@@ -300,38 +300,18 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             ),
           ],
 
-          // OpenAI specific settings
-          if (settings.provider == ImageGenProvider.openai && settings.model.contains('dall-e-3')) ...[
+          // OpenAI (gpt-image) specific settings
+          if (settings.provider == ImageGenProvider.openai) ...[
             const SizedBox(height: 16),
             _buildSection(
               context: context,
-              title: 'DALL-E 3 Settings',
+              title: 'GPT-Image Settings',
               children: [
                 ListTile(
-                  title: const Text('Style'),
-                  subtitle: Text(settings.openaiStyle == 'vivid' 
-                      ? 'Vivid - Hyper-real and dramatic' 
-                      : 'Natural - More natural, less hyper-real'),
-                  trailing: DropdownButton<String>(
-                    value: settings.openaiStyle,
-                    onChanged: settings.enabled
-                        ? (value) {
-                            if (value != null) {
-                              ref.read(imageGenSettingsProvider.notifier).setOpenaiStyle(value);
-                            }
-                          }
-                        : null,
-                    items: const [
-                      DropdownMenuItem(value: 'vivid', child: Text('Vivid')),
-                      DropdownMenuItem(value: 'natural', child: Text('Natural')),
-                    ],
-                  ),
-                ),
-                ListTile(
                   title: const Text('Quality'),
-                  subtitle: Text(settings.openaiQuality == 'hd' 
-                      ? 'HD - Higher detail and consistency' 
-                      : 'Standard - Faster, lower cost'),
+                  subtitle: Text(settings.openaiQuality == 'hd'
+                      ? 'High - Higher detail and consistency'
+                      : 'Auto - Let the model decide'),
                   trailing: DropdownButton<String>(
                     value: settings.openaiQuality,
                     onChanged: settings.enabled
@@ -342,8 +322,8 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                           }
                         : null,
                     items: const [
-                      DropdownMenuItem(value: 'standard', child: Text('Standard')),
-                      DropdownMenuItem(value: 'hd', child: Text('HD')),
+                      DropdownMenuItem(value: 'standard', child: Text('Auto')),
+                      DropdownMenuItem(value: 'hd', child: Text('High')),
                     ],
                   ),
                 ),
@@ -386,10 +366,11 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                   subtitle: Text(AppLocalizations.of(context)!.stableDiffusionDescription),
                 ),
               if (settings.provider == ImageGenProvider.openai)
-                ListTile(
-                  leading: const Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text(AppLocalizations.of(context)!.dalle),
-                  subtitle: Text(AppLocalizations.of(context)!.dalleDescription),
+                const ListTile(
+                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
+                  title: Text('GPT-Image'),
+                  subtitle: Text(
+                      'OpenAI /v1/images/generations API (gpt-image-2)'),
                 ),
               if (settings.provider == ImageGenProvider.openaiChat)
                 const ListTile(

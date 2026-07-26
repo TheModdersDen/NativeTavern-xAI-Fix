@@ -121,6 +121,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// Cancel current generation
   Future<void> cancelGeneration() async {
     _isCancelling = true;
+    // Abort the HTTP request so server-side generation actually stops
+    _llmService.cancelActiveRequest();
     state = state.copyWith(isGenerating: false);
     // Reset flag after a short delay
     Future.delayed(const Duration(milliseconds: 500), () {

@@ -397,6 +397,24 @@ class LLMConfig {
 class LLMService {
   final Dio _dio = Dio();
 
+  /// Token for the in-flight request so cancellation actually aborts the
+  /// HTTP connection (stops server-side generation/billing) instead of
+  /// just abandoning the local stream
+  CancelToken? _cancelToken;
+
+  CancelToken _newCancelToken() {
+    _cancelToken = CancelToken();
+    return _cancelToken!;
+  }
+
+  /// Abort the current request, if any
+  void cancelActiveRequest() {
+    final token = _cancelToken;
+    if (token != null && !token.isCancelled) {
+      token.cancel('Cancelled by user');
+    }
+  }
+
   /// Claude models that use adaptive thinking (effort string instead of budget tokens)
   /// Aligned with SillyTavern's isAdaptiveModel detection
   static bool _isClaudeAdaptiveModel(String model) {
@@ -900,19 +918,29 @@ class LLMService {
     LLMConfig config,
   ) async* {
     final parser = ThinkTagParser();
-    await for (final chunk
-        in _generateStreamWithReasoningRaw(messages, config)) {
-      final text = chunk.content;
-      if (text != null && text.isNotEmpty) {
-        final (content, reasoning) = parser.feed(text);
-        if (reasoning.isNotEmpty) {
-          yield LLMStreamChunk(reasoning: reasoning, isReasoningChunk: true);
+    try {
+      await for (final chunk
+          in _generateStreamWithReasoningRaw(messages, config)) {
+        final text = chunk.content;
+        if (text != null && text.isNotEmpty) {
+          final (content, reasoning) = parser.feed(text);
+          if (reasoning.isNotEmpty) {
+            yield LLMStreamChunk(reasoning: reasoning, isReasoningChunk: true);
+          }
+          if (content.isNotEmpty) {
+            yield LLMStreamChunk(content: content);
+          }
+        } else {
+          yield chunk;
         }
-        if (content.isNotEmpty) {
-          yield LLMStreamChunk(content: content);
-        }
+      }
+    } on DioException catch (e) {
+      // User-initiated cancel: end the stream quietly, keep partial output
+      if (e.type == DioExceptionType.cancel ||
+          CancelToken.isCancel(e)) {
+        _log('Stream cancelled by user');
       } else {
-        yield chunk;
+        rethrow;
       }
     }
     final (content, reasoning) = parser.flush();
@@ -1389,6 +1417,7 @@ class LLMService {
         validateStatus: (status) => true, // Accept all status codes
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     // Check for HTTP errors
@@ -1459,6 +1488,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -1547,6 +1577,7 @@ class LLMService {
         },
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -1613,6 +1644,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -1685,6 +1717,7 @@ class LLMService {
         headers: {'Content-Type': 'application/json'},
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -1760,6 +1793,7 @@ class LLMService {
         headers: {'Content-Type': 'application/json'},
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -1802,6 +1836,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -1876,6 +1911,7 @@ class LLMService {
         headers: {'Content-Type': 'application/json'},
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -1918,6 +1954,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -2029,6 +2066,7 @@ class LLMService {
           validateStatus: (status) => true, // Accept all status codes
         ),
         data: requestData,
+        cancelToken: _newCancelToken(),
       );
 
       // Check for HTTP errors before processing stream
@@ -2162,6 +2200,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -2276,6 +2315,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -2390,6 +2430,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -2464,6 +2505,7 @@ class LLMService {
         responseType: ResponseType.stream,
       ),
       data: requestData,
+      cancelToken: _newCancelToken(),
     );
 
     final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);

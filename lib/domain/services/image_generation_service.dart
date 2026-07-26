@@ -50,9 +50,9 @@ enum ImageGenProvider {
   String get defaultModel {
     switch (this) {
       case openai:
-        return 'dall-e-3';
+        return 'gpt-image-2';
       case openaiChat:
-        return 'gpt-image-1';
+        return 'gpt-image-2';
       case gemini:
         return 'gemini-2.5-flash-image';
       case novelai:
@@ -79,12 +79,13 @@ enum ImageGenProvider {
     switch (this) {
       case openai:
         return [
-          'dall-e-3',
-          'dall-e-2',
+          'gpt-image-2',
           'gpt-image-1',
+          'gpt-image-1-mini',
         ];
       case openaiChat:
         return [
+          'gpt-image-2',
           'gpt-image-1',
           'gemini-2.5-flash-image',
         ];
@@ -118,9 +119,9 @@ enum ImageGenProvider {
   static String getModelDisplayName(String model) {
     switch (model) {
       // OpenAI
-      case 'dall-e-3': return 'DALL-E 3';
-      case 'dall-e-2': return 'DALL-E 2';
+      case 'gpt-image-2': return 'GPT-Image-2';
       case 'gpt-image-1': return 'GPT-Image-1';
+      case 'gpt-image-1-mini': return 'GPT-Image-1 Mini';
       // Gemini
       case 'gemini-2.5-flash-image': return 'Nano-Banana';
       case 'gemini-3-pro-image-preview': return 'Nano-Banana-Pro';
@@ -840,43 +841,21 @@ class ImageGenerationService {
 
     onProgress?.call(0.1);
 
-    final isDalle2 = model.contains('dall-e-2');
-    final isDalle3 = model.contains('dall-e-3');
-    final isGptImg = model.contains('gpt-image');
-
-    // Apply prompt limits
+    // gpt-image prompt limit
     String prompt = request.prompt;
-    if (isDalle2 && prompt.length > 1000) {
-      prompt = prompt.substring(0, 1000);
-    } else if (isDalle3 && prompt.length > 4000) {
-      prompt = prompt.substring(0, 4000);
-    } else if (isGptImg && prompt.length > 32000) {
+    if (prompt.length > 32000) {
       prompt = prompt.substring(0, 32000);
     }
 
-    // Determine size based on model and aspect ratio
+    // Map requested aspect ratio to a supported gpt-image size
     String size;
     final aspectRatio = request.width / request.height;
-    
-    if (isDalle3) {
-      if (aspectRatio < 0.8) {
-        size = '1024x1792';
-      } else if (aspectRatio > 1.2) {
-        size = '1792x1024';
-      } else {
-        size = '1024x1024';
-      }
-    } else if (isGptImg) {
-      if (aspectRatio < 0.8) {
-        size = '1024x1536';
-      } else if (aspectRatio > 1.2) {
-        size = '1536x1024';
-      } else {
-        size = '1024x1024';
-      }
+    if (aspectRatio < 0.8) {
+      size = '1024x1536';
+    } else if (aspectRatio > 1.2) {
+      size = '1536x1024';
     } else {
-      // DALL-E 2
-      size = (request.width <= 512 && request.height <= 512) ? '512x512' : '1024x1024';
+      size = '1024x1024';
     }
 
     final requestBody = {
@@ -884,11 +863,9 @@ class ImageGenerationService {
       'prompt': prompt,
       'n': 1,
       'size': size,
-      'response_format': 'b64_json',
-      if (isDalle3) ...{
-        'style': _settings.openaiStyle,
-        'quality': _settings.openaiQuality,
-      },
+      // Note: gpt-image models reject response_format (always b64_json).
+      // Quality scale is low/medium/high/auto
+      if (_settings.openaiQuality == 'hd') 'quality': 'high',
     };
 
     onProgress?.call(0.3);
