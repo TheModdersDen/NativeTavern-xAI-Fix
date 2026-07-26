@@ -433,6 +433,16 @@ class LLMService {
     final effort = config.reasoningEffort;
     if (effort == ReasoningEffort.auto) return;
 
+    // Thinking mode rejects assistant prefill: convert a trailing
+    // assistant message to user (mirrors ST's fixThinkingPrefill)
+    final messages = requestData['messages'];
+    if (messages is List && messages.isNotEmpty) {
+      final last = messages.last;
+      if (last is Map && last['role'] == 'assistant') {
+        messages[messages.length - 1] = {...last, 'role': 'user'};
+      }
+    }
+
     if (_isClaudeAdaptiveModel(config.model)) {
       // Adaptive thinking (Opus 4.6+): effort string, like Gemini 3
       final String level;

@@ -3776,4 +3776,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get qualityHighDescription => '높음 - 더 높은 디테일과 일관성';
+
+  @override
+  String get impersonate => '대신 작성';
+
+  @override
+  String get impersonateHint => 'AI가 당신의 다음 답장을 작성';
+
+  @override
+  String get startReplyWith => '응답 시작 문구';
+
+  @override
+  String get startReplyWithHint => 'AI 응답이 이 텍스트로 시작됩니다';
+
+  @override
+  String get chatLorebooks => '채팅 로어북';
+
+  @override
+  String get chatLorebooksHint => '이 채팅에서만 활성화되는 월드 인포';
 }

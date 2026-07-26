@@ -5287,5 +5287,29 @@
   "qualityHighDescription": "High - Higher detail and consistency",
   "@qualityHighDescription": {
     "description": "UI label: High - Higher detail and consistency"
+  },
+  "impersonate": "Impersonate",
+  "@impersonate": {
+    "description": "UI label: Impersonate"
+  },
+  "impersonateHint": "Let the AI write your next reply",
+  "@impersonateHint": {
+    "description": "UI label: Let the AI write your next reply"
+  },
+  "startReplyWith": "Start Reply With",
+  "@startReplyWith": {
+    "description": "UI label: Start Reply With"
+  },
+  "startReplyWithHint": "The AI's reply will start with this text",
+  "@startReplyWithHint": {
+    "description": "UI label: The AI's reply will start with this text"
+  },
+  "chatLorebooks": "Chat Lorebooks",
+  "@chatLorebooks": {
+    "description": "UI label: Chat Lorebooks"
+  },
+  "chatLorebooksHint": "World info books active only in this chat",
+  "@chatLorebooksHint": {
+    "description": "UI label: World info books active only in this chat"
   }
 }

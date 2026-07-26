@@ -3778,4 +3778,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qualityHighDescription => '高 - より高い精細さと一貫性';
+
+  @override
+  String get impersonate => 'なりきり代筆';
+
+  @override
+  String get impersonateHint => 'AI にあなたの次の返信を書かせる';
+
+  @override
+  String get startReplyWith => '返信の書き出し';
+
+  @override
+  String get startReplyWithHint => 'AI の返信はこのテキストで始まります';
+
+  @override
+  String get chatLorebooks => 'チャットロアブック';
+
+  @override
+  String get chatLorebooksHint => 'このチャットでのみ有効なワールド情報';
 }

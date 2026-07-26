@@ -422,5 +422,11 @@
   "gptImageSettings": "GPT-Image 设置",
   "qualityLabel": "质量",
   "qualityAutoDescription": "自动 - 由模型决定",
-  "qualityHighDescription": "高 - 更高细节与一致性"
+  "qualityHighDescription": "高 - 更高细节与一致性",
+  "impersonate": "AI 代打",
+  "impersonateHint": "让 AI 以你的口吻写一条回复",
+  "startReplyWith": "回复引导",
+  "startReplyWithHint": "AI 的回复将以这段文字开头",
+  "chatLorebooks": "聊天世界书",
+  "chatLorebooksHint": "仅在本聊天中生效的世界书"
 }

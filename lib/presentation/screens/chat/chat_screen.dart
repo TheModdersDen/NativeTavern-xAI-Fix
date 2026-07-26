@@ -20,6 +20,7 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/chat/author_note_dialog.dart';
@@ -370,6 +371,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         context.push(AppRoutes.backgroundSettings);
         break;
 
+      case 'impersonate':
+        await _handleImpersonate();
+        break;
+
       case 'delswipe':
         if (chatState.messages.isNotEmpty) {
           final lastMessage = chatState.messages.last;
@@ -515,6 +520,125 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: Text(l10n.ok),
           ),
         ],
+      ),
+    );
+  }
+
+  /// "Start Reply With" dialog: assistant prefill for this chat
+  void _showStartReplyWithDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final chat = ref.read(activeChatProvider).chat;
+    final controller = TextEditingController(text: chat?.startReplyWith ?? '');
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.startReplyWith),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: l10n.startReplyWithHint),
+          maxLines: 3,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref
+                  .read(activeChatProvider.notifier)
+                  .updateStartReplyWith(controller.text.trim());
+              Navigator.pop(dialogContext);
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Impersonate: generate a user reply and put it in the input field
+  Future<void> _handleImpersonate() async {
+    final config = ref.read(llmConfigProvider);
+    if (!_isApiConfigured(config)) {
+      _showApiConfigurationDialog();
+      return;
+    }
+
+    final text =
+        await ref.read(activeChatProvider.notifier).impersonate(config);
+    if (!mounted) return;
+    if (text != null) {
+      _messageController.text = text;
+      _messageController.selection =
+          TextSelection.collapsed(offset: text.length);
+    }
+  }
+
+  /// Chat lorebooks: multi-select world books active only in this chat
+  void _showChatLorebooksDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Consumer(
+        builder: (context, ref, _) {
+          final worldInfosAsync = ref.watch(allWorldInfosProvider);
+          final chat = ref.watch(activeChatProvider).chat;
+          final linked = chat?.linkedWorldInfoIds ?? const <String>[];
+
+          return AlertDialog(
+            title: Text(l10n.chatLorebooks),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: worldInfosAsync.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('$e'),
+                data: (worldInfos) {
+                  if (worldInfos.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.chatLorebooksHint),
+                    );
+                  }
+                  return ListView(
+                    shrinkWrap: true,
+                    children: worldInfos
+                        .map((wi) => CheckboxListTile(
+                              title: Text(wi.name),
+                              subtitle: Text(
+                                l10n.chatLorebooksHint,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              value: linked.contains(wi.id),
+                              onChanged: (checked) {
+                                final updated = List<String>.from(linked);
+                                if (checked == true) {
+                                  updated.add(wi.id);
+                                } else {
+                                  updated.remove(wi.id);
+                                }
+                                ref
+                                    .read(activeChatProvider.notifier)
+                                    .updateLinkedWorldBooks(updated);
+                              },
+                            ))
+                        .toList(),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(l10n.close),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -794,6 +918,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
             PopupMenuItem(
+              value: 'start_reply_with',
+              child: ListTile(
+                leading: Icon(
+                  Icons.format_quote,
+                  color: (ref.read(activeChatProvider).chat?.startReplyWith
+                              .isNotEmpty ??
+                          false)
+                      ? AppTheme.accentColor
+                      : null,
+                ),
+                title: Text(l10n.startReplyWith),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'impersonate',
+              child: ListTile(
+                leading: const Icon(Icons.theater_comedy),
+                title: Text(l10n.impersonate),
+                subtitle: Text(
+                  l10n.impersonateHint,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'chat_lorebooks',
+              child: ListTile(
+                leading: Icon(
+                  Icons.public,
+                  color: (ref
+                              .read(activeChatProvider)
+                              .chat
+                              ?.linkedWorldInfoIds
+                              .isNotEmpty ??
+                          false)
+                      ? AppTheme.accentColor
+                      : null,
+                ),
+                title: Text(l10n.chatLorebooks),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
               value: 'bookmarks',
               child: ListTile(
                 leading:
@@ -836,6 +1005,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 break;
               case 'author_note':
                 showAuthorNoteDialog(context);
+                break;
+              case 'start_reply_with':
+                _showStartReplyWithDialog();
+                break;
+              case 'impersonate':
+                _handleImpersonate();
+                break;
+              case 'chat_lorebooks':
+                _showChatLorebooksDialog();
                 break;
               case 'bookmarks':
                 _showBookmarksDialog(context);

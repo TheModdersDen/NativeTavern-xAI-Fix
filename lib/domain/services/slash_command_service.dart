@@ -148,11 +148,19 @@ class SlashCommands {
     usage: '/delswipe',
   );
 
+  static const impersonate = SlashCommand(
+    name: 'impersonate',
+    description: 'Let the AI write your next reply as the user',
+    aliases: ['imp'],
+    usage: '/impersonate',
+  );
+
   static const List<SlashCommand> all = [
     continue_,
     regenerate,
     swipe,
     delswipe,
+    impersonate,
     persona,
     sys,
     bg,

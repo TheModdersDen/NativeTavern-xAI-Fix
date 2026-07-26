@@ -6942,6 +6942,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High - Higher detail and consistency'**
   String get qualityHighDescription;
+
+  /// UI label: Impersonate
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonate'**
+  String get impersonate;
+
+  /// UI label: Let the AI write your next reply
+  ///
+  /// In en, this message translates to:
+  /// **'Let the AI write your next reply'**
+  String get impersonateHint;
+
+  /// UI label: Start Reply With
+  ///
+  /// In en, this message translates to:
+  /// **'Start Reply With'**
+  String get startReplyWith;
+
+  /// UI label: The AI's reply will start with this text
+  ///
+  /// In en, this message translates to:
+  /// **'The AI\'s reply will start with this text'**
+  String get startReplyWithHint;
+
+  /// UI label: Chat Lorebooks
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Lorebooks'**
+  String get chatLorebooks;
+
+  /// UI label: World info books active only in this chat
+  ///
+  /// In en, this message translates to:
+  /// **'World info books active only in this chat'**
+  String get chatLorebooksHint;
 }
 
 class _AppLocalizationsDelegate

@@ -77,6 +77,7 @@ class ChatRepository {
       authorNote: Value(newChat.authorNote),
       authorNoteDepth: Value(newChat.authorNoteDepth),
       authorNoteEnabled: Value(newChat.authorNoteEnabled),
+      settingsJson: Value(jsonEncode(newChat.settings)),
       createdAt: Value(newChat.createdAt),
       updatedAt: Value(newChat.updatedAt),
     ));
@@ -94,6 +95,7 @@ class ChatRepository {
           authorNote: Value(chat.authorNote),
           authorNoteDepth: Value(chat.authorNoteDepth),
           authorNoteEnabled: Value(chat.authorNoteEnabled),
+          settingsJson: Value(jsonEncode(chat.settings)),
           updatedAt: Value(now),
         ));
     
@@ -197,6 +199,12 @@ class ChatRepository {
   // Private helpers
   
   models.Chat _chatFromRow(db.Chat row) {
+    Map<String, dynamic> settings = const {};
+    try {
+      settings = jsonDecode(row.settingsJson) as Map<String, dynamic>;
+    } catch (_) {
+      // Keep empty settings on malformed JSON
+    }
     return models.Chat(
       id: row.id,
       characterId: row.characterId,
@@ -205,6 +213,7 @@ class ChatRepository {
       authorNote: row.authorNote,
       authorNoteDepth: row.authorNoteDepth,
       authorNoteEnabled: row.authorNoteEnabled,
+      settings: settings,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

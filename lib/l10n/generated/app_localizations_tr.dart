@@ -3791,4 +3791,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get qualityHighDescription => 'High - Higher detail and consistency';
+
+  @override
+  String get impersonate => 'Impersonate';
+
+  @override
+  String get impersonateHint => 'Let the AI write your next reply';
+
+  @override
+  String get startReplyWith => 'Start Reply With';
+
+  @override
+  String get startReplyWithHint => 'The AI\'s reply will start with this text';
+
+  @override
+  String get chatLorebooks => 'Chat Lorebooks';
+
+  @override
+  String get chatLorebooksHint => 'World info books active only in this chat';
 }

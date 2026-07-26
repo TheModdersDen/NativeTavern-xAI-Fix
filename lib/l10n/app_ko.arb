@@ -322,5 +322,11 @@
   "gptImageSettings": "GPT-Image 설정",
   "qualityLabel": "품질",
   "qualityAutoDescription": "자동 - 모델이 결정",
-  "qualityHighDescription": "높음 - 더 높은 디테일과 일관성"
+  "qualityHighDescription": "높음 - 더 높은 디테일과 일관성",
+  "impersonate": "대신 작성",
+  "impersonateHint": "AI가 당신의 다음 답장을 작성",
+  "startReplyWith": "응답 시작 문구",
+  "startReplyWithHint": "AI 응답이 이 텍스트로 시작됩니다",
+  "chatLorebooks": "채팅 로어북",
+  "chatLorebooksHint": "이 채팅에서만 활성화되는 월드 인포"
 }

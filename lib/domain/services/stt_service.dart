@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 /// STT Provider types
 enum STTProvider {
@@ -147,6 +150,9 @@ class STTService {
   bool _isListening = false;
   STTSettings _settings = const STTSettings();
 
+  /// Platform speech recognition engine
+  final stt.SpeechToText _speech = stt.SpeechToText();
+
   /// Callbacks
   void Function(STTResult)? onResult;
   VoidCallback? onListeningStarted;
@@ -157,14 +163,29 @@ class STTService {
   bool get isListening => _isListening;
   STTSettings get settings => _settings;
 
-  /// Initialize the STT service
+  /// Initialize the STT service (requests microphone permission)
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // For system STT, we would use speech_to_text package
-      // For now, we'll set up the structure and add actual implementation later
-      _isInitialized = true;
+      _isInitialized = await _speech.initialize(
+        onError: (SpeechRecognitionError error) {
+          _isListening = false;
+          onError?.call('STT error: ${error.errorMsg}');
+          onListeningStopped?.call();
+        },
+        onStatus: (String status) {
+          if (status == 'notListening' || status == 'done') {
+            if (_isListening) {
+              _isListening = false;
+              onListeningStopped?.call();
+            }
+          }
+        },
+      );
+      if (!_isInitialized) {
+        onError?.call('Speech recognition unavailable or permission denied');
+      }
     } catch (e) {
       onError?.call('Failed to initialize STT: $e');
     }
@@ -178,12 +199,12 @@ class STTService {
   /// Check if STT is available
   Future<bool> isAvailable() async {
     await initialize();
-    // Would check if speech recognition is available on the device
-    return _isInitialized;
+    return _isInitialized && _speech.isAvailable;
   }
 
   /// Start listening
   Future<void> startListening() async {
+    await initialize();
     if (!_isInitialized || !_settings.enabled) return;
     if (_isListening) return;
 
@@ -191,14 +212,22 @@ class STTService {
       _isListening = true;
       onListeningStarted?.call();
 
-      // Here we would start the actual speech recognition
-      // For now, simulate with debug output
-      debugPrint('STT: Started listening (language: ${_settings.language})');
-
-      // Simulate receiving results
-      if (_settings.showPartialResults) {
-        // Would receive partial results as user speaks
-      }
+      await _speech.listen(
+        onResult: (SpeechRecognitionResult result) {
+          onResult?.call(STTResult(
+            text: result.recognizedWords,
+            isFinal: result.finalResult,
+            confidence: result.confidence > 0 ? result.confidence : 1.0,
+          ));
+        },
+        localeId: _settings.language.replaceAll('-', '_'),
+        listenOptions: stt.SpeechListenOptions(
+          partialResults: _settings.showPartialResults,
+          listenMode: _settings.continuousListening
+              ? stt.ListenMode.dictation
+              : stt.ListenMode.confirmation,
+        ),
+      );
     } catch (e) {
       _isListening = false;
       onError?.call('STT error: $e');
@@ -210,9 +239,9 @@ class STTService {
     if (!_isListening) return;
 
     try {
+      await _speech.stop();
       _isListening = false;
       onListeningStopped?.call();
-      debugPrint('STT: Stopped listening');
     } catch (e) {
       onError?.call('STT stop error: $e');
     }
@@ -232,9 +261,9 @@ class STTService {
     if (!_isListening) return;
 
     try {
+      await _speech.cancel();
       _isListening = false;
       onListeningStopped?.call();
-      debugPrint('STT: Cancelled listening');
     } catch (e) {
       onError?.call('STT cancel error: $e');
     }

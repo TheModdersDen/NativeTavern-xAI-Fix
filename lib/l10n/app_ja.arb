@@ -322,5 +322,11 @@
   "gptImageSettings": "GPT-Image 設定",
   "qualityLabel": "品質",
   "qualityAutoDescription": "自動 - モデルに任せる",
-  "qualityHighDescription": "高 - より高い精細さと一貫性"
+  "qualityHighDescription": "高 - より高い精細さと一貫性",
+  "impersonate": "なりきり代筆",
+  "impersonateHint": "AI にあなたの次の返信を書かせる",
+  "startReplyWith": "返信の書き出し",
+  "startReplyWithHint": "AI の返信はこのテキストで始まります",
+  "chatLorebooks": "チャットロアブック",
+  "chatLorebooksHint": "このチャットでのみ有効なワールド情報"
 }

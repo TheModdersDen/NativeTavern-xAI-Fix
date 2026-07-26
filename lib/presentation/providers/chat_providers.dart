@@ -118,6 +118,48 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         _ref = ref,
         super(const ActiveChatState());
 
+  /// Apply the chat's "Start Reply With" assistant prefill to the request
+  List<Map<String, dynamic>> _withPrefill(
+      List<Map<String, dynamic>> context) {
+    final prefill = state.chat?.startReplyWith ?? '';
+    if (prefill.isEmpty) return context;
+    return [
+      ...context,
+      {'role': 'assistant', 'content': prefill},
+    ];
+  }
+
+  /// Stream generation with assistant prefill: the prefill text is sent as
+  /// a trailing assistant message (native prefill on Claude, continuation
+  /// on OpenAI-compatible APIs) and emitted first so it becomes part of
+  /// the displayed/saved reply
+  Stream<LLMStreamChunk> _generateStreamWithPrefill(
+    List<Map<String, dynamic>> context,
+    LLMConfig config,
+  ) async* {
+    final prefill = state.chat?.startReplyWith ?? '';
+    if (prefill.isNotEmpty) {
+      yield LLMStreamChunk(content: prefill);
+    }
+    yield* _llmService.generateStreamWithReasoning(
+        _withPrefill(context), config);
+  }
+
+  /// Non-streaming generation with assistant prefill
+  Future<LLMResponse> _generateWithPrefill(
+    List<Map<String, dynamic>> context,
+    LLMConfig config,
+  ) async {
+    final prefill = state.chat?.startReplyWith ?? '';
+    final response = await _llmService.generateWithReasoning(
+        _withPrefill(context), config);
+    if (prefill.isEmpty) return response;
+    return LLMResponse(
+      content: prefill + response.content,
+      reasoning: response.reasoning,
+    );
+  }
+
   /// Cancel current generation
   Future<void> cancelGeneration() async {
     _isCancelling = true;
@@ -226,8 +268,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           chat: chat,
           messages: [],
         );
-        final processedGreeting =
-            MacroService(macroContext).process(character.firstMessage);
+        final macroService = MacroService(macroContext);
+        final processedGreeting = macroService.process(character.firstMessage);
+
+        // Alternate greetings become swipes of the first message so the
+        // user can browse the card's opening variants (ST behavior)
+        final greetingSwipes = [
+          processedGreeting,
+          ...character.alternateGreetings
+              .where((g) => g.trim().isNotEmpty)
+              .map(macroService.process),
+        ];
 
         final greeting = ChatMessage(
           id: _generateId(),
@@ -235,7 +286,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           role: MessageRole.assistant,
           content: processedGreeting,
           timestamp: DateTime.now(),
-          swipes: [processedGreeting],
+          swipes: greetingSwipes,
           currentSwipeIndex: 0,
         );
         await _chatRepository.addMessage(greeting);
@@ -422,7 +473,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
         await for (final chunk
-            in _llmService.generateStreamWithReasoning(context, config)) {
+            in _generateStreamWithPrefill(context, config)) {
           if (chunk.isReasoningChunk && chunk.reasoning != null) {
             reasoningBuffer.write(chunk.reasoning);
           }
@@ -449,7 +500,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response =
-            await _llmService.generateWithReasoning(context, config);
+            await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 
@@ -502,7 +553,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
         await for (final chunk
-            in _llmService.generateStreamWithReasoning(context, config)) {
+            in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -553,7 +604,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       } else {
         // Non-streaming mode with reasoning support
         final response =
-            await _llmService.generateWithReasoning(context, config);
+            await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
       }
@@ -729,7 +780,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
         await for (final chunk
-            in _llmService.generateStreamWithReasoning(context, config)) {
+            in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -785,7 +836,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       } else {
         // Non-streaming mode with reasoning support
         final response =
-            await _llmService.generateWithReasoning(context, config);
+            await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
       }
@@ -884,6 +935,36 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     await _generateAssistantResponse(config);
   }
 
+  /// Impersonate: generate the next reply from the user's point of view.
+  /// Returns the text for the input field; nothing is added to the chat.
+  Future<String?> impersonate(LLMConfig config) async {
+    if (state.chat == null) return null;
+
+    state = state.copyWith(isGenerating: true, error: null);
+    try {
+      final context = await _buildContext();
+      context.add({
+        'role': 'system',
+        'content':
+            '[Write the next reply from the point of view of the user '
+                'persona. Write only what the user says and does, in the '
+                'same style as their previous messages. Do not write for '
+                'any other character. Do not add any commentary.]',
+      });
+
+      // Deliberately bypass the assistant prefill - it steers the AI's
+      // voice, not the user's
+      final response =
+          await _llmService.generateWithReasoning(context, config);
+      state = state.copyWith(isGenerating: false);
+      final text = response.content.trim();
+      return text.isEmpty ? null : text;
+    } catch (e) {
+      state = state.copyWith(isGenerating: false, error: e.toString());
+      return null;
+    }
+  }
+
   /// Generate assistant response based on current context
   Future<void> _generateAssistantResponse(LLMConfig config) async {
     if (state.chat == null || state.character == null) return;
@@ -916,7 +997,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
         await for (final chunk
-            in _llmService.generateStreamWithReasoning(context, config)) {
+            in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -948,7 +1029,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response =
-            await _llmService.generateWithReasoning(context, config);
+            await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 
@@ -1810,13 +1891,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     // Get active world info IDs (manually enabled for this chat)
     final activeIds = _ref.read(activeWorldInfoIdsProvider);
 
+    // Books linked to this specific chat (chat lorebooks)
+    final chatLinkedIds = state.chat?.linkedWorldInfoIds ?? const <String>[];
+
     // Get ALL world infos and filter by enabled status
     final allWorldInfos = await _ref.read(allWorldInfosProvider.future);
 
     // Filter to get enabled world infos that are either:
     // 1. Global (isGlobal = true) - explicitly marked as global
     // 2. Linked to this character
-    // 3. Manually activated via activeWorldInfoIdsProvider
+    // 3. Linked to this chat (chat lorebook)
+    // 4. Manually activated via activeWorldInfoIdsProvider
     // NOTE: World infos with characterId == null but isGlobal == false are NOT included
     // The user must explicitly enable isGlobal to make a world info available to all characters
     final enabledWorldInfoIds = allWorldInfos
@@ -1824,6 +1909,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             w.enabled &&
             (w.isGlobal ||
                 w.characterId == character.id ||
+                chatLinkedIds.contains(w.id) ||
                 activeIds.contains(w.id)))
         .map((w) => w.id)
         .toList();
@@ -2115,6 +2201,26 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     state = state.copyWith(chat: updatedChat);
   }
 
+  /// Update the "Start Reply With" assistant prefill for this chat
+  Future<void> updateStartReplyWith(String text) async {
+    if (state.chat == null) return;
+
+    final updatedChat = state.chat!
+        .withSetting('startReplyWith', text.isEmpty ? null : text);
+    await _chatRepository.updateChat(updatedChat);
+    state = state.copyWith(chat: updatedChat);
+  }
+
+  /// Update the world info books linked to this chat
+  Future<void> updateLinkedWorldBooks(List<String> worldInfoIds) async {
+    if (state.chat == null) return;
+
+    final updatedChat = state.chat!.withSetting(
+        'linkedWorldInfoIds', worldInfoIds.isEmpty ? null : worldInfoIds);
+    await _chatRepository.updateChat(updatedChat);
+    state = state.copyWith(chat: updatedChat);
+  }
+
   /// Update Author's Note depth
   Future<void> updateAuthorNoteDepth(int depth) async {
     if (state.chat == null) return;
@@ -2388,7 +2494,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
         await for (final chunk
-            in _llmService.generateStreamWithReasoning(context, config)) {
+            in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -2420,7 +2526,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response =
-            await _llmService.generateWithReasoning(context, config);
+            await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 

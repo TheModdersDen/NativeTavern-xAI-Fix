@@ -3763,6 +3763,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityHighDescription => '高 - 更高细节与一致性';
+
+  @override
+  String get impersonate => 'AI 代打';
+
+  @override
+  String get impersonateHint => '让 AI 以你的口吻写一条回复';
+
+  @override
+  String get startReplyWith => '回复引导';
+
+  @override
+  String get startReplyWithHint => 'AI 的回复将以这段文字开头';
+
+  @override
+  String get chatLorebooks => '聊天世界书';
+
+  @override
+  String get chatLorebooksHint => '仅在本聊天中生效的世界书';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -4785,4 +4803,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get qualityHighDescription => '高 - 更高細節與一致性';
+
+  @override
+  String get impersonate => 'AI 代打';
+
+  @override
+  String get impersonateHint => '讓 AI 以你的口吻寫一條回覆';
+
+  @override
+  String get startReplyWith => '回覆引導';
+
+  @override
+  String get startReplyWithHint => 'AI 的回覆將以這段文字開頭';
+
+  @override
+  String get chatLorebooks => '聊天世界書';
+
+  @override
+  String get chatLorebooksHint => '僅在本聊天中生效的世界書';
 }

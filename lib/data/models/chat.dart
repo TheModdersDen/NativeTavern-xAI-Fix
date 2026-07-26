@@ -37,6 +37,11 @@ class Chat {
   final int authorNoteDepth; // Depth for injection (messages from end)
   final bool authorNoteEnabled; // Whether Author's Note is active
   final List<ChatSummary> summaries; // History summaries for context compression
+
+  /// Per-chat settings (persisted as JSON):
+  /// startReplyWith, linkedWorldInfoIds, ...
+  final Map<String, dynamic> settings;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -49,12 +54,34 @@ class Chat {
     this.authorNoteDepth = 4,
     this.authorNoteEnabled = false,
     this.summaries = const [],
+    this.settings = const {},
     required this.createdAt,
     required this.updatedAt,
   });
 
   /// Check if this is a group chat
   bool get isGroupChat => groupId != null;
+
+  /// Text the AI reply should start with (assistant prefill / ST's
+  /// "Start Reply With")
+  String get startReplyWith => settings['startReplyWith'] as String? ?? '';
+
+  /// World info books linked to this chat (in addition to global and
+  /// character-linked books)
+  List<String> get linkedWorldInfoIds =>
+      (settings['linkedWorldInfoIds'] as List<dynamic>?)?.cast<String>() ??
+      const [];
+
+  /// Copy with an updated settings entry
+  Chat withSetting(String key, dynamic value) {
+    final updated = Map<String, dynamic>.from(settings);
+    if (value == null) {
+      updated.remove(key);
+    } else {
+      updated[key] = value;
+    }
+    return copyWith(settings: updated);
+  }
 
   Chat copyWith({
     String? id,
@@ -66,6 +93,7 @@ class Chat {
     int? authorNoteDepth,
     bool? authorNoteEnabled,
     List<ChatSummary>? summaries,
+    Map<String, dynamic>? settings,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -78,6 +106,7 @@ class Chat {
       authorNoteDepth: authorNoteDepth ?? this.authorNoteDepth,
       authorNoteEnabled: authorNoteEnabled ?? this.authorNoteEnabled,
       summaries: summaries ?? this.summaries,
+      settings: settings ?? this.settings,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

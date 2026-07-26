@@ -1,6 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 /// TTS Provider types
 enum TTSProvider {
@@ -191,6 +196,12 @@ class TTSService {
   TTSSettings _settings = const TTSSettings();
   final Map<String, CharacterVoiceSettings> _characterVoices = {};
 
+  /// System TTS engine
+  final FlutterTts _flutterTts = FlutterTts();
+
+  /// Player for remote-synthesized audio
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   /// Available voices (populated after initialization)
   List<TTSVoice> _availableVoices = [];
 
@@ -210,13 +221,43 @@ class TTSService {
     if (_isInitialized) return;
 
     try {
-      // For system TTS, we would use flutter_tts package
-      // For now, we'll set up the structure and add actual implementation later
-      _availableVoices = _getDefaultVoices();
+      // Make speak() futures complete when playback finishes
+      await _flutterTts.awaitSpeakCompletion(true);
+      _availableVoices = await _loadSystemVoices();
+      if (_availableVoices.isEmpty) {
+        _availableVoices = _getDefaultVoices();
+      }
       _isInitialized = true;
     } catch (e) {
-      onError?.call('Failed to initialize TTS: $e');
+      // Keep the service usable for remote providers even if the
+      // system engine fails to initialize
+      _availableVoices = _getDefaultVoices();
+      _isInitialized = true;
+      onError?.call('Failed to initialize system TTS: $e');
     }
+  }
+
+  /// Query real system voices from the platform TTS engine
+  Future<List<TTSVoice>> _loadSystemVoices() async {
+    final voices = <TTSVoice>[];
+    final raw = await _flutterTts.getVoices;
+    if (raw is List) {
+      for (final item in raw) {
+        if (item is Map) {
+          final name = item['name']?.toString();
+          final locale = item['locale']?.toString();
+          if (name == null || name.isEmpty) continue;
+          voices.add(TTSVoice(
+            id: name,
+            name: locale != null ? '$name ($locale)' : name,
+            language: locale,
+            provider: TTSProvider.system,
+          ));
+        }
+      }
+    }
+    voices.sort((a, b) => (a.language ?? '').compareTo(b.language ?? ''));
+    return voices;
   }
 
   /// Get default system voices (placeholder)
@@ -316,19 +357,76 @@ class TTSService {
       final pitch = charVoice?.pitch ?? _settings.pitch;
       final volume = charVoice?.volume ?? _settings.volume;
 
-      // Here we would call the actual TTS implementation
-      // For now, simulate with a delay
-      debugPrint('TTS: Speaking "$text" with voice=$voiceId, rate=$rate, pitch=$pitch, volume=$volume');
-      
-      // Simulate speech duration based on text length
-      final duration = Duration(milliseconds: text.length * 50);
-      await Future.delayed(duration);
+      if (_settings.provider == TTSProvider.system) {
+        await _speakWithSystemTts(text,
+            voiceId: voiceId, rate: rate, pitch: pitch, volume: volume);
+      } else {
+        await _speakWithRemoteTts(text,
+            characterId: characterId, volume: volume);
+      }
 
       onComplete?.call();
     } catch (e) {
       onError?.call('TTS error: $e');
     } finally {
       _isSpeaking = false;
+    }
+  }
+
+  /// Speak with the platform TTS engine (flutter_tts)
+  Future<void> _speakWithSystemTts(
+    String text, {
+    String? voiceId,
+    required double rate,
+    required double pitch,
+    required double volume,
+  }) async {
+    // flutter_tts rate range is 0.0-1.0 with ~0.5 as normal speed;
+    // our settings use 1.0 as normal, so halve it
+    await _flutterTts.setSpeechRate((rate * 0.5).clamp(0.0, 1.0));
+    await _flutterTts.setPitch(pitch.clamp(0.5, 2.0));
+    await _flutterTts.setVolume(volume.clamp(0.0, 1.0));
+
+    if (voiceId != null && voiceId.isNotEmpty) {
+      final voice = _availableVoices
+          .where((v) => v.id == voiceId && v.provider == TTSProvider.system)
+          .toList();
+      if (voice.isNotEmpty) {
+        await _flutterTts.setVoice({
+          'name': voice.first.id,
+          'locale': voice.first.language ?? 'en-US',
+        });
+      }
+    }
+
+    await _flutterTts.speak(text);
+  }
+
+  /// Synthesize remotely and play the returned audio bytes
+  Future<void> _speakWithRemoteTts(
+    String text, {
+    String? characterId,
+    required double volume,
+  }) async {
+    final bytes = await synthesize(text, characterId: characterId);
+    if (bytes == null || bytes.isEmpty) {
+      throw Exception('TTS provider returned no audio');
+    }
+
+    // just_audio plays from files/URLs; write to a temp file
+    final dir = await getTemporaryDirectory();
+    final file = File(p.join(
+        dir.path, 'tts_${DateTime.now().millisecondsSinceEpoch}.audio'));
+    await file.writeAsBytes(bytes);
+
+    try {
+      await _audioPlayer.setVolume(volume.clamp(0.0, 1.0));
+      await _audioPlayer.setFilePath(file.path);
+      await _audioPlayer.play();
+      await _audioPlayer.stop();
+    } finally {
+      // Best-effort temp cleanup
+      file.delete().catchError((_) => file);
     }
   }
 
@@ -339,18 +437,27 @@ class TTSService {
       _isSpeaking = false;
       onCancel?.call();
     }
+    try {
+      await _flutterTts.stop();
+      await _audioPlayer.stop();
+    } catch (_) {
+      // Stopping is best-effort
+    }
   }
 
   /// Pause speaking
   Future<void> pause() async {
-    // Would pause the current speech
-    debugPrint('TTS: Pause');
+    try {
+      await _flutterTts.pause();
+      await _audioPlayer.pause();
+    } catch (_) {}
   }
 
   /// Resume speaking
   Future<void> resume() async {
-    // Would resume the paused speech
-    debugPrint('TTS: Resume');
+    try {
+      await _audioPlayer.play();
+    } catch (_) {}
   }
 
   /// Clean text for TTS
@@ -559,6 +666,7 @@ class TTSService {
   /// Dispose the service
   void dispose() {
     stop();
+    _audioPlayer.dispose();
     _isInitialized = false;
   }
 }
