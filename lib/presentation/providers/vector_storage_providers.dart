@@ -1,11 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
+import 'package:native_tavern/domain/services/embedding_service.dart';
 import 'package:native_tavern/domain/services/vector_storage_service.dart';
 
-/// Provider for VectorStorageService
+/// Provider for VectorStorageService (loads persisted collections)
 final vectorStorageServiceProvider = Provider<VectorStorageService>((ref) {
-  return VectorStorageService();
+  final service = VectorStorageService();
+  service.load();
+  return service;
+});
+
+/// Provider for EmbeddingService
+final embeddingServiceProvider = Provider<EmbeddingService>((ref) {
+  return EmbeddingService();
 });
 
 /// Provider for vector storage settings
@@ -95,6 +103,18 @@ class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings>
   /// Set embedding model
   void setEmbeddingModel(String model) {
     state = state.copyWith(embeddingModel: model);
+    _saveSettings();
+  }
+
+  /// Set embedding API endpoint
+  void setEmbeddingEndpoint(String endpoint) {
+    state = state.copyWith(embeddingEndpoint: endpoint);
+    _saveSettings();
+  }
+
+  /// Set embedding API key
+  void setEmbeddingApiKey(String apiKey) {
+    state = state.copyWith(embeddingApiKey: apiKey);
     _saveSettings();
   }
 
@@ -278,4 +298,81 @@ final isRAGActiveProvider = Provider<bool>((ref) {
   final settings = ref.watch(vectorStorageSettingsProvider);
   final activeCollection = ref.watch(activeCollectionProvider);
   return settings.enabled && activeCollection != null;
+});
+
+/// Embeds all documents in a collection that don't have embeddings yet.
+/// Returns the number of documents embedded.
+final embedCollectionProvider =
+    Provider<Future<int> Function(String collectionId)>((ref) {
+  return (collectionId) async {
+    final service = ref.read(vectorStorageServiceProvider);
+    final embedder = ref.read(embeddingServiceProvider);
+    final settings = ref.read(vectorStorageSettingsProvider);
+
+    final collection = service.getCollection(collectionId);
+    if (collection == null) return 0;
+
+    final pending =
+        collection.documents.where((d) => d.embedding == null).toList();
+    if (pending.isEmpty) return 0;
+
+    // Embed in batches of 32 to stay within API limits
+    var embedded = 0;
+    for (var i = 0; i < pending.length; i += 32) {
+      final batch = pending.sublist(
+          i, i + 32 > pending.length ? pending.length : i + 32);
+      final embeddings = await embedder.embedBatch(
+        batch.map((d) => d.content).toList(),
+        settings,
+      );
+      for (var j = 0; j < batch.length; j++) {
+        if (j < embeddings.length && embeddings[j].isNotEmpty) {
+          service.updateDocumentEmbedding(
+              collectionId, batch[j].id, embeddings[j]);
+          embedded++;
+        }
+      }
+    }
+
+    ref.read(vectorCollectionsProvider.notifier).refresh();
+    return embedded;
+  };
+});
+
+/// Retrieves RAG context for a query from the active collection.
+/// Returns the formatted context block, or null when RAG is inactive,
+/// nothing matches, or embedding fails.
+final ragContextProvider =
+    Provider<Future<String?> Function(String query)>((ref) {
+  return (query) async {
+    final settings = ref.read(vectorStorageSettingsProvider);
+    final collection = ref.read(activeCollectionProvider);
+    if (!settings.enabled ||
+        !settings.includeInPrompt ||
+        collection == null ||
+        query.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      final embedder = ref.read(embeddingServiceProvider);
+      final service = ref.read(vectorStorageServiceProvider);
+      final queryEmbedding = await embedder.embed(query, settings);
+
+      final results = service.search(
+        collectionId: collection.id,
+        queryEmbedding: queryEmbedding,
+        topK: settings.topK,
+        similarityThreshold: settings.similarityThreshold,
+      );
+      if (results.isEmpty) return null;
+
+      final context =
+          results.map((r) => '- ${r.document.content}').join('\n');
+      return settings.promptTemplate.replaceAll('{{context}}', context);
+    } catch (e) {
+      // RAG is best-effort: never block generation on retrieval failure
+      return null;
+    }
+  };
 });

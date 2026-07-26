@@ -119,6 +119,7 @@ class AIConfigScreen extends ConsumerWidget {
 
           const Divider(height: 32),
           _buildSectionHeader(context, AppLocalizations.of(context)!.llmConnection),
+          const _ConnectionProfilesTile(),
           const _LLMProviderTile(),
           const _ApiKeyTile(),
           const _ApiUrlTile(),
@@ -131,6 +132,9 @@ class AIConfigScreen extends ConsumerWidget {
           const _MaxTokensTile(),
           const _TemperatureTile(),
           const _TopPTile(),
+          const _ReasoningEffortTile(),
+          const _PromptCacheTile(),
+          const _MergeRolesTile(),
           const _StreamingTile(),
           ListTile(
             leading: const Icon(Icons.tune),
@@ -299,6 +303,14 @@ class _LLMProviderTile extends ConsumerWidget {
         return 'DeepSeek';
       case LLMProvider.qwen:
         return 'Qwen (Alibaba)';
+      case LLMProvider.siliconFlow:
+        return 'SiliconFlow (硅基流动)';
+      case LLMProvider.moonshot:
+        return 'Moonshot (Kimi)';
+      case LLMProvider.zai:
+        return 'Z.AI (智谱 GLM)';
+      case LLMProvider.miniMax:
+        return 'MiniMax';
       case LLMProvider.openAICompatible:
         return 'OAI Compatible';
     }
@@ -403,6 +415,14 @@ class _LLMProviderTile extends ConsumerWidget {
         return 'DeepSeek V3.2, DeepSeek R1';
       case LLMProvider.qwen:
         return 'Qwen Plus, Qwen Max';
+      case LLMProvider.siliconFlow:
+        return 'DeepSeek, Qwen, GLM hosting';
+      case LLMProvider.moonshot:
+        return 'Kimi K2, Kimi Latest';
+      case LLMProvider.zai:
+        return 'GLM-5, GLM-5 Turbo';
+      case LLMProvider.miniMax:
+        return 'MiniMax M2 series';
       case LLMProvider.openAICompatible:
         return 'Custom OAI-compatible API';
     }
@@ -1003,6 +1023,235 @@ class _TopPTile extends ConsumerWidget {
           ref.read(llmConfigProvider.notifier).updateTopP(value);
         },
       ),
+    );
+  }
+}
+
+class _ReasoningEffortTile extends ConsumerWidget {
+  const _ReasoningEffortTile();
+
+  static const _labels = {
+    ReasoningEffort.auto: 'Auto',
+    ReasoningEffort.min: 'Minimum',
+    ReasoningEffort.low: 'Low',
+    ReasoningEffort.medium: 'Medium',
+    ReasoningEffort.high: 'High',
+    ReasoningEffort.max: 'Maximum',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(llmConfigProvider);
+    final effort = ReasoningEffort.values.contains(config.reasoningEffort)
+        ? config.reasoningEffort
+        : ReasoningEffort.auto;
+
+    return ListTile(
+      leading: const Icon(Icons.psychology),
+      title: const Text('Reasoning Effort'),
+      trailing: DropdownButton<String>(
+        value: effort,
+        underline: const SizedBox.shrink(),
+        items: ReasoningEffort.values
+            .map((v) => DropdownMenuItem(
+                  value: v,
+                  child: Text(_labels[v] ?? v),
+                ))
+            .toList(),
+        onChanged: (value) {
+          if (value != null) {
+            ref.read(llmConfigProvider.notifier).updateReasoningEffort(value);
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// Connection Profiles: save/apply named connection snapshots (ST parity)
+class _ConnectionProfilesTile extends ConsumerWidget {
+  const _ConnectionProfilesTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profiles = ref.watch(connectionProfilesProvider);
+
+    return ListTile(
+      leading: const Icon(Icons.bookmarks_outlined),
+      title: const Text('Connection Profiles'),
+      subtitle: Text(profiles.isEmpty
+          ? 'Save current connection for quick switching'
+          : '${profiles.length} saved'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _showProfilesSheet(context, ref),
+    );
+  }
+
+  void _showProfilesSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => Consumer(
+        builder: (context, ref, _) {
+          final profiles = ref.watch(connectionProfilesProvider);
+          final current = ref.watch(llmConfigProvider);
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.bookmarks_outlined, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Connection Profiles',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      TextButton.icon(
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Save current'),
+                        onPressed: () =>
+                            _showSaveDialog(context, ref, current),
+                      ),
+                    ],
+                  ),
+                ),
+                if (profiles.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text('No profiles yet. Save the current '
+                        'connection to switch quickly later.'),
+                  )
+                else
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: profiles
+                          .map((profile) => ListTile(
+                                leading: const Icon(Icons.electrical_services),
+                                title: Text(profile.name),
+                                subtitle: Text(
+                                    '${profile.config.provider.name} · ${profile.config.model}'),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () => ref
+                                      .read(
+                                          connectionProfilesProvider.notifier)
+                                      .remove(profile.id),
+                                ),
+                                onTap: () async {
+                                  await ref
+                                      .read(
+                                          connectionProfilesProvider.notifier)
+                                      .apply(profile.id);
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Applied profile: ${profile.name}')),
+                                    );
+                                  }
+                                },
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showSaveDialog(
+      BuildContext context, WidgetRef ref, LLMConfig current) {
+    final controller = TextEditingController(
+      text: '${_providerLabel(current.provider)} - ${current.model}',
+    );
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Save Connection Profile'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Profile name'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                ref
+                    .read(connectionProfilesProvider.notifier)
+                    .saveCurrent(name);
+              }
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _providerLabel(LLMProvider provider) => provider.name;
+}
+
+class _PromptCacheTile extends ConsumerWidget {
+  const _PromptCacheTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(llmConfigProvider);
+    // Prompt caching is a Claude (Anthropic API) feature
+    if (config.provider != LLMProvider.claude) {
+      return const SizedBox.shrink();
+    }
+
+    return SwitchListTile(
+      secondary: const Icon(Icons.savings_outlined),
+      title: const Text('Prompt Caching'),
+      subtitle: const Text('Cache system prompt & history to reduce cost'),
+      value: config.promptCacheEnabled,
+      onChanged: (value) {
+        ref.read(llmConfigProvider.notifier).updatePromptCacheEnabled(value);
+      },
+    );
+  }
+}
+
+class _MergeRolesTile extends ConsumerWidget {
+  const _MergeRolesTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(llmConfigProvider);
+
+    return SwitchListTile(
+      secondary: const Icon(Icons.merge_type),
+      title: const Text('Merge Consecutive Roles'),
+      subtitle: const Text(
+          'For APIs requiring strict user/assistant alternation'),
+      value: config.mergeConsecutiveRoles,
+      onChanged: (value) {
+        ref
+            .read(llmConfigProvider.notifier)
+            .updateMergeConsecutiveRoles(value);
+      },
     );
   }
 }

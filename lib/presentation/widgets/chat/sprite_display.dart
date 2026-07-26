@@ -147,8 +147,9 @@ class _SpriteImageState extends State<_SpriteImage>
       );
     }
 
-    // Apply animation if enabled
-    if (widget.settings.animateTransitions) {
+    // Apply animation if enabled (honor system reduced-motion preference)
+    if (widget.settings.animateTransitions &&
+        !MediaQuery.of(context).disableAnimations) {
       imageWidget = AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {

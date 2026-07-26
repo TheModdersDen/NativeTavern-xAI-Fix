@@ -85,6 +85,14 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
         return 'https://api.deepseek.com/v1';
       case LLMProvider.qwen:
         return 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+      case LLMProvider.siliconFlow:
+        return 'https://api.siliconflow.cn/v1';
+      case LLMProvider.moonshot:
+        return 'https://api.moonshot.cn/v1';
+      case LLMProvider.zai:
+        return 'https://open.bigmodel.cn/api/paas/v4';
+      case LLMProvider.miniMax:
+        return 'https://api.minimaxi.com/v1';
       case LLMProvider.openAICompatible:
         return 'http://localhost:8080/v1';
     }
@@ -94,13 +102,13 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   static String _getDefaultModel(LLMProvider provider) {
     switch (provider) {
       case LLMProvider.openai:
-        return '5.2';
+        return 'gpt-5.2';
       case LLMProvider.claude:
-        return 'claude-sonnet-4-5-20250929';
+        return 'claude-sonnet-4-6';
       case LLMProvider.openRouter:
-        return 'anthropic/claude-3.5-sonnet';
+        return 'anthropic/claude-sonnet-4.5';
       case LLMProvider.gemini:
-        return 'gemini-1.5-pro';
+        return 'gemini-2.5-flash';
       case LLMProvider.ollama:
         return 'llama3.2';
       case LLMProvider.koboldCpp:
@@ -109,6 +117,14 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
         return 'deepseek-chat';
       case LLMProvider.qwen:
         return 'qwen-plus';
+      case LLMProvider.siliconFlow:
+        return 'deepseek-ai/DeepSeek-V3';
+      case LLMProvider.moonshot:
+        return 'kimi-latest';
+      case LLMProvider.zai:
+        return 'glm-5';
+      case LLMProvider.miniMax:
+        return 'MiniMax-M2';
       case LLMProvider.openAICompatible:
         return '';
     }
@@ -335,6 +351,28 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     _saveConfig();
   }
 
+  void updateReasoningEffort(String effort) {
+    state = state.copyWith(reasoningEffort: effort);
+    _saveConfig();
+  }
+
+  void updatePromptCacheEnabled(bool enabled) {
+    state = state.copyWith(promptCacheEnabled: enabled);
+    _saveConfig();
+  }
+
+  void updateMergeConsecutiveRoles(bool enabled) {
+    state = state.copyWith(mergeConsecutiveRoles: enabled);
+    _saveConfig();
+  }
+
+  /// Apply a full connection configuration (used by connection profiles)
+  Future<void> applyConfig(LLMConfig config) async {
+    state = config;
+    await _saveConfig();
+    await _saveCurrentProviderConfig();
+  }
+
   // Advanced sampler methods
   void updateTypicalP(double value) {
     state = state.copyWith(typicalP: value);
@@ -469,6 +507,118 @@ final llmConfigProvider = StateNotifierProvider<LLMConfigNotifier, LLMConfig>((r
   final prefs = ref.watch(sharedPreferencesProvider);
   final db = ref.watch(databaseProvider);
   return LLMConfigNotifier(prefs, db);
+});
+
+/// A named connection profile: a full snapshot of the LLM connection
+/// (provider, endpoint, key, model, sampling settings) that can be
+/// applied with one tap. Mirrors SillyTavern's Connection Profiles.
+class ConnectionProfile {
+  final String id;
+  final String name;
+  final LLMConfig config;
+  final DateTime createdAt;
+
+  const ConnectionProfile({
+    required this.id,
+    required this.name,
+    required this.config,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'config': config.toJson(),
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  factory ConnectionProfile.fromJson(Map<String, dynamic> json) =>
+      ConnectionProfile(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        config: LLMConfig.fromJson(json['config'] as Map<String, dynamic>),
+        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+      );
+}
+
+class ConnectionProfilesNotifier
+    extends StateNotifier<List<ConnectionProfile>> {
+  static const _storageKey = 'connection_profiles';
+  final SharedPreferences _prefs;
+  final Ref _ref;
+
+  ConnectionProfilesNotifier(this._prefs, this._ref) : super(const []) {
+    _load();
+  }
+
+  void _load() {
+    final jsonStr = _prefs.getString(_storageKey);
+    if (jsonStr == null) return;
+    try {
+      final list = jsonDecode(jsonStr) as List<dynamic>;
+      state = list
+          .map((e) => ConnectionProfile.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      _log('Failed to load connection profiles: $e');
+    }
+  }
+
+  Future<void> _save() async {
+    await _prefs.setString(
+      _storageKey,
+      jsonEncode(state.map((p) => p.toJson()).toList()),
+    );
+  }
+
+  /// Save the current connection settings under a name
+  Future<ConnectionProfile> saveCurrent(String name) async {
+    final config = _ref.read(llmConfigProvider);
+    final profile = ConnectionProfile(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      config: config,
+      createdAt: DateTime.now(),
+    );
+    state = [...state, profile];
+    await _save();
+    return profile;
+  }
+
+  /// Apply a profile's configuration
+  Future<void> apply(String id) async {
+    final profile = state.where((p) => p.id == id).firstOrNull;
+    if (profile == null) return;
+    await _ref.read(llmConfigProvider.notifier).applyConfig(profile.config);
+  }
+
+  Future<void> remove(String id) async {
+    state = state.where((p) => p.id != id).toList();
+    await _save();
+  }
+
+  Future<void> rename(String id, String newName) async {
+    state = [
+      for (final p in state)
+        if (p.id == id)
+          ConnectionProfile(
+            id: p.id,
+            name: newName,
+            config: p.config,
+            createdAt: p.createdAt,
+          )
+        else
+          p,
+    ];
+    await _save();
+  }
+}
+
+final connectionProfilesProvider = StateNotifierProvider<
+    ConnectionProfilesNotifier, List<ConnectionProfile>>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return ConnectionProfilesNotifier(prefs, ref);
 });
 
 /// App settings state
@@ -852,6 +1002,10 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
           case LLMProvider.gemini:
           case LLMProvider.deepSeek:
           case LLMProvider.qwen:
+          case LLMProvider.siliconFlow:
+          case LLMProvider.moonshot:
+          case LLMProvider.zai:
+          case LLMProvider.miniMax:
           case LLMProvider.openAICompatible:
           case LLMProvider.openai:
             message = 'No models found. Check your API key.';

@@ -1,3 +1,29 @@
+/// Character depth prompt (ST extensions.depth_prompt):
+/// a note injected at a fixed depth in the chat history
+class DepthPrompt {
+  final int depth;
+  final String prompt;
+  final String role; // system, user, or assistant
+
+  const DepthPrompt({
+    this.depth = 4,
+    this.prompt = '',
+    this.role = 'system',
+  });
+
+  Map<String, dynamic> toJson() => {
+        'depth': depth,
+        'prompt': prompt,
+        'role': role,
+      };
+
+  factory DepthPrompt.fromJson(Map<String, dynamic> json) => DepthPrompt(
+        depth: (json['depth'] as num?)?.toInt() ?? 4,
+        prompt: json['prompt'] as String? ?? '',
+        role: json['role'] as String? ?? 'system',
+      );
+}
+
 /// Character model for NativeTavern
 class Character {
   final String id;
@@ -18,6 +44,13 @@ class Character {
   final CharacterBook? characterBook;
   final Map<String, dynamic> extensions;
   final bool isFavorite;
+
+  /// Note injected at a fixed depth (ST extensions.depth_prompt)
+  final DepthPrompt? depthPrompt;
+
+  /// Group chat response weight 0.0-1.0 (ST extensions.talkativeness)
+  final double talkativeness;
+
   final DateTime createdAt;
   final DateTime modifiedAt;
 
@@ -40,6 +73,8 @@ class Character {
     this.characterBook,
     this.extensions = const {},
     this.isFavorite = false,
+    this.depthPrompt,
+    this.talkativeness = 0.5,
     required this.createdAt,
     required this.modifiedAt,
   });
@@ -63,6 +98,8 @@ class Character {
     CharacterBook? characterBook,
     Map<String, dynamic>? extensions,
     bool? isFavorite,
+    DepthPrompt? depthPrompt,
+    double? talkativeness,
     DateTime? createdAt,
     DateTime? modifiedAt,
   }) {
@@ -85,6 +122,8 @@ class Character {
       characterBook: characterBook ?? this.characterBook,
       extensions: extensions ?? this.extensions,
       isFavorite: isFavorite ?? this.isFavorite,
+      depthPrompt: depthPrompt ?? this.depthPrompt,
+      talkativeness: talkativeness ?? this.talkativeness,
       createdAt: createdAt ?? this.createdAt,
       modifiedAt: modifiedAt ?? this.modifiedAt,
     );
@@ -109,6 +148,8 @@ class Character {
         'characterBook': characterBook?.toJson(),
         'extensions': extensions,
         'isFavorite': isFavorite,
+        'depthPrompt': depthPrompt?.toJson(),
+        'talkativeness': talkativeness,
         'createdAt': createdAt.toIso8601String(),
         'modifiedAt': modifiedAt.toIso8601String(),
       };
@@ -136,9 +177,53 @@ class Character {
             : null,
         extensions: json['extensions'] as Map<String, dynamic>? ?? {},
         isFavorite: json['isFavorite'] as bool? ?? false,
+        depthPrompt: json['depthPrompt'] != null
+            ? DepthPrompt.fromJson(json['depthPrompt'] as Map<String, dynamic>)
+            : (json['extensions'] is Map<String, dynamic> &&
+                    (json['extensions'] as Map<String, dynamic>)['depth_prompt']
+                        is Map<String, dynamic>)
+                ? DepthPrompt.fromJson(
+                    (json['extensions'] as Map<String, dynamic>)['depth_prompt']
+                        as Map<String, dynamic>)
+                : null,
+        talkativeness: (json['talkativeness'] as num?)?.toDouble() ??
+            (json['extensions'] is Map<String, dynamic>
+                ? _parseTalkativeness(
+                    (json['extensions'] as Map<String, dynamic>)['talkativeness'])
+                : 0.5),
         createdAt: DateTime.parse(json['createdAt'] as String),
         modifiedAt: DateTime.parse(json['modifiedAt'] as String),
       );
+
+  static double _parseTalkativeness(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.5;
+    return 0.5;
+  }
+
+  /// Extract a depth prompt from an ST extensions map, if present
+  static DepthPrompt? depthPromptFromExtensions(
+      Map<String, dynamic> extensions) {
+    final raw = extensions['depth_prompt'];
+    if (raw is Map<String, dynamic>) return DepthPrompt.fromJson(raw);
+    return null;
+  }
+
+  /// Extract talkativeness from an ST extensions map (default 0.5)
+  static double talkativenessFromExtensions(Map<String, dynamic> extensions) {
+    return _parseTalkativeness(extensions['talkativeness']);
+  }
+
+  /// Extensions map with first-class depth_prompt/talkativeness merged
+  /// back in for SillyTavern-compatible export
+  Map<String, dynamic> extensionsForExport() {
+    final merged = Map<String, dynamic>.from(extensions);
+    if (depthPrompt != null && depthPrompt!.prompt.isNotEmpty) {
+      merged['depth_prompt'] = depthPrompt!.toJson();
+    }
+    merged['talkativeness'] = talkativeness;
+    return merged;
+  }
 }
 
 /// Character assets (avatar, expression packs, etc.)

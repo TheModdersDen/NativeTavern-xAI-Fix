@@ -190,6 +190,8 @@ class VectorStorageSettings {
   final String promptTemplate;
   final EmbeddingProvider embeddingProvider;
   final String? embeddingModel;
+  final String? embeddingEndpoint;
+  final String? embeddingApiKey;
 
   const VectorStorageSettings({
     this.enabled = false,
@@ -200,6 +202,8 @@ class VectorStorageSettings {
     this.promptTemplate = defaultPromptTemplate,
     this.embeddingProvider = EmbeddingProvider.openai,
     this.embeddingModel,
+    this.embeddingEndpoint,
+    this.embeddingApiKey,
   });
 
   static const defaultPromptTemplate = '''
@@ -222,6 +226,8 @@ Use the above context to help answer the user's question if relevant.
         orElse: () => EmbeddingProvider.openai,
       ),
       embeddingModel: json['embeddingModel'] as String?,
+      embeddingEndpoint: json['embeddingEndpoint'] as String?,
+      embeddingApiKey: json['embeddingApiKey'] as String?,
     );
   }
 
@@ -235,6 +241,8 @@ Use the above context to help answer the user's question if relevant.
       'promptTemplate': promptTemplate,
       'embeddingProvider': embeddingProvider.name,
       'embeddingModel': embeddingModel,
+      'embeddingEndpoint': embeddingEndpoint,
+      'embeddingApiKey': embeddingApiKey,
     };
   }
 
@@ -247,6 +255,8 @@ Use the above context to help answer the user's question if relevant.
     String? promptTemplate,
     EmbeddingProvider? embeddingProvider,
     String? embeddingModel,
+    String? embeddingEndpoint,
+    String? embeddingApiKey,
     bool clearActiveCollection = false,
   }) {
     return VectorStorageSettings(
@@ -258,6 +268,8 @@ Use the above context to help answer the user's question if relevant.
       promptTemplate: promptTemplate ?? this.promptTemplate,
       embeddingProvider: embeddingProvider ?? this.embeddingProvider,
       embeddingModel: embeddingModel ?? this.embeddingModel,
+      embeddingEndpoint: embeddingEndpoint ?? this.embeddingEndpoint,
+      embeddingApiKey: embeddingApiKey ?? this.embeddingApiKey,
     );
   }
 
@@ -274,6 +286,9 @@ Use the above context to help answer the user's question if relevant.
 enum EmbeddingProvider {
   openai,
   cohere,
+  gemini,
+  ollama,
+  siliconflow,
   local,
   custom,
 }
@@ -285,10 +300,16 @@ extension EmbeddingProviderExtension on EmbeddingProvider {
         return 'OpenAI';
       case EmbeddingProvider.cohere:
         return 'Cohere';
+      case EmbeddingProvider.gemini:
+        return 'Google Gemini';
+      case EmbeddingProvider.ollama:
+        return 'Ollama (Local)';
+      case EmbeddingProvider.siliconflow:
+        return 'SiliconFlow (硅基流动)';
       case EmbeddingProvider.local:
         return 'Local (Sentence Transformers)';
       case EmbeddingProvider.custom:
-        return 'Custom API';
+        return 'Custom API (OpenAI-compatible)';
     }
   }
 
@@ -298,6 +319,12 @@ extension EmbeddingProviderExtension on EmbeddingProvider {
         return 'text-embedding-3-small';
       case EmbeddingProvider.cohere:
         return 'embed-english-v3.0';
+      case EmbeddingProvider.gemini:
+        return 'text-embedding-004';
+      case EmbeddingProvider.ollama:
+        return 'nomic-embed-text';
+      case EmbeddingProvider.siliconflow:
+        return 'BAAI/bge-m3';
       case EmbeddingProvider.local:
         return 'all-MiniLM-L6-v2';
       case EmbeddingProvider.custom:
@@ -311,10 +338,35 @@ extension EmbeddingProviderExtension on EmbeddingProvider {
         return 1536;
       case EmbeddingProvider.cohere:
         return 1024;
+      case EmbeddingProvider.gemini:
+        return 768;
+      case EmbeddingProvider.ollama:
+        return 768;
+      case EmbeddingProvider.siliconflow:
+        return 1024;
       case EmbeddingProvider.local:
         return 384;
       case EmbeddingProvider.custom:
         return 768;
+    }
+  }
+
+  String get defaultEndpoint {
+    switch (this) {
+      case EmbeddingProvider.openai:
+        return 'https://api.openai.com/v1';
+      case EmbeddingProvider.cohere:
+        return 'https://api.cohere.com';
+      case EmbeddingProvider.gemini:
+        return 'https://generativelanguage.googleapis.com/v1beta';
+      case EmbeddingProvider.ollama:
+        return 'http://localhost:11434';
+      case EmbeddingProvider.siliconflow:
+        return 'https://api.siliconflow.cn/v1';
+      case EmbeddingProvider.local:
+        return '';
+      case EmbeddingProvider.custom:
+        return 'http://localhost:8080/v1';
     }
   }
 }

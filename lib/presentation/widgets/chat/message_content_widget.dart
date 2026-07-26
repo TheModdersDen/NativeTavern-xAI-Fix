@@ -51,6 +51,16 @@ class _MessageContentWidgetState extends State<MessageContentWidget> {
   /// Content key for forcing WebView re-render after streaming ends
   int _contentVersion = 0;
 
+  /// Cached subtree: during streaming every chunk rebuilds all visible
+  /// bubbles; returning an identical widget instance for unchanged content
+  /// lets Flutter skip re-parsing markdown/HTML for those bubbles
+  Widget? _cachedWidget;
+  String? _cachedContent;
+  bool? _cachedStreaming;
+  Color? _cachedColor;
+  int? _cachedVersion;
+  Brightness? _cachedBrightness;
+
   @override
   void didUpdateWidget(MessageContentWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -182,6 +192,27 @@ class _MessageContentWidgetState extends State<MessageContentWidget> {
       return const SizedBox.shrink();
     }
 
+    final brightness = Theme.of(context).brightness;
+    if (_cachedWidget != null &&
+        _cachedContent == widget.content &&
+        _cachedStreaming == widget.isStreaming &&
+        _cachedColor == widget.textColor &&
+        _cachedVersion == _contentVersion &&
+        _cachedBrightness == brightness) {
+      return _cachedWidget!;
+    }
+
+    final result = _buildContent(context);
+    _cachedWidget = result;
+    _cachedContent = widget.content;
+    _cachedStreaming = widget.isStreaming;
+    _cachedColor = widget.textColor;
+    _cachedVersion = _contentVersion;
+    _cachedBrightness = brightness;
+    return result;
+  }
+
+  Widget _buildContent(BuildContext context) {
     final hasHtml = _containsHtml(widget.content);
 
     Widget contentWidget;

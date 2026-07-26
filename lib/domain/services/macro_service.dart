@@ -3,24 +3,33 @@ import 'package:intl/intl.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/persona.dart';
+import 'package:native_tavern/domain/services/variables_service.dart';
 
 /// Service for expanding macros in text
 /// Supports SillyTavern-compatible macros: {{user}}, {{char}}, {{time}}, etc.
+/// Includes Macros 2.0 features: scoped {{if}}...{{else}}...{{/if}} blocks with
+/// lazy evaluation, and variable shorthands ({{.local}}, {{$global}}) with operators.
 class MacroService {
   final Random _random = Random();
-  
+
   /// Context for macro expansion
   final MacroContext context;
-  
+
+  /// Guard against runaway recursion in condition resolution
+  int _recursionDepth = 0;
+  static const int _maxRecursionDepth = 10;
+
   MacroService(this.context);
-  
+
   /// Process all macros in the given text
   String process(String text) {
     if (text.isEmpty) return text;
-    
+
     String result = text;
-    
+
     // Process macros in order of complexity (more specific first)
+    result = _processScopedIfMacros(result);
+    result = _processVariableShorthands(result);
     result = _processRandomMacros(result);
     result = _processConditionalMacros(result);
     result = _processTimeDateMacros(result);
@@ -28,7 +37,7 @@ class MacroService {
     result = _processUserMacros(result);
     result = _processChatMacros(result);
     result = _processSpecialMacros(result);
-    
+
     return result;
   }
   
@@ -77,7 +86,11 @@ class MacroService {
       context.characterName,
     );
     
-    // {{char_version}} or {{version}} - Character's version field
+    // {{charVersion}}, {{char_version}} or {{version}} - version field
+    result = result.replaceAll(
+      RegExp(r'\{\{charVersion\}\}', caseSensitive: false),
+      context.characterVersion,
+    );
     result = result.replaceAll(
       RegExp(r'\{\{char_version\}\}', caseSensitive: false),
       context.characterVersion,
@@ -105,7 +118,22 @@ class MacroService {
       context.characterScenario,
     );
     
-    // {{first_mes}} or {{greeting}} - Character's first message
+    // {{greeting::N}} or {{charFirstMessage::N}} - indexed greeting
+    // (0 = main greeting, 1+ = alternate greetings)
+    result = _replaceAllWithCallback(
+      result,
+      RegExp(r'\{\{(?:greeting|charFirstMessage)::(\d+)\}\}',
+          caseSensitive: false),
+      (match) {
+        final index = int.parse(match.group(1)!);
+        if (index == 0) return context.characterFirstMessage;
+        final alternates = context.alternateGreetings;
+        if (index - 1 < alternates.length) return alternates[index - 1];
+        return '';
+      },
+    );
+
+    // {{first_mes}}, {{greeting}} or {{charFirstMessage}} - first message
     result = result.replaceAll(
       RegExp(r'\{\{first_mes\}\}', caseSensitive: false),
       context.characterFirstMessage,
@@ -114,18 +142,26 @@ class MacroService {
       RegExp(r'\{\{greeting\}\}', caseSensitive: false),
       context.characterFirstMessage,
     );
+    result = result.replaceAll(
+      RegExp(r'\{\{charFirstMessage\}\}', caseSensitive: false),
+      context.characterFirstMessage,
+    );
     
-    // {{mes_example}} or {{examples}} - Character's example dialogues
+    // {{mes_example}}, {{mesExamples}} or {{examples}} - example dialogues
     result = result.replaceAll(
       RegExp(r'\{\{mes_example\}\}', caseSensitive: false),
+      context.characterExamples,
+    );
+    result = result.replaceAll(
+      RegExp(r'\{\{mesExamples\}\}', caseSensitive: false),
       context.characterExamples,
     );
     result = result.replaceAll(
       RegExp(r'\{\{examples\}\}', caseSensitive: false),
       context.characterExamples,
     );
-    
-    // {{system_prompt}} or {{char_system_prompt}} - Character's system prompt
+
+    // {{system_prompt}}, {{char_system_prompt}} or {{charPrompt}}
     result = result.replaceAll(
       RegExp(r'\{\{system_prompt\}\}', caseSensitive: false),
       context.characterSystemPrompt,
@@ -134,19 +170,36 @@ class MacroService {
       RegExp(r'\{\{char_system_prompt\}\}', caseSensitive: false),
       context.characterSystemPrompt,
     );
-    
+    result = result.replaceAll(
+      RegExp(r'\{\{charPrompt\}\}', caseSensitive: false),
+      context.characterSystemPrompt,
+    );
+
     // {{post_history_instructions}} - Character's post-history instructions
     result = result.replaceAll(
       RegExp(r'\{\{post_history_instructions\}\}', caseSensitive: false),
       context.postHistoryInstructions,
     );
-    
-    // {{jailbreak}} - Alias for post_history_instructions
+
+    // {{jailbreak}} or {{charJailbreak}} - Alias for post_history_instructions
     result = result.replaceAll(
       RegExp(r'\{\{jailbreak\}\}', caseSensitive: false),
       context.postHistoryInstructions,
     );
-    
+    result = result.replaceAll(
+      RegExp(r'\{\{charJailbreak\}\}', caseSensitive: false),
+      context.postHistoryInstructions,
+    );
+
+    // {{group}} - Comma-separated group member names
+    // (or character name outside of groups)
+    result = result.replaceAll(
+      RegExp(r'\{\{group\}\}', caseSensitive: false),
+      context.groupCharacterNames.isNotEmpty
+          ? context.groupCharacterNames.join(', ')
+          : context.characterName,
+    );
+
     return result;
   }
   
@@ -315,14 +368,18 @@ class MacroService {
       },
     );
     
-    // {{pick::option1::option2::option3}} - Pick random option
+    // {{pick::option1::option2::option3}} - Pick a random option.
+    // Unlike {{random}}, the pick is stable within a chat: the same macro
+    // at the same position always resolves to the same option (ST behavior)
     result = _replaceAllWithCallback(
       result,
       RegExp(r'\{\{pick::([^}]+)\}\}', caseSensitive: false),
       (match) {
         final options = match.group(1)!.split('::');
         if (options.isEmpty) return '';
-        return options[_random.nextInt(options.length)];
+        final seed =
+            _stableSeed('${context.chatId}|${match.group(0)}|${match.start}');
+        return options[seed % options.length];
       },
     );
     
@@ -336,10 +393,248 @@ class MacroService {
     return result;
   }
   
-  /// Process conditional macros
+  // ==================== Macros 2.0: Scoped {{if}} ====================
+
+  /// Process scoped conditional blocks (Macros 2.0):
+  /// `{{if condition}}then{{/if}}`
+  /// `{{if condition}}then{{else}}other{{/if}}`
+  /// `{{if !condition}}...{{/if}}` (inverted)
+  ///
+  /// Lazy evaluation: macros in the dropped branch are never expanded.
+  /// Supports nesting.
+  String _processScopedIfMacros(String text) {
+    // Opening tag: {{if <condition>}} with a space (the inline form uses {{if::)
+    final openRe = RegExp(r'\{\{if\s+([^}]+)\}\}', caseSensitive: false);
+    // Tokens that affect block structure
+    final tokenRe = RegExp(r'\{\{(if\s+[^}]+|else|/if)\}\}', caseSensitive: false);
+
+    var iterations = 0;
+    while (iterations++ < 100) {
+      // The inline form {{if cond::content}} contains '::' and is not
+      // a scoped block opener - skip those
+      RegExpMatch? open;
+      for (final m in openRe.allMatches(text)) {
+        if (!m.group(1)!.contains('::')) {
+          open = m;
+          break;
+        }
+      }
+      if (open == null) break;
+
+      // Find the matching {{/if}}, tracking nesting depth,
+      // and the top-level {{else}} if present
+      var depth = 1;
+      int? elseStart, elseEnd, closeStart, closeEnd;
+      for (final t in tokenRe.allMatches(text, open.end)) {
+        final token = t.group(1)!.toLowerCase();
+        if (token.startsWith('if')) {
+          if (token.contains('::')) continue; // inline form, not a block
+          depth++;
+        } else if (token == '/if') {
+          depth--;
+          if (depth == 0) {
+            closeStart = t.start;
+            closeEnd = t.end;
+            break;
+          }
+        } else if (token == 'else' && depth == 1 && elseStart == null) {
+          elseStart = t.start;
+          elseEnd = t.end;
+        }
+      }
+
+      if (closeStart == null || closeEnd == null) {
+        // Unbalanced block: drop the opening tag and continue
+        text = text.replaceRange(open.start, open.end, '');
+        continue;
+      }
+
+      final String thenBranch;
+      final String elseBranch;
+      if (elseStart != null && elseEnd != null) {
+        thenBranch = text.substring(open.end, elseStart);
+        elseBranch = text.substring(elseEnd, closeStart);
+      } else {
+        thenBranch = text.substring(open.end, closeStart);
+        elseBranch = '';
+      }
+
+      final chosen =
+          _evaluateCondition(open.group(1)!.trim()) ? thenBranch : elseBranch;
+      // The chosen branch stays in the text and is processed by the
+      // remaining loop iterations (nested ifs) and pipeline stages
+      text = text.replaceRange(open.start, closeEnd, chosen);
+    }
+
+    return text;
+  }
+
+  // ==================== Macros 2.0: Variable shorthands ====================
+
+  /// Variable name pattern: starts with a letter, may contain
+  /// word chars and inner hyphens, must not end with a hyphen
+  static const String _varNamePattern = r'[a-zA-Z](?:[\w\-]*[\w])?';
+
+  /// Process variable shorthand macros (Macros 2.0):
+  /// `{{.name}}` / `{{$name}}` - get local / global variable
+  /// `{{.name=value}}` - assign, `{{.name+=n}}` / `{{.name-=n}}` - add/subtract
+  /// `{{.name++}}` / `{{.name--}}` - increment/decrement
+  /// `{{.name==v}}` `!=` `>` `>=` `<` `<=` - comparisons (return true/false)
+  /// `{{.name??default}}` / `{{.name||default}}` - fallbacks
+  /// `{{.name??=v}}` / `{{.name||=v}}` - conditional assignment
+  String _processVariableShorthands(String text) {
+    // Operator form (longest operators first so e.g. `>=` wins over `>`)
+    final opRe = RegExp(
+      r'\{\{([.$])(' +
+          _varNamePattern +
+          r')\s*(\+\+|--|\?\?=|\|\|=|\?\?|\|\||\+=|-=|==|!=|>=|<=|>|<|=)\s*([^}]*)\}\}',
+    );
+    var result = text.replaceAllMapped(opRe, (m) {
+      final global = m.group(1) == r'$';
+      final name = m.group(2)!;
+      final op = m.group(3)!;
+      final value = m.group(4)!.trim();
+      return _applyVariableOperator(name, op, value, global: global);
+    });
+
+    // Plain get form
+    final getRe = RegExp(r'\{\{([.$])(' + _varNamePattern + r')\}\}');
+    result = result.replaceAllMapped(getRe, (m) {
+      final global = m.group(1) == r'$';
+      return _readVariable(m.group(2)!, global: global) ?? '';
+    });
+
+    return result;
+  }
+
+  String? _readVariable(String name, {required bool global}) {
+    final vars = VariablesService.instance;
+    if (global) {
+      if (!vars.existsGlobalVariable(name)) return null;
+      return vars.getGlobalVariable(name)?.toString() ?? '';
+    }
+    if (context.chatId.isEmpty ||
+        !vars.existsLocalVariable(context.chatId, name)) {
+      return null;
+    }
+    return vars.getLocalVariable(context.chatId, name)?.toString() ?? '';
+  }
+
+  void _writeVariable(String name, String value, {required bool global}) {
+    final vars = VariablesService.instance;
+    if (global) {
+      // Fire-and-forget persistence
+      vars.setGlobalVariable(name, value);
+    } else if (context.chatId.isNotEmpty) {
+      vars.setLocalVariable(context.chatId, name, value);
+    }
+  }
+
+  String _applyVariableOperator(
+    String name,
+    String op,
+    String value, {
+    required bool global,
+  }) {
+    final current = _readVariable(name, global: global);
+
+    switch (op) {
+      case '=':
+        _writeVariable(name, value, global: global);
+        return '';
+      case '+=':
+        _writeVariable(name, _addValues(current ?? '', value), global: global);
+        return '';
+      case '-=':
+        _writeVariable(name, _subtractValues(current ?? '0', value),
+            global: global);
+        return '';
+      case '++':
+        _writeVariable(name, _addValues(current ?? '0', '1'), global: global);
+        return '';
+      case '--':
+        _writeVariable(name, _subtractValues(current ?? '0', '1'),
+            global: global);
+        return '';
+      case '??':
+        return current ?? value;
+      case '||':
+        return (current == null || _isFalsyValue(current)) ? value : current;
+      case '??=':
+        if (current == null) _writeVariable(name, value, global: global);
+        return '';
+      case '||=':
+        if (current == null || _isFalsyValue(current)) {
+          _writeVariable(name, value, global: global);
+        }
+        return '';
+      case '==':
+        return (_compareValues(current ?? '', value) == 0).toString();
+      case '!=':
+        return (_compareValues(current ?? '', value) != 0).toString();
+      case '>':
+        return (_compareValues(current ?? '', value) > 0).toString();
+      case '>=':
+        return (_compareValues(current ?? '', value) >= 0).toString();
+      case '<':
+        return (_compareValues(current ?? '', value) < 0).toString();
+      case '<=':
+        return (_compareValues(current ?? '', value) <= 0).toString();
+    }
+    return '';
+  }
+
+  /// Add two values: numeric addition when both are numbers, else concatenation
+  String _addValues(String a, String b) {
+    final na = num.tryParse(a);
+    final nb = num.tryParse(b);
+    if (na != null && nb != null) return _formatNum(na + nb);
+    return a + b;
+  }
+
+  String _subtractValues(String a, String b) {
+    final na = num.tryParse(a) ?? 0;
+    final nb = num.tryParse(b) ?? 0;
+    return _formatNum(na - nb);
+  }
+
+  /// Compare two values numerically when possible, else as strings
+  int _compareValues(String a, String b) {
+    final na = num.tryParse(a);
+    final nb = num.tryParse(b);
+    if (na != null && nb != null) return na.compareTo(nb);
+    return a.compareTo(b);
+  }
+
+  String _formatNum(num n) {
+    if (n is int || n == n.roundToDouble()) return n.toInt().toString();
+    return n.toString();
+  }
+
+  bool _isFalsyValue(String v) {
+    final s = v.trim().toLowerCase();
+    return s.isEmpty || s == 'false' || s == 'off' || s == '0';
+  }
+
+  /// Process conditional macros (inline forms)
   String _processConditionalMacros(String text) {
     String result = text;
-    
+
+    // {{if condition::content}} - ST Macros 2.0 inline form
+    result = _replaceAllWithCallback(
+      result,
+      RegExp(r'\{\{if\s+([^:}]+)::([^}]*?)\}\}', caseSensitive: false),
+      (match) {
+        final condition = match.group(1)!.trim();
+        final thenValue = match.group(2)!;
+
+        if (_evaluateCondition(condition)) {
+          return thenValue;
+        }
+        return '';
+      },
+    );
+
     // {{if::condition::then}} - Simple if
     result = _replaceAllWithCallback(
       result,
@@ -347,14 +642,14 @@ class MacroService {
       (match) {
         final condition = match.group(1)!.trim();
         final thenValue = match.group(2)!;
-        
+
         if (_evaluateCondition(condition)) {
           return thenValue;
         }
         return '';
       },
     );
-    
+
     // {{if::condition::then::else}} - If-else
     result = _replaceAllWithCallback(
       result,
@@ -363,14 +658,14 @@ class MacroService {
         final condition = match.group(1)!.trim();
         final thenValue = match.group(2)!;
         final elseValue = match.group(3)!;
-        
+
         if (_evaluateCondition(condition)) {
           return thenValue;
         }
         return elseValue;
       },
     );
-    
+
     return result;
   }
   
@@ -429,38 +724,98 @@ class MacroService {
       RegExp(r'\{\{idle_duration\}\}', caseSensitive: false),
       context.idleDuration.toString(),
     );
-    
+
+    // {{maxContext}} / {{maxContextTokens}} / {{maxPromptTokens}}
+    result = result.replaceAll(
+      RegExp(r'\{\{(?:maxContext|maxContextTokens|maxPromptTokens)\}\}',
+          caseSensitive: false),
+      context.maxContextTokens.toString(),
+    );
+
+    // {{maxResponse}} / {{maxResponseTokens}}
+    result = result.replaceAll(
+      RegExp(r'\{\{(?:maxResponse|maxResponseTokens)\}\}',
+          caseSensitive: false),
+      context.maxResponseTokens.toString(),
+    );
+
     return result;
   }
   
-  /// Evaluate a simple condition
+  /// Evaluate a condition following ST Macros 2.0 semantics:
+  /// - `!` prefix inverts the result
+  /// - nested macros in the condition are resolved first
+  /// - `.name` / `$name` shorthands read local/global variables
+  /// - a bare macro name (e.g. `description`) resolves that macro
+  /// - falsy values: empty string, 'false', 'off', '0'
   bool _evaluateCondition(String condition) {
+    condition = condition.trim();
     if (condition.isEmpty) return false;
-    
+
     // Check for negation
     if (condition.startsWith('!')) {
       return !_evaluateCondition(condition.substring(1).trim());
     }
-    
-    // Check for comparison operators
-    if (condition.contains('==')) {
-      final parts = condition.split('==');
-      if (parts.length == 2) {
-        return parts[0].trim() == parts[1].trim();
+
+    // Check for explicit comparison operators
+    for (final op in const ['==', '!=']) {
+      if (condition.contains(op)) {
+        final parts = condition.split(op);
+        if (parts.length == 2) {
+          final left = _resolveConditionValue(parts[0].trim());
+          final right = _resolveConditionValue(parts[1].trim());
+          final equal = _compareValues(left, right) == 0;
+          return op == '==' ? equal : !equal;
+        }
       }
     }
-    
-    if (condition.contains('!=')) {
-      final parts = condition.split('!=');
-      if (parts.length == 2) {
-        return parts[0].trim() != parts[1].trim();
-      }
+
+    return !_isFalsyValue(_resolveConditionValue(condition));
+  }
+
+  /// Resolve a condition operand: nested macros, variable shorthands,
+  /// or bare macro names
+  String _resolveConditionValue(String value) {
+    if (_recursionDepth >= _maxRecursionDepth) return value;
+
+    // Nested macros like {{getvar::x}} or {{description}}
+    if (value.contains('{{')) {
+      _recursionDepth++;
+      final resolved = process(value);
+      _recursionDepth--;
+      return resolved;
     }
-    
-    // Simple truthy check - non-empty string is true
-    return condition.isNotEmpty && condition != '0' && condition.toLowerCase() != 'false';
+
+    // Variable shorthand: .name (local) or $name (global)
+    final varMatch =
+        RegExp(r'^([.$])(' + _varNamePattern + r')$').firstMatch(value);
+    if (varMatch != null) {
+      return _readVariable(varMatch.group(2)!,
+              global: varMatch.group(1) == r'$') ??
+          '';
+    }
+
+    // Bare macro name: resolve {{name}} if it changes anything
+    if (RegExp(r'^[a-zA-Z_][\w]*$').hasMatch(value)) {
+      _recursionDepth++;
+      final resolved = process('{{$value}}');
+      _recursionDepth--;
+      if (resolved != '{{$value}}') return resolved;
+    }
+
+    return value;
   }
   
+  /// Deterministic seed from a string (FNV-1a hash)
+  int _stableSeed(String input) {
+    var hash = 0x811c9dc5;
+    for (final unit in input.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0x7fffffff;
+    }
+    return hash;
+  }
+
   /// Helper to replace all matches with callback function
   String _replaceAllWithCallback(
     String text,
@@ -525,7 +880,14 @@ class MacroContext {
   
   // Group chat data (optional)
   final List<String> groupCharacterNames;
-  
+
+  // Alternate greetings for {{greeting::N}}
+  final List<String> alternateGreetings;
+
+  // Token limits for {{maxContextTokens}} / {{maxResponseTokens}}
+  final int maxContextTokens;
+  final int maxResponseTokens;
+
   const MacroContext({
     this.userName = 'User',
     this.userDescription = '',
@@ -549,6 +911,9 @@ class MacroContext {
     this.providerName = '',
     this.idleDuration = 0,
     this.groupCharacterNames = const [],
+    this.alternateGreetings = const [],
+    this.maxContextTokens = 0,
+    this.maxResponseTokens = 0,
   });
   
   /// Create MacroContext from character, persona, and chat data
@@ -562,6 +927,8 @@ class MacroContext {
     String? providerName,
     String? originalPrompt,
     List<Character>? groupCharacters,
+    int? maxContextTokens,
+    int? maxResponseTokens,
   }) {
     // Get last messages
     String lastMessage = '';
@@ -614,6 +981,9 @@ class MacroContext {
       providerName: providerName ?? '',
       idleDuration: idleDuration,
       groupCharacterNames: groupCharacters?.map((c) => c.name).toList() ?? [],
+      alternateGreetings: character?.alternateGreetings ?? const [],
+      maxContextTokens: maxContextTokens ?? 0,
+      maxResponseTokens: maxResponseTokens ?? 0,
     );
   }
   
@@ -640,6 +1010,9 @@ class MacroContext {
     String? providerName,
     int? idleDuration,
     List<String>? groupCharacterNames,
+    List<String>? alternateGreetings,
+    int? maxContextTokens,
+    int? maxResponseTokens,
   }) {
     return MacroContext(
       userName: userName ?? this.userName,
@@ -664,6 +1037,9 @@ class MacroContext {
       providerName: providerName ?? this.providerName,
       idleDuration: idleDuration ?? this.idleDuration,
       groupCharacterNames: groupCharacterNames ?? this.groupCharacterNames,
+      alternateGreetings: alternateGreetings ?? this.alternateGreetings,
+      maxContextTokens: maxContextTokens ?? this.maxContextTokens,
+      maxResponseTokens: maxResponseTokens ?? this.maxResponseTokens,
     );
   }
 }

@@ -15,6 +15,10 @@ enum LLMProvider {
   openRouter,
   ollama,
   koboldCpp,
+  siliconFlow,
+  moonshot,
+  zai,
+  miniMax,
 }
 
 /// LLM Response with content and optional reasoning/thinking
@@ -41,6 +45,145 @@ class LLMStreamChunk {
     this.reasoning,
     this.isReasoningChunk = false,
   });
+}
+
+/// Incrementally extracts inline `<think>`-style blocks from streamed text.
+///
+/// Models like DeepSeek R1 served through OpenAI-compatible/local endpoints
+/// embed their chain-of-thought as `<think>...</think>` at the start of the
+/// content instead of using a structured reasoning field. This parser splits
+/// such blocks out as reasoning so they render in the collapsible reasoning
+/// UI instead of the message body.
+///
+/// Parsing only activates when the first non-whitespace output is an opening
+/// tag - a tag appearing mid-message is treated as regular content.
+class ThinkTagParser {
+  static const List<String> _tagNames = [
+    'thinking',
+    'think',
+    'thought',
+    'reasoning',
+  ];
+
+  String _buffer = '';
+  bool _inThink = false;
+  String _activeTag = '';
+  bool _decided = false; // Whether we know if this message starts with a tag
+  bool _passthrough = false; // No leading tag: emit everything as content
+
+  /// Feed a content delta; returns (content, reasoning) to emit now.
+  (String, String) feed(String delta) {
+    _buffer += delta;
+    final content = StringBuffer();
+    final reasoning = StringBuffer();
+
+    while (_buffer.isNotEmpty) {
+      if (_passthrough) {
+        content.write(_buffer);
+        _buffer = '';
+        break;
+      }
+
+      if (!_decided) {
+        // Decide whether the message starts with an opening tag
+        final trimmed = _buffer.trimLeft();
+        if (trimmed.isEmpty) break; // Only whitespace so far - wait
+        String? matchedTag;
+        var isPrefix = false;
+        for (final tag in _tagNames) {
+          final open = '<$tag>';
+          if (trimmed.toLowerCase().startsWith(open)) {
+            matchedTag = tag;
+            break;
+          }
+          if (open.startsWith(trimmed.toLowerCase())) {
+            isPrefix = true;
+          }
+        }
+        if (matchedTag != null) {
+          _decided = true;
+          _inThink = true;
+          _activeTag = matchedTag;
+          final tagStart = _buffer.toLowerCase().indexOf('<$matchedTag>');
+          _buffer = _buffer.substring(tagStart + matchedTag.length + 2);
+          continue;
+        }
+        if (isPrefix) break; // Could still become a tag - wait for more
+        _decided = true;
+        _passthrough = true;
+        continue;
+      }
+
+      if (_inThink) {
+        final close = '</$_activeTag>';
+        final idx = _buffer.toLowerCase().indexOf(close);
+        if (idx >= 0) {
+          reasoning.write(_buffer.substring(0, idx));
+          _buffer = _buffer.substring(idx + close.length);
+          // Drop a single leading newline after the block
+          if (_buffer.startsWith('\n')) _buffer = _buffer.substring(1);
+          _inThink = false;
+          continue;
+        }
+        // Hold back a possible partial closing tag at the end
+        final holdback = _partialSuffixLength(_buffer, close);
+        if (_buffer.length > holdback) {
+          reasoning.write(_buffer.substring(0, _buffer.length - holdback));
+          _buffer = _buffer.substring(_buffer.length - holdback);
+        }
+        break;
+      }
+
+      // After the think block closed: everything is content
+      content.write(_buffer);
+      _buffer = '';
+    }
+
+    return (content.toString(), reasoning.toString());
+  }
+
+  /// Flush any held-back text at end of stream.
+  (String, String) flush() {
+    final rest = _buffer;
+    _buffer = '';
+    if (rest.isEmpty) return ('', '');
+    return _inThink ? ('', rest) : (rest, '');
+  }
+
+  /// Length of the longest suffix of [text] that is a prefix of [token]
+  int _partialSuffixLength(String text, String token) {
+    final max = token.length - 1;
+    for (var len = max < text.length ? max : text.length; len > 0; len--) {
+      if (token.startsWith(
+          text.substring(text.length - len).toLowerCase())) {
+        return len;
+      }
+    }
+    return 0;
+  }
+
+  /// Non-streaming variant: extract a leading think block from full text.
+  /// Returns (content, reasoning) where reasoning is null if no block found.
+  static (String, String?) extract(String text) {
+    final match = RegExp(
+      r'^\s*<(thinking|think|thought|reasoning)>([\s\S]*?)</\1>\s*',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (match == null) return (text, null);
+    return (text.substring(match.end), match.group(2)!.trim());
+  }
+}
+
+/// Reasoning effort levels (aligned with SillyTavern's REASONING_EFFORT)
+class ReasoningEffort {
+  static const String auto = 'auto';
+  static const String min = 'min';
+  static const String low = 'low';
+  static const String medium = 'medium';
+  static const String high = 'high';
+  static const String max = 'max';
+
+  static const List<String> values = [auto, min, low, medium, high, max];
 }
 
 /// LLM Configuration
@@ -75,6 +218,18 @@ class LLMConfig {
   final bool autoSummarizeEnabled;
   final double autoSummarizeThreshold;
 
+  // Reasoning/thinking effort: auto, min, low, medium, high, max
+  final String reasoningEffort;
+
+  // Claude prompt caching: caches system prompt + chat history prefix
+  // to cut input token costs on subsequent turns
+  final bool promptCacheEnabled;
+
+  // Merge consecutive same-role messages (prompt post-processing).
+  // Required by endpoints that enforce strict user/assistant alternation
+  // (e.g. deepseek-reasoner and some proxies)
+  final bool mergeConsecutiveRoles;
+
   const LLMConfig({
     required this.provider,
     required this.model,
@@ -103,6 +258,9 @@ class LLMConfig {
     // Auto-summarization defaults
     this.autoSummarizeEnabled = true,
     this.autoSummarizeThreshold = 0.8,
+    this.reasoningEffort = ReasoningEffort.auto,
+    this.promptCacheEnabled = false,
+    this.mergeConsecutiveRoles = false,
   });
 
   LLMConfig copyWith({
@@ -131,6 +289,9 @@ class LLMConfig {
     int? seed,
     bool? autoSummarizeEnabled,
     double? autoSummarizeThreshold,
+    String? reasoningEffort,
+    bool? promptCacheEnabled,
+    bool? mergeConsecutiveRoles,
   }) {
     return LLMConfig(
       provider: provider ?? this.provider,
@@ -158,6 +319,10 @@ class LLMConfig {
       seed: seed ?? this.seed,
       autoSummarizeEnabled: autoSummarizeEnabled ?? this.autoSummarizeEnabled,
       autoSummarizeThreshold: autoSummarizeThreshold ?? this.autoSummarizeThreshold,
+      reasoningEffort: reasoningEffort ?? this.reasoningEffort,
+      promptCacheEnabled: promptCacheEnabled ?? this.promptCacheEnabled,
+      mergeConsecutiveRoles:
+          mergeConsecutiveRoles ?? this.mergeConsecutiveRoles,
     );
   }
 
@@ -187,6 +352,9 @@ class LLMConfig {
         'seed': seed,
         'autoSummarizeEnabled': autoSummarizeEnabled,
         'autoSummarizeThreshold': autoSummarizeThreshold,
+        'reasoningEffort': reasoningEffort,
+        'promptCacheEnabled': promptCacheEnabled,
+        'mergeConsecutiveRoles': mergeConsecutiveRoles,
       };
 
   factory LLMConfig.fromJson(Map<String, dynamic> json) => LLMConfig(
@@ -218,12 +386,255 @@ class LLMConfig {
         seed: json['seed'] as int? ?? -1,
         autoSummarizeEnabled: json['autoSummarizeEnabled'] as bool? ?? true,
         autoSummarizeThreshold: (json['autoSummarizeThreshold'] as num?)?.toDouble() ?? 0.8,
+        reasoningEffort: json['reasoningEffort'] as String? ?? ReasoningEffort.auto,
+        promptCacheEnabled: json['promptCacheEnabled'] as bool? ?? false,
+        mergeConsecutiveRoles:
+            json['mergeConsecutiveRoles'] as bool? ?? false,
       );
 }
 
 /// LLM Service for generating responses
 class LLMService {
   final Dio _dio = Dio();
+
+  /// Claude models that use adaptive thinking (effort string instead of budget tokens)
+  /// Aligned with SillyTavern's isAdaptiveModel detection
+  static bool _isClaudeAdaptiveModel(String model) {
+    // ST enables adaptive thinking by default only for Opus 4.7+;
+    // newer Claude 5 family models are adaptive as well
+    return RegExp(r'^claude-(opus-4-7|opus-5|sonnet-5|fable-5)').hasMatch(model);
+  }
+
+  /// Apply Claude extended/adaptive thinking based on reasoningEffort.
+  /// Ported from SillyTavern's calculateClaudeBudgetTokens.
+  void _applyClaudeThinking(
+    Map<String, dynamic> requestData,
+    LLMConfig config, {
+    required bool stream,
+  }) {
+    final effort = config.reasoningEffort;
+    if (effort == ReasoningEffort.auto) return;
+
+    if (_isClaudeAdaptiveModel(config.model)) {
+      // Adaptive thinking (Opus 4.6+): effort string, like Gemini 3
+      final String level;
+      switch (effort) {
+        case ReasoningEffort.min:
+        case ReasoningEffort.low:
+          level = 'low';
+          break;
+        case ReasoningEffort.medium:
+          level = 'medium';
+          break;
+        case ReasoningEffort.high:
+          level = 'high';
+          break;
+        case ReasoningEffort.max:
+          level = 'max';
+          break;
+        default:
+          return;
+      }
+      requestData['thinking'] = {'type': 'adaptive'};
+      requestData['output_config'] = {'effort': level};
+      return;
+    }
+
+    // Traditional extended thinking: numeric budget tokens
+    final maxTokens = requestData['max_tokens'] as int;
+    int budget;
+    switch (effort) {
+      case ReasoningEffort.min:
+        budget = 1024;
+        break;
+      case ReasoningEffort.low:
+        budget = (maxTokens * 0.1).floor();
+        break;
+      case ReasoningEffort.medium:
+        budget = (maxTokens * 0.25).floor();
+        break;
+      case ReasoningEffort.high:
+        budget = (maxTokens * 0.5).floor();
+        break;
+      case ReasoningEffort.max:
+        budget = (maxTokens * 0.95).floor();
+        break;
+      default:
+        return;
+    }
+    if (budget < 1024) budget = 1024;
+    if (!stream && budget > 21333) budget = 21333;
+
+    // Claude thinking requires headroom above the budget
+    if (maxTokens <= 1024) {
+      requestData['max_tokens'] = maxTokens + 1024;
+    }
+    requestData['thinking'] = {
+      'type': 'enabled',
+      'budget_tokens': budget,
+    };
+  }
+
+  /// Apply Gemini thinkingConfig based on reasoningEffort.
+  /// Ported from SillyTavern's calculateGoogleBudgetTokens.
+  void _applyGeminiThinking(
+    Map<String, dynamic> generationConfig,
+    LLMConfig config,
+  ) {
+    final effort = config.reasoningEffort;
+    if (effort == ReasoningEffort.auto) return;
+
+    final model = config.model;
+    final maxTokens = generationConfig['maxOutputTokens'] as int;
+    final thinkingConfig = <String, dynamic>{'includeThoughts': true};
+
+    // Gemini 3.x models use thinkingLevel strings
+    if (RegExp(r'gemini-3[.\d]*-pro').hasMatch(model)) {
+      thinkingConfig['thinkingLevel'] =
+          (effort == ReasoningEffort.high || effort == ReasoningEffort.max)
+              ? 'high'
+              : 'low';
+    } else if (RegExp(r'gemini-3[.\d]*-flash').hasMatch(model)) {
+      final String level;
+      switch (effort) {
+        case ReasoningEffort.min:
+          level = 'minimal';
+          break;
+        case ReasoningEffort.low:
+          level = 'low';
+          break;
+        case ReasoningEffort.medium:
+          level = 'medium';
+          break;
+        default:
+          level = 'high';
+      }
+      thinkingConfig['thinkingLevel'] = level;
+    } else if (model.contains('flash') || model.contains('pro')) {
+      // Gemini 2.x: numeric thinkingBudget
+      final isPro = !model.contains('flash');
+      final isFlashLite = model.contains('flash-lite');
+      int budget;
+      switch (effort) {
+        case ReasoningEffort.min:
+          budget = isPro ? 128 : 0;
+          break;
+        case ReasoningEffort.low:
+          budget = (maxTokens * 0.1).floor();
+          break;
+        case ReasoningEffort.medium:
+          budget = (maxTokens * 0.25).floor();
+          break;
+        case ReasoningEffort.high:
+          budget = (maxTokens * 0.5).floor();
+          break;
+        case ReasoningEffort.max:
+          budget = maxTokens;
+          break;
+        default:
+          return;
+      }
+      final cap = isPro ? 32768 : 24576;
+      if (budget > cap) budget = cap;
+      if (isPro && budget < 128) budget = 128;
+      if (isFlashLite && budget < 512) budget = 512;
+      thinkingConfig['thinkingBudget'] = budget;
+    } else {
+      return;
+    }
+
+    generationConfig['thinkingConfig'] = thinkingConfig;
+  }
+
+  /// Apply Claude prompt caching (cache_control breakpoints).
+  ///
+  /// Marks the system prompt and the second-to-last user message with
+  /// ephemeral cache_control so the stable prefix of the conversation is
+  /// cached between turns (mirrors ST's system-prompt cache + cachingAtDepth).
+  void _applyClaudePromptCaching(
+    Map<String, dynamic> requestData,
+    LLMConfig config,
+  ) {
+    if (!config.promptCacheEnabled) return;
+
+    const cacheControl = {'type': 'ephemeral'};
+
+    // System prompt -> text block with cache_control
+    final system = requestData['system'];
+    if (system is String && system.isNotEmpty) {
+      requestData['system'] = [
+        {'type': 'text', 'text': system, 'cache_control': cacheControl},
+      ];
+    }
+
+    // Mark the second-to-last user message so the history prefix caches
+    // incrementally as the chat grows
+    final messages = requestData['messages'];
+    if (messages is List) {
+      final userIndexes = <int>[];
+      for (var i = 0; i < messages.length; i++) {
+        final msg = messages[i];
+        if (msg is Map && msg['role'] == 'user') userIndexes.add(i);
+      }
+      if (userIndexes.length >= 2) {
+        final target = userIndexes[userIndexes.length - 2];
+        final msg = Map<String, dynamic>.from(messages[target] as Map);
+        final content = msg['content'];
+        if (content is String) {
+          msg['content'] = [
+            {'type': 'text', 'text': content, 'cache_control': cacheControl},
+          ];
+          messages[target] = msg;
+        } else if (content is List && content.isNotEmpty) {
+          final lastBlock =
+              Map<String, dynamic>.from(content.last as Map);
+          lastBlock['cache_control'] = cacheControl;
+          content[content.length - 1] = lastBlock;
+        }
+      }
+    }
+  }
+
+  /// Apply reasoning effort for OpenAI-compatible endpoints
+  void _applyOpenAIReasoning(
+    Map<String, dynamic> requestData,
+    LLMConfig config,
+  ) {
+    final effort = config.reasoningEffort;
+    if (effort == ReasoningEffort.auto) return;
+
+    if (config.provider == LLMProvider.openRouter) {
+      // OpenRouter uses a nested reasoning object with low/medium/high
+      final String level;
+      switch (effort) {
+        case ReasoningEffort.min:
+        case ReasoningEffort.low:
+          level = 'low';
+          break;
+        case ReasoningEffort.medium:
+          level = 'medium';
+          break;
+        default:
+          level = 'high';
+      }
+      requestData['reasoning'] = {'effort': level};
+      return;
+    }
+
+    // OpenAI-style reasoning_effort: minimal/low/medium/high
+    final String value;
+    switch (effort) {
+      case ReasoningEffort.min:
+        value = 'minimal';
+        break;
+      case ReasoningEffort.max:
+        value = 'high';
+        break;
+      default:
+        value = effort;
+    }
+    requestData['reasoning_effort'] = value;
+  }
   
   /// Log a message to the console
   /// Always calls debugPrint so DebugLogService can capture logs in all build modes
@@ -294,8 +705,16 @@ class LLMService {
       }
     }
     
-    // Log system message for Claude
-    final system = data['system'] as String?;
+    // Log system message for Claude (string, or blocks when caching is on)
+    final systemValue = data['system'];
+    final system = systemValue is String
+        ? systemValue
+        : systemValue is List
+            ? systemValue
+                .whereType<Map>()
+                .map((b) => b['text'] ?? '')
+                .join('\n')
+            : null;
     if (system != null) {
       final preview = system.length > 200 ? '${system.substring(0, 200)}...' : system;
       _log('System: $preview');
@@ -393,10 +812,58 @@ class LLMService {
     List<Map<String, dynamic>> messages,
     LLMConfig config,
   ) async {
+    final response = await _generateWithReasoningRaw(messages, config);
+    // Fallback: extract inline <think> blocks for providers without
+    // structured reasoning fields (local models, R1 via compatible APIs)
+    if (!response.hasReasoning) {
+      final (content, reasoning) = ThinkTagParser.extract(response.content);
+      if (reasoning != null) {
+        return LLMResponse(content: content, reasoning: reasoning);
+      }
+    }
+    return response;
+  }
+
+  /// Merge consecutive same-role messages (prompt post-processing).
+  /// String contents are joined with double newlines; multimodal (list)
+  /// contents are never merged.
+  List<Map<String, dynamic>> _mergeConsecutiveRoles(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
+  ) {
+    if (!config.mergeConsecutiveRoles || messages.isEmpty) return messages;
+
+    final merged = <Map<String, dynamic>>[];
+    for (final msg in messages) {
+      final prev = merged.isNotEmpty ? merged.last : null;
+      if (prev != null &&
+          prev['role'] == msg['role'] &&
+          prev['content'] is String &&
+          msg['content'] is String) {
+        merged[merged.length - 1] = {
+          ...prev,
+          'content': '${prev['content']}\n\n${msg['content']}',
+        };
+      } else {
+        merged.add(msg);
+      }
+    }
+    return merged;
+  }
+
+  Future<LLMResponse> _generateWithReasoningRaw(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
+  ) async {
+    messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
-      
+
       case LLMProvider.deepSeek:
       case LLMProvider.qwen:
+      case LLMProvider.siliconFlow:
+      case LLMProvider.moonshot:
+      case LLMProvider.zai:
+      case LLMProvider.miniMax:
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
         return _generateOpenAIWithReasoning(messages, config);
@@ -425,15 +892,51 @@ class LLMService {
     }
   }
 
-  /// Generate a streaming response with reasoning/thinking support
+  /// Generate a streaming response with reasoning/thinking support.
+  /// Content deltas are run through [ThinkTagParser] so inline <think>
+  /// blocks stream into the reasoning UI instead of the message body.
   Stream<LLMStreamChunk> generateStreamWithReasoning(
     List<Map<String, dynamic>> messages,
     LLMConfig config,
+  ) async* {
+    final parser = ThinkTagParser();
+    await for (final chunk
+        in _generateStreamWithReasoningRaw(messages, config)) {
+      final text = chunk.content;
+      if (text != null && text.isNotEmpty) {
+        final (content, reasoning) = parser.feed(text);
+        if (reasoning.isNotEmpty) {
+          yield LLMStreamChunk(reasoning: reasoning, isReasoningChunk: true);
+        }
+        if (content.isNotEmpty) {
+          yield LLMStreamChunk(content: content);
+        }
+      } else {
+        yield chunk;
+      }
+    }
+    final (content, reasoning) = parser.flush();
+    if (reasoning.isNotEmpty) {
+      yield LLMStreamChunk(reasoning: reasoning, isReasoningChunk: true);
+    }
+    if (content.isNotEmpty) {
+      yield LLMStreamChunk(content: content);
+    }
+  }
+
+  Stream<LLMStreamChunk> _generateStreamWithReasoningRaw(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
   ) {
+    messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
-      
+
       case LLMProvider.deepSeek:
       case LLMProvider.qwen:
+      case LLMProvider.siliconFlow:
+      case LLMProvider.moonshot:
+      case LLMProvider.zai:
+      case LLMProvider.miniMax:
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
         return _streamOpenAIWithReasoning(messages, config);
@@ -462,6 +965,10 @@ class LLMService {
         case LLMProvider.openRouter:
         case LLMProvider.deepSeek:
         case LLMProvider.qwen:
+        case LLMProvider.siliconFlow:
+        case LLMProvider.moonshot:
+        case LLMProvider.zai:
+        case LLMProvider.miniMax:
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
           if (config.apiKey.isEmpty) {
@@ -716,6 +1223,10 @@ class LLMService {
         case LLMProvider.openRouter:
         case LLMProvider.deepSeek:
         case LLMProvider.qwen:
+        case LLMProvider.siliconFlow:
+        case LLMProvider.moonshot:
+        case LLMProvider.zai:
+        case LLMProvider.miniMax:
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
           _log('Fetching models from ${config.apiUrl}/models');
@@ -738,12 +1249,38 @@ class LLMService {
           return modelIds;
           
         case LLMProvider.claude:
-          // Claude doesn't have a models endpoint, return known models
+          // Try the Anthropic models endpoint, fall back to known models
+          try {
+            final response = await _dio.get(
+              '${config.apiUrl}/v1/models',
+              options: Options(
+                headers: {
+                  'x-api-key': config.apiKey,
+                  'anthropic-version': '2023-06-01',
+                },
+              ),
+            );
+            final data = response.data as Map<String, dynamic>;
+            final models = (data['data'] as List<dynamic>?) ?? [];
+            if (models.isNotEmpty) {
+              final modelIds = models
+                  .map((m) => (m as Map<String, dynamic>)['id'] as String)
+                  .toList();
+              _log('Returning ${modelIds.length} Claude models from API');
+              return modelIds;
+            }
+          } catch (e) {
+            _log('Claude models endpoint failed, using predefined list: $e');
+          }
           _log('Returning predefined Claude models');
           return [
+            'claude-opus-4-7',
+            'claude-opus-4-6',
+            'claude-sonnet-4-6',
+            'claude-opus-4-5',
             'claude-sonnet-4-5-20250929',
             'claude-haiku-4-5-20251001',
-            'claude-opus-4-5-20251001',
+            'claude-opus-4-1-20250805',
           ];
           
         case LLMProvider.gemini:
@@ -837,9 +1374,11 @@ class LLMService {
       if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
       if (config.tailFreeSampling != 1.0) requestData['tfs_z'] = config.tailFreeSampling;
     }
-    
+
+    _applyOpenAIReasoning(requestData, config);
+
     _logRequest(endpoint, requestData, config);
-    
+
     final response = await _dio.post(
       endpoint,
       options: Options(
@@ -872,6 +1411,15 @@ class LLMService {
       reasoning = message?['reasoning_content'] as String?;
       // Also check for thought field (some providers)
       reasoning ??= message?['thought'] as String?;
+      // Fallback: inline <think> tags in content (R1 via compatible endpoints)
+      if (reasoning == null || reasoning.isEmpty) {
+        final (extractedContent, extractedReasoning) =
+            ThinkTagParser.extract(content);
+        if (extractedReasoning != null) {
+          content = extractedContent;
+          reasoning = extractedReasoning;
+        }
+      }
     }
     
     _logResponse(config.provider.name, data,
@@ -896,9 +1444,11 @@ class LLMService {
       'presence_penalty': config.presencePenalty,
       'stream': true,
     };
-    
+
+    _applyOpenAIReasoning(requestData, config);
+
     _logRequest(endpoint, requestData, config);
-    
+
     final response = await _dio.post<ResponseBody>(
       endpoint,
       options: Options(
@@ -976,13 +1526,15 @@ class LLMService {
     final chatMessages = messages.where((m) => m['role'] != 'system').toList();
 
     final endpoint = '${config.apiUrl}/v1/messages';
-    final requestData = {
+    final requestData = <String, dynamic>{
       'model': config.model,
       'max_tokens': config.maxTokens,
       'system': systemMessage['content'],
       'messages': chatMessages,
     };
-    
+    _applyClaudeThinking(requestData, config, stream: false);
+    _applyClaudePromptCaching(requestData, config);
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post(
@@ -1038,14 +1590,16 @@ class LLMService {
     final chatMessages = messages.where((m) => m['role'] != 'system').toList();
 
     final endpoint = '${config.apiUrl}/v1/messages';
-    final requestData = {
+    final requestData = <String, dynamic>{
       'model': config.model,
       'max_tokens': config.maxTokens,
       'system': systemMessage['content'],
       'messages': chatMessages,
       'stream': true,
     };
-    
+    _applyClaudeThinking(requestData, config, stream: true);
+    _applyClaudePromptCaching(requestData, config);
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post<ResponseBody>(
@@ -1111,16 +1665,18 @@ class LLMService {
     }).toList();
 
     final endpoint = '${config.apiUrl}/models/${config.model}:generateContent?key=${config.apiKey}';
+    final generationConfig = <String, dynamic>{
+      'maxOutputTokens': config.maxTokens,
+      'temperature': config.temperature,
+      'topP': config.topP,
+      'topK': config.topK,
+    };
+    _applyGeminiThinking(generationConfig, config);
     final requestData = {
       'contents': contents,
-      'generationConfig': {
-        'maxOutputTokens': config.maxTokens,
-        'temperature': config.temperature,
-        'topP': config.topP,
-        'topK': config.topK,
-      },
+      'generationConfig': generationConfig,
     };
-    
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post(
@@ -1457,7 +2013,9 @@ class LLMService {
         if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
         if (config.tailFreeSampling != 1.0) requestData['tfs_z'] = config.tailFreeSampling;
       }
-      
+
+      _applyOpenAIReasoning(requestData, config);
+
       _logRequest(endpoint, requestData, config);
       
       final response = await _dio.post<ResponseBody>(
@@ -1581,14 +2139,16 @@ class LLMService {
     final chatMessages = messages.where((m) => m['role'] != 'system').toList();
 
     final endpoint = '${config.apiUrl}/v1/messages';
-    final requestData = {
+    final requestData = <String, dynamic>{
       'model': config.model,
       'max_tokens': config.maxTokens,
       'system': systemMessage['content'],
       'messages': chatMessages,
       'stream': true,
     };
-    
+    _applyClaudeThinking(requestData, config, stream: true);
+    _applyClaudePromptCaching(requestData, config);
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post<ResponseBody>(
@@ -1695,16 +2255,18 @@ class LLMService {
     }).toList();
 
     final endpoint = '${config.apiUrl}/models/${config.model}:streamGenerateContent?key=${config.apiKey}';
+    final generationConfig = <String, dynamic>{
+      'maxOutputTokens': config.maxTokens,
+      'temperature': config.temperature,
+      'topP': config.topP,
+      'topK': config.topK,
+    };
+    _applyGeminiThinking(generationConfig, config);
     final requestData = {
       'contents': contents,
-      'generationConfig': {
-        'maxOutputTokens': config.maxTokens,
-        'temperature': config.temperature,
-        'topP': config.topP,
-        'topK': config.topK,
-      },
+      'generationConfig': generationConfig,
     };
-    
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post<ResponseBody>(

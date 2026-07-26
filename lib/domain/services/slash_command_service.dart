@@ -141,10 +141,18 @@ class SlashCommands {
     usage: '/note [content]',
   );
 
+  static const delswipe = SlashCommand(
+    name: 'delswipe',
+    description: 'Delete the current swipe of the last message',
+    aliases: ['deleteswipe'],
+    usage: '/delswipe',
+  );
+
   static const List<SlashCommand> all = [
     continue_,
     regenerate,
     swipe,
+    delswipe,
     persona,
     sys,
     bg,

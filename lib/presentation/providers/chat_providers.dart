@@ -21,6 +21,7 @@ import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/providers/vector_storage_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 
 // Note: Repository providers are defined in their respective repository files
@@ -606,6 +607,39 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     state = state.copyWith(messages: updatedMessages);
   }
 
+  /// Delete a single swipe from a message (Swipe Picker)
+  /// Keeps at least one swipe; adjusts the current index if needed
+  Future<void> deleteSwipe(String messageId, int swipeIndex) async {
+    final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
+    if (messageIndex < 0) return;
+
+    final message = state.messages[messageIndex];
+    if (message.swipes.length <= 1) return;
+    if (swipeIndex < 0 || swipeIndex >= message.swipes.length) return;
+
+    final updatedSwipes = List<String>.from(message.swipes)
+      ..removeAt(swipeIndex);
+
+    var newIndex = message.currentSwipeIndex;
+    if (newIndex >= updatedSwipes.length) {
+      newIndex = updatedSwipes.length - 1;
+    } else if (swipeIndex < newIndex) {
+      newIndex--;
+    }
+
+    final updatedMessage = message.copyWith(
+      content: updatedSwipes[newIndex],
+      swipes: updatedSwipes,
+      currentSwipeIndex: newIndex,
+    );
+
+    await _chatRepository.updateMessage(updatedMessage);
+
+    final updatedMessages = List<ChatMessage>.from(state.messages);
+    updatedMessages[messageIndex] = updatedMessage;
+    state = state.copyWith(messages: updatedMessages);
+  }
+
   /// Edit a message
   Future<void> editMessage(String messageId, String newContent) async {
     final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
@@ -1010,6 +1044,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         messages: state.messages,
         modelName: llmConfig.model,
         providerName: llmConfig.provider.name,
+        maxContextTokens: llmConfig.contextLength,
+        maxResponseTokens: llmConfig.maxTokens,
       );
       macroService = MacroService(macroContext);
     }
@@ -1102,11 +1138,36 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final authorNote = chat?.authorNote ?? '';
     final authorNoteDepth = chat?.authorNoteDepth ?? 4;
 
+    // RAG: retrieve relevant knowledge for the latest user message
+    if (chatMessages.isNotEmpty) {
+      final lastUserMessage = chatMessages
+          .lastWhere((m) => m.role == MessageRole.user,
+              orElse: () => chatMessages.last)
+          .content;
+      final ragContext =
+          await _ref.read(ragContextProvider)(lastUserMessage);
+      if (ragContext != null && ragContext.isNotEmpty) {
+        messages.add({'role': 'system', 'content': ragContext});
+      }
+    }
+
+    // Prepare character depth prompt (ST extensions.depth_prompt)
+    final depthPrompt = character?.depthPrompt;
+    final hasDepthPrompt = depthPrompt != null && depthPrompt.prompt.isNotEmpty;
+
     for (var i = 0; i < chatMessages.length; i++) {
       final msg = chatMessages[i];
 
       // Depth is counted from the end (most recent = depth 0)
       final depthFromEnd = chatMessages.length - 1 - i;
+
+      // Inject character depth prompt at its configured depth
+      if (hasDepthPrompt && depthFromEnd == depthPrompt.depth) {
+        messages.add({
+          'role': depthPrompt.role,
+          'content': processMacros(depthPrompt.prompt),
+        });
+      }
 
       // Check if any depth-based world info entries should be inserted before this message
       for (final entry in depthEntries) {
@@ -1168,6 +1229,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         messages.insert(chatStartIndex, {
           'role': 'system',
           'content': '[Author\'s Note]\n$processedNote',
+        });
+      }
+    }
+
+    // If depth prompt depth is beyond message count, insert at the start of chat
+    if (hasDepthPrompt && depthPrompt.depth >= chatMessages.length) {
+      final chatStartIndex = messages.length - chatMessages.length;
+      if (chatStartIndex >= 0) {
+        messages.insert(chatStartIndex, {
+          'role': depthPrompt.role,
+          'content': processMacros(depthPrompt.prompt),
         });
       }
     }
@@ -1527,6 +1599,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         messages: chatMessages,
         modelName: llmConfig.model,
         providerName: llmConfig.provider.name,
+        maxContextTokens: llmConfig.contextLength,
+        maxResponseTokens: llmConfig.maxTokens,
       );
       macroService = MacroService(macroContext);
     }
@@ -1615,11 +1689,36 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final authorNote = chat?.authorNote ?? '';
     final authorNoteDepth = chat?.authorNoteDepth ?? 4;
 
+    // RAG: retrieve relevant knowledge for the latest user message
+    if (chatMessages.isNotEmpty) {
+      final lastUserMessage = chatMessages
+          .lastWhere((m) => m.role == MessageRole.user,
+              orElse: () => chatMessages.last)
+          .content;
+      final ragContext =
+          await _ref.read(ragContextProvider)(lastUserMessage);
+      if (ragContext != null && ragContext.isNotEmpty) {
+        messages.add({'role': 'system', 'content': ragContext});
+      }
+    }
+
+    // Prepare character depth prompt (ST extensions.depth_prompt)
+    final depthPrompt = character?.depthPrompt;
+    final hasDepthPrompt = depthPrompt != null && depthPrompt.prompt.isNotEmpty;
+
     for (var i = 0; i < chatMessages.length; i++) {
       final msg = chatMessages[i];
 
       // Depth is counted from the end (most recent = depth 0)
       final depthFromEnd = chatMessages.length - 1 - i;
+
+      // Inject character depth prompt at its configured depth
+      if (hasDepthPrompt && depthFromEnd == depthPrompt.depth) {
+        messages.add({
+          'role': depthPrompt.role,
+          'content': processMacros(depthPrompt.prompt),
+        });
+      }
 
       // Check if any depth-based world info entries should be inserted
       for (final entry in depthEntries) {

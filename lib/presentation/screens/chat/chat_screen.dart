@@ -20,6 +20,7 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/chat/author_note_dialog.dart';
 import 'package:native_tavern/presentation/widgets/chat/bookmark_dialog.dart';
@@ -40,6 +41,7 @@ import 'package:native_tavern/presentation/widgets/chat/visual_novel_message_vie
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
+import '../../widgets/chat/swipe_picker_sheet.dart';
 
 /// Provider for chat export service
 final chatExportServiceProvider = Provider<ChatExportService>((ref) {
@@ -365,8 +367,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         break;
 
       case 'bg':
-        // TODO: Implement background change
-        _showSnackBar('Background feature coming soon');
+        context.push(AppRoutes.backgroundSettings);
+        break;
+
+      case 'delswipe':
+        if (chatState.messages.isNotEmpty) {
+          final lastMessage = chatState.messages.last;
+          if (lastMessage.swipes.length > 1) {
+            await chatNotifier.deleteSwipe(
+                lastMessage.id, lastMessage.currentSwipeIndex);
+            _showSnackBar('Swipe deleted');
+          } else {
+            _showSnackBar('No alternate swipes to delete');
+          }
+        }
         break;
 
       case 'help':
@@ -1018,6 +1032,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           layoutMode: layoutMode,
           onSwipe: (swipeIndex) {
             ref.read(activeChatProvider.notifier).swipeMessage(
+                  message.id,
+                  swipeIndex,
+                );
+          },
+          onDeleteSwipe: (swipeIndex) {
+            return ref.read(activeChatProvider.notifier).deleteSwipe(
                   message.id,
                   swipeIndex,
                 );
@@ -2066,6 +2086,7 @@ class _MessageBubble extends StatefulWidget {
   final double bubbleOpacity;
   final String layoutMode;
   final void Function(int) onSwipe;
+  final Future<void> Function(int)? onDeleteSwipe;
   final void Function(String) onEdit;
   final VoidCallback onDelete;
   final VoidCallback? onRegenerate;
@@ -2086,6 +2107,7 @@ class _MessageBubble extends StatefulWidget {
     this.bubbleOpacity = 0.8,
     this.layoutMode = 'bubble',
     required this.onSwipe,
+    this.onDeleteSwipe,
     required this.onEdit,
     required this.onDelete,
     this.onRegenerate,
@@ -2192,12 +2214,23 @@ class _MessageBubbleState extends State<_MessageBubble> {
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
-                        Text(
-                          '${widget.message.currentSwipeIndex + 1}/${widget.message.swipes.length}',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                        GestureDetector(
+                          // Long press opens the Swipe Picker (ST 1.17+)
+                          onLongPress: () => _openSwipePicker(context),
+                          onTap: () => _openSwipePicker(context),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              '${widget.message.currentSwipeIndex + 1}/${widget.message.swipes.length}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: AppTheme.textMuted,
                                   ),
+                            ),
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.chevron_right, size: 20),
@@ -2219,6 +2252,17 @@ class _MessageBubbleState extends State<_MessageBubble> {
           if (isUser) const SizedBox(width: 8),
         ],
       ),
+    );
+  }
+
+  void _openSwipePicker(BuildContext context) {
+    SwipePickerSheet.show(
+      context,
+      message: widget.message,
+      onSelect: (index) => widget.onSwipe(index),
+      onDelete: (index) async {
+        await widget.onDeleteSwipe?.call(index);
+      },
     );
   }
 

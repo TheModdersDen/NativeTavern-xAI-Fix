@@ -226,6 +226,13 @@ class ImportService {
       exampleMessages = json['mes_example'] as String? ?? json['example_dialogue'] as String? ?? '';
     }
 
+    // Parse ST extension fields: depth_prompt and talkativeness
+    final depthPrompt = Character.depthPromptFromExtensions(extensions);
+    final talkativeness = extensions.containsKey('talkativeness') ||
+            !json.containsKey('talkativeness')
+        ? Character.talkativenessFromExtensions(extensions)
+        : Character.talkativenessFromExtensions(json);
+
     final now = DateTime.now();
     return Character(
       id: _generateId(),
@@ -244,6 +251,8 @@ class ImportService {
       version: version,
       extensions: extensions,
       characterBook: characterBook,
+      depthPrompt: depthPrompt,
+      talkativeness: talkativeness,
       createdAt: now,
       modifiedAt: now,
     );
@@ -314,6 +323,9 @@ class ImportService {
   }
 
   Map<String, dynamic> _characterToV3Json(Character character) {
+    // Merge first-class depth_prompt/talkativeness back into extensions
+    final extensions = character.extensionsForExport();
+
     final data = {
       'name': character.name,
       'description': character.description,
@@ -328,7 +340,7 @@ class ImportService {
       'tags': character.tags,
       'creator': character.creator,
       'character_version': character.version,
-      'extensions': character.extensions,
+      'extensions': extensions,
     };
 
     // Add character book if present

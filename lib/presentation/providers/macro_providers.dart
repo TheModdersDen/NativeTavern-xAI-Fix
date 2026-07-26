@@ -22,6 +22,8 @@ final macroContextProvider = Provider<MacroContext>((ref) {
     messages: chatState.messages,
     modelName: llmConfig.model,
     providerName: llmConfig.provider.name,
+    maxContextTokens: llmConfig.contextLength,
+    maxResponseTokens: llmConfig.maxTokens,
   );
 });
 

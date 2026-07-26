@@ -144,6 +144,57 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
               ref.read(vectorStorageSettingsProvider.notifier).setEmbeddingModel(value);
             },
           ),
+          const SizedBox(height: 16),
+          TextFormField(
+            initialValue: settings.embeddingEndpoint ??
+                settings.embeddingProvider.defaultEndpoint,
+            decoration: const InputDecoration(
+              labelText: 'API Endpoint',
+              border: OutlineInputBorder(),
+            ),
+            enabled: settings.enabled,
+            onChanged: (value) {
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setEmbeddingEndpoint(value);
+            },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            initialValue: settings.embeddingApiKey ?? '',
+            decoration: const InputDecoration(
+              labelText: 'API Key',
+              border: OutlineInputBorder(),
+            ),
+            obscureText: true,
+            enabled: settings.enabled,
+            onChanged: (value) {
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setEmbeddingApiKey(value);
+            },
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            icon: const Icon(Icons.auto_fix_high),
+            label: const Text('Embed pending documents'),
+            onPressed: settings.enabled && settings.activeCollectionId != null
+                ? () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    try {
+                      final count = await ref.read(embedCollectionProvider)(
+                          settings.activeCollectionId!);
+                      messenger.showSnackBar(SnackBar(
+                          content: Text(count > 0
+                              ? 'Embedded $count documents'
+                              : 'All documents already embedded')));
+                    } catch (e) {
+                      messenger.showSnackBar(
+                          SnackBar(content: Text('Embedding failed: $e')));
+                    }
+                  }
+                : null,
+          ),
 
           const Divider(height: 32),
 

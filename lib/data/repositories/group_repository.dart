@@ -90,11 +90,34 @@ class GroupRepository {
     final newMember = GroupMember(
       characterId: characterId,
       insertionOrder: group.members.length,
+      talkativeness: await _characterTalkativeness(characterId),
     );
 
     return updateGroup(group.copyWith(
       members: [...group.members, newMember],
     ));
+  }
+
+  /// Read the character's talkativeness (0.0-1.0 in extensions)
+  /// as a 0-100 group member weight, defaulting to 50
+  Future<int> _characterTalkativeness(String characterId) async {
+    try {
+      final row = await (_db.select(_db.characters)
+            ..where((t) => t.id.equals(characterId)))
+          .getSingleOrNull();
+      if (row == null) return 50;
+      final extensions =
+          jsonDecode(row.extensionsJson) as Map<String, dynamic>;
+      final value = extensions['talkativeness'];
+      final talkativeness = value is num
+          ? value.toDouble()
+          : value is String
+              ? double.tryParse(value) ?? 0.5
+              : 0.5;
+      return (talkativeness * 100).round().clamp(0, 100);
+    } catch (_) {
+      return 50;
+    }
   }
 
   /// Remove a character from a group

@@ -11,7 +11,8 @@ enum ImageGenProvider {
   openaiChat('openai_chat', 'OpenAI-Chat', 'https://api.openai.com/v1'),
   gemini('gemini', 'Gemini', 'https://generativelanguage.googleapis.com/v1beta'),
   novelai('novelai', 'NovelAI', 'https://image.novelai.net'),
-  
+  pollinations('pollinations', 'Pollinations (Free)', 'https://image.pollinations.ai'),
+
   // Local SD backends
   automatic1111('automatic1111', 'Automatic1111', 'http://localhost:7860'),
   comfyui('comfyui', 'ComfyUI', 'http://127.0.0.1:8188'),
@@ -56,6 +57,8 @@ enum ImageGenProvider {
         return 'gemini-2.5-flash-image';
       case novelai:
         return 'nai-diffusion-4-5-curated';
+      case pollinations:
+        return 'flux';
       case automatic1111:
       case comfyui:
         return '';
@@ -98,6 +101,12 @@ enum ImageGenProvider {
           'nai-diffusion-4-full',
           'nai-diffusion-3',
           'nai-diffusion-furry-3',
+        ];
+      case pollinations:
+        return [
+          'flux',
+          'turbo',
+          'gptimage',
         ];
       case automatic1111:
       case comfyui:
@@ -768,6 +777,8 @@ class ImageGenerationService {
           return await _generateGemini(request, model);
         case ImageGenProvider.novelai:
           return await _generateNovelAI(request, model);
+        case ImageGenProvider.pollinations:
+          return await _generatePollinations(request, model);
         case ImageGenProvider.automatic1111:
           return await _generateAutomatic1111(request);
         case ImageGenProvider.comfyui:
@@ -778,6 +789,46 @@ class ImageGenerationService {
       onError?.call('Image generation error: $e');
       return null;
     }
+  }
+
+  /// Generate image using Pollinations (free, no API key)
+  Future<ImageGenResult?> _generatePollinations(
+      ImageGenRequest request, String model) async {
+    onProgress?.call(0.1);
+
+    final requestSeed = request.seed;
+    final seed = (requestSeed != null && requestSeed >= 0)
+        ? requestSeed
+        : math.Random().nextInt(0x7fffffff);
+    final endpoint = _settings.effectiveEndpoint;
+    final encodedPrompt = Uri.encodeComponent(request.prompt);
+    final url = '$endpoint/prompt/$encodedPrompt'
+        '?width=${request.width}&height=${request.height}'
+        '&model=${model.isNotEmpty ? model : 'flux'}'
+        '&seed=$seed&nologo=true';
+
+    onProgress?.call(0.3);
+
+    final response = await _dio.get<List<int>>(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+        receiveTimeout: const Duration(minutes: 3),
+      ),
+    );
+
+    onProgress?.call(0.9);
+
+    if (response.data == null || response.data!.isEmpty) {
+      throw Exception('Pollinations returned no image data');
+    }
+
+    return ImageGenResult(
+      images: [Uint8List.fromList(response.data!)],
+      prompt: request.prompt,
+      seed: seed,
+      format: 'jpg',
+    );
   }
 
   /// Generate image using OpenAI (DALL-E 2/3 or GPT-Image-1)

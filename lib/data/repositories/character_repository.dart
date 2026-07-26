@@ -327,6 +327,8 @@ class CharacterRepository {
       version: version,
       characterBook: characterBook,
       extensions: extensions,
+      depthPrompt: models.Character.depthPromptFromExtensions(extensions),
+      talkativeness: models.Character.talkativenessFromExtensions(extensions),
       createdAt: DateTime.now(),
       modifiedAt: DateTime.now(),
     );
@@ -413,7 +415,7 @@ class CharacterRepository {
         'tags': character.tags,
         'creator': character.creator,
         'character_version': character.version,
-        'extensions': character.extensions,
+        'extensions': character.extensionsForExport(),
       },
     };
   }
@@ -442,6 +444,10 @@ class CharacterRepository {
       characterBook: _parseCharacterBook(row.characterBookJson),
       extensions: _parseJsonMap(row.extensionsJson),
       isFavorite: row.isFavorite,
+      depthPrompt: models.Character.depthPromptFromExtensions(
+          _parseJsonMap(row.extensionsJson)),
+      talkativeness: models.Character.talkativenessFromExtensions(
+          _parseJsonMap(row.extensionsJson)),
       createdAt: row.createdAt,
       modifiedAt: row.modifiedAt,
     );
@@ -465,7 +471,7 @@ class CharacterRepository {
       characterVersion: Value(character.version),
       avatarPath: Value(character.assets?.avatarPath),
       characterBookJson: Value(_serializeCharacterBook(character.characterBook)),
-      extensionsJson: Value(jsonEncode(character.extensions)),
+      extensionsJson: Value(jsonEncode(character.extensionsForExport())),
       isFavorite: Value(character.isFavorite),
       createdAt: Value(character.createdAt),
       modifiedAt: Value(character.modifiedAt),

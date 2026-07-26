@@ -1,16 +1,62 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
 
 /// Service for vector storage and RAG operations
 class VectorStorageService {
-  /// In-memory storage for collections
+  /// In-memory storage for collections, persisted to a JSON file
   final Map<String, VectorCollection> _collections = {};
+
+  bool _loaded = false;
 
   /// Get all collections
   List<VectorCollection> get collections => _collections.values.toList();
 
   /// Get a collection by ID
   VectorCollection? getCollection(String id) => _collections[id];
+
+  // ==================== Persistence ====================
+
+  Future<File> _storageFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final storageDir = Directory(p.join(dir.path, 'NativeTavern'));
+    await storageDir.create(recursive: true);
+    return File(p.join(storageDir.path, 'vector_collections.json'));
+  }
+
+  /// Load persisted collections from disk (idempotent)
+  Future<void> load() async {
+    if (_loaded) return;
+    _loaded = true;
+    try {
+      final file = await _storageFile();
+      if (!await file.exists()) return;
+      final json = jsonDecode(await file.readAsString()) as List<dynamic>;
+      for (final item in json) {
+        final collection =
+            VectorCollection.fromJson(item as Map<String, dynamic>);
+        _collections[collection.id] = collection;
+      }
+      debugPrint(
+          'VectorStorage: loaded ${_collections.length} collections');
+    } catch (e) {
+      debugPrint('VectorStorage: failed to load collections: $e');
+    }
+  }
+
+  /// Persist all collections to disk (fire-and-forget from mutations)
+  Future<void> persist() async {
+    try {
+      final file = await _storageFile();
+      await file.writeAsString(
+          jsonEncode(_collections.values.map((c) => c.toJson()).toList()));
+    } catch (e) {
+      debugPrint('VectorStorage: failed to persist collections: $e');
+    }
+  }
 
   /// Create a new collection
   VectorCollection createCollection({
@@ -24,17 +70,20 @@ class VectorStorageService {
       dimensions: dimensions,
     );
     _collections[collection.id] = collection;
+    persist();
     return collection;
   }
 
   /// Update a collection
   void updateCollection(VectorCollection collection) {
     _collections[collection.id] = collection;
+    persist();
   }
 
   /// Delete a collection
   void deleteCollection(String id) {
     _collections.remove(id);
+    persist();
   }
 
   /// Add a document to a collection
@@ -59,6 +108,7 @@ class VectorStorageService {
       documents: [...collection.documents, document],
     );
     _collections[collectionId] = updatedCollection;
+    persist();
 
     return document;
   }
@@ -93,6 +143,7 @@ class VectorStorageService {
         .toList();
 
     _collections[collectionId] = collection.copyWith(documents: updatedDocuments);
+    persist();
   }
 
   /// Update document embedding
@@ -112,6 +163,7 @@ class VectorStorageService {
     }).toList();
 
     _collections[collectionId] = collection.copyWith(documents: updatedDocuments);
+    persist();
   }
 
   /// Search for similar documents
@@ -274,6 +326,7 @@ class VectorStorageService {
     final data = jsonDecode(json) as Map<String, dynamic>;
     final collection = VectorCollection.fromJson(data);
     _collections[collection.id] = collection;
+    persist();
     return collection;
   }
 

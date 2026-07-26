@@ -25,10 +25,62 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
   late ChatBackground _currentBackground;
   bool _isLoading = false;
 
+  /// Background gallery (ST 1.17 Background Folders)
+  List<_GalleryImage> _galleryImages = [];
+  String? _selectedFolder; // null = all folders
+  List<String> _galleryFolders = [];
+
   @override
   void initState() {
     super.initState();
     _loadCurrentBackground();
+    _loadGallery();
+  }
+
+  Future<Directory> _backgroundsDir() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final bgDir = Directory(p.join(appDir.path, 'NativeTavern', 'backgrounds'));
+    await bgDir.create(recursive: true);
+    return bgDir;
+  }
+
+  Future<void> _loadGallery() async {
+    try {
+      final bgDir = await _backgroundsDir();
+      final images = <_GalleryImage>[];
+      final folders = <String>{};
+
+      await for (final entity in bgDir.list(recursive: true)) {
+        if (entity is File && _isImageFile(entity.path)) {
+          final relative = p.relative(entity.path, from: bgDir.path);
+          final folder = p.dirname(relative) == '.' ? '' : p.split(relative).first;
+          if (folder.isNotEmpty) folders.add(folder);
+          images.add(_GalleryImage(
+            path: entity.path,
+            folder: folder,
+            modified: (await entity.stat()).modified,
+          ));
+        }
+      }
+
+      // Newest first
+      images.sort((a, b) => b.modified.compareTo(a.modified));
+
+      if (mounted) {
+        setState(() {
+          _galleryImages = images;
+          _galleryFolders = folders.toList()..sort();
+        });
+      }
+    } catch (_) {
+      // Gallery is best-effort; ignore scan errors
+    }
+  }
+
+  bool _isImageFile(String path) {
+    final ext = p.extension(path).toLowerCase();
+    return const ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp']
+        .contains(ext);
   }
 
   void _loadCurrentBackground() {
@@ -98,6 +150,14 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
           const SizedBox(height: 8),
           _buildImageSection(),
           const SizedBox(height: 24),
+
+          // Background gallery with virtual folders
+          if (_galleryImages.isNotEmpty) ...[
+            _buildSectionHeader('Gallery'),
+            const SizedBox(height: 8),
+            _buildGallerySection(),
+            const SizedBox(height: 24),
+          ],
 
           // Adjustments
           if (_currentBackground.type != BackgroundType.none) ...[
@@ -398,6 +458,228 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
     );
   }
 
+  Widget _buildGallerySection() {
+    final visibleImages = _selectedFolder == null
+        ? _galleryImages
+        : _galleryImages.where((i) => i.folder == _selectedFolder).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Folder filter chips
+        if (_galleryFolders.isNotEmpty)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ChoiceChip(
+                  label: const Text('All'),
+                  selected: _selectedFolder == null,
+                  onSelected: (_) => setState(() => _selectedFolder = null),
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('Ungrouped'),
+                  selected: _selectedFolder == '',
+                  onSelected: (_) => setState(() => _selectedFolder = ''),
+                ),
+                for (final folder in _galleryFolders) ...[
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    avatar: const Icon(Icons.folder, size: 16),
+                    label: Text(folder),
+                    selected: _selectedFolder == folder,
+                    onSelected: (_) =>
+                        setState(() => _selectedFolder = folder),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        if (_galleryFolders.isNotEmpty) const SizedBox(height: 12),
+
+        // Image grid with thumbnails
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 0.75,
+          ),
+          itemCount: visibleImages.length,
+          itemBuilder: (context, index) {
+            final image = visibleImages[index];
+            final isActive = _currentBackground.imagePath == image.path;
+            return GestureDetector(
+              onTap: () => _applyGalleryImage(image),
+              onLongPress: () => _showGalleryImageOptions(image),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: isActive
+                      ? Border.all(color: AppTheme.accentColor, width: 2)
+                      : null,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(image.path),
+                    fit: BoxFit.cover,
+                    cacheWidth: 300,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppTheme.darkCard,
+                      child: const Icon(Icons.broken_image,
+                          color: AppTheme.textMuted),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _applyGalleryImage(_GalleryImage image) {
+    final enableBlur =
+        ref.read(appSettingsProvider.select((s) => s.enableBackgroundBlur));
+    final opacity =
+        ref.read(appSettingsProvider.select((s) => s.backgroundOpacity));
+    _saveBackground(ChatBackground.imagePath(
+      image.path,
+      opacity: opacity,
+      blur: enableBlur,
+      blurAmount: 10.0,
+      bubbleOpacity: _currentBackground.bubbleOpacity,
+    ));
+  }
+
+  void _showGalleryImageOptions(_GalleryImage image) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.wallpaper),
+              title: const Text('Set as background'),
+              onTap: () {
+                Navigator.pop(context);
+                _applyGalleryImage(image);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.drive_file_move_outline),
+              title: const Text('Move to folder'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMoveToFolderDialog(image);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text('Delete',
+                  style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(context);
+                await _deleteGalleryImage(image);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showMoveToFolderDialog(_GalleryImage image) async {
+    final controller = TextEditingController(text: image.folder);
+    final folder = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Move to folder'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Folder name',
+                hintText: 'Leave empty for ungrouped',
+              ),
+              autofocus: true,
+            ),
+            if (_galleryFolders.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: _galleryFolders
+                    .map((f) => ActionChip(
+                          label: Text(f),
+                          onPressed: () => Navigator.pop(context, f),
+                        ))
+                    .toList(),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Move'),
+          ),
+        ],
+      ),
+    );
+
+    if (folder == null) return;
+
+    try {
+      final bgDir = await _backgroundsDir();
+      final targetDir = folder.isEmpty
+          ? bgDir
+          : Directory(p.join(bgDir.path, folder));
+      await targetDir.create(recursive: true);
+      final newPath = p.join(targetDir.path, p.basename(image.path));
+      if (newPath != image.path) {
+        await File(image.path).rename(newPath);
+        // Keep the active background pointing at the moved file
+        if (_currentBackground.imagePath == image.path) {
+          await _saveBackground(
+              _currentBackground.copyWith(imagePath: newPath));
+        }
+      }
+      await _loadGallery();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Move failed: $e')));
+      }
+    }
+  }
+
+  Future<void> _deleteGalleryImage(_GalleryImage image) async {
+    try {
+      await File(image.path).delete();
+      if (_currentBackground.imagePath == image.path) {
+        await _saveBackground(ChatBackground.none);
+      }
+      await _loadGallery();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      }
+    }
+  }
+
   Future<void> _pickImage() async {
     setState(() => _isLoading = true);
 
@@ -410,14 +692,17 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         if (file.path != null) {
-          // Copy to app directory
-          final appDir = await getApplicationDocumentsDirectory();
-          final bgDir = Directory(p.join(appDir.path, 'NativeTavern', 'backgrounds'));
+          // Copy to app directory (into the selected gallery folder, if any)
+          final baseDir = await _backgroundsDir();
+          final bgDir = (_selectedFolder == null || _selectedFolder!.isEmpty)
+              ? baseDir
+              : Directory(p.join(baseDir.path, _selectedFolder!));
           await bgDir.create(recursive: true);
 
           final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
           final destPath = p.join(bgDir.path, fileName);
           await File(file.path!).copy(destPath);
+          await _loadGallery();
 
           // Get global settings
           final enableBlur = ref.read(appSettingsProvider.select((s) => s.enableBackgroundBlur));
@@ -491,6 +776,19 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
       ),
     );
   }
+}
+
+/// A background image in the gallery
+class _GalleryImage {
+  final String path;
+  final String folder; // '' = ungrouped (root directory)
+  final DateTime modified;
+
+  const _GalleryImage({
+    required this.path,
+    required this.folder,
+    required this.modified,
+  });
 }
 
 class _BackgroundPreviewFull extends StatelessWidget {
