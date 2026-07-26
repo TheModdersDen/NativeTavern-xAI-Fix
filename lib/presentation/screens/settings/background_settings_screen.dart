@@ -153,7 +153,7 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
 
           // Background gallery with virtual folders
           if (_galleryImages.isNotEmpty) ...[
-            _buildSectionHeader('Gallery'),
+            _buildSectionHeader(AppLocalizations.of(context).gallery),
             const SizedBox(height: 8),
             _buildGallerySection(),
             const SizedBox(height: 24),
@@ -473,13 +473,13 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
             child: Row(
               children: [
                 ChoiceChip(
-                  label: const Text('All'),
+                  label: Text(AppLocalizations.of(context).allLabel),
                   selected: _selectedFolder == null,
                   onSelected: (_) => setState(() => _selectedFolder = null),
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Ungrouped'),
+                  label: Text(AppLocalizations.of(context).ungrouped),
                   selected: _selectedFolder == '',
                   onSelected: (_) => setState(() => _selectedFolder = ''),
                 ),
@@ -566,7 +566,7 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
           children: [
             ListTile(
               leading: const Icon(Icons.wallpaper),
-              title: const Text('Set as background'),
+              title: Text(AppLocalizations.of(context).setAsBackground),
               onTap: () {
                 Navigator.pop(context);
                 _applyGalleryImage(image);
@@ -574,7 +574,7 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
             ),
             ListTile(
               leading: const Icon(Icons.drive_file_move_outline),
-              title: const Text('Move to folder'),
+              title: Text(AppLocalizations.of(context).moveToFolder),
               onTap: () {
                 Navigator.pop(context);
                 _showMoveToFolderDialog(image);
@@ -582,8 +582,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('Delete',
-                  style: TextStyle(color: Colors.red)),
+              title: Text(AppLocalizations.of(context).delete,
+                  style: const TextStyle(color: Colors.red)),
               onTap: () async {
                 Navigator.pop(context);
                 await _deleteGalleryImage(image);
@@ -597,18 +597,19 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
 
   Future<void> _showMoveToFolderDialog(_GalleryImage image) async {
     final controller = TextEditingController(text: image.folder);
+    final l10n = AppLocalizations.of(context);
     final folder = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Move to folder'),
+        title: Text(l10n.moveToFolder),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Folder name',
-                hintText: 'Leave empty for ungrouped',
+              decoration: InputDecoration(
+                labelText: l10n.folderName,
+                hintText: l10n.folderNameHint,
               ),
               autofocus: true,
             ),
@@ -629,11 +630,11 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Move'),
+            child: Text(l10n.move),
           ),
         ],
       ),
@@ -659,8 +660,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
       await _loadGallery();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Move failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).moveFailed('$e'))));
       }
     }
   }
@@ -674,8 +675,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
       await _loadGallery();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).deleteFailed('$e'))));
       }
     }
   }

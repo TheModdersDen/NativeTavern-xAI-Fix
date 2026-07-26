@@ -148,9 +148,9 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           TextFormField(
             initialValue: settings.embeddingEndpoint ??
                 settings.embeddingProvider.defaultEndpoint,
-            decoration: const InputDecoration(
-              labelText: 'API Endpoint',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).apiEndpoint,
+              border: const OutlineInputBorder(),
             ),
             enabled: settings.enabled,
             onChanged: (value) {
@@ -162,9 +162,9 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           TextFormField(
             initialValue: settings.embeddingApiKey ?? '',
-            decoration: const InputDecoration(
-              labelText: 'API Key',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).apiKey,
+              border: const OutlineInputBorder(),
             ),
             obscureText: true,
             enabled: settings.enabled,
@@ -177,20 +177,21 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.auto_fix_high),
-            label: const Text('Embed pending documents'),
+            label: Text(AppLocalizations.of(context).embedPendingDocuments),
             onPressed: settings.enabled && settings.activeCollectionId != null
                 ? () async {
                     final messenger = ScaffoldMessenger.of(context);
+                    final l10n = AppLocalizations.of(context);
                     try {
                       final count = await ref.read(embedCollectionProvider)(
                           settings.activeCollectionId!);
                       messenger.showSnackBar(SnackBar(
                           content: Text(count > 0
-                              ? 'Embedded $count documents'
-                              : 'All documents already embedded')));
+                              ? l10n.embeddedDocuments('$count')
+                              : l10n.allDocumentsEmbedded)));
                     } catch (e) {
-                      messenger.showSnackBar(
-                          SnackBar(content: Text('Embedding failed: $e')));
+                      messenger.showSnackBar(SnackBar(
+                          content: Text(l10n.embeddingFailed('$e'))));
                     }
                   }
                 : null,

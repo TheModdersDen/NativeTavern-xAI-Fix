@@ -37,7 +37,7 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 ### Core Features ✅
 - 📱 **Native Mobile App** - Built with Flutter for iOS and Android
 - ⚡ **High Performance** - Optimized for mobile devices
-- 🤖 **Multi-Provider LLM Support** - OpenAI, Claude, OpenRouter, Gemini, Ollama, KoboldCpp
+- 🤖 **Multi-Provider LLM Support** - OpenAI, Claude, OpenRouter, Gemini, DeepSeek, Qwen, SiliconFlow, Moonshot (Kimi), Z.AI (GLM), MiniMax, Ollama, KoboldCpp, custom OpenAI-compatible endpoints
 - 📦 **Full ST Compatibility** - Import/export PNG cards, CharX, JSON
 - 💬 **Streaming Responses** - Real-time SSE streaming from all providers
 
@@ -50,6 +50,7 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 
 ### Chat Features ✅
 - 💬 **Message Actions** - Edit, delete, regenerate, swipe between alternatives
+- 🎛️ **Swipe Picker** - Tap the swipe counter to browse/jump/delete all swipes
 - 👥 **Group Chats** - Multi-character conversations with 5 response modes
 - 🔖 **Bookmarks** - Create checkpoints and branch conversations
 - 📝 **Author's Note** - Injection at configurable depth
@@ -74,6 +75,10 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 - 🎲 **Mirostat** - Mode, Tau, Eta settings
 - ✂️ **Tail-Free Sampling** - TFS and Top-A support
 - 🛑 **Stop Sequences** - Custom stop tokens
+- 🧠 **Reasoning Effort** - Claude adaptive thinking, Gemini thinkingBudget, OpenAI reasoning_effort
+- 💰 **Prompt Caching** - Claude prompt caching to cut input costs
+- 🔖 **Connection Profiles** - Save named connection snapshots, switch with one tap
+- 🔀 **Message Merging** - For APIs requiring strict user/assistant alternation
 
 ### Themes ✅
 - 🎨 **18 Built-in Themes** - 7 dark + 11 light themes
@@ -83,8 +88,9 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 
 ### Chain of Thought Support ✅
 - 🧠 **OpenAI o1/o3** - Parse `reasoning_content` field
-- 💭 **Claude** - Parse `thinking` blocks
+- 💭 **Claude** - Parse `thinking` blocks (including adaptive thinking)
 - 🤔 **Gemini 2.0 Flash Thinking** - Parse `thought` field
+- 🏷️ **Inline Tag Parsing** - Auto-extract `<think>` tags from DeepSeek R1 and similar models (streaming + non-streaming)
 - 💾 **Reasoning Storage** - Save reasoning with messages and swipes
 - 📦 **Collapsible UI** - Expandable reasoning blocks with copy support
 - ⏳ **Streaming Display** - Real-time reasoning with pulse animation
@@ -110,21 +116,17 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 - ⚙️ **Customizable** - Size, position, opacity settings
 - 🎬 **Action Detection** - Detects *smiles*, *laughs*, etc.
 
-### Text-to-Speech ✅
-- 🔊 **Multiple Providers** - System TTS, ElevenLabs, Azure
+### Text-to-Speech 🚧
+- 🔊 **Multiple Providers** - ElevenLabs, Azure, Volcengine, GPT-SoVITS, OpenAI-compatible endpoints
 - 🎭 **Per-Character Voices** - Different voice for each character
-- ▶️ **Auto-play** - Automatically read new messages
 - 🎚️ **Voice Controls** - Speed, pitch, volume adjustment
 - 📝 **Text Cleaning** - Removes markdown/HTML for natural speech
-- 🔄 **Message Queue** - Queue multiple messages
+- ⚠️ **Status** - Synthesis APIs are wired (return audio bytes); playback integration in progress
 
-### Speech-to-Text ✅
-- 🎤 **Voice Input** - Dictate messages using your voice
+### Speech-to-Text 🚧
+- 🎤 **Voice Input** - Dictate messages using your voice (API layer ready, recording integration in progress)
 - 🌍 **16 Languages** - Support for major languages
 - 🔄 **Multiple Providers** - System STT, Whisper, Azure
-- 📝 **Partial Results** - See text as you speak
-- ⚡ **Auto-send** - Automatically send after speaking
-- 🔁 **Continuous Mode** - Keep listening for multiple phrases
 
 ### Translation ✅
 - 🌐 **30+ Languages** - Translate between major languages
@@ -135,7 +137,7 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 - 🔘 **Translate Button** - On-demand message translation
 
 ### Image Generation ✅
-- 🎨 **Multiple Providers** - Stable Diffusion, DALL-E, ComfyUI, Automatic1111
+- 🎨 **Multiple Providers** - GPT-Image-2, Gemini, NovelAI, Pollinations (free), ComfyUI, Automatic1111
 - 📐 **Size Presets** - 512x512, 768x768, 1024x1024, and more
 - ⚙️ **Generation Settings** - Steps, CFG scale, sampler selection
 - 🚫 **Negative Prompts** - Exclude unwanted elements
@@ -190,21 +192,23 @@ A native cross-platform mobile application (iOS/Android) that reimplements Silly
 - 📊 **Statistics** - Character/token ratios
 - 🔧 **Multiple Tokenizers** - GPT, LLaMA, Claude, Mistral, etc.
 
-### Vector Storage / RAG ✅
-- 📚 **Collections** - Organize documents into collections
-- 🔍 **Similarity Search** - Find relevant context
+### Vector Storage / RAG 🚧
+- 🧲 **Embedding Providers** - OpenAI-compatible, SiliconFlow, Cohere, Gemini, Ollama
+- 📚 **Collections** - Organize documents into collections, persisted locally
+- 🔍 **Similarity Search** - Top-K with similarity threshold
 - 📝 **Document Chunking** - Fixed size, sentence, paragraph
-- 🎯 **Prompt Integration** - Auto-inject context
+- 🎯 **Prompt Integration** - Retrieve by latest user message, inject via template
 - 📤 **Import/Export** - Share collections as JSON
 
-### Macro System ✅
-- `{{user}}` - Current persona name
-- `{{char}}` - Character name
+### Macro System ✅ (Macros 2.0)
+- `{{user}}` / `{{char}}` - Persona and character names
 - `{{time}}` / `{{date}}` / `{{weekday}}` - Date/time macros
-- `{{random:min:max}}` - Random number generation
-- `{{roll:NdM}}` - Dice rolling
-- `{{idle_duration}}` - Time since last message
-- `{{lastMessage}}` / `{{lastUserMessage}}` / `{{lastCharMessage}}`
+- `{{random:min:max}}` / `{{roll:NdM}}` / `{{pick::...}}` (chat-stable)
+- `{{if condition}}...{{else}}...{{/if}}` - Scoped conditional blocks with lazy evaluation and nesting
+- `{{.localVar}}` / `{{$globalVar}}` - Variable shorthands with `= += -= ++ -- == != > < ?? ||` operators
+- `{{greeting::N}}` - Indexed alternate greetings
+- `{{maxContextTokens}}` / `{{maxResponseTokens}}` / `{{group}}`
+- `{{idle_duration}}` / `{{lastMessage}}` / `{{lastUserMessage}}` / `{{lastCharMessage}}`
 
 ### Slash Commands ✅
 - `/continue` - Continue generation
@@ -332,14 +336,15 @@ native_tavern/
 | **6** | Slash Commands, Tags, Backgrounds, HTML/Markdown | ✅ Complete |
 | **7** | Expression Sprites, TTS, STT, Translation, Image Generation | ✅ Complete |
 | **8** | Regex Scripts, Variables, Chat Backups | ✅ Complete |
-| **9** | Logit Bias, CFG Scale, Logprobs, Tokenizer, Vector Storage/RAG | ✅ Complete |
+| **9** | Logit Bias, CFG Scale, Logprobs, Tokenizer, Vector Storage/RAG | 🚧 RAG core working |
+| **10** | Extensions, TTS/STT playback integration | ⏳ Planned |
 
 ## Feature Comparison with SillyTavern
 
 | Feature | SillyTavern Web | NativeTavern | Status |
 |---------|-----------------|--------------|--------|
 | Character Import/Export | ✅ | ✅ | Full parity |
-| LLM Providers | 10+ | 6 | Core providers |
+| LLM Providers | 10+ | 13 | Including major Chinese providers |
 | Streaming | ✅ | ✅ | Full parity |
 | Message Actions | ✅ | ✅ | Full parity |
 | Group Chats | ✅ | ✅ | Full parity |
@@ -355,8 +360,8 @@ native_tavern/
 | Reasoning UI | ✅ | ✅ | Full parity |
 | Markdown Hotkeys | ✅ | ✅ | Full parity |
 | Expression Sprites | ✅ | ✅ | Full parity |
-| TTS | ✅ | ✅ | Full parity |
-| STT | ✅ | ✅ | Full parity |
+| TTS | ✅ | 🚧 | Synthesis ready, playback WIP |
+| STT | ✅ | 🚧 | API layer ready, recording WIP |
 | Translation | ✅ | ✅ | Full parity |
 | Image Generation | ✅ | ✅ | Full parity |
 | Regex Scripts | ✅ | ✅ | Full parity |
@@ -366,7 +371,7 @@ native_tavern/
 | CFG Scale | ✅ | ✅ | Full parity |
 | Token Probabilities | ✅ | ✅ | Full parity |
 | Tokenizer | ✅ | ✅ | Full parity |
-| Vector Storage/RAG | ✅ | ✅ | Full parity |
+| Vector Storage/RAG | ✅ | 🚧 | Core working |
 | Extensions | ✅ | ⏳ | Planned |
 
 **Overall Completion: ~99%** of core SillyTavern features

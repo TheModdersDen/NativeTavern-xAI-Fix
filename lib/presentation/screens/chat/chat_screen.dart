@@ -376,9 +376,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           if (lastMessage.swipes.length > 1) {
             await chatNotifier.deleteSwipe(
                 lastMessage.id, lastMessage.currentSwipeIndex);
-            _showSnackBar('Swipe deleted');
+            if (mounted) {
+              _showSnackBar(AppLocalizations.of(context)!.swipeDeleted);
+            }
           } else {
-            _showSnackBar('No alternate swipes to delete');
+            _showSnackBar(AppLocalizations.of(context)!.noAlternateSwipes);
           }
         }
         break;

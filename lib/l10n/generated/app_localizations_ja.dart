@@ -3639,4 +3639,143 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get bubbleOpacityHelp =>
       'Controls the transparency of message bubbles when a background is active.';
+
+  @override
+  String get swipes => 'スワイプ';
+
+  @override
+  String get deleteSwipeQuestion => 'このスワイプを削除しますか?';
+
+  @override
+  String get charsSuffix => '文字';
+
+  @override
+  String get swipeDeleted => 'スワイプを削除しました';
+
+  @override
+  String get noAlternateSwipes => '削除できるスワイプがありません';
+
+  @override
+  String get reasoningEffort => '推論強度';
+
+  @override
+  String get effortAuto => '自動';
+
+  @override
+  String get effortMin => '最小';
+
+  @override
+  String get effortLow => '低';
+
+  @override
+  String get effortMedium => '中';
+
+  @override
+  String get effortHigh => '高';
+
+  @override
+  String get effortMax => '最大';
+
+  @override
+  String get promptCaching => 'プロンプトキャッシュ';
+
+  @override
+  String get promptCachingDescription => 'システムプロンプトと履歴をキャッシュしてコストを削減';
+
+  @override
+  String get mergeConsecutiveRoles => '連続する同ロールを結合';
+
+  @override
+  String get mergeConsecutiveRolesDescription =>
+      'user/assistant の厳密な交互を要求する API 向け';
+
+  @override
+  String get connectionProfiles => '接続プロファイル';
+
+  @override
+  String get connectionProfilesHint => '現在の接続を保存してすばやく切り替え';
+
+  @override
+  String profilesSavedCount(String count) {
+    return '$count 件保存済み';
+  }
+
+  @override
+  String get saveCurrent => '現在を保存';
+
+  @override
+  String get noProfilesHint => 'プロファイルがありません。現在の接続を保存すると後で素早く切り替えられます。';
+
+  @override
+  String appliedProfile(String name) {
+    return 'プロファイルを適用: $name';
+  }
+
+  @override
+  String get saveConnectionProfile => '接続プロファイルを保存';
+
+  @override
+  String get profileName => 'プロファイル名';
+
+  @override
+  String get gallery => 'ギャラリー';
+
+  @override
+  String get allLabel => 'すべて';
+
+  @override
+  String get ungrouped => '未分類';
+
+  @override
+  String get setAsBackground => '背景に設定';
+
+  @override
+  String get moveToFolder => 'フォルダに移動';
+
+  @override
+  String get folderName => 'フォルダ名';
+
+  @override
+  String get folderNameHint => '空欄で未分類';
+
+  @override
+  String get move => '移動';
+
+  @override
+  String moveFailed(String error) {
+    return '移動に失敗: $error';
+  }
+
+  @override
+  String deleteFailed(String error) {
+    return '削除に失敗: $error';
+  }
+
+  @override
+  String get embedPendingDocuments => '未処理ドキュメントを埋め込む';
+
+  @override
+  String embeddedDocuments(String count) {
+    return '$count 件のドキュメントを埋め込みました';
+  }
+
+  @override
+  String get allDocumentsEmbedded => 'すべてのドキュメントは埋め込み済みです';
+
+  @override
+  String embeddingFailed(String error) {
+    return '埋め込みに失敗: $error';
+  }
+
+  @override
+  String get gptImageSettings => 'GPT-Image 設定';
+
+  @override
+  String get qualityLabel => '品質';
+
+  @override
+  String get qualityAutoDescription => '自動 - モデルに任せる';
+
+  @override
+  String get qualityHighDescription => '高 - より高い精細さと一貫性';
 }

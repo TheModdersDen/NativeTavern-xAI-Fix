@@ -305,13 +305,13 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildSection(
               context: context,
-              title: 'GPT-Image Settings',
+              title: AppLocalizations.of(context)!.gptImageSettings,
               children: [
                 ListTile(
-                  title: const Text('Quality'),
+                  title: Text(AppLocalizations.of(context)!.qualityLabel),
                   subtitle: Text(settings.openaiQuality == 'hd'
-                      ? 'High - Higher detail and consistency'
-                      : 'Auto - Let the model decide'),
+                      ? AppLocalizations.of(context)!.qualityHighDescription
+                      : AppLocalizations.of(context)!.qualityAutoDescription),
                   trailing: DropdownButton<String>(
                     value: settings.openaiQuality,
                     onChanged: settings.enabled
@@ -321,9 +321,15 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                             }
                           }
                         : null,
-                    items: const [
-                      DropdownMenuItem(value: 'standard', child: Text('Auto')),
-                      DropdownMenuItem(value: 'hd', child: Text('High')),
+                    items: [
+                      DropdownMenuItem(
+                          value: 'standard',
+                          child: Text(
+                              AppLocalizations.of(context)!.effortAuto)),
+                      DropdownMenuItem(
+                          value: 'hd',
+                          child: Text(
+                              AppLocalizations.of(context)!.effortHigh)),
                     ],
                   ),
                 ),

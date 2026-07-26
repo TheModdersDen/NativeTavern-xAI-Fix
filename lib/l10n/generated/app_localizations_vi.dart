@@ -3648,4 +3648,146 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get bubbleOpacityHelp =>
       'Controls the transparency of message bubbles when a background is active.';
+
+  @override
+  String get swipes => 'Swipes';
+
+  @override
+  String get deleteSwipeQuestion => 'Delete swipe?';
+
+  @override
+  String get charsSuffix => 'chars';
+
+  @override
+  String get swipeDeleted => 'Swipe deleted';
+
+  @override
+  String get noAlternateSwipes => 'No alternate swipes to delete';
+
+  @override
+  String get reasoningEffort => 'Reasoning Effort';
+
+  @override
+  String get effortAuto => 'Auto';
+
+  @override
+  String get effortMin => 'Minimum';
+
+  @override
+  String get effortLow => 'Low';
+
+  @override
+  String get effortMedium => 'Medium';
+
+  @override
+  String get effortHigh => 'High';
+
+  @override
+  String get effortMax => 'Maximum';
+
+  @override
+  String get promptCaching => 'Prompt Caching';
+
+  @override
+  String get promptCachingDescription =>
+      'Cache system prompt & history to reduce cost';
+
+  @override
+  String get mergeConsecutiveRoles => 'Merge Consecutive Roles';
+
+  @override
+  String get mergeConsecutiveRolesDescription =>
+      'For APIs requiring strict user/assistant alternation';
+
+  @override
+  String get connectionProfiles => 'Connection Profiles';
+
+  @override
+  String get connectionProfilesHint =>
+      'Save current connection for quick switching';
+
+  @override
+  String profilesSavedCount(String count) {
+    return '$count saved';
+  }
+
+  @override
+  String get saveCurrent => 'Save current';
+
+  @override
+  String get noProfilesHint =>
+      'No profiles yet. Save the current connection to switch quickly later.';
+
+  @override
+  String appliedProfile(String name) {
+    return 'Applied profile: $name';
+  }
+
+  @override
+  String get saveConnectionProfile => 'Save Connection Profile';
+
+  @override
+  String get profileName => 'Profile name';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get allLabel => 'All';
+
+  @override
+  String get ungrouped => 'Ungrouped';
+
+  @override
+  String get setAsBackground => 'Set as background';
+
+  @override
+  String get moveToFolder => 'Move to folder';
+
+  @override
+  String get folderName => 'Folder name';
+
+  @override
+  String get folderNameHint => 'Leave empty for ungrouped';
+
+  @override
+  String get move => 'Move';
+
+  @override
+  String moveFailed(String error) {
+    return 'Move failed: $error';
+  }
+
+  @override
+  String deleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
+  String get embedPendingDocuments => 'Embed pending documents';
+
+  @override
+  String embeddedDocuments(String count) {
+    return 'Embedded $count documents';
+  }
+
+  @override
+  String get allDocumentsEmbedded => 'All documents already embedded';
+
+  @override
+  String embeddingFailed(String error) {
+    return 'Embedding failed: $error';
+  }
+
+  @override
+  String get gptImageSettings => 'GPT-Image Settings';
+
+  @override
+  String get qualityLabel => 'Quality';
+
+  @override
+  String get qualityAutoDescription => 'Auto - Let the model decide';
+
+  @override
+  String get qualityHighDescription => 'High - Higher detail and consistency';
 }

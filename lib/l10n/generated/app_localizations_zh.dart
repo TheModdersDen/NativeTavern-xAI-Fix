@@ -3625,6 +3625,144 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get bubbleOpacityHelp =>
       'Controls the transparency of message bubbles when a background is active.';
+
+  @override
+  String get swipes => '备选回复';
+
+  @override
+  String get deleteSwipeQuestion => '删除此备选回复?';
+
+  @override
+  String get charsSuffix => '字符';
+
+  @override
+  String get swipeDeleted => '已删除备选回复';
+
+  @override
+  String get noAlternateSwipes => '没有可删除的备选回复';
+
+  @override
+  String get reasoningEffort => '推理强度';
+
+  @override
+  String get effortAuto => '自动';
+
+  @override
+  String get effortMin => '最低';
+
+  @override
+  String get effortLow => '低';
+
+  @override
+  String get effortMedium => '中';
+
+  @override
+  String get effortHigh => '高';
+
+  @override
+  String get effortMax => '最高';
+
+  @override
+  String get promptCaching => '提示词缓存';
+
+  @override
+  String get promptCachingDescription => '缓存系统提示词与历史以降低费用';
+
+  @override
+  String get mergeConsecutiveRoles => '合并连续同角色消息';
+
+  @override
+  String get mergeConsecutiveRolesDescription => '用于要求 user/assistant 严格交替的接口';
+
+  @override
+  String get connectionProfiles => '连接档案';
+
+  @override
+  String get connectionProfilesHint => '保存当前连接以便快速切换';
+
+  @override
+  String profilesSavedCount(String count) {
+    return '已保存 $count 个';
+  }
+
+  @override
+  String get saveCurrent => '保存当前';
+
+  @override
+  String get noProfilesHint => '还没有档案。保存当前连接,以后即可一键切换。';
+
+  @override
+  String appliedProfile(String name) {
+    return '已应用档案:$name';
+  }
+
+  @override
+  String get saveConnectionProfile => '保存连接档案';
+
+  @override
+  String get profileName => '档案名称';
+
+  @override
+  String get gallery => '图库';
+
+  @override
+  String get allLabel => '全部';
+
+  @override
+  String get ungrouped => '未分组';
+
+  @override
+  String get setAsBackground => '设为背景';
+
+  @override
+  String get moveToFolder => '移动到文件夹';
+
+  @override
+  String get folderName => '文件夹名称';
+
+  @override
+  String get folderNameHint => '留空表示未分组';
+
+  @override
+  String get move => '移动';
+
+  @override
+  String moveFailed(String error) {
+    return '移动失败:$error';
+  }
+
+  @override
+  String deleteFailed(String error) {
+    return '删除失败:$error';
+  }
+
+  @override
+  String get embedPendingDocuments => '嵌入待处理文档';
+
+  @override
+  String embeddedDocuments(String count) {
+    return '已嵌入 $count 个文档';
+  }
+
+  @override
+  String get allDocumentsEmbedded => '所有文档均已嵌入';
+
+  @override
+  String embeddingFailed(String error) {
+    return '嵌入失败:$error';
+  }
+
+  @override
+  String get gptImageSettings => 'GPT-Image 设置';
+
+  @override
+  String get qualityLabel => '质量';
+
+  @override
+  String get qualityAutoDescription => '自动 - 由模型决定';
+
+  @override
+  String get qualityHighDescription => '高 - 更高细节与一致性';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -4509,4 +4647,142 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get commandHelp => '輸入 / 檢視可用指令';
+
+  @override
+  String get swipes => '備選回覆';
+
+  @override
+  String get deleteSwipeQuestion => '刪除此備選回覆?';
+
+  @override
+  String get charsSuffix => '字元';
+
+  @override
+  String get swipeDeleted => '已刪除備選回覆';
+
+  @override
+  String get noAlternateSwipes => '沒有可刪除的備選回覆';
+
+  @override
+  String get reasoningEffort => '推理強度';
+
+  @override
+  String get effortAuto => '自動';
+
+  @override
+  String get effortMin => '最低';
+
+  @override
+  String get effortLow => '低';
+
+  @override
+  String get effortMedium => '中';
+
+  @override
+  String get effortHigh => '高';
+
+  @override
+  String get effortMax => '最高';
+
+  @override
+  String get promptCaching => '提示詞快取';
+
+  @override
+  String get promptCachingDescription => '快取系統提示詞與歷史以降低費用';
+
+  @override
+  String get mergeConsecutiveRoles => '合併連續同角色訊息';
+
+  @override
+  String get mergeConsecutiveRolesDescription => '用於要求 user/assistant 嚴格交替的介面';
+
+  @override
+  String get connectionProfiles => '連線設定檔';
+
+  @override
+  String get connectionProfilesHint => '儲存目前連線以便快速切換';
+
+  @override
+  String profilesSavedCount(String count) {
+    return '已儲存 $count 個';
+  }
+
+  @override
+  String get saveCurrent => '儲存目前';
+
+  @override
+  String get noProfilesHint => '還沒有設定檔。儲存目前連線,以後即可一鍵切換。';
+
+  @override
+  String appliedProfile(String name) {
+    return '已套用設定檔:$name';
+  }
+
+  @override
+  String get saveConnectionProfile => '儲存連線設定檔';
+
+  @override
+  String get profileName => '設定檔名稱';
+
+  @override
+  String get gallery => '圖庫';
+
+  @override
+  String get allLabel => '全部';
+
+  @override
+  String get ungrouped => '未分組';
+
+  @override
+  String get setAsBackground => '設為背景';
+
+  @override
+  String get moveToFolder => '移動到資料夾';
+
+  @override
+  String get folderName => '資料夾名稱';
+
+  @override
+  String get folderNameHint => '留空表示未分組';
+
+  @override
+  String get move => '移動';
+
+  @override
+  String moveFailed(String error) {
+    return '移動失敗:$error';
+  }
+
+  @override
+  String deleteFailed(String error) {
+    return '刪除失敗:$error';
+  }
+
+  @override
+  String get embedPendingDocuments => '嵌入待處理文件';
+
+  @override
+  String embeddedDocuments(String count) {
+    return '已嵌入 $count 個文件';
+  }
+
+  @override
+  String get allDocumentsEmbedded => '所有文件均已嵌入';
+
+  @override
+  String embeddingFailed(String error) {
+    return '嵌入失敗:$error';
+  }
+
+  @override
+  String get gptImageSettings => 'GPT-Image 設定';
+
+  @override
+  String get qualityLabel => '品質';
+
+  @override
+  String get qualityAutoDescription => '自動 - 由模型決定';
+
+  @override
+  String get qualityHighDescription => '高 - 更高細節與一致性';
 }

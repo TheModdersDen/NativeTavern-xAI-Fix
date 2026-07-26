@@ -3637,4 +3637,143 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get bubbleOpacityHelp =>
       'Controls the transparency of message bubbles when a background is active.';
+
+  @override
+  String get swipes => '스와이프';
+
+  @override
+  String get deleteSwipeQuestion => '이 스와이프를 삭제할까요?';
+
+  @override
+  String get charsSuffix => '자';
+
+  @override
+  String get swipeDeleted => '스와이프를 삭제했습니다';
+
+  @override
+  String get noAlternateSwipes => '삭제할 대체 스와이프가 없습니다';
+
+  @override
+  String get reasoningEffort => '추론 강도';
+
+  @override
+  String get effortAuto => '자동';
+
+  @override
+  String get effortMin => '최소';
+
+  @override
+  String get effortLow => '낮음';
+
+  @override
+  String get effortMedium => '중간';
+
+  @override
+  String get effortHigh => '높음';
+
+  @override
+  String get effortMax => '최대';
+
+  @override
+  String get promptCaching => '프롬프트 캐싱';
+
+  @override
+  String get promptCachingDescription => '시스템 프롬프트와 기록을 캐시하여 비용 절감';
+
+  @override
+  String get mergeConsecutiveRoles => '연속된 동일 역할 병합';
+
+  @override
+  String get mergeConsecutiveRolesDescription =>
+      'user/assistant 엄격 교대를 요구하는 API용';
+
+  @override
+  String get connectionProfiles => '연결 프로필';
+
+  @override
+  String get connectionProfilesHint => '현재 연결을 저장하여 빠르게 전환';
+
+  @override
+  String profilesSavedCount(String count) {
+    return '$count개 저장됨';
+  }
+
+  @override
+  String get saveCurrent => '현재 저장';
+
+  @override
+  String get noProfilesHint => '프로필이 없습니다. 현재 연결을 저장하면 나중에 빠르게 전환할 수 있습니다.';
+
+  @override
+  String appliedProfile(String name) {
+    return '프로필 적용됨: $name';
+  }
+
+  @override
+  String get saveConnectionProfile => '연결 프로필 저장';
+
+  @override
+  String get profileName => '프로필 이름';
+
+  @override
+  String get gallery => '갤러리';
+
+  @override
+  String get allLabel => '전체';
+
+  @override
+  String get ungrouped => '미분류';
+
+  @override
+  String get setAsBackground => '배경으로 설정';
+
+  @override
+  String get moveToFolder => '폴더로 이동';
+
+  @override
+  String get folderName => '폴더 이름';
+
+  @override
+  String get folderNameHint => '비워두면 미분류';
+
+  @override
+  String get move => '이동';
+
+  @override
+  String moveFailed(String error) {
+    return '이동 실패: $error';
+  }
+
+  @override
+  String deleteFailed(String error) {
+    return '삭제 실패: $error';
+  }
+
+  @override
+  String get embedPendingDocuments => '대기 문서 임베딩';
+
+  @override
+  String embeddedDocuments(String count) {
+    return '$count개 문서 임베딩 완료';
+  }
+
+  @override
+  String get allDocumentsEmbedded => '모든 문서가 이미 임베딩되었습니다';
+
+  @override
+  String embeddingFailed(String error) {
+    return '임베딩 실패: $error';
+  }
+
+  @override
+  String get gptImageSettings => 'GPT-Image 설정';
+
+  @override
+  String get qualityLabel => '품질';
+
+  @override
+  String get qualityAutoDescription => '자동 - 모델이 결정';
+
+  @override
+  String get qualityHighDescription => '높음 - 더 높은 디테일과 일관성';
 }

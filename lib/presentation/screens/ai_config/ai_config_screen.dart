@@ -1030,32 +1030,34 @@ class _TopPTile extends ConsumerWidget {
 class _ReasoningEffortTile extends ConsumerWidget {
   const _ReasoningEffortTile();
 
-  static const _labels = {
-    ReasoningEffort.auto: 'Auto',
-    ReasoningEffort.min: 'Minimum',
-    ReasoningEffort.low: 'Low',
-    ReasoningEffort.medium: 'Medium',
-    ReasoningEffort.high: 'High',
-    ReasoningEffort.max: 'Maximum',
-  };
+  Map<String, String> _labels(AppLocalizations l10n) => {
+        ReasoningEffort.auto: l10n.effortAuto,
+        ReasoningEffort.min: l10n.effortMin,
+        ReasoningEffort.low: l10n.effortLow,
+        ReasoningEffort.medium: l10n.effortMedium,
+        ReasoningEffort.high: l10n.effortHigh,
+        ReasoningEffort.max: l10n.effortMax,
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(llmConfigProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final labels = _labels(l10n);
     final effort = ReasoningEffort.values.contains(config.reasoningEffort)
         ? config.reasoningEffort
         : ReasoningEffort.auto;
 
     return ListTile(
       leading: const Icon(Icons.psychology),
-      title: const Text('Reasoning Effort'),
+      title: Text(l10n.reasoningEffort),
       trailing: DropdownButton<String>(
         value: effort,
         underline: const SizedBox.shrink(),
         items: ReasoningEffort.values
             .map((v) => DropdownMenuItem(
                   value: v,
-                  child: Text(_labels[v] ?? v),
+                  child: Text(labels[v] ?? v),
                 ))
             .toList(),
         onChanged: (value) {
@@ -1075,13 +1077,14 @@ class _ConnectionProfilesTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profiles = ref.watch(connectionProfilesProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return ListTile(
       leading: const Icon(Icons.bookmarks_outlined),
-      title: const Text('Connection Profiles'),
+      title: Text(l10n.connectionProfiles),
       subtitle: Text(profiles.isEmpty
-          ? 'Save current connection for quick switching'
-          : '${profiles.length} saved'),
+          ? l10n.connectionProfilesHint
+          : l10n.profilesSavedCount('${profiles.length}')),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => _showProfilesSheet(context, ref),
     );
@@ -1106,7 +1109,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                       const Icon(Icons.bookmarks_outlined, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Connection Profiles',
+                        AppLocalizations.of(context)!.connectionProfiles,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
@@ -1115,7 +1118,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                       const Spacer(),
                       TextButton.icon(
                         icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Save current'),
+                        label: Text(AppLocalizations.of(context)!.saveCurrent),
                         onPressed: () =>
                             _showSaveDialog(context, ref, current),
                       ),
@@ -1123,10 +1126,9 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                   ),
                 ),
                 if (profiles.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text('No profiles yet. Save the current '
-                        'connection to switch quickly later.'),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(AppLocalizations.of(context)!.noProfilesHint),
                   )
                 else
                   Flexible(
@@ -1155,7 +1157,9 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
-                                              'Applied profile: ${profile.name}')),
+                                              AppLocalizations.of(context)!
+                                                  .appliedProfile(
+                                                      profile.name))),
                                     );
                                   }
                                 },
@@ -1177,19 +1181,20 @@ class _ConnectionProfilesTile extends ConsumerWidget {
     final controller = TextEditingController(
       text: '${_providerLabel(current.provider)} - ${current.model}',
     );
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Save Connection Profile'),
+        title: Text(l10n.saveConnectionProfile),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'Profile name'),
+          decoration: InputDecoration(labelText: l10n.profileName),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -1201,7 +1206,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
               }
               Navigator.pop(dialogContext);
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -1224,8 +1229,8 @@ class _PromptCacheTile extends ConsumerWidget {
 
     return SwitchListTile(
       secondary: const Icon(Icons.savings_outlined),
-      title: const Text('Prompt Caching'),
-      subtitle: const Text('Cache system prompt & history to reduce cost'),
+      title: Text(AppLocalizations.of(context)!.promptCaching),
+      subtitle: Text(AppLocalizations.of(context)!.promptCachingDescription),
       value: config.promptCacheEnabled,
       onChanged: (value) {
         ref.read(llmConfigProvider.notifier).updatePromptCacheEnabled(value);
@@ -1243,9 +1248,9 @@ class _MergeRolesTile extends ConsumerWidget {
 
     return SwitchListTile(
       secondary: const Icon(Icons.merge_type),
-      title: const Text('Merge Consecutive Roles'),
-      subtitle: const Text(
-          'For APIs requiring strict user/assistant alternation'),
+      title: Text(AppLocalizations.of(context)!.mergeConsecutiveRoles),
+      subtitle: Text(
+          AppLocalizations.of(context)!.mergeConsecutiveRolesDescription),
       value: config.mergeConsecutiveRoles,
       onChanged: (value) {
         ref

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:native_tavern/data/models/chat.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 
 /// Swipe Picker (aligned with SillyTavern 1.17+):
@@ -85,7 +86,7 @@ class _SwipePickerSheetState extends State<SwipePickerSheet> {
                     const Icon(Icons.swipe, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Swipes (${_swipes.length})',
+                      '${AppLocalizations.of(context).swipes} (${_swipes.length})',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -167,7 +168,7 @@ class _SwipePickerSheetState extends State<SwipePickerSheet> {
                   ],
                   const Spacer(),
                   Text(
-                    '${content.length} chars',
+                    '${content.length} ${AppLocalizations.of(context).charsSuffix}',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: AppTheme.textMuted,
                     ),
@@ -202,7 +203,7 @@ class _SwipePickerSheetState extends State<SwipePickerSheet> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete swipe?'),
+        title: Text(AppLocalizations.of(context).deleteSwipeQuestion),
         content: Text(
           _swipes[index].length > 200
               ? '${_swipes[index].substring(0, 200)}...'
@@ -211,12 +212,12 @@ class _SwipePickerSheetState extends State<SwipePickerSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),

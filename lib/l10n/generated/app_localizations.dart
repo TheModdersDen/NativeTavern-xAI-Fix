@@ -6690,6 +6690,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Controls the transparency of message bubbles when a background is active.'**
   String get bubbleOpacityHelp;
+
+  /// UI label: Swipes
+  ///
+  /// In en, this message translates to:
+  /// **'Swipes'**
+  String get swipes;
+
+  /// UI label: Delete swipe?
+  ///
+  /// In en, this message translates to:
+  /// **'Delete swipe?'**
+  String get deleteSwipeQuestion;
+
+  /// UI label: chars
+  ///
+  /// In en, this message translates to:
+  /// **'chars'**
+  String get charsSuffix;
+
+  /// UI label: Swipe deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe deleted'**
+  String get swipeDeleted;
+
+  /// UI label: No alternate swipes to delete
+  ///
+  /// In en, this message translates to:
+  /// **'No alternate swipes to delete'**
+  String get noAlternateSwipes;
+
+  /// UI label: Reasoning Effort
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning Effort'**
+  String get reasoningEffort;
+
+  /// UI label: Auto
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get effortAuto;
+
+  /// UI label: Minimum
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get effortMin;
+
+  /// UI label: Low
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get effortLow;
+
+  /// UI label: Medium
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get effortMedium;
+
+  /// UI label: High
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get effortHigh;
+
+  /// UI label: Maximum
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get effortMax;
+
+  /// UI label: Prompt Caching
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt Caching'**
+  String get promptCaching;
+
+  /// UI label: Cache system prompt & history to reduce cost
+  ///
+  /// In en, this message translates to:
+  /// **'Cache system prompt & history to reduce cost'**
+  String get promptCachingDescription;
+
+  /// UI label: Merge Consecutive Roles
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Consecutive Roles'**
+  String get mergeConsecutiveRoles;
+
+  /// UI label: For APIs requiring strict user/assistant alternation
+  ///
+  /// In en, this message translates to:
+  /// **'For APIs requiring strict user/assistant alternation'**
+  String get mergeConsecutiveRolesDescription;
+
+  /// UI label: Connection Profiles
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Profiles'**
+  String get connectionProfiles;
+
+  /// UI label: Save current connection for quick switching
+  ///
+  /// In en, this message translates to:
+  /// **'Save current connection for quick switching'**
+  String get connectionProfilesHint;
+
+  /// UI label: {count} saved
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved'**
+  String profilesSavedCount(String count);
+
+  /// UI label: Save current
+  ///
+  /// In en, this message translates to:
+  /// **'Save current'**
+  String get saveCurrent;
+
+  /// UI label: No profiles yet. Save the current connection to switch quickly later.
+  ///
+  /// In en, this message translates to:
+  /// **'No profiles yet. Save the current connection to switch quickly later.'**
+  String get noProfilesHint;
+
+  /// UI label: Applied profile: {name}
+  ///
+  /// In en, this message translates to:
+  /// **'Applied profile: {name}'**
+  String appliedProfile(String name);
+
+  /// UI label: Save Connection Profile
+  ///
+  /// In en, this message translates to:
+  /// **'Save Connection Profile'**
+  String get saveConnectionProfile;
+
+  /// UI label: Profile name
+  ///
+  /// In en, this message translates to:
+  /// **'Profile name'**
+  String get profileName;
+
+  /// UI label: Gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// UI label: All
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allLabel;
+
+  /// UI label: Ungrouped
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped'**
+  String get ungrouped;
+
+  /// UI label: Set as background
+  ///
+  /// In en, this message translates to:
+  /// **'Set as background'**
+  String get setAsBackground;
+
+  /// UI label: Move to folder
+  ///
+  /// In en, this message translates to:
+  /// **'Move to folder'**
+  String get moveToFolder;
+
+  /// UI label: Folder name
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get folderName;
+
+  /// UI label: Leave empty for ungrouped
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for ungrouped'**
+  String get folderNameHint;
+
+  /// UI label: Move
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get move;
+
+  /// UI label: Move failed: {error}
+  ///
+  /// In en, this message translates to:
+  /// **'Move failed: {error}'**
+  String moveFailed(String error);
+
+  /// UI label: Delete failed: {error}
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String deleteFailed(String error);
+
+  /// UI label: Embed pending documents
+  ///
+  /// In en, this message translates to:
+  /// **'Embed pending documents'**
+  String get embedPendingDocuments;
+
+  /// UI label: Embedded {count} documents
+  ///
+  /// In en, this message translates to:
+  /// **'Embedded {count} documents'**
+  String embeddedDocuments(String count);
+
+  /// UI label: All documents already embedded
+  ///
+  /// In en, this message translates to:
+  /// **'All documents already embedded'**
+  String get allDocumentsEmbedded;
+
+  /// UI label: Embedding failed: {error}
+  ///
+  /// In en, this message translates to:
+  /// **'Embedding failed: {error}'**
+  String embeddingFailed(String error);
+
+  /// UI label: GPT-Image Settings
+  ///
+  /// In en, this message translates to:
+  /// **'GPT-Image Settings'**
+  String get gptImageSettings;
+
+  /// UI label: Quality
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get qualityLabel;
+
+  /// UI label: Auto - Let the model decide
+  ///
+  /// In en, this message translates to:
+  /// **'Auto - Let the model decide'**
+  String get qualityAutoDescription;
+
+  /// UI label: High - Higher detail and consistency
+  ///
+  /// In en, this message translates to:
+  /// **'High - Higher detail and consistency'**
+  String get qualityHighDescription;
 }
 
 class _AppLocalizationsDelegate
