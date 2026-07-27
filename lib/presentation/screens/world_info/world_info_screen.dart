@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/world_info.dart';
+import 'package:native_tavern/domain/services/world_info_import.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 import 'package:native_tavern/presentation/screens/world_info/world_info_entry_editor_screen.dart';
@@ -250,42 +251,51 @@ class WorldInfoScreen extends ConsumerWidget {
       
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
       _log('Parsed JSON keys: ${json.keys.toList()}');
-      
-      // Parse entries from different formats
-      final parsedEntries = _parseWorldInfoEntries(json);
-      _log('Parsed ${parsedEntries.length} entries');
-      
+
       // Get world info name
       final name = json['name']?.toString() ??
                    json['originalData']?['name']?.toString() ??
                    file.name.replaceAll('.json', '');
       final description = json['description']?.toString();
-      
+
       _log('Creating world info: $name');
-      
+
       await ref.read(worldInfoNotifierProvider.notifier).createWorldInfo(
         name: name,
         description: description,
         isGlobal: json['isGlobal'] == true,
       );
 
-      // Import entries
+      // Import entries with full ST field fidelity (position, constant,
+      // order, probability, timed effects, recursion flags, role, ...)
       final createdWorldInfos = ref.read(worldInfoNotifierProvider).valueOrNull ?? [];
       final createdWorldInfo = createdWorldInfos.firstWhere((w) => w.name == name);
-      
+
+      final parsedEntries =
+          WorldInfoImport.parseEntries(json, createdWorldInfo.id);
       _log('Adding ${parsedEntries.length} entries to world info: ${createdWorldInfo.id}');
-      
+
       for (final entry in parsedEntries) {
         try {
-          await ref.read(worldInfoNotifierProvider.notifier).addEntry(
-            worldInfoId: createdWorldInfo.id,
-            keys: entry['keys'] as List<String>,
-            content: entry['content'] as String,
-            comment: entry['comment'] as String? ?? '',
-            secondaryKeys: entry['secondaryKeys'] as List<String>? ?? [],
-          );
+          final created =
+              await ref.read(worldInfoNotifierProvider.notifier).addEntry(
+                    worldInfoId: createdWorldInfo.id,
+                    keys: entry.keys,
+                    content: entry.content,
+                    comment: entry.comment,
+                    secondaryKeys: entry.secondaryKeys,
+                    position: entry.position,
+                    constant: entry.constant,
+                    selective: entry.selective,
+                    insertionOrder: entry.insertionOrder,
+                  );
+          // Apply the remaining behavioral fields the addEntry API
+          // doesn't accept directly
+          await ref.read(worldInfoNotifierProvider.notifier).updateEntry(
+                entry.copyWith(id: created.id),
+              );
         } catch (e, st) {
-          _log('Failed to add entry: ${entry['keys']}', error: e.toString(), stackTrace: st);
+          _log('Failed to add entry: ${entry.keys}', error: e.toString(), stackTrace: st);
         }
       }
 
@@ -306,92 +316,6 @@ class WorldInfoScreen extends ConsumerWidget {
     }
   }
   
-  /// Parse world info entries from various formats (SillyTavern, NativeTavern, etc.)
-  List<Map<String, dynamic>> _parseWorldInfoEntries(Map<String, dynamic> json) {
-    final entries = <Map<String, dynamic>>[];
-    
-    // Check for SillyTavern format: entries is a Map<String, Entry>
-    if (json['entries'] is Map) {
-      _log('Detected SillyTavern format (entries as Map)');
-      final entriesMap = json['entries'] as Map<String, dynamic>;
-      
-      for (final entry in entriesMap.entries) {
-        try {
-          final entryData = entry.value as Map<String, dynamic>;
-          entries.add(_parseEntry(entryData));
-        } catch (e, st) {
-          _log('Failed to parse entry ${entry.key}', error: e.toString(), stackTrace: st);
-        }
-      }
-    }
-    // Check for NativeTavern format: entries is a List<Entry>
-    else if (json['entries'] is List) {
-      _log('Detected NativeTavern format (entries as List)');
-      final entriesList = json['entries'] as List<dynamic>;
-      
-      for (var i = 0; i < entriesList.length; i++) {
-        try {
-          final entryData = entriesList[i] as Map<String, dynamic>;
-          entries.add(_parseEntry(entryData));
-        } catch (e, st) {
-          _log('Failed to parse entry at index $i', error: e.toString(), stackTrace: st);
-        }
-      }
-    }
-    
-    return entries;
-  }
-  
-  /// Parse a single entry, handling type conversions
-  Map<String, dynamic> _parseEntry(Map<String, dynamic> data) {
-    // Handle keys - SillyTavern uses 'key', NativeTavern uses 'keys'
-    List<String> keys;
-    if (data['keys'] != null) {
-      keys = _parseStringList(data['keys']);
-    } else if (data['key'] != null) {
-      keys = _parseStringList(data['key']);
-    } else {
-      keys = [];
-    }
-    
-    // Handle secondary keys
-    List<String> secondaryKeys;
-    if (data['secondaryKeys'] != null) {
-      secondaryKeys = _parseStringList(data['secondaryKeys']);
-    } else if (data['secondary_keys'] != null) {
-      secondaryKeys = _parseStringList(data['secondary_keys']);
-    } else if (data['keysecondary'] != null) {
-      secondaryKeys = _parseStringList(data['keysecondary']);
-    } else {
-      secondaryKeys = [];
-    }
-    
-    // Handle content
-    final content = data['content']?.toString() ?? '';
-    
-    // Handle comment
-    final comment = data['comment']?.toString() ?? '';
-    
-    return {
-      'keys': keys,
-      'secondaryKeys': secondaryKeys,
-      'content': content,
-      'comment': comment,
-    };
-  }
-  
-  /// Safely parse a list of strings from various formats
-  List<String> _parseStringList(dynamic value) {
-    if (value == null) return [];
-    if (value is List) {
-      return value.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
-    }
-    if (value is String) {
-      // Handle comma-separated string
-      return value.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-    }
-    return [];
-  }
 }
 
 /// Card widget for displaying a World Info
