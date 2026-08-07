@@ -18,13 +18,35 @@ class Live2DImportException implements Exception {
   String toString() => message;
 }
 
+class Live2DImportedPackage {
+  final String directoryPath;
+  final List<Live2DModelDefinition> models;
+
+  Live2DImportedPackage({
+    required this.directoryPath,
+    required List<Live2DModelDefinition> models,
+  }) : models = List.unmodifiable(models);
+}
+
+class Live2DPackageDeletionResult {
+  final Live2DImportedPackage package;
+  final bool cleanupPending;
+
+  const Live2DPackageDeletionResult({
+    required this.package,
+    required this.cleanupPending,
+  });
+}
+
 /// Imports user-owned Live2D ZIP packages into NativeTavern's data directory.
 class Live2DImportService {
   static const maxArchiveBytes = 128 * 1024 * 1024;
   static const maxExtractedBytes = 512 * 1024 * 1024;
   static const maxSingleFileBytes = 128 * 1024 * 1024;
   static const maxEntries = 5000;
+  static const orphanStagingGracePeriod = Duration(hours: 1);
   static const _metadataFileName = '.nativetavern-live2d.json';
+  static const _importMarkerFileName = '.nativetavern-importing';
   static const _uuid = Uuid();
 
   static const _allowedExtensions = {
@@ -55,6 +77,7 @@ class Live2DImportService {
   Directory get _modelsRoot => Directory(p.join(dataPath, 'live2d_models'));
 
   Future<List<Live2DModelDefinition>> listImportedModels() async {
+    await cleanupOrphanDirectories();
     final root = _modelsRoot;
     if (!root.existsSync()) return const [];
 
@@ -67,6 +90,146 @@ class Live2DImportService {
     }
     models.sort((a, b) => a.displayName.compareTo(b.displayName));
     return models;
+  }
+
+  /// Removes staging and quarantined directories left by interrupted imports
+  /// or deletions. Normal package directories are never touched here.
+  Future<void> cleanupOrphanDirectories() async {
+    final root = _modelsRoot;
+    if (!root.existsSync()) return;
+    final staleBefore = DateTime.now().subtract(orphanStagingGracePeriod);
+    await for (final entity in root.list(followLinks: false)) {
+      final name = p.basename(entity.path);
+      if (!name.startsWith('.import-') && !name.startsWith('.deleting-')) {
+        continue;
+      }
+      if (name.startsWith('.import-')) {
+        final marker = File(p.join(entity.path, _importMarkerFileName));
+        final modified = marker.existsSync()
+            ? marker.lastModifiedSync()
+            : entity.statSync().modified;
+        if (modified.isAfter(staleBefore)) continue;
+      }
+      try {
+        await entity.delete(recursive: entity is Directory);
+      } catch (_) {
+        // A later library refresh retries cleanup without hiding valid models.
+      }
+    }
+  }
+
+  /// Resolves the package containing [definition] and verifies that it is a
+  /// real, metadata-backed child of the managed Live2D directory.
+  Future<Live2DImportedPackage> inspectImportedPackage(
+    Live2DModelDefinition definition,
+  ) async {
+    if (definition.source != Live2DModelSource.appData) {
+      throw const Live2DImportException(
+        'Only imported Live2D models can be deleted.',
+      );
+    }
+    final relativeDirectory = definition.modelDirectory.replaceAll('\\', '/');
+    if (_isAbsolutePath(relativeDirectory)) {
+      throw const Live2DImportException(
+        'The imported model path is outside the managed Live2D directory.',
+      );
+    }
+
+    final root = _modelsRoot;
+    if (!root.existsSync()) {
+      throw const Live2DImportException(
+        'The imported model package is missing.',
+      );
+    }
+    final rootPath = p.normalize(p.absolute(root.path));
+    final modelDirectory = p.normalize(
+      p.absolute(p.join(dataPath, relativeDirectory)),
+    );
+    if (!p.isWithin(rootPath, modelDirectory)) {
+      throw const Live2DImportException(
+        'The imported model path is outside the managed Live2D directory.',
+      );
+    }
+
+    final relativeToRoot = p.relative(modelDirectory, from: rootPath);
+    final segments = p.split(relativeToRoot);
+    if (segments.isEmpty ||
+        segments.first == '.' ||
+        segments.first == '..' ||
+        segments.first.startsWith('.')) {
+      throw const Live2DImportException('Invalid imported model package path.');
+    }
+    final packageDirectory = Directory(p.join(rootPath, segments.first));
+    final entityType = FileSystemEntity.typeSync(
+      packageDirectory.path,
+      followLinks: false,
+    );
+    if (entityType != FileSystemEntityType.directory) {
+      throw const Live2DImportException(
+        'The imported model package is missing.',
+      );
+    }
+
+    final resolvedRoot = p.normalize(await root.resolveSymbolicLinks());
+    final resolvedPackage =
+        p.normalize(await packageDirectory.resolveSymbolicLinks());
+    if (!p.isWithin(resolvedRoot, resolvedPackage)) {
+      throw const Live2DImportException(
+        'The imported model package resolves outside the managed directory.',
+      );
+    }
+
+    final models = await _readPackageModels(packageDirectory);
+    final containsTarget = models.any((model) {
+      return model.id == definition.id &&
+          model.modelFileName == definition.modelFileName &&
+          p.equals(
+            p.normalize(model.modelDirectory),
+            p.normalize(definition.modelDirectory),
+          );
+    });
+    if (!containsTarget) {
+      throw const Live2DImportException(
+        'The imported model does not match its package metadata.',
+      );
+    }
+    return Live2DImportedPackage(
+      directoryPath: packageDirectory.path,
+      models: models,
+    );
+  }
+
+  /// Atomically hides a validated package before deleting its files. Once the
+  /// rename succeeds, a failed recursive cleanup is safe to retry later.
+  Future<Live2DPackageDeletionResult> deleteImportedPackage(
+    Live2DModelDefinition definition,
+  ) async {
+    final package = await inspectImportedPackage(definition);
+    final packageDirectory = Directory(package.directoryPath);
+    final quarantine = Directory(
+      p.join(
+        _modelsRoot.path,
+        '.deleting-${p.basename(package.directoryPath)}-${_uuid.v4()}',
+      ),
+    );
+    try {
+      await packageDirectory.rename(quarantine.path);
+    } on FileSystemException catch (error) {
+      throw Live2DImportException(
+        'The imported model package could not be quarantined: ${error.message}',
+      );
+    }
+
+    var cleanupPending = false;
+    try {
+      await quarantine.delete(recursive: true);
+    } catch (_) {
+      cleanupPending = true;
+    }
+    return Live2DPackageDeletionResult(
+      package: package,
+      cleanupPending: cleanupPending,
+    );
   }
 
   Future<List<Live2DModelDefinition>> importZip(File zipFile) async {
@@ -132,6 +295,11 @@ class Live2DImportService {
 
     try {
       await staging.create(recursive: true);
+      final importMarker = File(p.join(staging.path, _importMarkerFileName));
+      await importMarker.writeAsString(
+        DateTime.now().toUtc().toIso8601String(),
+        flush: true,
+      );
       for (final (entry, relativePath) in validatedEntries) {
         final content = entry.content;
         if (content is! List<int> || content.length > maxSingleFileBytes) {
@@ -222,6 +390,7 @@ class Live2DImportService {
         jsonEncode(metadata),
         flush: true,
       );
+      await importMarker.delete();
       await staging.rename(destination.path);
       return _definitionsFromMetadata(destination, metadataModels);
     } catch (_) {
@@ -300,6 +469,12 @@ class Live2DImportService {
       return null;
     }
     return p.joinAll(segments);
+  }
+
+  bool _isAbsolutePath(String value) {
+    return p.isAbsolute(value) ||
+        value.startsWith('/') ||
+        RegExp(r'^[a-zA-Z]:/').hasMatch(value);
   }
 
   bool _shouldExtract(String path) {

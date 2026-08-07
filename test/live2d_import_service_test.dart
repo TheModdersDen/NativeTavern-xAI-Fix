@@ -118,6 +118,63 @@ void main() {
 
     expect(await importService.listImportedModels(), isEmpty);
   });
+
+  test('repeated imports stay isolated and stale staging directories are removed',
+      () async {
+    final zipFile = _writeZip(
+      tempDirectory,
+      'repeated.zip',
+      _validModelEntries(),
+    );
+    final staleImport = Directory(
+      p.join(tempDirectory.path, 'live2d_models', '.import-stale'),
+    )..createSync(recursive: true);
+    final staleMarker = File(
+      p.join(staleImport.path, '.nativetavern-importing'),
+    )..writeAsStringSync('stale');
+    staleMarker.setLastModifiedSync(
+      DateTime.now().subtract(const Duration(hours: 2)),
+    );
+    final staleDeletion = Directory(
+      p.join(tempDirectory.path, 'live2d_models', '.deleting-stale'),
+    )..createSync(recursive: true);
+    final activeImport = Directory(
+      p.join(tempDirectory.path, 'live2d_models', '.import-active'),
+    )..createSync(recursive: true);
+    File(
+      p.join(activeImport.path, '.nativetavern-importing'),
+    ).writeAsStringSync('active');
+
+    final first = await importService.importZip(zipFile);
+    final second = await importService.importZip(zipFile);
+    final models = await importService.listImportedModels();
+
+    expect(models, hasLength(2));
+    expect(first.single.id, isNot(second.single.id));
+    expect(models.map((model) => model.id).toSet(), hasLength(2));
+    expect(staleImport.existsSync(), isFalse);
+    expect(staleDeletion.existsSync(), isFalse);
+    expect(activeImport.existsSync(), isTrue);
+  });
+
+  test('deletion rejects bundled and out-of-root model definitions', () async {
+    await expectLater(
+      importService.deleteImportedPackage(Live2DService.bundledModels.single),
+      throwsA(isA<Live2DImportException>()),
+    );
+    await expectLater(
+      importService.deleteImportedPackage(
+        const Live2DModelDefinition(
+          id: 'outside',
+          displayName: 'Outside',
+          modelDirectory: '../outside',
+          modelFileName: 'outside.model3.json',
+          source: Live2DModelSource.appData,
+        ),
+      ),
+      throwsA(isA<Live2DImportException>()),
+    );
+  });
 }
 
 Map<String, List<int>> _validModelEntries() {

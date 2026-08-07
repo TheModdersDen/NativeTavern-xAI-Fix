@@ -9,6 +9,10 @@ import 'package:flutter_live2d/flutter_live2d.dart';
 import 'package:native_tavern/core/utils/path_utils.dart';
 import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/presentation/widgets/live2d/macos_live2d_view.dart';
+import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
+
+export 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart'
+    show Live2DStageTransform;
 
 abstract interface class _NativeLive2DController {
   ValueListenable<Live2DViewState> get listenable;
@@ -185,19 +189,6 @@ class Live2DCharacterController {
   }
 }
 
-/// Transparent Live2D stage with lifecycle, motion, and graceful fallback.
-class Live2DStageTransform {
-  final double scale;
-  final double offsetX;
-  final double offsetY;
-
-  const Live2DStageTransform({
-    required this.scale,
-    required this.offsetX,
-    required this.offsetY,
-  });
-}
-
 class Live2DCharacterView extends StatefulWidget {
   final Live2DConfig config;
   final bool isSpeaking;
@@ -227,10 +218,6 @@ class Live2DCharacterView extends StatefulWidget {
 
 class _Live2DCharacterViewState extends State<Live2DCharacterView>
     with WidgetsBindingObserver {
-  static const double _minScale = 0.1;
-  static const double _maxScale = 10;
-  static const double _maxOffset = 10;
-
   late final _NativeLive2DController _nativeController;
   Timer? _returnToIdleTimer;
   Timer? _scrollSaveTimer;
@@ -239,7 +226,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   double _stageScale = 1;
   double _offsetX = 0;
   double _offsetY = 0;
-  double _gestureStartScale = 1;
+  Live2DStageTransform? _gestureStartTransform;
+  Offset? _gestureStartFocalPoint;
   bool _transformDirty = false;
 
   @override
@@ -247,9 +235,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     super.initState();
     _nativeController =
         Platform.isMacOS ? _MacOSLive2DController() : _MobileLive2DController();
-    _stageScale = widget.config.scale.clamp(_minScale, _maxScale);
-    _offsetX = widget.config.offsetX.clamp(-_maxOffset, _maxOffset);
-    _offsetY = widget.config.offsetY.clamp(-_maxOffset, _maxOffset);
+    _applyConfigTransform(widget.config);
     WidgetsBinding.instance.addObserver(this);
     if (Live2DCharacterView.isPlatformSupported) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadModel());
@@ -264,9 +250,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     if (oldConfig.scale != config.scale ||
         oldConfig.offsetX != config.offsetX ||
         oldConfig.offsetY != config.offsetY) {
-      _stageScale = config.scale.clamp(_minScale, _maxScale);
-      _offsetX = config.offsetX.clamp(-_maxOffset, _maxOffset);
-      _offsetY = config.offsetY.clamp(-_maxOffset, _maxOffset);
+      _applyConfigTransform(config);
     }
     if (oldConfig.modelDirectory != config.modelDirectory ||
         oldConfig.modelFileName != config.modelFileName) {
@@ -376,42 +360,41 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
 
   void _handleScaleStart(ScaleStartDetails details) {
     _scrollSaveTimer?.cancel();
-    _gestureStartScale = _stageScale;
+    _gestureStartTransform = _currentTransform;
+    _gestureStartFocalPoint = details.localFocalPoint;
     _transformDirty = false;
   }
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     final size = context.size;
-    if (!widget.interactive || size == null || size.isEmpty) return;
-
-    final previousScale = _stageScale;
-    final nextScale =
-        (_gestureStartScale * details.scale).clamp(_minScale, _maxScale);
-    var translation = Offset(
-      _offsetX * size.width,
-      _offsetY * size.height,
+    final startTransform = _gestureStartTransform;
+    final startFocalPoint = _gestureStartFocalPoint;
+    if (!widget.interactive ||
+        size == null ||
+        size.isEmpty ||
+        startTransform == null ||
+        startFocalPoint == null) {
+      return;
+    }
+    final next = Live2DStageTransform.applyGesture(
+      start: startTransform,
+      startFocalPoint: startFocalPoint,
+      currentFocalPoint: details.localFocalPoint,
+      scaleDelta: details.scale,
+      size: size,
     );
 
-    if (nextScale != previousScale) {
-      final scaleRatio = nextScale / previousScale;
-      final focalFromCenter =
-          details.localFocalPoint - size.center(Offset.zero);
-      translation = translation * scaleRatio +
-          focalFromCenter * (1 - scaleRatio) +
-          details.focalPointDelta * scaleRatio;
-    } else {
-      translation += details.focalPointDelta;
-    }
-
     setState(() {
-      _stageScale = nextScale;
-      _offsetX = (translation.dx / size.width).clamp(-_maxOffset, _maxOffset);
-      _offsetY = (translation.dy / size.height).clamp(-_maxOffset, _maxOffset);
+      _stageScale = next.scale;
+      _offsetX = next.offsetX;
+      _offsetY = next.offsetY;
       _transformDirty = true;
     });
   }
 
   void _handleScaleEnd(ScaleEndDetails details) {
+    _gestureStartTransform = null;
+    _gestureStartFocalPoint = null;
     if (_transformDirty) _notifyTransformChanged();
   }
 
@@ -423,7 +406,10 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
       if (size == null || size.isEmpty) return;
       final scaleFactor = math.exp(-scrollEvent.scrollDelta.dy * 0.0015);
       _scaleAroundPoint(
-        (_stageScale * scaleFactor).clamp(_minScale, _maxScale),
+        (_stageScale * scaleFactor).clamp(
+          Live2DStageTransform.minScale,
+          Live2DStageTransform.maxScale,
+        ),
         scrollEvent.localPosition,
         size,
       );
@@ -437,21 +423,36 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
 
   void _scaleAroundPoint(double nextScale, Offset focalPoint, Size size) {
     if (nextScale == _stageScale) return;
-    final scaleRatio = nextScale / _stageScale;
-    final translation = Offset(
-      _offsetX * size.width,
-      _offsetY * size.height,
+    final next = Live2DStageTransform.applyGesture(
+      start: _currentTransform,
+      startFocalPoint: focalPoint,
+      currentFocalPoint: focalPoint,
+      scaleDelta: nextScale / _stageScale,
+      size: size,
     );
-    final focalFromCenter = focalPoint - size.center(Offset.zero);
-    final nextTranslation =
-        translation * scaleRatio + focalFromCenter * (1 - scaleRatio);
     setState(() {
-      _stageScale = nextScale;
-      _offsetX =
-          (nextTranslation.dx / size.width).clamp(-_maxOffset, _maxOffset);
-      _offsetY =
-          (nextTranslation.dy / size.height).clamp(-_maxOffset, _maxOffset);
+      _stageScale = next.scale;
+      _offsetX = next.offsetX;
+      _offsetY = next.offsetY;
     });
+  }
+
+  Live2DStageTransform get _currentTransform =>
+      Live2DStageTransform.constrained(
+        scale: _stageScale,
+        offsetX: _offsetX,
+        offsetY: _offsetY,
+      );
+
+  void _applyConfigTransform(Live2DConfig config) {
+    final transform = Live2DStageTransform.constrained(
+      scale: config.scale,
+      offsetX: config.offsetX,
+      offsetY: config.offsetY,
+    );
+    _stageScale = transform.scale;
+    _offsetX = transform.offsetX;
+    _offsetY = transform.offsetY;
   }
 
   void _resetTransform() {
