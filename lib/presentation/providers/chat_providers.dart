@@ -118,9 +118,53 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         _ref = ref,
         super(const ActiveChatState());
 
+  Future<Persona?> _resolvePersona({
+    String? characterId,
+    String? groupId,
+    String? chatId,
+  }) async {
+    final effectiveChatId = chatId ?? state.chat?.id;
+    final effectiveGroupId = groupId ?? state.group?.id ?? state.chat?.groupId;
+    final effectiveCharacterId =
+        characterId ?? state.character?.id ?? state.chat?.characterId;
+    final personas = await _personaRepository.getAllPersonas();
+
+    Persona? connectedWhere(bool Function(PersonaConnection) matches) {
+      for (final persona in personas) {
+        if (persona.connections.any(matches)) return persona;
+      }
+      return null;
+    }
+
+    if (effectiveChatId != null) {
+      final connected =
+          connectedWhere((connection) => connection.chatId == effectiveChatId);
+      if (connected != null) return connected;
+    }
+    if (effectiveGroupId != null) {
+      final connected = connectedWhere(
+        (connection) => connection.groupId == effectiveGroupId,
+      );
+      if (connected != null) return connected;
+    }
+    if (effectiveCharacterId != null) {
+      final connected = connectedWhere(
+        (connection) => connection.characterId == effectiveCharacterId,
+      );
+      if (connected != null) return connected;
+    }
+
+    final activePersonaId = _ref.read(activePersonaIdProvider);
+    if (activePersonaId != null) {
+      final active = await _personaRepository.getPersona(activePersonaId);
+      if (active != null) return active;
+    }
+
+    return _personaRepository.getDefaultPersona();
+  }
+
   /// Apply the chat's "Start Reply With" assistant prefill to the request
-  List<Map<String, dynamic>> _withPrefill(
-      List<Map<String, dynamic>> context) {
+  List<Map<String, dynamic>> _withPrefill(List<Map<String, dynamic>> context) {
     final prefill = state.chat?.startReplyWith ?? '';
     if (prefill.isEmpty) return context;
     return [
@@ -151,8 +195,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     LLMConfig config,
   ) async {
     final prefill = state.chat?.startReplyWith ?? '';
-    final response = await _llmService.generateWithReasoning(
-        _withPrefill(context), config);
+    final response =
+        await _llmService.generateWithReasoning(_withPrefill(context), config);
     if (prefill.isEmpty) return response;
     return LLMResponse(
       content: prefill + response.content,
@@ -185,7 +229,11 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
       final character =
           await _characterRepository.getCharacter(chat.characterId);
-      final messages = await _chatRepository.getMessages(chatId);
+      var messages = await _chatRepository.getMessages(chatId);
+
+      if (!chat.isGroupChat && character != null) {
+        messages = await _syncGreetingSwipes(chat, character, messages);
+      }
 
       // Check if this is a group chat
       if (chat.isGroupChat) {
@@ -230,6 +278,58 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     }
   }
 
+  Future<List<ChatMessage>> _syncGreetingSwipes(
+    Chat chat,
+    Character character,
+    List<ChatMessage> messages,
+  ) async {
+    if (messages.isEmpty ||
+        character.firstMessage.isEmpty ||
+        character.alternateGreetings.isEmpty) {
+      return messages;
+    }
+    final first = messages.first;
+    if (first.role != MessageRole.assistant) return messages;
+
+    final persona = await _resolvePersona(
+      characterId: character.id,
+      chatId: chat.id,
+    );
+    final macroService = MacroService(MacroContext.fromData(
+      character: character,
+      persona: persona,
+      chat: chat,
+      messages: messages,
+    ));
+    final primaryGreeting = macroService.process(character.firstMessage);
+    final existingSwipes = first.swipes.isEmpty
+        ? <String>[first.content]
+        : List<String>.from(first.swipes);
+    if (first.content != primaryGreeting &&
+        !existingSwipes.contains(primaryGreeting)) {
+      return messages;
+    }
+
+    final expected = [
+      primaryGreeting,
+      ...character.alternateGreetings
+          .where((greeting) => greeting.trim().isNotEmpty)
+          .map(macroService.process),
+    ];
+    var changed = false;
+    for (final greeting in expected) {
+      if (!existingSwipes.contains(greeting)) {
+        existingSwipes.add(greeting);
+        changed = true;
+      }
+    }
+    if (!changed) return messages;
+
+    final updated = first.copyWith(swipes: existingSwipes);
+    await _chatRepository.updateMessage(updated);
+    return [updated, ...messages.skip(1)];
+  }
+
   /// Create a new chat with a character
   Future<String?> createChat(String characterId) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -254,12 +354,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       // Add first message (greeting) if character has one
       if (character.firstMessage.isNotEmpty) {
         // Get active persona for macro processing
-        final activePersonaId = _ref.read(activePersonaIdProvider);
-        Persona? persona;
-        if (activePersonaId != null) {
-          persona = await _personaRepository.getPersona(activePersonaId);
-        }
-        persona ??= await _personaRepository.getDefaultPersona();
+        final persona = await _resolvePersona(
+          characterId: character.id,
+          chatId: chat.id,
+        );
 
         // Process macros in the greeting
         final macroContext = MacroContext.fromData(
@@ -337,8 +435,11 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       }
 
       // Use first member as the "primary" character
-      final firstCharId = group.members.first.characterId;
-      final firstChar = groupChars[firstCharId]!;
+      final firstChar = group.members
+          .map((member) => groupChars[member.characterId])
+          .whereType<Character>()
+          .first;
+      final firstCharId = firstChar.id;
 
       final chat = Chat(
         id: _generateId(),
@@ -352,12 +453,11 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.createChat(chat);
 
       // Get active persona for macro processing
-      final activePersonaId = _ref.read(activePersonaIdProvider);
-      Persona? persona;
-      if (activePersonaId != null) {
-        persona = await _personaRepository.getPersona(activePersonaId);
-      }
-      persona ??= await _personaRepository.getDefaultPersona();
+      final persona = await _resolvePersona(
+        characterId: firstCharId,
+        groupId: group.id,
+        chatId: chat.id,
+      );
 
       // Generate initial greetings from each character (if they have one)
       final messages = <ChatMessage>[];
@@ -375,13 +475,19 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           final processedGreeting =
               MacroService(macroContext).process(char.firstMessage);
 
+          final greetingSwipes = [
+            processedGreeting,
+            ...char.alternateGreetings
+                .where((greeting) => greeting.trim().isNotEmpty)
+                .map(MacroService(macroContext).process),
+          ];
           final greeting = ChatMessage(
             id: _generateId(),
             chatId: chat.id,
             role: MessageRole.assistant,
             content: processedGreeting,
             timestamp: DateTime.now(),
-            swipes: [processedGreeting],
+            swipes: greetingSwipes,
             currentSwipeIndex: 0,
             characterId: char.id,
             characterName: char.name,
@@ -472,8 +578,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         // Stream the response with reasoning support
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk
-            in _generateStreamWithPrefill(context, config)) {
+        await for (final chunk in _generateStreamWithPrefill(context, config)) {
           if (chunk.isReasoningChunk && chunk.reasoning != null) {
             reasoningBuffer.write(chunk.reasoning);
           }
@@ -499,8 +604,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
-        final response =
-            await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 
@@ -552,8 +656,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         // Streaming mode
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk
-            in _generateStreamWithPrefill(context, config)) {
+        await for (final chunk in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -603,8 +706,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming mode with reasoning support
-        final response =
-            await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
       }
@@ -742,6 +844,29 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     state = state.copyWith(messages: updatedMessages);
   }
 
+  /// Add a local message without triggering an LLM response.
+  Future<ChatMessage?> addLocalMessage({
+    required MessageRole role,
+    required String content,
+    List<ChatAttachment> attachments = const [],
+  }) async {
+    final chat = state.chat;
+    if (chat == null) return null;
+
+    final message = ChatMessage(
+      id: _generateId(),
+      chatId: chat.id,
+      role: role,
+      content: content,
+      timestamp: DateTime.now(),
+      swipes: [content],
+      attachments: attachments,
+    );
+    await _chatRepository.addMessage(message);
+    state = state.copyWith(messages: [...state.messages, message]);
+    return message;
+  }
+
   /// Delete a message and all messages after it
   Future<void> deleteMessageAndAfter(String messageId) async {
     final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
@@ -779,8 +904,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         // Streaming mode
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk
-            in _generateStreamWithPrefill(context, config)) {
+        await for (final chunk in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -835,8 +959,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming mode with reasoning support
-        final response =
-            await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
       }
@@ -945,17 +1068,15 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       final context = await _buildContext();
       context.add({
         'role': 'system',
-        'content':
-            '[Write the next reply from the point of view of the user '
-                'persona. Write only what the user says and does, in the '
-                'same style as their previous messages. Do not write for '
-                'any other character. Do not add any commentary.]',
+        'content': '[Write the next reply from the point of view of the user '
+            'persona. Write only what the user says and does, in the '
+            'same style as their previous messages. Do not write for '
+            'any other character. Do not add any commentary.]',
       });
 
       // Deliberately bypass the assistant prefill - it steers the AI's
       // voice, not the user's
-      final response =
-          await _llmService.generateWithReasoning(context, config);
+      final response = await _llmService.generateWithReasoning(context, config);
       state = state.copyWith(isGenerating: false);
       final text = response.content.trim();
       return text.isEmpty ? null : text;
@@ -996,8 +1117,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         // Stream the response with reasoning support
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk
-            in _generateStreamWithPrefill(context, config)) {
+        await for (final chunk in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -1028,8 +1148,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
-        final response =
-            await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 
@@ -1106,12 +1225,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final enabledSections = promptConfig.enabledSections;
 
     // Get active persona
-    final activePersonaId = _ref.read(activePersonaIdProvider);
-    Persona? persona;
-    if (activePersonaId != null) {
-      persona = await _personaRepository.getPersona(activePersonaId);
-    }
-    persona ??= await _personaRepository.getDefaultPersona();
+    final persona = await _resolvePersona();
 
     // Get LLM config for macro context
     final llmConfig = _ref.read(llmConfigProvider);
@@ -1196,6 +1310,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       messages.addAll(sectionMessages);
     }
 
+    if (persona != null &&
+        persona.descriptionSettings.position ==
+            PersonaDescriptionPosition.afterChar) {
+      final personaMessage = _buildPersonaMessage(persona, processMacros);
+      if (personaMessage != null) messages.add(personaMessage);
+    }
+
     // Add summary message if we have summaries
     if (summaries.isNotEmpty) {
       final latestSummary = summaries.last;
@@ -1220,6 +1341,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final authorNoteEnabled = chat?.authorNoteEnabled ?? false;
     final authorNote = chat?.authorNote ?? '';
     final authorNoteDepth = chat?.authorNoteDepth ?? 4;
+    final personaPosition = persona?.descriptionSettings.position;
+    final personaDepth = personaPosition == PersonaDescriptionPosition.atDepth
+        ? persona!.descriptionSettings.depth
+        : (personaPosition == PersonaDescriptionPosition.topAN ||
+                personaPosition == PersonaDescriptionPosition.bottomAN)
+            ? authorNoteDepth
+            : null;
 
     // RAG: retrieve relevant knowledge for the latest user message
     if (chatMessages.isNotEmpty) {
@@ -1227,8 +1355,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           .lastWhere((m) => m.role == MessageRole.user,
               orElse: () => chatMessages.last)
           .content;
-      final ragContext =
-          await _ref.read(ragContextProvider)(lastUserMessage);
+      final ragContext = await _ref.read(ragContextProvider)(lastUserMessage);
       if (ragContext != null && ragContext.isNotEmpty) {
         messages.add({'role': 'system', 'content': ragContext});
       }
@@ -1243,6 +1370,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
       // Depth is counted from the end (most recent = depth 0)
       final depthFromEnd = chatMessages.length - 1 - i;
+
+      if (persona != null &&
+          personaDepth == depthFromEnd &&
+          personaPosition != PersonaDescriptionPosition.bottomAN) {
+        final personaMessage = _buildPersonaMessage(persona, processMacros);
+        if (personaMessage != null) messages.add(personaMessage);
+      }
 
       // Inject character depth prompt at its configured depth
       if (hasDepthPrompt && depthFromEnd == depthPrompt.depth) {
@@ -1290,6 +1424,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         });
       }
 
+      if (persona != null &&
+          personaDepth == depthFromEnd &&
+          personaPosition == PersonaDescriptionPosition.bottomAN) {
+        final personaMessage = _buildPersonaMessage(persona, processMacros);
+        if (personaMessage != null) messages.add(personaMessage);
+      }
+
       // Build message with attachments if present
       if (msg.hasAttachments && msg.role == MessageRole.user) {
         messages.add(_buildMultimodalMessage(msg));
@@ -1313,6 +1454,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           'role': 'system',
           'content': '[Author\'s Note]\n$processedNote',
         });
+      }
+    }
+
+    if (persona != null &&
+        personaDepth != null &&
+        personaDepth >= chatMessages.length) {
+      final personaMessage = _buildPersonaMessage(persona, processMacros);
+      if (personaMessage != null) {
+        final chatStartIndex = messages.length - chatMessages.length;
+        messages.insert(
+            chatStartIndex.clamp(0, messages.length), personaMessage);
       }
     }
 
@@ -1382,13 +1534,22 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
     switch (section.type) {
       case PromptSectionType.systemPrompt:
-        // Use custom content from section if available, otherwise use character's system prompt
-        final content = section.content?.isNotEmpty == true
-            ? section.content!
-            : (character?.systemPrompt.isNotEmpty == true
-                ? character!.systemPrompt
-                : PromptSection.getDefaultContent(
-                    PromptSectionType.systemPrompt));
+        final baseContent = persona?.systemPromptOverride?.isNotEmpty == true
+            ? persona!.systemPromptOverride!
+            : section.content?.isNotEmpty == true
+                ? section.content!
+                : (character?.systemPrompt.isNotEmpty == true
+                    ? character!.systemPrompt
+                    : PromptSection.getDefaultContent(
+                        PromptSectionType.systemPrompt));
+        final embeddedPersona = persona != null &&
+                persona.descriptionSettings.position ==
+                    PersonaDescriptionPosition.inSystemPrompt
+            ? _personaPromptText(persona, processMacros)
+            : null;
+        final content = embeddedPersona == null || embeddedPersona.isEmpty
+            ? baseContent
+            : '$baseContent\n\n$embeddedPersona';
         if (content.isNotEmpty) {
           // Add world info before system prompt (using 'before' position as proxy)
           final beforeEntries = groupedEntries[WorldInfoPosition.before];
@@ -1419,14 +1580,11 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         break;
 
       case PromptSectionType.persona:
-        if (persona != null && persona.name.isNotEmpty) {
-          final buffer = StringBuffer();
-          buffer.writeln('The user is ${persona.name}.');
-          if (persona.description.isNotEmpty) {
-            buffer.writeln(
-                'User description: ${processMacros(persona.description)}');
-          }
-          messages.add({'role': role, 'content': buffer.toString().trim()});
+        if (persona != null &&
+            persona.descriptionSettings.position ==
+                PersonaDescriptionPosition.beforeChar) {
+          final personaMessage = _buildPersonaMessage(persona, processMacros);
+          if (personaMessage != null) messages.add(personaMessage);
         }
         break;
 
@@ -1570,13 +1728,14 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         break;
 
       case PromptSectionType.postHistoryInstructions:
-        // Use custom content from section if available
-        final content = section.content?.isNotEmpty == true
-            ? section.content!
-            : (character?.postHistoryInstructions.isNotEmpty == true
-                ? character!.postHistoryInstructions
-                : PromptSection.getDefaultContent(
-                    PromptSectionType.postHistoryInstructions));
+        final content = persona?.postHistoryInstructions?.isNotEmpty == true
+            ? persona!.postHistoryInstructions!
+            : section.content?.isNotEmpty == true
+                ? section.content!
+                : (character?.postHistoryInstructions.isNotEmpty == true
+                    ? character!.postHistoryInstructions
+                    : PromptSection.getDefaultContent(
+                        PromptSectionType.postHistoryInstructions));
         if (content.isNotEmpty) {
           messages.add({'role': role, 'content': processMacros(content)});
         }
@@ -1612,18 +1771,35 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     return messages;
   }
 
+  String _personaPromptText(
+    Persona persona,
+    String Function(String) processMacros,
+  ) {
+    final buffer = StringBuffer('The user is ${persona.name}.');
+    if (persona.description.isNotEmpty) {
+      buffer.write('\nUser description: ${processMacros(persona.description)}');
+    }
+    return buffer.toString();
+  }
+
+  Map<String, dynamic>? _buildPersonaMessage(
+    Persona persona,
+    String Function(String) processMacros,
+  ) {
+    if (persona.name.isEmpty && persona.description.isEmpty) return null;
+    return {
+      'role': persona.descriptionSettings.role.name,
+      'content': _personaPromptText(persona, processMacros),
+    };
+  }
+
   /// Process macros in Author's Note
   Future<String> _processAuthorNoteMacros(String note) async {
     final character = state.character;
     if (character == null) return note;
 
     // Get active persona
-    final activePersonaId = _ref.read(activePersonaIdProvider);
-    Persona? persona;
-    if (activePersonaId != null) {
-      persona = await _personaRepository.getPersona(activePersonaId);
-    }
-    persona ??= await _personaRepository.getDefaultPersona();
+    final persona = await _resolvePersona();
 
     // Get LLM config
     final llmConfig = _ref.read(llmConfigProvider);
@@ -1661,12 +1837,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final enabledSections = promptConfig.enabledSections;
 
     // Get active persona
-    final activePersonaId = _ref.read(activePersonaIdProvider);
-    Persona? persona;
-    if (activePersonaId != null) {
-      persona = await _personaRepository.getPersona(activePersonaId);
-    }
-    persona ??= await _personaRepository.getDefaultPersona();
+    final persona = await _resolvePersona();
 
     // Get LLM config for macro context
     final llmConfig = _ref.read(llmConfigProvider);
@@ -1778,8 +1949,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           .lastWhere((m) => m.role == MessageRole.user,
               orElse: () => chatMessages.last)
           .content;
-      final ragContext =
-          await _ref.read(ragContextProvider)(lastUserMessage);
+      final ragContext = await _ref.read(ragContextProvider)(lastUserMessage);
       if (ragContext != null && ragContext.isNotEmpty) {
         messages.add({'role': 'system', 'content': ragContext});
       }
@@ -1893,6 +2063,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
     // Books linked to this specific chat (chat lorebooks)
     final chatLinkedIds = state.chat?.linkedWorldInfoIds ?? const <String>[];
+    final persona = await _resolvePersona(characterId: character.id);
+    final personaLorebookId = persona?.lorebookId;
 
     // Get ALL world infos and filter by enabled status
     final allWorldInfos = await _ref.read(allWorldInfosProvider.future);
@@ -1910,6 +2082,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             (w.isGlobal ||
                 w.characterId == character.id ||
                 chatLinkedIds.contains(w.id) ||
+                w.id == personaLorebookId ||
                 activeIds.contains(w.id)))
         .map((w) => w.id)
         .toList();
@@ -2111,12 +2284,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     try {
       // Get character and persona for summary context
       final character = state.character;
-      final activePersonaId = _ref.read(activePersonaIdProvider);
-      Persona? persona;
-      if (activePersonaId != null) {
-        persona = await _personaRepository.getPersona(activePersonaId);
-      }
-      persona ??= await _personaRepository.getDefaultPersona();
+      final persona = await _resolvePersona();
 
       // Determine which messages to summarize
       final messagesToSummarize = chat.summaries.isEmpty
@@ -2160,9 +2328,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     }
   }
 
-  /// Clear the current chat
-  void clearChat() {
-    state = const ActiveChatState();
+  /// Clear all messages while keeping the current chat open.
+  Future<void> clearMessages() async {
+    final chat = state.chat;
+    if (chat == null || state.isGenerating) return;
+
+    await _chatRepository.clearMessages(chat.id);
+    final updatedChat = await _chatRepository.updateChat(
+      chat.copyWith(summaries: const []),
+    );
+    state = state.copyWith(chat: updatedChat, messages: const []);
+    _ref.invalidate(allChatsProvider);
   }
 
   /// Import messages into the current chat and refresh local state.
@@ -2205,8 +2381,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   Future<void> updateStartReplyWith(String text) async {
     if (state.chat == null) return;
 
-    final updatedChat = state.chat!
-        .withSetting('startReplyWith', text.isEmpty ? null : text);
+    final updatedChat =
+        state.chat!.withSetting('startReplyWith', text.isEmpty ? null : text);
     await _chatRepository.updateChat(updatedChat);
     state = state.copyWith(chat: updatedChat);
   }
@@ -2493,8 +2669,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         // Stream the response with reasoning support
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk
-            in _generateStreamWithPrefill(context, config)) {
+        await for (final chunk in _generateStreamWithPrefill(context, config)) {
           // Check if generation was cancelled
           if (_isCancelling) {
             break;
@@ -2525,8 +2700,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
-        final response =
-            await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(context, config);
         finalContent = response.content;
         finalReasoning = response.reasoning;
 
@@ -2598,12 +2772,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     if (group == null) return '';
 
     // Get active persona
-    final activePersonaId = _ref.read(activePersonaIdProvider);
-    Persona? persona;
-    if (activePersonaId != null) {
-      persona = await _personaRepository.getPersona(activePersonaId);
-    }
-    persona ??= await _personaRepository.getDefaultPersona();
+    final persona = await _resolvePersona();
 
     // Get LLM config for macro context
     final llmConfig = _ref.read(llmConfigProvider);

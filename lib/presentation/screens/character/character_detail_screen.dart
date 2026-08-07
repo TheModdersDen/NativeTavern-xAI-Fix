@@ -11,12 +11,6 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 
-/// Provider for loading a single character by ID
-final characterDetailProvider = FutureProvider.family<Character?, String>((ref, id) async {
-  final repo = ref.watch(characterRepositoryProvider);
-  return repo.getCharacter(id);
-});
-
 /// Character detail screen
 class CharacterDetailScreen extends ConsumerWidget {
   final String characterId;
@@ -30,7 +24,7 @@ class CharacterDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final characterAsync = ref.watch(characterDetailProvider(characterId));
-    
+
     return characterAsync.when(
       data: (character) {
         if (character == null) {
@@ -70,20 +64,24 @@ class _CharacterDetailContent extends ConsumerStatefulWidget {
   const _CharacterDetailContent({required this.character});
 
   @override
-  ConsumerState<_CharacterDetailContent> createState() => _CharacterDetailContentState();
+  ConsumerState<_CharacterDetailContent> createState() =>
+      _CharacterDetailContentState();
 }
 
-class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent> {
+class _CharacterDetailContentState
+    extends ConsumerState<_CharacterDetailContent> {
   bool _isCreatingChat = false;
 
   Future<void> _startChat() async {
     if (_isCreatingChat) return;
-    
+
     setState(() => _isCreatingChat = true);
-    
+
     try {
-      final chatId = await ref.read(activeChatProvider.notifier).createChat(widget.character.id);
-      
+      final chatId = await ref
+          .read(activeChatProvider.notifier)
+          .createChat(widget.character.id);
+
       if (chatId != null && mounted) {
         context.push('/chat/$chatId');
       } else if (mounted) {
@@ -154,7 +152,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
     if (confirmed == true && mounted) {
       try {
         // Use characterListProvider.notifier to ensure list gets refreshed
-        await ref.read(characterListProvider.notifier).deleteCharacter(character.id);
+        await ref
+            .read(characterListProvider.notifier)
+            .deleteCharacter(character.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.characterDeleted)),
@@ -200,7 +200,7 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final character = widget.character;
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -219,7 +219,8 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () => context.push('/characters/${character.id}/edit'),
+                onPressed: () =>
+                    context.push('/characters/${character.id}/edit'),
               ),
               PopupMenuButton<String>(
                 onSelected: (value) => _handleMenuAction(value, character),
@@ -238,7 +239,8 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                   ),
                   PopupMenuItem(
                     value: 'delete',
-                    child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                    child: Text(l10n.delete,
+                        style: const TextStyle(color: Colors.red)),
                   ),
                 ],
               ),
@@ -255,41 +257,48 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                     Wrap(
                       spacing: 8,
                       runSpacing: 4,
-                      children: character.tags.map((tag) => Chip(
-                        label: Text(tag),
-                        backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-                      )).toList(),
+                      children: character.tags
+                          .map((tag) => Chip(
+                                label: Text(tag),
+                                backgroundColor: AppTheme.primaryColor
+                                    .withValues(alpha: 0.2),
+                              ))
+                          .toList(),
                     ),
                   if (character.tags.isNotEmpty) const SizedBox(height: 16),
-                  
+
                   // Creator info
                   Row(
                     children: [
                       if (character.creator.isNotEmpty) ...[
-                        const Icon(Icons.person_outline, size: 16, color: AppTheme.textMuted),
+                        const Icon(Icons.person_outline,
+                            size: 16, color: AppTheme.textMuted),
                         const SizedBox(width: 4),
                         Text(
                           l10n.byCreator(character.creator),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.textMuted,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.textMuted,
+                                  ),
                         ),
                         const SizedBox(width: 16),
                       ],
                       if (character.version.isNotEmpty) ...[
-                        const Icon(Icons.update, size: 16, color: AppTheme.textMuted),
+                        const Icon(Icons.update,
+                            size: 16, color: AppTheme.textMuted),
                         const SizedBox(width: 4),
                         Text(
                           l10n.versionLabel(character.version),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.textMuted,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.textMuted,
+                                  ),
                         ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Description section
                   if (character.description.isNotEmpty)
                     _SectionCard(
@@ -297,8 +306,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.description,
                       icon: Icons.description,
                     ),
-                  if (character.description.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.description.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Personality section
                   if (character.personality.isNotEmpty)
                     _SectionCard(
@@ -306,8 +316,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.personality,
                       icon: Icons.psychology,
                     ),
-                  if (character.personality.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.personality.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Scenario section
                   if (character.scenario.isNotEmpty)
                     _SectionCard(
@@ -316,7 +327,7 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       icon: Icons.movie,
                     ),
                   if (character.scenario.isNotEmpty) const SizedBox(height: 16),
-                  
+
                   // First message section
                   if (character.firstMessage.isNotEmpty)
                     _SectionCard(
@@ -324,8 +335,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.firstMessage,
                       icon: Icons.chat_bubble,
                     ),
-                  if (character.firstMessage.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.firstMessage.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Alternate greetings section
                   if (character.alternateGreetings.isNotEmpty) ...[
                     _AlternateGreetingsCard(
@@ -333,7 +345,7 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
+
                   // Example messages section
                   if (character.exampleMessages.isNotEmpty)
                     _SectionCard(
@@ -341,8 +353,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.exampleMessages,
                       icon: Icons.format_quote,
                     ),
-                  if (character.exampleMessages.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.exampleMessages.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // System prompt section
                   if (character.systemPrompt.isNotEmpty)
                     _SectionCard(
@@ -350,8 +363,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.systemPrompt,
                       icon: Icons.settings_suggest,
                     ),
-                  if (character.systemPrompt.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.systemPrompt.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Post-history instructions section
                   if (character.postHistoryInstructions.isNotEmpty)
                     _SectionCard(
@@ -359,8 +373,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.postHistoryInstructions,
                       icon: Icons.rule,
                     ),
-                  if (character.postHistoryInstructions.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.postHistoryInstructions.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Creator notes section
                   if (character.creatorNotes.isNotEmpty)
                     _SectionCard(
@@ -368,8 +383,9 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                       content: character.creatorNotes,
                       icon: Icons.note,
                     ),
-                  if (character.creatorNotes.isNotEmpty) const SizedBox(height: 16),
-                  
+                  if (character.creatorNotes.isNotEmpty)
+                    const SizedBox(height: 16),
+
                   // Embedded Lorebook section
                   if (character.characterBook != null &&
                       character.characterBook!.entries.isNotEmpty)
@@ -379,7 +395,7 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
                   if (character.characterBook != null &&
                       character.characterBook!.entries.isNotEmpty)
                     const SizedBox(height: 16),
-                  
+
                   const SizedBox(height: 80), // Space for FAB
                 ],
               ),
@@ -393,7 +409,8 @@ class _CharacterDetailContentState extends ConsumerState<_CharacterDetailContent
             ? const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.chat),
         label: Text(_isCreatingChat ? l10n.creating : l10n.startChat),
@@ -479,11 +496,12 @@ class _SectionCardState extends State<_SectionCard> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final lines = widget.content.split('\n');
-    final shouldShowExpand = lines.length > widget.maxLines || widget.content.length > 500;
+    final shouldShowExpand =
+        lines.length > widget.maxLines || widget.content.length > 500;
     final displayContent = _expanded || !shouldShowExpand
         ? widget.content
         : '${widget.content.substring(0, widget.content.length.clamp(0, 500))}...';
-    
+
     return GestureDetector(
       onLongPress: _copyToClipboard,
       child: Card(
@@ -511,7 +529,8 @@ class _SectionCardState extends State<_SectionCard> {
                   ),
                   if (shouldShowExpand)
                     IconButton(
-                      icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+                      icon: Icon(
+                          _expanded ? Icons.expand_less : Icons.expand_more),
                       onPressed: () => setState(() => _expanded = !_expanded),
                       tooltip: _expanded ? l10n.showLess : l10n.showMore,
                     ),
@@ -540,21 +559,25 @@ class _AlternateGreetingsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${l10n.copiedToClipboard}: ${l10n.greetingNumber(index + 1)}'),
+        content: Text(
+            '${l10n.copiedToClipboard}: ${l10n.greetingNumber(index + 1)}'),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
   void _copyAllGreetings(BuildContext context) {
-    final allText = greetings.asMap().entries
+    final allText = greetings
+        .asMap()
+        .entries
         .map((e) => '--- Greeting ${e.key + 1} ---\n${e.value}')
         .join('\n\n');
     Clipboard.setData(ClipboardData(text: allText));
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${l10n.copiedToClipboard}: ${l10n.alternateGreetingsCount(greetings.length)}'),
+        content: Text(
+            '${l10n.copiedToClipboard}: ${l10n.alternateGreetingsCount(greetings.length)}'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -571,7 +594,8 @@ class _AlternateGreetingsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.waving_hand, size: 20, color: AppTheme.primaryColor),
+                const Icon(Icons.waving_hand,
+                    size: 20, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -590,50 +614,55 @@ class _AlternateGreetingsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...greetings.asMap().entries.map((entry) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onLongPress: () => _copyGreeting(context, entry.value, entry.key),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.darkSurface,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.darkDivider),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onLongPress: () =>
+                        _copyGreeting(context, entry.value, entry.key),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.darkSurface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.darkDivider),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              l10n.greetingNumber(entry.key + 1),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppTheme.textMuted,
-                                  ),
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.greetingNumber(entry.key + 1),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: AppTheme.textMuted,
+                                      ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.copy, size: 14),
+                                onPressed: () => _copyGreeting(
+                                    context, entry.value, entry.key),
+                                tooltip: l10n.copiedToClipboard,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.copy, size: 14),
-                            onPressed: () => _copyGreeting(context, entry.value, entry.key),
-                            tooltip: l10n.copiedToClipboard,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
+                          const SizedBox(height: 4),
+                          Text(
+                            entry.value.length > 200
+                                ? '${entry.value.substring(0, 200)}...'
+                                : entry.value,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.value.length > 200
-                            ? '${entry.value.substring(0, 200)}...'
-                            : entry.value,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            )),
+                )),
           ],
         ),
       ),
@@ -647,12 +676,14 @@ class _CharacterBookCard extends StatelessWidget {
   const _CharacterBookCard({required this.characterBook});
 
   void _copyEntry(BuildContext context, CharacterBookEntry entry) {
-    final text = 'Name: ${entry.name}\nKeys: ${entry.keys.join(", ")}\nContent: ${entry.content}';
+    final text =
+        'Name: ${entry.name}\nKeys: ${entry.keys.join(", ")}\nContent: ${entry.content}';
     Clipboard.setData(ClipboardData(text: text));
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${l10n.copiedToClipboard}: ${entry.name.isNotEmpty ? entry.name : entry.keys.join(", ")}'),
+        content: Text(
+            '${l10n.copiedToClipboard}: ${entry.name.isNotEmpty ? entry.name : entry.keys.join(", ")}'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -662,7 +693,7 @@ class _CharacterBookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final enabledEntries = characterBook.entries.where((e) => e.enabled).length;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -671,7 +702,8 @@ class _CharacterBookCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.auto_stories, size: 20, color: AppTheme.primaryColor),
+                const Icon(Icons.auto_stories,
+                    size: 20, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -679,12 +711,14 @@ class _CharacterBookCard extends StatelessWidget {
                     children: [
                       Text(
                         characterBook.name ?? l10n.embeddedLorebook,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppTheme.primaryColor,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
                       ),
                       Text(
-                        l10n.entriesEnabled(enabledEntries, characterBook.entries.length),
+                        l10n.entriesEnabled(
+                            enabledEntries, characterBook.entries.length),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.textMuted,
                             ),
@@ -708,83 +742,107 @@ class _CharacterBookCard extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 8),
             ...characterBook.entries.take(5).map((entry) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: GestureDetector(
-                onLongPress: () => _copyEntry(context, entry),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: entry.enabled ? AppTheme.darkSurface : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: entry.enabled ? AppTheme.primaryColor.withValues(alpha: 0.3) : AppTheme.darkDivider,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: GestureDetector(
+                    onLongPress: () => _copyEntry(context, entry),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: entry.enabled
+                            ? AppTheme.darkSurface
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: entry.enabled
+                              ? AppTheme.primaryColor.withValues(alpha: 0.3)
+                              : AppTheme.darkDivider,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            entry.enabled ? Icons.check_circle : Icons.cancel,
-                            size: 14,
-                            color: entry.enabled ? Colors.green : AppTheme.textMuted,
+                          Row(
+                            children: [
+                              Icon(
+                                entry.enabled
+                                    ? Icons.check_circle
+                                    : Icons.cancel,
+                                size: 14,
+                                color: entry.enabled
+                                    ? Colors.green
+                                    : AppTheme.textMuted,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  entry.name.isNotEmpty
+                                      ? entry.name
+                                      : entry.keys.join(', '),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: entry.enabled
+                                            ? null
+                                            : AppTheme.textMuted,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.copy, size: 14),
+                                onPressed: () => _copyEntry(context, entry),
+                                tooltip: l10n.copiedToClipboard,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              entry.name.isNotEmpty ? entry.name : entry.keys.join(', '),
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: entry.enabled ? null : AppTheme.textMuted,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          if (entry.keys.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 4,
+                              runSpacing: 2,
+                              children: entry.keys
+                                  .take(5)
+                                  .map((key) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor
+                                              .withValues(alpha: 0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          key,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall,
+                                        ),
+                                      ))
+                                  .toList(),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.copy, size: 14),
-                            onPressed: () => _copyEntry(context, entry),
-                            tooltip: l10n.copiedToClipboard,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
+                          ],
+                          const SizedBox(height: 4),
+                          Text(
+                            entry.content.length > 100
+                                ? '${entry.content.substring(0, 100)}...'
+                                : entry.content,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                      if (entry.keys.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: entry.keys.take(5).map((key) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              key,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          )).toList(),
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.content.length > 100
-                            ? '${entry.content.substring(0, 100)}...'
-                            : entry.content,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.textMuted,
-                            ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            )),
+                )),
             if (characterBook.entries.length > 5)
               Padding(
                 padding: const EdgeInsets.only(top: 8),

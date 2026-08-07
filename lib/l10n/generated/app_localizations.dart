@@ -6978,6 +6978,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'World info books active only in this chat'**
   String get chatLorebooksHint;
+
+  /// No description provided for @messagesCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'All messages cleared'**
+  String get messagesCleared;
+
+  /// No description provided for @selectCharacterCardFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Select character card files'**
+  String get selectCharacterCardFiles;
+
+  /// No description provided for @supportedCharacterCardFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch import supported: PNG, CharX, and JSON'**
+  String get supportedCharacterCardFormats;
+
+  /// No description provided for @importFromUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from URL'**
+  String get importFromUrl;
+
+  /// No description provided for @enterCharacterCardUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a character card URL...'**
+  String get enterCharacterCardUrl;
+
+  /// No description provided for @pasteAndImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste and import'**
+  String get pasteAndImport;
+
+  /// No description provided for @supportedCommunities.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported communities (tap to open):'**
+  String get supportedCommunities;
+
+  /// No description provided for @publicCardLinksSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Public PNG and JSON links are also supported'**
+  String get publicCardLinksSupported;
+
+  /// No description provided for @communityLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Community links'**
+  String get communityLinks;
+
+  /// No description provided for @importSummaryMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {success} character cards; {failed} failed'**
+  String importSummaryMixed(Object failed, Object success);
+
+  /// No description provided for @importSummarySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} character cards'**
+  String importSummarySuccess(Object count);
+
+  /// No description provided for @importSummaryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'All imports failed'**
+  String get importSummaryFailed;
+
+  /// No description provided for @processingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing: {processed} / {total}'**
+  String processingProgress(Object processed, Object total);
+
+  /// No description provided for @importSuccessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get importSuccessLabel;
+
+  /// No description provided for @importFailureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get importFailureLabel;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @importAllCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Import all ({count})'**
+  String importAllCharacters(Object count);
+
+  /// No description provided for @switchLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch layout'**
+  String get switchLayout;
+
+  /// No description provided for @stopGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop generating'**
+  String get stopGenerating;
+
+  /// No description provided for @imageBackgroundSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Image background settings'**
+  String get imageBackgroundSettings;
+
+  /// No description provided for @useCharacterImageAsBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Use character image as background'**
+  String get useCharacterImageAsBackground;
+
+  /// No description provided for @useCharacterImageAsBackgroundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically use the character avatar when available'**
+  String get useCharacterImageAsBackgroundHint;
+
+  /// No description provided for @backgroundOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Background opacity'**
+  String get backgroundOpacity;
+
+  /// No description provided for @backgroundOpacityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to custom and character image backgrounds'**
+  String get backgroundOpacityHint;
+
+  /// No description provided for @enableBackgroundBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable background blur'**
+  String get enableBackgroundBlur;
+
+  /// No description provided for @enableBackgroundBlurHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies blur to all image backgrounds'**
+  String get enableBackgroundBlurHint;
+
+  /// No description provided for @backgroundPriorityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority: character background > global background > character image > default color'**
+  String get backgroundPriorityHint;
+
+  /// No description provided for @openRouterUpstreamProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenRouter provider'**
+  String get openRouterUpstreamProvider;
+
+  /// No description provided for @automaticRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic routing'**
+  String get automaticRouting;
+
+  /// No description provided for @openRouterProviderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the upstream provider used for this model'**
+  String get openRouterProviderHint;
+
+  /// No description provided for @useCurrentChatConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current chat connection'**
+  String get useCurrentChatConnection;
+
+  /// No description provided for @chatConnectionAppliedToEmbeddings.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat endpoint and API key applied to embeddings'**
+  String get chatConnectionAppliedToEmbeddings;
 }
 
 class _AppLocalizationsDelegate

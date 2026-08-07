@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/database/database.dart' hide Persona;
@@ -12,9 +13,11 @@ class PersonaRepository {
 
   /// Get all personas
   Future<List<Persona>> getAllPersonas() async {
-    final rows = await _db.customSelect(
-      'SELECT * FROM personas ORDER BY is_default DESC, name ASC',
-    ).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM personas ORDER BY is_default DESC, name ASC',
+        )
+        .get();
 
     return rows.map((row) => _rowToPersona(row.data)).toList();
   }
@@ -32,9 +35,11 @@ class PersonaRepository {
 
   /// Get the default persona
   Future<Persona?> getDefaultPersona() async {
-    final rows = await _db.customSelect(
-      'SELECT * FROM personas WHERE is_default = 1 LIMIT 1',
-    ).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM personas WHERE is_default = 1 LIMIT 1',
+        )
+        .get();
 
     if (rows.isEmpty) return null;
     return _rowToPersona(rows.first.data);
@@ -44,8 +49,12 @@ class PersonaRepository {
   Future<void> createPersona(Persona persona) async {
     await _db.customInsert(
       '''
-      INSERT INTO personas (id, name, description, avatar_path, is_default, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO personas (
+        id, name, description, avatar_path, is_default,
+        connections_json, description_settings_json, lorebook_id,
+        system_prompt_override, post_history_instructions, tags_json,
+        creator_notes, is_favorite, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       variables: [
         Variable.withString(persona.id),
@@ -55,6 +64,22 @@ class PersonaRepository {
             ? Variable.withString(persona.avatarPath!)
             : const Variable(null),
         Variable.withBool(persona.isDefault),
+        Variable.withString(jsonEncode(
+          persona.connections.map((connection) => connection.toJson()).toList(),
+        )),
+        Variable.withString(jsonEncode(persona.descriptionSettings.toJson())),
+        persona.lorebookId != null
+            ? Variable.withString(persona.lorebookId!)
+            : const Variable(null),
+        persona.systemPromptOverride != null
+            ? Variable.withString(persona.systemPromptOverride!)
+            : const Variable(null),
+        persona.postHistoryInstructions != null
+            ? Variable.withString(persona.postHistoryInstructions!)
+            : const Variable(null),
+        Variable.withString(jsonEncode(persona.tags)),
+        Variable.withString(persona.creatorNotes),
+        Variable.withBool(persona.isFavorite),
         Variable.withDateTime(persona.createdAt),
         Variable.withDateTime(persona.updatedAt),
       ],
@@ -66,7 +91,10 @@ class PersonaRepository {
     await _db.customUpdate(
       '''
       UPDATE personas
-      SET name = ?, description = ?, avatar_path = ?, is_default = ?, updated_at = ?
+      SET name = ?, description = ?, avatar_path = ?, is_default = ?,
+          connections_json = ?, description_settings_json = ?, lorebook_id = ?,
+          system_prompt_override = ?, post_history_instructions = ?, tags_json = ?,
+          creator_notes = ?, is_favorite = ?, updated_at = ?
       WHERE id = ?
       ''',
       variables: [
@@ -76,6 +104,22 @@ class PersonaRepository {
             ? Variable.withString(persona.avatarPath!)
             : const Variable(null),
         Variable.withBool(persona.isDefault),
+        Variable.withString(jsonEncode(
+          persona.connections.map((connection) => connection.toJson()).toList(),
+        )),
+        Variable.withString(jsonEncode(persona.descriptionSettings.toJson())),
+        persona.lorebookId != null
+            ? Variable.withString(persona.lorebookId!)
+            : const Variable(null),
+        persona.systemPromptOverride != null
+            ? Variable.withString(persona.systemPromptOverride!)
+            : const Variable(null),
+        persona.postHistoryInstructions != null
+            ? Variable.withString(persona.postHistoryInstructions!)
+            : const Variable(null),
+        Variable.withString(jsonEncode(persona.tags)),
+        Variable.withString(persona.creatorNotes),
+        Variable.withBool(persona.isFavorite),
         Variable.withDateTime(persona.updatedAt),
         Variable.withString(persona.id),
       ],
@@ -123,9 +167,47 @@ class PersonaRepository {
       description: row['description'] as String? ?? '',
       avatarPath: row['avatar_path'] as String?,
       isDefault: (row['is_default'] as int) == 1,
+      connections: _parseJsonList(row['connections_json'])
+          .whereType<Map<String, dynamic>>()
+          .map(PersonaConnection.fromJson)
+          .toList(),
+      descriptionSettings: _parseDescriptionSettings(
+        row['description_settings_json'],
+      ),
+      lorebookId: row['lorebook_id'] as String?,
+      systemPromptOverride: row['system_prompt_override'] as String?,
+      postHistoryInstructions: row['post_history_instructions'] as String?,
+      tags: _parseJsonList(row['tags_json']).map((value) => '$value').toList(),
+      creatorNotes: row['creator_notes'] as String? ?? '',
+      isFavorite: (row['is_favorite'] as int? ?? 0) == 1,
       createdAt: _parseDateTime(row['created_at']),
       updatedAt: _parseDateTime(row['updated_at']),
     );
+  }
+
+  List<dynamic> _parseJsonList(dynamic value) {
+    if (value is! String || value.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(value);
+      return decoded is List<dynamic> ? decoded : const [];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  PersonaDescriptionSettings _parseDescriptionSettings(dynamic value) {
+    if (value is! String || value.isEmpty) {
+      return const PersonaDescriptionSettings();
+    }
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is Map<String, dynamic>) {
+        return PersonaDescriptionSettings.fromJson(decoded);
+      }
+    } catch (_) {
+      // Fall back to defaults for malformed legacy data.
+    }
+    return const PersonaDescriptionSettings();
   }
 
   /// Parse DateTime from database value (can be int or String)

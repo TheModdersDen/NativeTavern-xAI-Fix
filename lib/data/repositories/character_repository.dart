@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/database/database.dart' hide Character;
 import 'package:native_tavern/data/database/database.dart' as db;
 import 'package:native_tavern/data/models/character.dart' as models;
+import 'package:native_tavern/core/utils/png_text_chunks.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -69,35 +70,34 @@ class CharacterRepository {
     if (character == null) {
       throw Exception('Character not found');
     }
-    
+
     final updatedCharacter = character.copyWith(
       isFavorite: !character.isFavorite,
       modifiedAt: DateTime.now(),
     );
-    
-    await (_db.update(_db.characters)
-          ..where((t) => t.id.equals(characterId)))
+
+    await (_db.update(_db.characters)..where((t) => t.id.equals(characterId)))
         .write(_characterToCompanion(updatedCharacter));
-    
+
     return updatedCharacter;
   }
 
   /// Set character favorite status
-  Future<models.Character> setFavorite(String characterId, bool isFavorite) async {
+  Future<models.Character> setFavorite(
+      String characterId, bool isFavorite) async {
     final character = await getCharacter(characterId);
     if (character == null) {
       throw Exception('Character not found');
     }
-    
+
     final updatedCharacter = character.copyWith(
       isFavorite: isFavorite,
       modifiedAt: DateTime.now(),
     );
-    
-    await (_db.update(_db.characters)
-          ..where((t) => t.id.equals(characterId)))
+
+    await (_db.update(_db.characters)..where((t) => t.id.equals(characterId)))
         .write(_characterToCompanion(updatedCharacter));
-    
+
     return updatedCharacter;
   }
 
@@ -105,7 +105,7 @@ class CharacterRepository {
   Future<models.Character> createCharacter(models.Character character) async {
     final id = character.id.isEmpty ? _uuid.v4() : character.id;
     final now = DateTime.now();
-    
+
     final newCharacter = character.copyWith(
       id: id,
       createdAt: now,
@@ -119,39 +119,49 @@ class CharacterRepository {
   /// Update an existing character
   Future<models.Character> updateCharacter(models.Character character) async {
     final updatedCharacter = character.copyWith(modifiedAt: DateTime.now());
-    
-    await (_db.update(_db.characters)
-          ..where((t) => t.id.equals(character.id)))
+
+    await (_db.update(_db.characters)..where((t) => t.id.equals(character.id)))
         .write(_characterToCompanion(updatedCharacter));
-    
+
     return updatedCharacter;
   }
 
   /// Delete a character
   Future<void> deleteCharacter(String id) async {
     // Delete associated messages first (they reference chats)
-    final chats = await (_db.select(_db.chats)..where((t) => t.characterId.equals(id))).get();
+    final chats = await (_db.select(_db.chats)
+          ..where((t) => t.characterId.equals(id)))
+        .get();
     for (final chat in chats) {
-      await (_db.delete(_db.messages)..where((t) => t.chatId.equals(chat.id))).go();
-      await (_db.delete(_db.bookmarks)..where((t) => t.chatId.equals(chat.id))).go();
+      await (_db.delete(_db.messages)..where((t) => t.chatId.equals(chat.id)))
+          .go();
+      await (_db.delete(_db.bookmarks)..where((t) => t.chatId.equals(chat.id)))
+          .go();
     }
-    
+
     // Delete associated chats
     await (_db.delete(_db.chats)..where((t) => t.characterId.equals(id))).go();
-    
+
     // Delete associated world infos and their entries (character-specific lorebooks)
-    final worldInfos = await (_db.select(_db.worldInfos)..where((t) => t.characterId.equals(id))).get();
+    final worldInfos = await (_db.select(_db.worldInfos)
+          ..where((t) => t.characterId.equals(id)))
+        .get();
     for (final worldInfo in worldInfos) {
-      await (_db.delete(_db.worldInfoEntries)..where((t) => t.worldInfoId.equals(worldInfo.id))).go();
+      await (_db.delete(_db.worldInfoEntries)
+            ..where((t) => t.worldInfoId.equals(worldInfo.id)))
+          .go();
     }
-    await (_db.delete(_db.worldInfos)..where((t) => t.characterId.equals(id))).go();
-    
+    await (_db.delete(_db.worldInfos)..where((t) => t.characterId.equals(id)))
+        .go();
+
     // Delete associated character tags
-    await (_db.delete(_db.characterTags)..where((t) => t.characterId.equals(id))).go();
-    
+    await (_db.delete(_db.characterTags)
+          ..where((t) => t.characterId.equals(id)))
+        .go();
+
     // Delete the character
     await (_db.delete(_db.characters)..where((t) => t.id.equals(id))).go();
-    
+
     // Delete avatar file if exists
     await _deleteCharacterAvatar(id);
   }
@@ -162,15 +172,14 @@ class CharacterRepository {
     if (!await avatarDir.exists()) {
       await avatarDir.create(recursive: true);
     }
-    
+
     final avatarPath = p.join(avatarDir.path, '$characterId.png');
     await File(avatarPath).writeAsBytes(imageData);
-    
+
     // Update character with avatar path
-    await (_db.update(_db.characters)
-          ..where((t) => t.id.equals(characterId)))
+    await (_db.update(_db.characters)..where((t) => t.id.equals(characterId)))
         .write(CharactersCompanion(avatarPath: Value(avatarPath)));
-    
+
     return avatarPath;
   }
 
@@ -197,22 +206,23 @@ class CharacterRepository {
           // Load PNG bytes from assets
           final byteData = await rootBundle.load(assetPath);
           final bytes = byteData.buffer.asUint8List();
-          
+
           // Extract character data from PNG tEXt chunk
-          final base64Data = _extractPngTextChunk(bytes, 'chara');
+          final base64Data = extractPngTextChunk(bytes, 'ccv3') ??
+              extractPngTextChunk(bytes, 'chara');
           if (base64Data == null) {
             debugPrint('No character data found in $assetPath');
             continue;
           }
-          
+
           // Decode base64 and parse JSON (V2/V3 character card format)
           final jsonString = utf8.decode(base64Decode(base64Data));
           final json = jsonDecode(jsonString) as Map<String, dynamic>;
-          
+
           // Extract character ID from embedded data (V2/V3 format has it in data.id)
           final data = json['data'] as Map<String, dynamic>? ?? json;
           final characterId = data['id'] as String? ?? _uuid.v4();
-          
+
           final existing = await getCharacter(characterId);
           if (existing != null) {
             // Character already exists, skip
@@ -221,15 +231,15 @@ class CharacterRepository {
 
           // Parse character card (V2/V3 format) - same logic as importFromJson
           final character = _parseCharacterCard(json, characterId);
-          
+
           // Save avatar image
           final avatarPath = await _saveBuiltInAvatar(characterId, bytes);
           final characterWithAvatar = character.copyWith(
             assets: models.CharacterAssets(avatarPath: avatarPath),
           );
-          
+
           await createCharacter(characterWithAvatar);
-          
+
           debugPrint('Loaded built-in character: ${character.name}');
         } catch (e) {
           debugPrint('Failed to load built-in character from $assetPath: $e');
@@ -239,9 +249,10 @@ class CharacterRepository {
       debugPrint('Failed to load built-in characters: $e');
     }
   }
-  
+
   /// Parse character card from V1/V2/V3 format JSON
-  models.Character _parseCharacterCard(Map<String, dynamic> json, String characterId) {
+  models.Character _parseCharacterCard(
+      Map<String, dynamic> json, String characterId) {
     String name = '';
     String description = '';
     String personality = '';
@@ -268,17 +279,20 @@ class CharacterRepository {
       firstMessage = data['first_mes'] as String? ?? '';
       exampleMessages = data['mes_example'] as String? ?? '';
       systemPrompt = data['system_prompt'] as String? ?? '';
-      postHistoryInstructions = data['post_history_instructions'] as String? ?? '';
+      postHistoryInstructions =
+          data['post_history_instructions'] as String? ?? '';
       creatorNotes = data['creator_notes'] as String? ?? '';
       tags = (data['tags'] as List<dynamic>?)?.cast<String>() ?? [];
       creator = data['creator'] as String? ?? '';
       version = data['character_version'] as String? ?? '';
-      alternateGreetings = (data['alternate_greetings'] as List<dynamic>?)?.cast<String>() ?? [];
+      alternateGreetings =
+          (data['alternate_greetings'] as List<dynamic>?)?.cast<String>() ?? [];
       extensions = data['extensions'] as Map<String, dynamic>? ?? {};
       if (data['character_book'] != null) {
-        characterBook = models.CharacterBook.fromJson(data['character_book'] as Map<String, dynamic>);
+        characterBook = models.CharacterBook.fromJson(
+            data['character_book'] as Map<String, dynamic>);
       }
-    } 
+    }
     // Check for V2 format (has data field but no spec)
     else if (json.containsKey('data')) {
       final data = json['data'] as Map<String, dynamic>? ?? {};
@@ -289,27 +303,38 @@ class CharacterRepository {
       firstMessage = data['first_mes'] as String? ?? '';
       exampleMessages = data['mes_example'] as String? ?? '';
       systemPrompt = data['system_prompt'] as String? ?? '';
-      postHistoryInstructions = data['post_history_instructions'] as String? ?? '';
+      postHistoryInstructions =
+          data['post_history_instructions'] as String? ?? '';
       creatorNotes = data['creator_notes'] as String? ?? '';
       tags = (data['tags'] as List<dynamic>?)?.cast<String>() ?? [];
       creator = data['creator'] as String? ?? '';
       version = data['character_version'] as String? ?? '';
-      alternateGreetings = (data['alternate_greetings'] as List<dynamic>?)?.cast<String>() ?? [];
+      alternateGreetings =
+          (data['alternate_greetings'] as List<dynamic>?)?.cast<String>() ?? [];
       extensions = data['extensions'] as Map<String, dynamic>? ?? {};
       if (data['character_book'] != null) {
-        characterBook = models.CharacterBook.fromJson(data['character_book'] as Map<String, dynamic>);
+        characterBook = models.CharacterBook.fromJson(
+            data['character_book'] as Map<String, dynamic>);
       }
     }
     // V1 format (flat structure)
     else {
       name = json['name'] as String? ?? json['char_name'] as String? ?? '';
-      description = json['description'] as String? ?? json['char_persona'] as String? ?? '';
+      description = json['description'] as String? ??
+          json['char_persona'] as String? ??
+          '';
       personality = json['personality'] as String? ?? '';
-      scenario = json['scenario'] as String? ?? json['world_scenario'] as String? ?? '';
-      firstMessage = json['first_mes'] as String? ?? json['char_greeting'] as String? ?? '';
-      exampleMessages = json['mes_example'] as String? ?? json['example_dialogue'] as String? ?? '';
+      scenario = json['scenario'] as String? ??
+          json['world_scenario'] as String? ??
+          '';
+      firstMessage = json['first_mes'] as String? ??
+          json['char_greeting'] as String? ??
+          '';
+      exampleMessages = json['mes_example'] as String? ??
+          json['example_dialogue'] as String? ??
+          '';
     }
-    
+
     return models.Character(
       id: characterId,
       name: name,
@@ -333,61 +358,18 @@ class CharacterRepository {
       modifiedAt: DateTime.now(),
     );
   }
-  
-  /// Extract text chunk from PNG bytes
-  String? _extractPngTextChunk(Uint8List bytes, String keyword) {
-    // PNG signature is 8 bytes
-    if (bytes.length < 8) return null;
-    
-    int offset = 8; // Skip PNG signature
-    
-    while (offset < bytes.length - 8) {
-      // Read chunk length (4 bytes, big-endian)
-      final length = (bytes[offset] << 24) | 
-                    (bytes[offset + 1] << 16) | 
-                    (bytes[offset + 2] << 8) | 
-                    bytes[offset + 3];
-      offset += 4;
-      
-      // Read chunk type (4 bytes)
-      final type = String.fromCharCodes(bytes.sublist(offset, offset + 4));
-      offset += 4;
-      
-      if (type == 'tEXt') {
-        // Read keyword until null byte
-        final dataStart = offset;
-        final dataEnd = offset + length;
-        
-        int keywordEnd = dataStart;
-        while (keywordEnd < dataEnd && bytes[keywordEnd] != 0) {
-          keywordEnd++;
-        }
-        
-        final chunkKeyword = String.fromCharCodes(bytes.sublist(dataStart, keywordEnd));
-        
-        if (chunkKeyword == keyword && keywordEnd + 1 < dataEnd) {
-          // Return the text value after the null separator
-          return String.fromCharCodes(bytes.sublist(keywordEnd + 1, dataEnd));
-        }
-      }
-      
-      // Skip data + CRC
-      offset += length + 4;
-    }
-    
-    return null;
-  }
-  
+
   /// Save built-in avatar to data directory
-  Future<String> _saveBuiltInAvatar(String characterId, Uint8List imageData) async {
+  Future<String> _saveBuiltInAvatar(
+      String characterId, Uint8List imageData) async {
     final avatarDir = Directory(p.join(_dataPath, 'avatars'));
     if (!await avatarDir.exists()) {
       await avatarDir.create(recursive: true);
     }
-    
+
     final avatarPath = p.join(avatarDir.path, '$characterId.png');
     await File(avatarPath).writeAsBytes(imageData);
-    
+
     return avatarPath;
   }
 
@@ -408,6 +390,7 @@ class CharacterRepository {
         'personality': character.personality,
         'scenario': character.scenario,
         'first_mes': character.firstMessage,
+        'alternate_greetings': character.alternateGreetings,
         'mes_example': character.exampleMessages,
         'system_prompt': character.systemPrompt,
         'post_history_instructions': character.postHistoryInstructions,
@@ -421,7 +404,7 @@ class CharacterRepository {
   }
 
   // Private helpers
-  
+
   models.Character _characterFromRow(db.Character row) {
     return models.Character(
       id: row.id,
@@ -470,7 +453,8 @@ class CharacterRepository {
       creator: Value(character.creator),
       characterVersion: Value(character.version),
       avatarPath: Value(character.assets?.avatarPath),
-      characterBookJson: Value(_serializeCharacterBook(character.characterBook)),
+      characterBookJson:
+          Value(_serializeCharacterBook(character.characterBook)),
       extensionsJson: Value(jsonEncode(character.extensionsForExport())),
       isFavorite: Value(character.isFavorite),
       createdAt: Value(character.createdAt),

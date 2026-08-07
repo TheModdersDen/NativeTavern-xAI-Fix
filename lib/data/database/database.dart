@@ -14,19 +14,26 @@ class Characters extends Table {
   TextColumn get personality => text().withDefault(const Constant(''))();
   TextColumn get scenario => text().withDefault(const Constant(''))();
   TextColumn get firstMessage => text().withDefault(const Constant(''))();
-  TextColumn get alternateGreetings => text().withDefault(const Constant('[]'))(); // JSON array
+  TextColumn get alternateGreetings =>
+      text().withDefault(const Constant('[]'))(); // JSON array
   TextColumn get exampleDialogue => text().withDefault(const Constant(''))();
   TextColumn get systemPrompt => text().withDefault(const Constant(''))();
-  TextColumn get postHistoryInstructions => text().withDefault(const Constant(''))();
+  TextColumn get postHistoryInstructions =>
+      text().withDefault(const Constant(''))();
   TextColumn get creatorNotes => text().withDefault(const Constant(''))();
-  TextColumn get tags => text().withDefault(const Constant('[]'))(); // JSON array
+  TextColumn get tags =>
+      text().withDefault(const Constant('[]'))(); // JSON array
   TextColumn get creator => text().withDefault(const Constant(''))();
   TextColumn get characterVersion => text().withDefault(const Constant(''))();
   TextColumn get avatarPath => text().nullable()();
-  TextColumn get assetsJson => text().withDefault(const Constant('{}'))(); // JSON
-  TextColumn get characterBookJson => text().withDefault(const Constant(''))(); // JSON for embedded lorebook
-  TextColumn get extensionsJson => text().withDefault(const Constant('{}'))(); // JSON
-  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))(); // Favorite flag
+  TextColumn get assetsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
+  TextColumn get characterBookJson =>
+      text().withDefault(const Constant(''))(); // JSON for embedded lorebook
+  TextColumn get extensionsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
+  BoolColumn get isFavorite =>
+      boolean().withDefault(const Constant(false))(); // Favorite flag
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get modifiedAt => dateTime()();
 
@@ -40,10 +47,14 @@ class Chats extends Table {
   TextColumn get characterId => text().references(Characters, #id)();
   TextColumn get groupId => text().nullable()();
   TextColumn get title => text().withDefault(const Constant('New Chat'))();
-  TextColumn get settingsJson => text().withDefault(const Constant('{}'))(); // JSON
-  TextColumn get authorNote => text().withDefault(const Constant(''))(); // Author's Note content
-  IntColumn get authorNoteDepth => integer().withDefault(const Constant(4))(); // Depth for injection
-  BoolColumn get authorNoteEnabled => boolean().withDefault(const Constant(false))(); // Whether enabled
+  TextColumn get settingsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
+  TextColumn get authorNote =>
+      text().withDefault(const Constant(''))(); // Author's Note content
+  IntColumn get authorNoteDepth =>
+      integer().withDefault(const Constant(4))(); // Depth for injection
+  BoolColumn get authorNoteEnabled =>
+      boolean().withDefault(const Constant(false))(); // Whether enabled
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -58,14 +69,18 @@ class Messages extends Table {
   TextColumn get role => text()(); // user, assistant, system
   TextColumn get content => text()();
   DateTimeColumn get timestamp => dateTime()();
-  TextColumn get swipes => text().withDefault(const Constant('[]'))(); // JSON array of strings
+  TextColumn get swipes =>
+      text().withDefault(const Constant('[]'))(); // JSON array of strings
   IntColumn get currentSwipeIndex => integer().withDefault(const Constant(0))();
   BoolColumn get isEdited => boolean().withDefault(const Constant(false))();
   BoolColumn get isHidden => boolean().withDefault(const Constant(false))();
-  TextColumn get metadataJson => text().withDefault(const Constant('{}'))(); // JSON
-  TextColumn get characterId => text().nullable()(); // For group chats - which character sent this
+  TextColumn get metadataJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
+  TextColumn get characterId =>
+      text().nullable()(); // For group chats - which character sent this
   TextColumn get characterName => text().nullable()(); // Cached character name
-  TextColumn get attachmentsJson => text().withDefault(const Constant('[]'))(); // JSON array of attachments
+  TextColumn get attachmentsJson =>
+      text().withDefault(const Constant('[]'))(); // JSON array of attachments
 
   @override
   Set<Column> get primaryKey => {id};
@@ -79,12 +94,17 @@ class WorldInfos extends Table {
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
   BoolColumn get isGlobal => boolean().withDefault(const Constant(false))();
   TextColumn get characterId => text().nullable().references(Characters, #id)();
-  TextColumn get scanDepth => text().nullable()(); // Default scan depth for entries
-  BoolColumn get caseSensitive => boolean().nullable()(); // Default case sensitivity
-  BoolColumn get matchWholeWords => boolean().nullable()(); // Default match whole words
-  BoolColumn get useGroupScoring => boolean().nullable()(); // Default group scoring
+  TextColumn get scanDepth =>
+      text().nullable()(); // Default scan depth for entries
+  BoolColumn get caseSensitive =>
+      boolean().nullable()(); // Default case sensitivity
+  BoolColumn get matchWholeWords =>
+      boolean().nullable()(); // Default match whole words
+  BoolColumn get useGroupScoring =>
+      boolean().nullable()(); // Default group scoring
   IntColumn get recursionDepth => integer().nullable()(); // Max recursion depth
-  TextColumn get extensionsJson => text().withDefault(const Constant('{}'))(); // JSON extensions
+  TextColumn get extensionsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON extensions
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get modifiedAt => dateTime()();
 
@@ -96,27 +116,35 @@ class WorldInfos extends Table {
 class WorldInfoEntries extends Table {
   TextColumn get id => text()();
   TextColumn get worldInfoId => text().references(WorldInfos, #id)();
-  TextColumn get keys => text().withDefault(const Constant('[]'))(); // JSON array
-  TextColumn get secondaryKeys => text().withDefault(const Constant('[]'))(); // JSON array
+  TextColumn get keys =>
+      text().withDefault(const Constant('[]'))(); // JSON array
+  TextColumn get secondaryKeys =>
+      text().withDefault(const Constant('[]'))(); // JSON array
   TextColumn get content => text().withDefault(const Constant(''))();
   TextColumn get comment => text().withDefault(const Constant(''))();
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
   BoolColumn get constant => boolean().withDefault(const Constant(false))();
   BoolColumn get selective => boolean().withDefault(const Constant(false))();
   IntColumn get insertionOrder => integer().withDefault(const Constant(0))();
-  BoolColumn get caseSensitive => boolean().withDefault(const Constant(false))();
-  BoolColumn get matchWholeWords => boolean().withDefault(const Constant(false))();
-  BoolColumn get useGroupScoring => boolean().withDefault(const Constant(false))();
+  BoolColumn get caseSensitive =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get matchWholeWords =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get useGroupScoring =>
+      boolean().withDefault(const Constant(false))();
   TextColumn get automationId => text().withDefault(const Constant(''))();
   IntColumn get probability => integer().withDefault(const Constant(100))();
   IntColumn get position => integer().withDefault(const Constant(1))();
   IntColumn get depth => integer().withDefault(const Constant(4))();
   TextColumn get group => text().nullable()();
   IntColumn get groupWeight => integer().withDefault(const Constant(100))();
-  BoolColumn get preventRecursion => boolean().withDefault(const Constant(false))();
-  BoolColumn get delayUntilRecursion => boolean().withDefault(const Constant(false))();
+  BoolColumn get preventRecursion =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get delayUntilRecursion =>
+      boolean().withDefault(const Constant(false))();
   IntColumn get scanDepth => integer().withDefault(const Constant(1000))();
-  TextColumn get extensionsJson => text().withDefault(const Constant('{}'))(); // JSON
+  TextColumn get extensionsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
 
   @override
   Set<Column> get primaryKey => {id};
@@ -132,7 +160,8 @@ class LlmConfigs extends Table {
   TextColumn get model => text().nullable()();
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
-  TextColumn get defaultSettingsJson => text().withDefault(const Constant('{}'))(); // JSON
+  TextColumn get defaultSettingsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get modifiedAt => dateTime()();
 
@@ -147,6 +176,15 @@ class Personas extends Table {
   TextColumn get description => text().withDefault(const Constant(''))();
   TextColumn get avatarPath => text().nullable()();
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+  TextColumn get connectionsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get descriptionSettingsJson =>
+      text().withDefault(const Constant('{}'))();
+  TextColumn get lorebookId => text().nullable()();
+  TextColumn get systemPromptOverride => text().nullable()();
+  TextColumn get postHistoryInstructions => text().nullable()();
+  TextColumn get tagsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get creatorNotes => text().withDefault(const Constant(''))();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -159,8 +197,10 @@ class Groups extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get description => text().nullable()();
-  TextColumn get membersJson => text().withDefault(const Constant('[]'))(); // JSON array of GroupMember
-  TextColumn get settingsJson => text().withDefault(const Constant('{}'))(); // JSON GroupSettings
+  TextColumn get membersJson =>
+      text().withDefault(const Constant('[]'))(); // JSON array of GroupMember
+  TextColumn get settingsJson =>
+      text().withDefault(const Constant('{}'))(); // JSON GroupSettings
   TextColumn get avatarPath => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get modifiedAt => dateTime()();
@@ -232,9 +272,10 @@ class GlobalStates extends Table {
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -291,7 +332,8 @@ class AppDatabase extends _$AppDatabase {
           // Add missing SillyTavern-compatible fields to world info entries
           await m.addColumn(worldInfoEntries, worldInfoEntries.useGroupScoring);
           await m.addColumn(worldInfoEntries, worldInfoEntries.automationId);
-          await m.addColumn(worldInfoEntries, worldInfoEntries.delayUntilRecursion);
+          await m.addColumn(
+              worldInfoEntries, worldInfoEntries.delayUntilRecursion);
         }
         if (from < 12) {
           // Add missing SillyTavern-compatible fields to world infos
@@ -300,12 +342,24 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(worldInfos, worldInfos.matchWholeWords);
           await m.addColumn(worldInfos, worldInfos.useGroupScoring);
           await m.addColumn(worldInfos, worldInfos.recursionDepth);
-          await m.addColumn(worldInfos, worldInfos.recursionDepth);
           await m.addColumn(worldInfos, worldInfos.extensionsJson);
         }
         if (from < 13) {
           // Add GlobalStates table for settings persistence
           await m.createTable(globalStates);
+        }
+        // Versions before v3 did not have a personas table. createTable above
+        // uses the current schema, so only add these columns to an existing
+        // legacy personas table.
+        if (from >= 3 && from < 14) {
+          await m.addColumn(personas, personas.connectionsJson);
+          await m.addColumn(personas, personas.descriptionSettingsJson);
+          await m.addColumn(personas, personas.lorebookId);
+          await m.addColumn(personas, personas.systemPromptOverride);
+          await m.addColumn(personas, personas.postHistoryInstructions);
+          await m.addColumn(personas, personas.tagsJson);
+          await m.addColumn(personas, personas.creatorNotes);
+          await m.addColumn(personas, personas.isFavorite);
         }
       },
     );
@@ -316,10 +370,10 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'NativeTavern', 'database.sqlite'));
-    
+
     // Ensure directory exists
     await file.parent.create(recursive: true);
-    
+
     // Use foreground database (not background isolate) for reliable writes
     // Background isolate can be killed by OS when app goes to background,
     // causing data loss
@@ -334,7 +388,7 @@ LazyDatabase _openConnection() {
         database.execute('PRAGMA foreign_keys=ON;');
       },
     );
-    
+
     return db;
   });
 }

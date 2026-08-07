@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/providers/character_providers.dart';
 
 /// Character editor screen for creating/editing characters
 class CharacterEditorScreen extends ConsumerStatefulWidget {
@@ -15,14 +16,15 @@ class CharacterEditorScreen extends ConsumerStatefulWidget {
   const CharacterEditorScreen({super.key, this.characterId});
 
   @override
-  ConsumerState<CharacterEditorScreen> createState() => _CharacterEditorScreenState();
+  ConsumerState<CharacterEditorScreen> createState() =>
+      _CharacterEditorScreenState();
 }
 
 class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers for all fields
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -36,10 +38,10 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
   final _tagsController = TextEditingController();
   final _creatorController = TextEditingController();
   final _versionController = TextEditingController();
-  
+
   // Alternate greetings controllers
   final List<TextEditingController> _alternateGreetingControllers = [];
-  
+
   // State
   bool _isLoading = true;
   bool _isSaving = false;
@@ -85,7 +87,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
     try {
       final repo = ref.read(characterRepositoryProvider);
       final character = await repo.getCharacter(widget.characterId!);
-      
+
       if (character != null) {
         _character = character;
         _nameController.text = character.name;
@@ -101,16 +103,19 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
         _creatorController.text = character.creator;
         _versionController.text = character.version;
         _avatarPath = character.assets?.avatarPath;
-        
+
         // Load alternate greetings
         for (final greeting in character.alternateGreetings) {
-          _alternateGreetingControllers.add(TextEditingController(text: greeting));
+          _alternateGreetingControllers
+              .add(TextEditingController(text: greeting));
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToLoadCharacter(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToLoadCharacter(e.toString()))),
         );
       }
     }
@@ -130,7 +135,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         Uint8List? bytes;
-        
+
         if (file.bytes != null) {
           bytes = file.bytes;
         } else if (file.path != null) {
@@ -147,7 +152,9 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToPickImage(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToPickImage(e.toString()))),
         );
       }
     }
@@ -161,14 +168,14 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
     try {
       final repo = ref.read(characterRepositoryProvider);
       final now = DateTime.now();
-      
+
       // Parse tags
       final tags = _tagsController.text
           .split(',')
           .map((t) => t.trim())
           .where((t) => t.isNotEmpty)
           .toList();
-      
+
       // Get alternate greetings
       final alternateGreetings = _alternateGreetingControllers
           .map((c) => c.text.trim())
@@ -176,7 +183,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           .toList();
 
       Character character;
-      
+
       if (_character != null) {
         // Update existing character
         character = _character!.copyWith(
@@ -224,16 +231,23 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
         await repo.saveAvatar(character.id, _avatarData!);
       }
 
+      ref.invalidate(characterListProvider);
+      ref.invalidate(characterDetailProvider(character.id));
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.characterSavedSuccessfully)),
+          SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.characterSavedSuccessfully)),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveCharacter(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToSaveCharacter(e.toString()))),
         );
       }
     } finally {
@@ -252,10 +266,12 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
   @override
   Widget build(BuildContext context) {
     final isNew = widget.characterId == null;
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isNew ? AppLocalizations.of(context)!.createCharacter : AppLocalizations.of(context)!.editCharacter),
+        title: Text(isNew
+            ? AppLocalizations.of(context)!.createCharacter
+            : AppLocalizations.of(context)!.editCharacter),
         actions: [
           if (_hasChanges)
             Padding(
@@ -320,13 +336,15 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     backgroundImage: _getAvatarImage(),
                     child: _avatarData == null && _avatarPath == null
                         ? Icon(
                             Icons.person,
                             size: 60,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           )
                         : null,
                   ),
@@ -348,7 +366,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Name
           TextFormField(
             controller: _nameController,
@@ -365,7 +383,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Description
           TextFormField(
             controller: _descriptionController,
@@ -378,26 +396,28 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             maxLines: 6,
           ),
           const SizedBox(height: 16),
-          
+
           // Personality
           TextFormField(
             controller: _personalityController,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context)!.personality,
-              hintText: AppLocalizations.of(context)!.characterPersonalityTraits,
+              hintText:
+                  AppLocalizations.of(context)!.characterPersonalityTraits,
               border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 4,
           ),
           const SizedBox(height: 16),
-          
+
           // Scenario
           TextFormField(
             controller: _scenarioController,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context)!.scenario,
-              hintText: AppLocalizations.of(context)!.currentCircumstancesContext,
+              hintText:
+                  AppLocalizations.of(context)!.currentCircumstancesContext,
               border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
@@ -432,8 +452,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             AppLocalizations.of(context)!.customInstructionsSystemMessage,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -446,7 +466,6 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             maxLines: 8,
           ),
           const SizedBox(height: 24),
-          
           Text(
             AppLocalizations.of(context)!.postHistoryInstructions,
             style: Theme.of(context).textTheme.titleMedium,
@@ -455,8 +474,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             AppLocalizations.of(context)!.instructionsInsertedAfterHistory,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -487,8 +506,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             AppLocalizations.of(context)!.firstMessageSentByCharacter,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -501,13 +520,14 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             maxLines: 8,
           ),
           const SizedBox(height: 24),
-          
+
           // Alternate Greetings
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)!.alternateGreetingsCount(_alternateGreetingControllers.length),
+                AppLocalizations.of(context)!.alternateGreetingsCount(
+                    _alternateGreetingControllers.length),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               IconButton(
@@ -521,8 +541,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             AppLocalizations.of(context)!.alternateGreetingsCanSwipe,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           ..._alternateGreetingControllers.asMap().entries.map((entry) {
@@ -537,8 +557,10 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
                     child: TextFormField(
                       controller: controller,
                       decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.greeting(index + 1),
-                        hintText: AppLocalizations.of(context)!.alternativeGreetingMessage,
+                        labelText:
+                            AppLocalizations.of(context)!.greeting(index + 1),
+                        hintText: AppLocalizations.of(context)!
+                            .alternativeGreetingMessage,
                         border: const OutlineInputBorder(),
                         alignLabelWithHint: true,
                       ),
@@ -550,7 +572,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
                   Column(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        icon:
+                            const Icon(Icons.delete_outline, color: Colors.red),
                         onPressed: () => _removeAlternateGreeting(index),
                         tooltip: AppLocalizations.of(context)!.removeGreeting,
                       ),
@@ -576,20 +599,21 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Theme.of(context).colorScheme.outline),
+                border:
+                    Border.all(color: Theme.of(context).colorScheme.outline),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
                 child: Text(
                   AppLocalizations.of(context)!.noAlternateGreetings,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ),
             ),
           const SizedBox(height: 24),
-          
+
           Text(
             AppLocalizations.of(context)!.exampleMessages,
             style: Theme.of(context).textTheme.titleMedium,
@@ -598,14 +622,15 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             'Example dialogue to demonstrate how the character speaks.\nFormat: <START>\n{user}: Hello\n{char}: Hi there!',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _exampleMessagesController,
             decoration: const InputDecoration(
-              hintText: '<START>\n{user}: How are you?\n{char}: I\'m doing well, thanks for asking!',
+              hintText:
+                  '<START>\n{user}: How are you?\n{char}: I\'m doing well, thanks for asking!',
               border: OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
@@ -633,8 +658,9 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
 
   void _moveGreeting(int index, int direction) {
     final newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= _alternateGreetingControllers.length) return;
-    
+    if (newIndex < 0 || newIndex >= _alternateGreetingControllers.length)
+      return;
+
     setState(() {
       final controller = _alternateGreetingControllers.removeAt(index);
       _alternateGreetingControllers.insert(newIndex, controller);
@@ -657,8 +683,8 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           Text(
             AppLocalizations.of(context)!.creatorNotesNotSentToAi,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -671,7 +697,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             maxLines: 4,
           ),
           const SizedBox(height: 24),
-          
+
           // Tags
           TextFormField(
             controller: _tagsController,
@@ -683,7 +709,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Creator
           TextFormField(
             controller: _creatorController,
@@ -694,7 +720,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Version
           TextFormField(
             controller: _versionController,
@@ -705,7 +731,7 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Character Info Card
           if (_character != null) ...[
             Card(
@@ -719,9 +745,12 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
-                    Text(AppLocalizations.of(context)!.characterId(_character!.id)),
-                    Text(AppLocalizations.of(context)!.created(_character!.createdAt.toLocal().toString())),
-                    Text(AppLocalizations.of(context)!.modified(_character!.modifiedAt.toLocal().toString())),
+                    Text(AppLocalizations.of(context)!
+                        .characterId(_character!.id)),
+                    Text(AppLocalizations.of(context)!
+                        .created(_character!.createdAt.toLocal().toString())),
+                    Text(AppLocalizations.of(context)!
+                        .modified(_character!.modifiedAt.toLocal().toString())),
                   ],
                 ),
               ),

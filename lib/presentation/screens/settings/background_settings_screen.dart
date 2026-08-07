@@ -18,10 +18,12 @@ class BackgroundSettingsScreen extends ConsumerStatefulWidget {
   const BackgroundSettingsScreen({super.key, this.characterId});
 
   @override
-  ConsumerState<BackgroundSettingsScreen> createState() => _BackgroundSettingsScreenState();
+  ConsumerState<BackgroundSettingsScreen> createState() =>
+      _BackgroundSettingsScreenState();
 }
 
-class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScreen> {
+class _BackgroundSettingsScreenState
+    extends ConsumerState<BackgroundSettingsScreen> {
   late ChatBackground _currentBackground;
   bool _isLoading = false;
 
@@ -53,7 +55,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
       await for (final entity in bgDir.list(recursive: true)) {
         if (entity is File && _isImageFile(entity.path)) {
           final relative = p.relative(entity.path, from: bgDir.path);
-          final folder = p.dirname(relative) == '.' ? '' : p.split(relative).first;
+          final folder =
+              p.dirname(relative) == '.' ? '' : p.split(relative).first;
           if (folder.isNotEmpty) folders.add(folder);
           images.add(_GalleryImage(
             path: entity.path,
@@ -94,12 +97,15 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
 
   Future<void> _saveBackground(ChatBackground background) async {
     setState(() => _currentBackground = background);
-    
+
     if (widget.characterId != null) {
-      await ref.read(characterBackgroundProvider(widget.characterId!).notifier)
+      await ref
+          .read(characterBackgroundProvider(widget.characterId!).notifier)
           .setBackground(background);
     } else {
-      await ref.read(globalBackgroundProvider.notifier).setBackground(background);
+      await ref
+          .read(globalBackgroundProvider.notifier)
+          .setBackground(background);
     }
   }
 
@@ -110,7 +116,9 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isCharacterSpecific ? l10n.characterBackground : l10n.chatBackground),
+        title: Text(isCharacterSpecific
+            ? l10n.characterBackground
+            : l10n.chatBackground),
         actions: [
           if (_currentBackground.type != BackgroundType.none)
             IconButton(
@@ -128,7 +136,7 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
             _buildCharacterAvatarSetting(),
             const SizedBox(height: 24),
           ],
-          
+
           // Preview
           _buildPreviewSection(),
           const SizedBox(height: 24),
@@ -174,18 +182,21 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: AppTheme.accentColor,
-        fontWeight: FontWeight.bold,
-      ),
+            color: AppTheme.accentColor,
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
   Widget _buildCharacterAvatarSetting() {
-    final useCharacterAvatar = ref.watch(appSettingsProvider.select((s) => s.useCharacterAvatarAsBackground));
-    final enableBlur = ref.watch(appSettingsProvider.select((s) => s.enableBackgroundBlur));
-    final backgroundOpacity = ref.watch(appSettingsProvider.select((s) => s.backgroundOpacity));
+    final useCharacterAvatar = ref.watch(
+        appSettingsProvider.select((s) => s.useCharacterAvatarAsBackground));
+    final enableBlur =
+        ref.watch(appSettingsProvider.select((s) => s.enableBackgroundBlur));
+    final backgroundOpacity =
+        ref.watch(appSettingsProvider.select((s) => s.backgroundOpacity));
     final l10n = AppLocalizations.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -198,35 +209,37 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '图片背景设置', // Image Background Settings
+                    l10n.imageBackgroundSettings,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Use character avatar toggle
             SwitchListTile(
-              title: const Text('使用角色卡图片作为背景'),
-              subtitle: const Text('如果角色卡有头像图片，将自动作为聊天背景'),
+              title: Text(l10n.useCharacterImageAsBackground),
+              subtitle: Text(l10n.useCharacterImageAsBackgroundHint),
               value: useCharacterAvatar,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).updateUseCharacterAvatarAsBackground(value);
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .updateUseCharacterAvatarAsBackground(value);
               },
               contentPadding: EdgeInsets.zero,
             ),
-            
+
             const Divider(height: 24),
-            
+
             // Background opacity slider
             Row(
               children: [
                 const Icon(Icons.opacity, size: 20),
                 const SizedBox(width: 12),
-                const Text('背景透明度'),
+                Text(l10n.backgroundOpacity),
                 const Spacer(),
                 Text('${(backgroundOpacity * 100).round()}%'),
               ],
@@ -238,36 +251,40 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
               max: 1.0,
               divisions: 18,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).updateBackgroundOpacity(value);
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .updateBackgroundOpacity(value);
               },
             ),
             Text(
-              '应用于所有图片背景（自定义图片 + 角色卡图片）',
+              l10n.backgroundOpacityHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textMuted,
-              ),
+                    color: AppTheme.textMuted,
+                  ),
             ),
-            
+
             const Divider(height: 24),
-            
+
             // Background blur toggle
             SwitchListTile(
-              title: const Text('启用背景模糊效果'),
-              subtitle: const Text('应用模糊效果到所有图片背景'),
+              title: Text(l10n.enableBackgroundBlur),
+              subtitle: Text(l10n.enableBackgroundBlurHint),
               value: enableBlur,
               onChanged: (value) {
-                ref.read(appSettingsProvider.notifier).updateEnableBackgroundBlur(value);
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .updateEnableBackgroundBlur(value);
               },
               contentPadding: EdgeInsets.zero,
             ),
-            
+
             const SizedBox(height: 8),
             Text(
-              '💡 优先级：角色专属背景 > 全局背景 > 角色卡图片 > 默认颜色',
+              l10n.backgroundPriorityHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textMuted,
-                fontStyle: FontStyle.italic,
-              ),
+                    color: AppTheme.textMuted,
+                    fontStyle: FontStyle.italic,
+                  ),
             ),
           ],
         ),
@@ -292,7 +309,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.wallpaper, size: 48, color: AppTheme.textMuted),
+                      const Icon(Icons.wallpaper,
+                          size: 48, color: AppTheme.textMuted),
                       const SizedBox(height: 8),
                       Text(
                         AppLocalizations.of(context).noBackgroundSelected,
@@ -311,9 +329,11 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppTheme.darkCard.withValues(alpha: _currentBackground.bubbleOpacity),
+                      color: AppTheme.darkCard
+                          .withValues(alpha: _currentBackground.bubbleOpacity),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -325,9 +345,11 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                   Align(
                     alignment: Alignment.centerRight,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppTheme.accentColor.withValues(alpha: _currentBackground.bubbleOpacity),
+                        color: AppTheme.accentColor.withValues(
+                            alpha: _currentBackground.bubbleOpacity),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -356,11 +378,12 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
           onTap: () => _saveBackground(ChatBackground.none),
         ),
         ...BackgroundPresets.gradients.map((bg) => BackgroundPreview(
-          background: bg,
-          selected: _currentBackground.type == BackgroundType.gradient &&
-              _currentBackground.gradientColors?.join(',') == bg.gradientColors?.join(','),
-          onTap: () => _saveBackground(bg),
-        )),
+              background: bg,
+              selected: _currentBackground.type == BackgroundType.gradient &&
+                  _currentBackground.gradientColors?.join(',') ==
+                      bg.gradientColors?.join(','),
+              onTap: () => _saveBackground(bg),
+            )),
       ],
     );
   }
@@ -369,12 +392,14 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: BackgroundPresets.solidColors.map((bg) => BackgroundPreview(
-        background: bg,
-        selected: _currentBackground.type == BackgroundType.color &&
-            _currentBackground.color == bg.color,
-        onTap: () => _saveBackground(bg),
-      )).toList(),
+      children: BackgroundPresets.solidColors
+          .map((bg) => BackgroundPreview(
+                background: bg,
+                selected: _currentBackground.type == BackgroundType.color &&
+                    _currentBackground.color == bg.color,
+                onTap: () => _saveBackground(bg),
+              ))
+          .toList(),
     );
   }
 
@@ -405,13 +430,15 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
           const SizedBox(height: 12),
           Text(
             _currentBackground.imagePath != null
-                ? AppLocalizations.of(context).localImage(p.basename(_currentBackground.imagePath!))
+                ? AppLocalizations.of(context)
+                    .localImage(p.basename(_currentBackground.imagePath!))
                 : _currentBackground.imageUrl != null
-                    ? AppLocalizations.of(context).urlLabel(_currentBackground.imageUrl!)
+                    ? AppLocalizations.of(context)
+                        .urlLabel(_currentBackground.imageUrl!)
                     : AppLocalizations.of(context).noImage,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textMuted,
-            ),
+                  color: AppTheme.textMuted,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -426,7 +453,6 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            
             // Bubble opacity slider
             Row(
               children: [
@@ -437,7 +463,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                 Tooltip(
                   message: AppLocalizations.of(context).bubbleOpacityHelp,
                   triggerMode: TooltipTriggerMode.tap,
-                  child: const Icon(Icons.info_outline, size: 16, color: AppTheme.textMuted),
+                  child: const Icon(Icons.info_outline,
+                      size: 16, color: AppTheme.textMuted),
                 ),
                 const Spacer(),
                 Text('${(_currentBackground.bubbleOpacity * 100).round()}%'),
@@ -449,7 +476,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
               max: 1.0,
               divisions: 20,
               onChanged: (value) {
-                _saveBackground(_currentBackground.copyWith(bubbleOpacity: value));
+                _saveBackground(
+                    _currentBackground.copyWith(bubbleOpacity: value));
               },
             ),
           ],
@@ -489,8 +517,7 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
                     avatar: const Icon(Icons.folder, size: 16),
                     label: Text(folder),
                     selected: _selectedFolder == folder,
-                    onSelected: (_) =>
-                        setState(() => _selectedFolder = folder),
+                    onSelected: (_) => setState(() => _selectedFolder = folder),
                   ),
                 ],
               ],
@@ -644,9 +671,8 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
 
     try {
       final bgDir = await _backgroundsDir();
-      final targetDir = folder.isEmpty
-          ? bgDir
-          : Directory(p.join(bgDir.path, folder));
+      final targetDir =
+          folder.isEmpty ? bgDir : Directory(p.join(bgDir.path, folder));
       await targetDir.create(recursive: true);
       final newPath = p.join(targetDir.path, p.basename(image.path));
       if (newPath != image.path) {
@@ -700,15 +726,18 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
               : Directory(p.join(baseDir.path, _selectedFolder!));
           await bgDir.create(recursive: true);
 
-          final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+          final fileName =
+              '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
           final destPath = p.join(bgDir.path, fileName);
           await File(file.path!).copy(destPath);
           await _loadGallery();
 
           // Get global settings
-          final enableBlur = ref.read(appSettingsProvider.select((s) => s.enableBackgroundBlur));
-          final opacity = ref.read(appSettingsProvider.select((s) => s.backgroundOpacity));
-          
+          final enableBlur = ref
+              .read(appSettingsProvider.select((s) => s.enableBackgroundBlur));
+          final opacity =
+              ref.read(appSettingsProvider.select((s) => s.backgroundOpacity));
+
           await _saveBackground(ChatBackground.imagePath(
             destPath,
             opacity: opacity,
@@ -721,7 +750,9 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).failedToLoadImage(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)
+                  .failedToLoadImage(e.toString()))),
         );
       }
     } finally {
@@ -758,9 +789,11 @@ class _BackgroundSettingsScreenState extends ConsumerState<BackgroundSettingsScr
               final url = controller.text.trim();
               if (url.isNotEmpty) {
                 // Get global settings
-                final enableBlur = ref.read(appSettingsProvider.select((s) => s.enableBackgroundBlur));
-                final opacity = ref.read(appSettingsProvider.select((s) => s.backgroundOpacity));
-                
+                final enableBlur = ref.read(
+                    appSettingsProvider.select((s) => s.enableBackgroundBlur));
+                final opacity = ref.read(
+                    appSettingsProvider.select((s) => s.backgroundOpacity));
+
                 _saveBackground(ChatBackground.imageUrl(
                   url,
                   opacity: opacity,

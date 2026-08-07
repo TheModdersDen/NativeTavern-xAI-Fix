@@ -14,14 +14,14 @@ import 'package:native_tavern/core/services/initialization_service.dart';
 void _log(String message, {String? error, StackTrace? stackTrace}) {
   final timestamp = DateTime.now().toIso8601String();
   final logMessage = '[$timestamp] SettingsProvider: $message';
-  
+
   if (kDebugMode) {
     debugPrint(logMessage);
     if (error != null) {
       debugPrint('  Error: $error');
     }
   }
-  
+
   developer.log(
     message,
     name: 'SettingsProvider',
@@ -130,6 +130,28 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     }
   }
 
+  static String _normalizeApiUrl(LLMProvider provider, String apiUrl) {
+    var normalized = apiUrl.trim();
+    while (normalized.endsWith('/')) {
+      normalized = normalized.substring(0, normalized.length - 1);
+    }
+
+    final suffixes = switch (provider) {
+      LLMProvider.claude => const ['/v1/messages'],
+      LLMProvider.gemini => const ['/models'],
+      LLMProvider.ollama => const ['/api/tags'],
+      LLMProvider.koboldCpp => const ['/api/v1/model'],
+      _ => const ['/chat/completions', '/models'],
+    };
+    for (final suffix in suffixes) {
+      if (normalized.endsWith(suffix)) {
+        normalized = normalized.substring(0, normalized.length - suffix.length);
+        break;
+      }
+    }
+    return normalized;
+  }
+
   /// Get the storage key for a provider's configuration
   String _getProviderConfigKey(LLMProvider provider) {
     return '$_providerConfigKeyPrefix${provider.name}';
@@ -144,51 +166,58 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
       'model': state.model,
     };
     final jsonStr = jsonEncode(providerConfig);
-    
+
     // Save to DB
     await _db.into(_db.globalStates).insert(
-      GlobalStatesCompanion(
-        key: drift.Value(key),
-        value: drift.Value(jsonStr),
-        updatedAt: drift.Value(DateTime.now()),
-      ),
-      mode: drift.InsertMode.insertOrReplace,
-    );
-    
+          GlobalStatesCompanion(
+            key: drift.Value(key),
+            value: drift.Value(jsonStr),
+            updatedAt: drift.Value(DateTime.now()),
+          ),
+          mode: drift.InsertMode.insertOrReplace,
+        );
+
     // Keep syncing to prefs for backup safety until fully migrated (optional but good for now)
     await _prefs.setString(key, jsonStr);
-    _log('Saved config for provider ${state.provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
+    _log(
+        'Saved config for provider ${state.provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
   }
 
   /// Load a provider's connection settings, or return defaults if none exist
   Future<Map<String, String>> _loadProviderConfig(LLMProvider provider) async {
     final key = _getProviderConfigKey(provider);
-    
+
     // Try DB first
-    final row = await (_db.select(_db.globalStates)..where((t) => t.key.equals(key))).getSingleOrNull();
+    final row = await (_db.select(_db.globalStates)
+          ..where((t) => t.key.equals(key)))
+        .getSingleOrNull();
     String? jsonStr;
-    
+
     if (row != null) {
       jsonStr = row.value;
     } else {
       // Fallback to prefs
       jsonStr = _prefs.getString(key);
     }
-    
+
     if (jsonStr != null) {
       try {
         final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-        _log('Loaded saved config for provider ${provider.name}: apiUrl=${map['apiUrl']}, model=${map['model']}');
+        _log(
+            'Loaded saved config for provider ${provider.name}: apiUrl=${map['apiUrl']}, model=${map['model']}');
         return {
           'apiKey': map['apiKey'] as String? ?? '',
-          'apiUrl': map['apiUrl'] as String? ?? _getDefaultUrl(provider),
+          'apiUrl': _normalizeApiUrl(
+            provider,
+            map['apiUrl'] as String? ?? _getDefaultUrl(provider),
+          ),
           'model': map['model'] as String? ?? _getDefaultModel(provider),
         };
       } catch (e) {
         _log('Failed to load config for provider ${provider.name}: $e');
       }
     }
-    
+
     // Return defaults if no saved config
     _log('Using default config for provider ${provider.name}');
     return {
@@ -200,11 +229,13 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
 
   Future<void> _loadConfig() async {
     // 1. Try DB
-    final row = await (_db.select(_db.globalStates)..where((t) => t.key.equals(_configKey))).getSingleOrNull();
-    
+    final row = await (_db.select(_db.globalStates)
+          ..where((t) => t.key.equals(_configKey)))
+        .getSingleOrNull();
+
     String? jsonStr;
     bool needsMigration = false;
-    
+
     if (row != null) {
       jsonStr = row.value;
     } else {
@@ -218,8 +249,11 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     if (jsonStr != null) {
       try {
         final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-        state = LLMConfig.fromJson(map);
-        
+        final loaded = LLMConfig.fromJson(map);
+        state = loaded.copyWith(
+          apiUrl: _normalizeApiUrl(loaded.provider, loaded.apiUrl),
+        );
+
         if (needsMigration) {
           _log('Migrating LLM config from SharedPreferences to Database');
           _saveConfig(); // Save to DB
@@ -232,17 +266,17 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
 
   Future<void> _saveConfig() async {
     final jsonStr = jsonEncode(state.toJson());
-    
+
     // Save to DB
     await _db.into(_db.globalStates).insert(
-      GlobalStatesCompanion(
-        key: drift.Value(_configKey),
-        value: drift.Value(jsonStr),
-        updatedAt: drift.Value(DateTime.now()),
-      ),
-      mode: drift.InsertMode.insertOrReplace,
-    );
-    
+          GlobalStatesCompanion(
+            key: drift.Value(_configKey),
+            value: drift.Value(jsonStr),
+            updatedAt: drift.Value(DateTime.now()),
+          ),
+          mode: drift.InsertMode.insertOrReplace,
+        );
+
     // Sync to Prefs for redundancy/legacy
     await _prefs.setString(_configKey, jsonStr);
   }
@@ -255,7 +289,7 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
 
     // Save current provider's connection settings first
     await _saveCurrentProviderConfig();
-    
+
     // Load the new provider's saved settings (or defaults)
     final newProviderConfig = await _loadProviderConfig(provider);
 
@@ -266,14 +300,15 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
       model: newProviderConfig['model'],
     );
     await _saveConfig();
-    
-    _log('Switched to provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
+
+    _log(
+        'Switched to provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
   }
 
   /// Force set provider and reload its config from DB.
   /// Unlike updateProvider, this does NOT skip if the provider is the same.
   /// Used when applying presets to ensure connection settings are refreshed.
-  /// 
+  ///
   /// IMPORTANT: Do NOT call _saveCurrentProviderConfig() here!
   /// This method is called after restoreProviderConfigs has already written
   /// the correct configs to DB. Saving current state would overwrite
@@ -289,8 +324,9 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
       model: newProviderConfig['model'],
     );
     await _saveConfig();
-    
-    _log('Force set provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}, apiKey=${state.apiKey.isNotEmpty ? "***" : "(empty)"}');
+
+    _log(
+        'Force set provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}, apiKey=${state.apiKey.isNotEmpty ? "***" : "(empty)"}');
   }
 
   void updateApiKey(String apiKey) {
@@ -300,15 +336,26 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   }
 
   void updateApiUrl(String apiUrl) {
-    state = state.copyWith(apiUrl: apiUrl);
+    final normalized = _normalizeApiUrl(state.provider, apiUrl);
+    state = state.copyWith(apiUrl: normalized);
     _saveConfig();
     _saveCurrentProviderConfig(); // Also save to per-provider config for persistence
   }
 
   void updateModel(String model) {
-    state = state.copyWith(model: model);
+    state = state.copyWith(
+      model: model.trim(),
+      openRouterProvider: state.provider == LLMProvider.openRouter
+          ? ''
+          : state.openRouterProvider,
+    );
     _saveConfig();
     _saveCurrentProviderConfig(); // Also save to per-provider config for persistence
+  }
+
+  void updateOpenRouterProvider(String provider) {
+    state = state.copyWith(openRouterProvider: provider);
+    _saveConfig();
   }
 
   void updateMaxTokens(int maxTokens) {
@@ -448,7 +495,7 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   Future<Map<String, Map<String, dynamic>>> getAllProviderConfigs() async {
     // Ensure current config is saved first
     await _saveCurrentProviderConfig();
-    
+
     final result = <String, Map<String, dynamic>>{};
     for (final provider in LLMProvider.values) {
       // _loadProviderConfig returns {apiKey, apiUrl, model}
@@ -466,33 +513,35 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   /// Restore configuration for all providers (writes to DB/prefs only).
   /// The caller is responsible for refreshing the active provider state
   /// (e.g., via forceSetProvider).
-  Future<void> restoreProviderConfigs(Map<String, Map<String, dynamic>> configs) async {
+  Future<void> restoreProviderConfigs(
+      Map<String, Map<String, dynamic>> configs) async {
     for (final entry in configs.entries) {
       try {
         final providerName = entry.key;
         final config = entry.value;
-        
+
         // Find the provider enum
         final provider = LLMProvider.values.firstWhere(
-          (p) => p.name == providerName,
-          orElse: () => LLMProvider.openai // Fallback
-        );
-        
-        if (provider.name != providerName) continue; // Skip if name didn't match exactly
-        
+            (p) => p.name == providerName,
+            orElse: () => LLMProvider.openai // Fallback
+            );
+
+        if (provider.name != providerName)
+          continue; // Skip if name didn't match exactly
+
         final key = _getProviderConfigKey(provider);
         final jsonStr = jsonEncode(config);
-        
+
         // Save to DB
         await _db.into(_db.globalStates).insert(
-          GlobalStatesCompanion(
-            key: drift.Value(key),
-            value: drift.Value(jsonStr),
-            updatedAt: drift.Value(DateTime.now()),
-          ),
-          mode: drift.InsertMode.insertOrReplace,
-        );
-        
+              GlobalStatesCompanion(
+                key: drift.Value(key),
+                value: drift.Value(jsonStr),
+                updatedAt: drift.Value(DateTime.now()),
+              ),
+              mode: drift.InsertMode.insertOrReplace,
+            );
+
         // Sync to Prefs
         await _prefs.setString(key, jsonStr);
         _log('Restored config for provider ${provider.name}');
@@ -503,7 +552,8 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   }
 }
 
-final llmConfigProvider = StateNotifierProvider<LLMConfigNotifier, LLMConfig>((ref) {
+final llmConfigProvider =
+    StateNotifierProvider<LLMConfigNotifier, LLMConfig>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   final db = ref.watch(databaseProvider);
   return LLMConfigNotifier(prefs, db);
@@ -615,8 +665,9 @@ class ConnectionProfilesNotifier
   }
 }
 
-final connectionProfilesProvider = StateNotifierProvider<
-    ConnectionProfilesNotifier, List<ConnectionProfile>>((ref) {
+final connectionProfilesProvider =
+    StateNotifierProvider<ConnectionProfilesNotifier, List<ConnectionProfile>>(
+        (ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ConnectionProfilesNotifier(prefs, ref);
 });
@@ -675,7 +726,8 @@ class AppSettings {
       confirmBeforeDelete: confirmBeforeDelete ?? this.confirmBeforeDelete,
       autoSaveChats: autoSaveChats ?? this.autoSaveChats,
       enableDebugLog: enableDebugLog ?? this.enableDebugLog,
-      useCharacterAvatarAsBackground: useCharacterAvatarAsBackground ?? this.useCharacterAvatarAsBackground,
+      useCharacterAvatarAsBackground:
+          useCharacterAvatarAsBackground ?? this.useCharacterAvatarAsBackground,
       enableBackgroundBlur: enableBackgroundBlur ?? this.enableBackgroundBlur,
       backgroundOpacity: backgroundOpacity ?? this.backgroundOpacity,
       chatLayoutMode: chatLayoutMode ?? this.chatLayoutMode,
@@ -708,7 +760,8 @@ class AppSettings {
       confirmBeforeDelete: json['confirmBeforeDelete'] as bool? ?? true,
       autoSaveChats: json['autoSaveChats'] as bool? ?? true,
       enableDebugLog: json['enableDebugLog'] as bool? ?? false,
-      useCharacterAvatarAsBackground: json['useCharacterAvatarAsBackground'] as bool? ?? true,
+      useCharacterAvatarAsBackground:
+          json['useCharacterAvatarAsBackground'] as bool? ?? true,
       enableBackgroundBlur: json['enableBackgroundBlur'] as bool? ?? false,
       backgroundOpacity: (json['backgroundOpacity'] as num?)?.toDouble() ?? 1.0,
       chatLayoutMode: json['chatLayoutMode'] as String? ?? 'bubble',
@@ -728,11 +781,13 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _loadSettings() async {
     // 1. Try DB
-    final row = await (_db.select(_db.globalStates)..where((t) => t.key.equals(_settingsKey))).getSingleOrNull();
-    
+    final row = await (_db.select(_db.globalStates)
+          ..where((t) => t.key.equals(_settingsKey)))
+        .getSingleOrNull();
+
     String? jsonStr;
     bool needsMigration = false;
-    
+
     if (row != null) {
       jsonStr = row.value;
     } else {
@@ -742,12 +797,12 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
         needsMigration = true;
       }
     }
-    
+
     if (jsonStr != null) {
       try {
         final map = jsonDecode(jsonStr) as Map<String, dynamic>;
         state = AppSettings.fromJson(map);
-        
+
         if (needsMigration) {
           _log('Migrating App Settings from SharedPreferences to Database');
           _saveSettings();
@@ -760,17 +815,17 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _saveSettings() async {
     final jsonStr = jsonEncode(state.toJson());
-    
+
     // Save to DB
     await _db.into(_db.globalStates).insert(
-      GlobalStatesCompanion(
-        key: drift.Value(_settingsKey),
-        value: drift.Value(jsonStr),
-        updatedAt: drift.Value(DateTime.now()),
-      ),
-      mode: drift.InsertMode.insertOrReplace,
-    );
-    
+          GlobalStatesCompanion(
+            key: drift.Value(_settingsKey),
+            value: drift.Value(jsonStr),
+            updatedAt: drift.Value(DateTime.now()),
+          ),
+          mode: drift.InsertMode.insertOrReplace,
+        );
+
     // Sync to Prefs
     await _prefs.setString(_settingsKey, jsonStr);
   }
@@ -885,9 +940,10 @@ class ConnectionTestNotifier extends StateNotifier<ConnectionTestState> {
   Future<void> testConnection(LLMConfig config) async {
     _log('Starting connection test for ${config.provider.name}');
     _log('API URL: ${config.apiUrl}');
-    _log('API Key: ${config.apiKey.isEmpty ? "(empty)" : "${config.apiKey.substring(0, 8)}..."}');
+    _log(
+        'API Key: ${config.apiKey.isEmpty ? "(empty)" : "${config.apiKey.substring(0, 8)}..."}');
     _log('Model: ${config.model}');
-    
+
     state = const ConnectionTestState(status: ConnectionStatus.testing);
 
     try {
@@ -895,7 +951,7 @@ class ConnectionTestNotifier extends StateNotifier<ConnectionTestState> {
       _log('Calling LLMService.testConnection...');
       final successMessage = await _llmService.testConnection(config);
       _log('Connection test successful: $successMessage');
-      
+
       // Try to get available models
       List<String>? models;
       try {
@@ -904,7 +960,8 @@ class ConnectionTestNotifier extends StateNotifier<ConnectionTestState> {
         _log('Fetched ${models.length} models');
       } catch (e, stackTrace) {
         // Models fetching is optional, don't fail the test
-        _log('Failed to fetch models: $e', error: e.toString(), stackTrace: stackTrace);
+        _log('Failed to fetch models: $e',
+            error: e.toString(), stackTrace: stackTrace);
       }
 
       state = ConnectionTestState(
@@ -919,9 +976,10 @@ class ConnectionTestNotifier extends StateNotifier<ConnectionTestState> {
       if (errorMessage.startsWith('Exception: ')) {
         errorMessage = errorMessage.substring(11);
       }
-      
-      _log('Connection test failed: $errorMessage', error: e.toString(), stackTrace: stackTrace);
-      
+
+      _log('Connection test failed: $errorMessage',
+          error: e.toString(), stackTrace: stackTrace);
+
       state = ConnectionTestState(
         status: ConnectionStatus.error,
         message: errorMessage,
@@ -978,16 +1036,17 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
   Future<void> fetchModels(LLMConfig config) async {
     _log('Starting model fetch for ${config.provider.name}');
     _log('API URL: ${config.apiUrl}');
-    
+
     state = const ModelFetchState(status: ModelFetchStatus.loading);
 
     try {
       _log('Calling LLMService.getAvailableModels...');
       final models = await _llmService.getAvailableModels(config);
       _log('Received ${models.length} models');
-      
+
       if (models.isNotEmpty) {
-        _log('Models: ${models.take(10).join(", ")}${models.length > 10 ? "..." : ""}');
+        _log(
+            'Models: ${models.take(10).join(", ")}${models.length > 10 ? "..." : ""}');
         state = ModelFetchState(
           status: ModelFetchStatus.success,
           models: models,
@@ -997,7 +1056,6 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
         // Provide helpful message based on provider
         String message;
         switch (config.provider) {
-          
           case LLMProvider.openRouter:
           case LLMProvider.gemini:
           case LLMProvider.deepSeek:
@@ -1011,7 +1069,8 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
             message = 'No models found. Check your API key.';
             break;
           case LLMProvider.ollama:
-            message = 'No models found. Run "ollama pull <model>" to download models.';
+            message =
+                'No models found. Run "ollama pull <model>" to download models.';
             break;
           case LLMProvider.koboldCpp:
             message = 'No model loaded. Load a model in KoboldCpp first.';
@@ -1031,7 +1090,8 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
       if (errorMessage.startsWith('Exception: ')) {
         errorMessage = errorMessage.substring(11);
       }
-      _log('Model fetch failed: $errorMessage', error: e.toString(), stackTrace: stackTrace);
+      _log('Model fetch failed: $errorMessage',
+          error: e.toString(), stackTrace: stackTrace);
       state = ModelFetchState(
         status: ModelFetchStatus.error,
         errorMessage: errorMessage,
@@ -1058,7 +1118,8 @@ final tokenizerServiceProvider = Provider<TokenizerService>((ref) {
 });
 
 /// Provider for chat summarization service
-final chatSummarizationServiceProvider = Provider<ChatSummarizationService>((ref) {
+final chatSummarizationServiceProvider =
+    Provider<ChatSummarizationService>((ref) {
   final llmService = ref.watch(llmServiceProvider);
   final tokenizerService = ref.watch(tokenizerServiceProvider);
   return ChatSummarizationService(llmService, tokenizerService);

@@ -16,11 +16,11 @@ final activePersonaIdProvider = StateProvider<String?>((ref) => null);
 final activePersonaProvider = FutureProvider<Persona?>((ref) async {
   final activeId = ref.watch(activePersonaIdProvider);
   final repo = ref.watch(personaRepositoryProvider);
-  
+
   if (activeId != null) {
     return repo.getPersona(activeId);
   }
-  
+
   // Return default persona if no active persona is set
   return repo.getDefaultPersona();
 });
@@ -30,7 +30,8 @@ class PersonaNotifier extends StateNotifier<AsyncValue<List<Persona>>> {
   final PersonaRepository _repository;
   final Ref _ref;
 
-  PersonaNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  PersonaNotifier(this._repository, this._ref)
+      : super(const AsyncValue.loading()) {
     _loadPersonas();
   }
 
@@ -49,30 +50,19 @@ class PersonaNotifier extends StateNotifier<AsyncValue<List<Persona>>> {
     await _loadPersonas();
   }
 
-  Future<void> createPersona({
-    required String name,
-    String description = '',
-    String? avatarPath,
-  }) async {
-    final now = DateTime.now();
-    final persona = Persona(
-      id: now.millisecondsSinceEpoch.toString(),
-      name: name,
-      description: description,
-      avatarPath: avatarPath,
-      isDefault: false,
-      createdAt: now,
-      updatedAt: now,
-    );
-
+  Future<void> createPersona(Persona persona) async {
     await _repository.createPersona(persona);
     await _loadPersonas();
+    _ref.invalidate(allPersonasProvider);
+    _ref.invalidate(activePersonaProvider);
   }
 
   Future<void> updatePersona(Persona persona) async {
     final updated = persona.copyWith(updatedAt: DateTime.now());
     await _repository.updatePersona(updated);
     await _loadPersonas();
+    _ref.invalidate(allPersonasProvider);
+    _ref.invalidate(activePersonaProvider);
   }
 
   Future<void> deletePersona(String id) async {
@@ -83,13 +73,13 @@ class PersonaNotifier extends StateNotifier<AsyncValue<List<Persona>>> {
     }
 
     await _repository.deletePersona(id);
-    
+
     // If the deleted persona was active, reset to default
     final activeId = _ref.read(activePersonaIdProvider);
     if (activeId == id) {
       _ref.read(activePersonaIdProvider.notifier).state = null;
     }
-    
+
     await _loadPersonas();
   }
 
@@ -104,7 +94,8 @@ class PersonaNotifier extends StateNotifier<AsyncValue<List<Persona>>> {
 }
 
 /// Provider for persona notifier
-final personaNotifierProvider = StateNotifierProvider<PersonaNotifier, AsyncValue<List<Persona>>>((ref) {
+final personaNotifierProvider =
+    StateNotifierProvider<PersonaNotifier, AsyncValue<List<Persona>>>((ref) {
   final repo = ref.watch(personaRepositoryProvider);
   return PersonaNotifier(repo, ref);
 });

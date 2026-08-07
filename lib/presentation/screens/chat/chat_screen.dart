@@ -375,6 +375,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         await _handleImpersonate();
         break;
 
+      case 'imagine':
+        await _handleImagineCommand(argument);
+        break;
+
       case 'delswipe':
         if (chatState.messages.isNotEmpty) {
           final lastMessage = chatState.messages.last;
@@ -435,6 +439,69 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         }
         break;
     }
+  }
+
+  Future<void> _handleImagineCommand(String? argument) async {
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.read(imageGenSettingsProvider);
+    if (!settings.enabled) {
+      _showSnackBar('${l10n.imageGeneration}: ${l10n.configureNow}');
+      return;
+    }
+
+    final request = ref.read(parseImagineCommandProvider)(
+          '/imagine ${argument ?? ''}',
+        );
+    if (request == null) {
+      _showCommandError(SlashCommands.imagine.usage);
+      return;
+    }
+
+    _showSnackBar(l10n.imageGeneration);
+    final result = await ref.read(imageGenStateProvider.notifier).generate(request);
+    if (!mounted) return;
+    if (result == null || result.images.isEmpty) {
+      final error = ref.read(imageGenStateProvider).error;
+      _showCommandError(error ?? 'No image generated');
+      return;
+    }
+
+    try {
+      final attachments = await _saveGeneratedImages(result);
+      await ref.read(activeChatProvider.notifier).addLocalMessage(
+            role: MessageRole.user,
+            content: request.prompt,
+            attachments: attachments,
+          );
+      _showSnackBar('${l10n.generationComplete} (${attachments.length})');
+      _scrollToBottom();
+    } catch (error) {
+      _showCommandError('Failed to save image: $error');
+    }
+  }
+
+  Future<List<ChatAttachment>> _saveGeneratedImages(
+      ImageGenResult result) async {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final imagesDir = Directory(p.join(appDocDir.path, 'chat_images'));
+    if (!await imagesDir.exists()) {
+      await imagesDir.create(recursive: true);
+    }
+
+    final attachments = <ChatAttachment>[];
+    for (final imageBytes in result.images) {
+      final imageId = const Uuid().v4();
+      final fileName = '$imageId.${result.format}';
+      final filePath = p.join(imagesDir.path, fileName);
+      await File(filePath).writeAsBytes(imageBytes);
+      attachments.add(ChatAttachment(
+        id: imageId,
+        path: filePath,
+        mimeType: 'image/${result.format}',
+        sizeBytes: imageBytes.length,
+      ));
+    }
+    return attachments;
   }
 
   void _handleSwipeCommand(String? argument) {
@@ -594,8 +661,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             content: SizedBox(
               width: double.maxFinite,
               child: worldInfosAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Text('$e'),
                 data: (worldInfos) {
                   if (worldInfos.isEmpty) {
@@ -869,7 +935,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ? Icons.auto_stories // Novel mode icon
                   : Icons.chat_bubble, // Bubble mode icon
             ),
-            tooltip: '切换布局',
+            tooltip: l10n.switchLayout,
             onPressed: () {
               final currentMode = ref.read(appSettingsProvider).chatLayoutMode;
               final newMode =
@@ -922,7 +988,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: ListTile(
                 leading: Icon(
                   Icons.format_quote,
-                  color: (ref.read(activeChatProvider).chat?.startReplyWith
+                  color: (ref
+                              .read(activeChatProvider)
+                              .chat
+                              ?.startReplyWith
                               .isNotEmpty ??
                           false)
                       ? AppTheme.accentColor
@@ -1001,7 +1070,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           onSelected: (value) {
             switch (value) {
               case 'character':
-                // Navigate to character
+                final characterId = chatState.character?.id;
+                if (characterId != null) {
+                  context.push('/characters/$characterId');
+                }
                 break;
               case 'author_note':
                 showAuthorNoteDialog(context);
@@ -1135,8 +1207,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 // Copy to clipboard
                 final content = message.content;
                 if (content.isNotEmpty) {
-                  // Implement copy
+                  Clipboard.setData(ClipboardData(text: content));
                 }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: Text(l10n.edit),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditMessageDialog(message);
               },
             ),
             if (isAssistant)
@@ -1259,6 +1339,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       },
     );
+  }
+
+  Future<void> _showEditMessageDialog(ChatMessage message) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController(text: message.content);
+    final updated = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.edit),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: null,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (updated != null) {
+      await ref.read(activeChatProvider.notifier).editMessage(
+            message.id,
+            updated,
+          );
+    }
   }
 
   void _showBookmarksDialog(BuildContext context) {
@@ -1490,8 +1603,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     maxLines: 5,
                     minLines: 1,
                     hintText: AppLocalizations.of(context).typeMessage,
-                    onSubmitted: (_) => _sendMessage(),
-                    textInputAction: TextInputAction.send,
+                    onSubmitted: Platform.isIOS || Platform.isAndroid
+                        ? null
+                        : (_) => _sendMessage(),
+                    textInputAction: Platform.isIOS || Platform.isAndroid
+                        ? TextInputAction.newline
+                        : TextInputAction.send,
                     showToolbar: false,
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context).typeMessage,
@@ -1519,12 +1636,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    tooltip: '停止生成',
+                    tooltip: AppLocalizations.of(context).stopGenerating,
                   )
                 else
                   IconButton.filled(
                     onPressed: _sendMessage,
                     icon: const Icon(Icons.send),
+                    tooltip: AppLocalizations.of(context).send,
                   ),
               ],
             ),
@@ -2242,9 +2360,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: Text(l10n.cancel),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // Clear all messages
+              try {
+                await ref.read(activeChatProvider.notifier).clearMessages();
+                if (mounted) {
+                  _showSnackBar(l10n.messagesCleared);
+                }
+              } catch (error) {
+                if (mounted) {
+                  _showSnackBar('${l10n.error}: $error');
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(l10n.clear),
@@ -2399,8 +2526,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                           onLongPress: () => _openSwipePicker(context),
                           onTap: () => _openSwipePicker(context),
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: Text(
                               '${widget.message.currentSwipeIndex + 1}/${widget.message.swipes.length}',
                               style: Theme.of(context)
@@ -2425,6 +2551,16 @@ class _MessageBubbleState extends State<_MessageBubble> {
                         ),
                       ],
                     ),
+                  ),
+                if (isUser && !_isEditing && !widget.isGenerating)
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 16),
+                    tooltip: AppLocalizations.of(context).edit,
+                    onPressed: () {
+                      _editController.text = widget.message.content;
+                      setState(() => _isEditing = true);
+                    },
+                    visualDensity: VisualDensity.compact,
                   ),
               ],
             ),

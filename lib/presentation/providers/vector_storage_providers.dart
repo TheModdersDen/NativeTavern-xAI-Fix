@@ -96,6 +96,7 @@ class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings>
     state = state.copyWith(
       embeddingProvider: provider,
       embeddingModel: provider.defaultModel,
+      embeddingEndpoint: provider.defaultEndpoint,
     );
     _saveSettings();
   }
@@ -115,6 +116,19 @@ class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings>
   /// Set embedding API key
   void setEmbeddingApiKey(String apiKey) {
     state = state.copyWith(embeddingApiKey: apiKey);
+    _saveSettings();
+  }
+
+  /// Reuse an OpenAI-compatible chat connection for embeddings.
+  void useChatConnection({
+    required String endpoint,
+    required String apiKey,
+  }) {
+    state = state.copyWith(
+      embeddingProvider: EmbeddingProvider.custom,
+      embeddingEndpoint: endpoint.trim(),
+      embeddingApiKey: apiKey.trim(),
+    );
     _saveSettings();
   }
 
@@ -140,7 +154,9 @@ class VectorCollectionsNotifier extends StateNotifier<List<VectorCollection>> {
     _loadCollections();
   }
 
-  void _loadCollections() {
+  Future<void> _loadCollections() async {
+    await _service.load();
+    if (!mounted) return;
     state = _service.collections;
   }
 

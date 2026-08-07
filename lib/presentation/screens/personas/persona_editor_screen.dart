@@ -8,6 +8,7 @@ import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
+import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -21,10 +22,12 @@ class PersonaEditorScreen extends ConsumerStatefulWidget {
   const PersonaEditorScreen({super.key, this.persona});
 
   @override
-  ConsumerState<PersonaEditorScreen> createState() => _PersonaEditorScreenState();
+  ConsumerState<PersonaEditorScreen> createState() =>
+      _PersonaEditorScreenState();
 }
 
-class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with SingleTickerProviderStateMixin {
+class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
@@ -32,14 +35,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
   late TextEditingController _postHistoryController;
   late TextEditingController _creatorNotesController;
   late TextEditingController _tagInputController;
-  
+
   String? _avatarPath;
   bool _isFavorite = false;
   String? _lorebookId;
   List<String> _tags = [];
   List<PersonaConnection> _connections = [];
-  PersonaDescriptionSettings _descriptionSettings = const PersonaDescriptionSettings();
-  
+  PersonaDescriptionSettings _descriptionSettings =
+      const PersonaDescriptionSettings();
+
   bool _isSaving = false;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -47,22 +51,27 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Initialize controllers with existing data
     final persona = widget.persona;
     _nameController = TextEditingController(text: persona?.name ?? '');
-    _descriptionController = TextEditingController(text: persona?.description ?? '');
-    _systemPromptController = TextEditingController(text: persona?.systemPromptOverride ?? '');
-    _postHistoryController = TextEditingController(text: persona?.postHistoryInstructions ?? '');
-    _creatorNotesController = TextEditingController(text: persona?.creatorNotes ?? '');
+    _descriptionController =
+        TextEditingController(text: persona?.description ?? '');
+    _systemPromptController =
+        TextEditingController(text: persona?.systemPromptOverride ?? '');
+    _postHistoryController =
+        TextEditingController(text: persona?.postHistoryInstructions ?? '');
+    _creatorNotesController =
+        TextEditingController(text: persona?.creatorNotes ?? '');
     _tagInputController = TextEditingController();
-    
+
     _avatarPath = persona?.avatarPath;
     _isFavorite = persona?.isFavorite ?? false;
     _lorebookId = persona?.lorebookId;
     _tags = List.from(persona?.tags ?? []);
     _connections = List.from(persona?.connections ?? []);
-    _descriptionSettings = persona?.descriptionSettings ?? const PersonaDescriptionSettings();
+    _descriptionSettings =
+        persona?.descriptionSettings ?? const PersonaDescriptionSettings();
   }
 
   @override
@@ -77,7 +86,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
     super.dispose();
   }
 
-  bool get _isDesktop => Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  bool get _isDesktop =>
+      Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +135,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
           // Avatar picker
           Center(child: _buildAvatarPicker()),
           const SizedBox(height: 24),
-          
+
           // Name
           TextField(
             controller: _nameController,
@@ -137,7 +147,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Description
           TextField(
             controller: _descriptionController,
@@ -151,11 +161,11 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
             maxLines: 5,
           ),
           const SizedBox(height: 16),
-          
+
           // Tags
           _buildTagsSection(),
           const SizedBox(height: 16),
-          
+
           // Creator Notes
           TextField(
             controller: _creatorNotesController,
@@ -181,7 +191,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
           // Lorebook Selection
           _buildLorebookSelector(),
           const SizedBox(height: 16),
-          
+
           // System Prompt Override
           TextField(
             controller: _systemPromptController,
@@ -195,7 +205,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
             maxLines: 5,
           ),
           const SizedBox(height: 16),
-          
+
           // Post-History Instructions
           TextField(
             controller: _postHistoryController,
@@ -209,7 +219,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
             maxLines: 5,
           ),
           const SizedBox(height: 16),
-          
+
           // Description Settings
           _buildDescriptionSettings(),
         ],
@@ -254,13 +264,19 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
                     return Card(
                       child: ListTile(
                         leading: Icon(
-                          connection.characterId != null ? Icons.person : Icons.group,
+                          connection.characterId != null
+                              ? Icons.person
+                              : connection.groupId != null
+                                  ? Icons.group
+                                  : Icons.chat,
                           color: AppTheme.primaryColor,
                         ),
                         title: Text(
                           connection.characterId != null
                               ? 'Character: ${connection.characterId}'
-                              : 'Group: ${connection.groupId}',
+                              : connection.groupId != null
+                                  ? 'Group: ${connection.groupId}'
+                                  : 'Chat: ${connection.chatId}',
                         ),
                         subtitle: Text('Lock: ${connection.lockType.name}'),
                         trailing: IconButton(
@@ -290,10 +306,10 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
           runSpacing: 8,
           children: [
             ..._tags.map((tag) => Chip(
-              label: Text(tag),
-              onDeleted: () => setState(() => _tags.remove(tag)),
-              deleteIcon: const Icon(Icons.close, size: 18),
-            )),
+                  label: Text(tag),
+                  onDeleted: () => setState(() => _tags.remove(tag)),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                )),
             ActionChip(
               label: const Text('Add Tag'),
               avatar: const Icon(Icons.add, size: 18),
@@ -307,7 +323,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
 
   Widget _buildLorebookSelector() {
     final lorebooksAsync = ref.watch(allWorldInfosProvider);
-    
+
     return lorebooksAsync.when(
       loading: () => const LinearProgressIndicator(),
       error: (_, __) => const Text('Error loading lorebooks'),
@@ -327,9 +343,9 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
               child: Text('None'),
             ),
             ...lorebooks.map((lb) => DropdownMenuItem(
-              value: lb.id,
-              child: Text(lb.name),
-            )),
+                  value: lb.id,
+                  child: Text(lb.name),
+                )),
           ],
           onChanged: (value) => setState(() => _lorebookId = value),
         );
@@ -365,13 +381,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    _descriptionSettings = _descriptionSettings.copyWith(position: value);
+                    _descriptionSettings =
+                        _descriptionSettings.copyWith(position: value);
                   });
                 }
               },
             ),
             const SizedBox(height: 12),
-            if (_descriptionSettings.position == PersonaDescriptionPosition.atDepth)
+            if (_descriptionSettings.position ==
+                PersonaDescriptionPosition.atDepth)
               TextField(
                 decoration: const InputDecoration(
                   labelText: 'Depth',
@@ -385,7 +403,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
                 onChanged: (value) {
                   final depth = int.tryParse(value) ?? 4;
                   setState(() {
-                    _descriptionSettings = _descriptionSettings.copyWith(depth: depth);
+                    _descriptionSettings =
+                        _descriptionSettings.copyWith(depth: depth);
                   });
                 },
               ),
@@ -406,7 +425,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    _descriptionSettings = _descriptionSettings.copyWith(role: value);
+                    _descriptionSettings =
+                        _descriptionSettings.copyWith(role: value);
                   });
                 }
               },
@@ -425,9 +445,11 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
           child: CircleAvatar(
             radius: 60,
             backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-            backgroundImage: _avatarPath != null ? FileImage(File(_avatarPath!)) : null,
+            backgroundImage:
+                _avatarPath != null ? FileImage(File(_avatarPath!)) : null,
             child: _avatarPath == null
-                ? const Icon(Icons.person, size: 60, color: AppTheme.primaryColor)
+                ? const Icon(Icons.person,
+                    size: 60, color: AppTheme.primaryColor)
                 : null,
           ),
         ),
@@ -443,7 +465,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.darkCard, width: 2),
               ),
-              child: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+              child:
+                  const Icon(Icons.camera_alt, size: 20, color: Colors.white),
             ),
           ),
         ),
@@ -456,7 +479,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
       _pickImageFromFiles();
       return;
     }
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.darkCard,
@@ -483,7 +506,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
             if (_avatarPath != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Remove Avatar', style: TextStyle(color: Colors.red)),
+                title: const Text('Remove Avatar',
+                    style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() => _avatarPath = null);
@@ -544,14 +568,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
   Future<void> _saveAvatarImage(String sourcePath) async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final avatarsDir = Directory(p.join(appDir.path, 'NativeTavern', 'avatars', 'personas'));
+      final avatarsDir =
+          Directory(p.join(appDir.path, 'NativeTavern', 'avatars', 'personas'));
       await avatarsDir.create(recursive: true);
-      
+
       const uuid = Uuid();
       final extension = p.extension(sourcePath);
       final newFileName = '${uuid.v4()}$extension';
       final newPath = p.join(avatarsDir.path, newFileName);
-      
+
       await File(sourcePath).copy(newPath);
       setState(() => _avatarPath = newPath);
     } catch (e) {
@@ -605,7 +630,16 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
       context: context,
       builder: (context) => _AddConnectionDialog(
         onAdd: (connection) {
-          setState(() => _connections.add(connection));
+          setState(() {
+            _connections.removeWhere((existing) =>
+                (connection.characterId != null &&
+                    existing.characterId == connection.characterId) ||
+                (connection.groupId != null &&
+                    existing.groupId == connection.groupId) ||
+                (connection.chatId != null &&
+                    existing.chatId == connection.chatId));
+            _connections.add(connection);
+          });
         },
       ),
     );
@@ -649,11 +683,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
       );
 
       if (widget.persona == null) {
-        await ref.read(personaNotifierProvider.notifier).createPersona(
-          name: persona.name,
-          description: persona.description,
-          avatarPath: persona.avatarPath,
-        );
+        await ref.read(personaNotifierProvider.notifier).createPersona(persona);
       } else {
         await ref.read(personaNotifierProvider.notifier).updatePersona(persona);
       }
@@ -676,12 +706,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen> with 
   }
 
   String _formatEnumName(String name) {
-    return name.replaceAllMapped(
-      RegExp(r'([A-Z])'),
-      (match) => ' ${match.group(0)}',
-    ).trim().split(' ').map((word) => 
-      word[0].toUpperCase() + word.substring(1)
-    ).join(' ');
+    return name
+        .replaceAllMapped(
+          RegExp(r'([A-Z])'),
+          (match) => ' ${match.group(0)}',
+        )
+        .trim()
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
   }
 }
 
@@ -692,11 +725,12 @@ class _AddConnectionDialog extends ConsumerStatefulWidget {
   const _AddConnectionDialog({required this.onAdd});
 
   @override
-  ConsumerState<_AddConnectionDialog> createState() => _AddConnectionDialogState();
+  ConsumerState<_AddConnectionDialog> createState() =>
+      _AddConnectionDialogState();
 }
 
 class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
-  bool _isCharacter = true;
+  _ConnectionTarget _target = _ConnectionTarget.character;
   String? _selectedId;
   PersonaLockType _lockType = PersonaLockType.none;
 
@@ -708,25 +742,42 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Type selector
-          SegmentedButton<bool>(
+          SegmentedButton<_ConnectionTarget>(
             segments: const [
-              ButtonSegment(value: true, label: Text('Character'), icon: Icon(Icons.person)),
-              ButtonSegment(value: false, label: Text('Group'), icon: Icon(Icons.group)),
+              ButtonSegment(
+                value: _ConnectionTarget.character,
+                label: Text('Character'),
+                icon: Icon(Icons.person),
+              ),
+              ButtonSegment(
+                value: _ConnectionTarget.group,
+                label: Text('Group'),
+                icon: Icon(Icons.group),
+              ),
+              ButtonSegment(
+                value: _ConnectionTarget.chat,
+                label: Text('Chat'),
+                icon: Icon(Icons.chat),
+              ),
             ],
-            selected: {_isCharacter},
-            onSelectionChanged: (Set<bool> selected) {
+            selected: {_target},
+            onSelectionChanged: (Set<_ConnectionTarget> selected) {
               setState(() {
-                _isCharacter = selected.first;
+                _target = selected.first;
                 _selectedId = null;
               });
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Entity selector
-          _isCharacter ? _buildCharacterSelector() : _buildGroupSelector(),
+          switch (_target) {
+            _ConnectionTarget.character => _buildCharacterSelector(),
+            _ConnectionTarget.group => _buildGroupSelector(),
+            _ConnectionTarget.chat => _buildChatSelector(),
+          },
           const SizedBox(height: 16),
-          
+
           // Lock type
           DropdownButtonFormField<PersonaLockType>(
             value: _lockType,
@@ -740,7 +791,8 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
                 child: Text(type.name),
               );
             }).toList(),
-            onChanged: (value) => setState(() => _lockType = value ?? PersonaLockType.none),
+            onChanged: (value) =>
+                setState(() => _lockType = value ?? PersonaLockType.none),
           ),
         ],
       ),
@@ -750,16 +802,25 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _selectedId == null ? null : () {
-            widget.onAdd(
-              PersonaConnection(
-                characterId: _isCharacter ? _selectedId : null,
-                groupId: _isCharacter ? null : _selectedId,
-                lockType: _lockType,
-              ),
-            );
-            Navigator.pop(context);
-          },
+          onPressed: _selectedId == null
+              ? null
+              : () {
+                  widget.onAdd(
+                    PersonaConnection(
+                      characterId: _target == _ConnectionTarget.character
+                          ? _selectedId
+                          : null,
+                      groupId: _target == _ConnectionTarget.group
+                          ? _selectedId
+                          : null,
+                      chatId: _target == _ConnectionTarget.chat
+                          ? _selectedId
+                          : null,
+                      lockType: _lockType,
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
           child: const Text('Add'),
         ),
       ],
@@ -777,10 +838,12 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
           labelText: 'Character',
           border: OutlineInputBorder(),
         ),
-        items: characters.map((char) => DropdownMenuItem(
-          value: char.id,
-          child: Text(char.name),
-        )).toList(),
+        items: characters
+            .map((char) => DropdownMenuItem(
+                  value: char.id,
+                  child: Text(char.name),
+                ))
+            .toList(),
         onChanged: (value) => setState(() => _selectedId = value),
       ),
     );
@@ -797,12 +860,39 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
           labelText: 'Group',
           border: OutlineInputBorder(),
         ),
-        items: groups.map((group) => DropdownMenuItem(
-          value: group.id,
-          child: Text(group.name),
-        )).toList(),
+        items: groups
+            .map((group) => DropdownMenuItem(
+                  value: group.id,
+                  child: Text(group.name),
+                ))
+            .toList(),
+        onChanged: (value) => setState(() => _selectedId = value),
+      ),
+    );
+  }
+
+  Widget _buildChatSelector() {
+    final chatsAsync = ref.watch(allChatsProvider);
+    return chatsAsync.when(
+      loading: () => const CircularProgressIndicator(),
+      error: (_, __) => const Text('Error loading chats'),
+      data: (chats) => DropdownButtonFormField<String>(
+        value: _selectedId,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Chat',
+          border: OutlineInputBorder(),
+        ),
+        items: chats
+            .map((chat) => DropdownMenuItem(
+                  value: chat.id,
+                  child: Text(chat.title, overflow: TextOverflow.ellipsis),
+                ))
+            .toList(),
         onChanged: (value) => setState(() => _selectedId = value),
       ),
     );
   }
 }
+
+enum _ConnectionTarget { character, group, chat }

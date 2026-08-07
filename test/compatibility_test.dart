@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/models/ai_preset.dart';
@@ -72,6 +73,55 @@ void main() {
       expect(rendered.contains('{{char}}'), isFalse);
       expect(rendered, contains('Lucy'));
     });
+
+    test('imports compressed zTXt chara metadata', () async {
+      final card = {
+        'spec': 'chara_card_v2',
+        'data': {
+          'name': 'Compressed Card',
+          'first_mes': 'Hello',
+          'alternate_greetings': ['Hi again'],
+        },
+      };
+      final payload = base64Encode(utf8.encode(jsonEncode(card)));
+      final metadata = <int>[
+        ...latin1.encode('chara'),
+        0,
+        0,
+        ...zlib.encode(latin1.encode(payload)),
+      ];
+
+      final character = await importService.importFromPngBytes(
+        _pngWithTextChunk('zTXt', metadata),
+      );
+      expect(character.name, 'Compressed Card');
+      expect(character.alternateGreetings, ['Hi again']);
+    });
+
+    test('imports raw JSON from iTXt ccv3 metadata', () async {
+      final card = {
+        'spec': 'chara_card_v3',
+        'data': {
+          'name': 'V3 Card',
+          'first_mes': 'Hello from V3',
+        },
+      };
+      final metadata = <int>[
+        ...latin1.encode('ccv3'),
+        0,
+        0,
+        0,
+        0,
+        0,
+        ...utf8.encode(jsonEncode(card)),
+      ];
+
+      final character = await importService.importFromPngBytes(
+        _pngWithTextChunk('iTXt', metadata),
+      );
+      expect(character.name, 'V3 Card');
+      expect(character.firstMessage, 'Hello from V3');
+    });
   });
 
   group('Real ST world info book (Eldoria)', () {
@@ -106,8 +156,7 @@ void main() {
         userName: 'Lucy',
         characterName: 'Seraphina',
       );
-      final rendered =
-          MacroService(context).process(entries.first.content);
+      final rendered = MacroService(context).process(entries.first.content);
       expect(rendered.contains('{{char}}'), isFalse);
       expect(rendered, contains('Seraphina'));
     });
@@ -229,4 +278,32 @@ void main() {
       expect(again, result);
     });
   });
+}
+
+Uint8List _pngWithTextChunk(String type, List<int> data) {
+  List<int> chunk(String chunkType, List<int> chunkData) => [
+        (chunkData.length >> 24) & 0xff,
+        (chunkData.length >> 16) & 0xff,
+        (chunkData.length >> 8) & 0xff,
+        chunkData.length & 0xff,
+        ...ascii.encode(chunkType),
+        ...chunkData,
+        0,
+        0,
+        0,
+        0,
+      ];
+
+  return Uint8List.fromList([
+    137,
+    80,
+    78,
+    71,
+    13,
+    10,
+    26,
+    10,
+    ...chunk(type, data),
+    ...chunk('IEND', const []),
+  ]);
 }

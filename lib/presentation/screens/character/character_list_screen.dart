@@ -16,7 +16,8 @@ class CharacterListScreen extends ConsumerStatefulWidget {
   const CharacterListScreen({super.key});
 
   @override
-  ConsumerState<CharacterListScreen> createState() => _CharacterListScreenState();
+  ConsumerState<CharacterListScreen> createState() =>
+      _CharacterListScreenState();
 }
 
 class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
@@ -64,10 +65,15 @@ class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
               data: (characters) {
                 final filtered = _searchQuery.isEmpty
                     ? characters
-                    : characters.where((c) => 
-                        c.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                        c.description.toLowerCase().contains(_searchQuery.toLowerCase())
-                      ).toList();
+                    : characters
+                        .where((c) =>
+                            c.name
+                                .toLowerCase()
+                                .contains(_searchQuery.toLowerCase()) ||
+                            c.description
+                                .toLowerCase()
+                                .contains(_searchQuery.toLowerCase()))
+                        .toList();
 
                 if (filtered.isEmpty) {
                   return const _EmptyState();
@@ -87,12 +93,14 @@ class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text('${l10n.error}: $error'),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => ref.read(characterListProvider.notifier).refresh(),
+                      onPressed: () =>
+                          ref.read(characterListProvider.notifier).refresh(),
                       child: Text(l10n.retry),
                     ),
                   ],
@@ -104,7 +112,7 @@ class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
       ),
     );
   }
-  
+
   Icon _getViewModeIcon() {
     switch (_viewMode) {
       case CharacterViewMode.list:
@@ -125,7 +133,7 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
@@ -214,7 +222,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -326,7 +334,7 @@ class _CharacterGridCard extends ConsumerWidget {
   Widget _defaultAvatar() {
     final icon = _getCharacterIcon(character);
     final color = _getCharacterColor(character);
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -434,7 +442,7 @@ class _CharacterCompactGridCard extends ConsumerWidget {
   Widget _defaultCompactAvatar() {
     final icon = _getCharacterIcon(character);
     final color = _getCharacterColor(character);
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -491,7 +499,7 @@ class _CharacterListTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -504,7 +512,7 @@ class _CharacterListTile extends ConsumerWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: PopupMenuButton(
+        trailing: PopupMenuButton<String>(
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'chat',
@@ -513,7 +521,6 @@ class _CharacterListTile extends ConsumerWidget {
                 title: Text(l10n.startChat),
                 contentPadding: EdgeInsets.zero,
               ),
-              onTap: () => _startChat(context, ref),
             ),
             PopupMenuItem(
               value: 'edit',
@@ -522,7 +529,6 @@ class _CharacterListTile extends ConsumerWidget {
                 title: Text(l10n.edit),
                 contentPadding: EdgeInsets.zero,
               ),
-              onTap: () => context.push('/characters/${character.id}'),
             ),
             PopupMenuItem(
               value: 'export',
@@ -531,20 +537,32 @@ class _CharacterListTile extends ConsumerWidget {
                 title: Text(l10n.exportChat),
                 contentPadding: EdgeInsets.zero,
               ),
-              onTap: () {
-                // TODO: Export character
-              },
             ),
             PopupMenuItem(
               value: 'delete',
-              onTap: () => _confirmDelete(context, ref),
               child: ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                title: Text(l10n.delete,
+                    style: const TextStyle(color: Colors.red)),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
           ],
+          onSelected: (value) {
+            switch (value) {
+              case 'chat':
+                _startChat(context, ref);
+                break;
+              case 'edit':
+                context.push('/characters/${character.id}/edit');
+                break;
+              case 'export':
+                break;
+              case 'delete':
+                _confirmDelete(context, ref);
+                break;
+            }
+          },
         ),
         onTap: () => context.push('/characters/${character.id}'),
       ),
@@ -553,9 +571,10 @@ class _CharacterListTile extends ConsumerWidget {
 
   Future<void> _startChat(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    
+
     try {
-      final chatId = await ref.read(activeChatProvider.notifier).createChat(character.id);
+      final chatId =
+          await ref.read(activeChatProvider.notifier).createChat(character.id);
       if (chatId != null && context.mounted) {
         context.push('/chat/$chatId');
       } else if (context.mounted) {
@@ -574,7 +593,7 @@ class _CharacterListTile extends ConsumerWidget {
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -588,7 +607,9 @@ class _CharacterListTile extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(characterListProvider.notifier).deleteCharacter(character.id);
+              ref
+                  .read(characterListProvider.notifier)
+                  .deleteCharacter(character.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.characterDeleted)),
               );

@@ -4548,6 +4548,66 @@ class $PersonasTable extends Personas with TableInfo<$PersonasTable, Persona> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_default" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _connectionsJsonMeta =
+      const VerificationMeta('connectionsJson');
+  @override
+  late final GeneratedColumn<String> connectionsJson = GeneratedColumn<String>(
+      'connections_json', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  static const VerificationMeta _descriptionSettingsJsonMeta =
+      const VerificationMeta('descriptionSettingsJson');
+  @override
+  late final GeneratedColumn<String> descriptionSettingsJson =
+      GeneratedColumn<String>('description_settings_json', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: false,
+          defaultValue: const Constant('{}'));
+  static const VerificationMeta _lorebookIdMeta =
+      const VerificationMeta('lorebookId');
+  @override
+  late final GeneratedColumn<String> lorebookId = GeneratedColumn<String>(
+      'lorebook_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _systemPromptOverrideMeta =
+      const VerificationMeta('systemPromptOverride');
+  @override
+  late final GeneratedColumn<String> systemPromptOverride =
+      GeneratedColumn<String>('system_prompt_override', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _postHistoryInstructionsMeta =
+      const VerificationMeta('postHistoryInstructions');
+  @override
+  late final GeneratedColumn<String> postHistoryInstructions =
+      GeneratedColumn<String>('post_history_instructions', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _tagsJsonMeta =
+      const VerificationMeta('tagsJson');
+  @override
+  late final GeneratedColumn<String> tagsJson = GeneratedColumn<String>(
+      'tags_json', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  static const VerificationMeta _creatorNotesMeta =
+      const VerificationMeta('creatorNotes');
+  @override
+  late final GeneratedColumn<String> creatorNotes = GeneratedColumn<String>(
+      'creator_notes', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _isFavoriteMeta =
+      const VerificationMeta('isFavorite');
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+      'is_favorite', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -4561,8 +4621,23 @@ class $PersonasTable extends Personas with TableInfo<$PersonasTable, Persona> {
       'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, description, avatarPath, isDefault, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        description,
+        avatarPath,
+        isDefault,
+        connectionsJson,
+        descriptionSettingsJson,
+        lorebookId,
+        systemPromptOverride,
+        postHistoryInstructions,
+        tagsJson,
+        creatorNotes,
+        isFavorite,
+        createdAt,
+        updatedAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4600,6 +4675,54 @@ class $PersonasTable extends Personas with TableInfo<$PersonasTable, Persona> {
       context.handle(_isDefaultMeta,
           isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta));
     }
+    if (data.containsKey('connections_json')) {
+      context.handle(
+          _connectionsJsonMeta,
+          connectionsJson.isAcceptableOrUnknown(
+              data['connections_json']!, _connectionsJsonMeta));
+    }
+    if (data.containsKey('description_settings_json')) {
+      context.handle(
+          _descriptionSettingsJsonMeta,
+          descriptionSettingsJson.isAcceptableOrUnknown(
+              data['description_settings_json']!,
+              _descriptionSettingsJsonMeta));
+    }
+    if (data.containsKey('lorebook_id')) {
+      context.handle(
+          _lorebookIdMeta,
+          lorebookId.isAcceptableOrUnknown(
+              data['lorebook_id']!, _lorebookIdMeta));
+    }
+    if (data.containsKey('system_prompt_override')) {
+      context.handle(
+          _systemPromptOverrideMeta,
+          systemPromptOverride.isAcceptableOrUnknown(
+              data['system_prompt_override']!, _systemPromptOverrideMeta));
+    }
+    if (data.containsKey('post_history_instructions')) {
+      context.handle(
+          _postHistoryInstructionsMeta,
+          postHistoryInstructions.isAcceptableOrUnknown(
+              data['post_history_instructions']!,
+              _postHistoryInstructionsMeta));
+    }
+    if (data.containsKey('tags_json')) {
+      context.handle(_tagsJsonMeta,
+          tagsJson.isAcceptableOrUnknown(data['tags_json']!, _tagsJsonMeta));
+    }
+    if (data.containsKey('creator_notes')) {
+      context.handle(
+          _creatorNotesMeta,
+          creatorNotes.isAcceptableOrUnknown(
+              data['creator_notes']!, _creatorNotesMeta));
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+          _isFavoriteMeta,
+          isFavorite.isAcceptableOrUnknown(
+              data['is_favorite']!, _isFavoriteMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -4631,6 +4754,25 @@ class $PersonasTable extends Personas with TableInfo<$PersonasTable, Persona> {
           .read(DriftSqlType.string, data['${effectivePrefix}avatar_path']),
       isDefault: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_default'])!,
+      connectionsJson: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}connections_json'])!,
+      descriptionSettingsJson: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}description_settings_json'])!,
+      lorebookId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lorebook_id']),
+      systemPromptOverride: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}system_prompt_override']),
+      postHistoryInstructions: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}post_history_instructions']),
+      tagsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tags_json'])!,
+      creatorNotes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}creator_notes'])!,
+      isFavorite: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -4650,6 +4792,14 @@ class Persona extends DataClass implements Insertable<Persona> {
   final String description;
   final String? avatarPath;
   final bool isDefault;
+  final String connectionsJson;
+  final String descriptionSettingsJson;
+  final String? lorebookId;
+  final String? systemPromptOverride;
+  final String? postHistoryInstructions;
+  final String tagsJson;
+  final String creatorNotes;
+  final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Persona(
@@ -4658,6 +4808,14 @@ class Persona extends DataClass implements Insertable<Persona> {
       required this.description,
       this.avatarPath,
       required this.isDefault,
+      required this.connectionsJson,
+      required this.descriptionSettingsJson,
+      this.lorebookId,
+      this.systemPromptOverride,
+      this.postHistoryInstructions,
+      required this.tagsJson,
+      required this.creatorNotes,
+      required this.isFavorite,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -4670,6 +4828,22 @@ class Persona extends DataClass implements Insertable<Persona> {
       map['avatar_path'] = Variable<String>(avatarPath);
     }
     map['is_default'] = Variable<bool>(isDefault);
+    map['connections_json'] = Variable<String>(connectionsJson);
+    map['description_settings_json'] =
+        Variable<String>(descriptionSettingsJson);
+    if (!nullToAbsent || lorebookId != null) {
+      map['lorebook_id'] = Variable<String>(lorebookId);
+    }
+    if (!nullToAbsent || systemPromptOverride != null) {
+      map['system_prompt_override'] = Variable<String>(systemPromptOverride);
+    }
+    if (!nullToAbsent || postHistoryInstructions != null) {
+      map['post_history_instructions'] =
+          Variable<String>(postHistoryInstructions);
+    }
+    map['tags_json'] = Variable<String>(tagsJson);
+    map['creator_notes'] = Variable<String>(creatorNotes);
+    map['is_favorite'] = Variable<bool>(isFavorite);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -4684,6 +4858,20 @@ class Persona extends DataClass implements Insertable<Persona> {
           ? const Value.absent()
           : Value(avatarPath),
       isDefault: Value(isDefault),
+      connectionsJson: Value(connectionsJson),
+      descriptionSettingsJson: Value(descriptionSettingsJson),
+      lorebookId: lorebookId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lorebookId),
+      systemPromptOverride: systemPromptOverride == null && nullToAbsent
+          ? const Value.absent()
+          : Value(systemPromptOverride),
+      postHistoryInstructions: postHistoryInstructions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(postHistoryInstructions),
+      tagsJson: Value(tagsJson),
+      creatorNotes: Value(creatorNotes),
+      isFavorite: Value(isFavorite),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -4698,6 +4886,17 @@ class Persona extends DataClass implements Insertable<Persona> {
       description: serializer.fromJson<String>(json['description']),
       avatarPath: serializer.fromJson<String?>(json['avatarPath']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
+      connectionsJson: serializer.fromJson<String>(json['connectionsJson']),
+      descriptionSettingsJson:
+          serializer.fromJson<String>(json['descriptionSettingsJson']),
+      lorebookId: serializer.fromJson<String?>(json['lorebookId']),
+      systemPromptOverride:
+          serializer.fromJson<String?>(json['systemPromptOverride']),
+      postHistoryInstructions:
+          serializer.fromJson<String?>(json['postHistoryInstructions']),
+      tagsJson: serializer.fromJson<String>(json['tagsJson']),
+      creatorNotes: serializer.fromJson<String>(json['creatorNotes']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -4711,6 +4910,16 @@ class Persona extends DataClass implements Insertable<Persona> {
       'description': serializer.toJson<String>(description),
       'avatarPath': serializer.toJson<String?>(avatarPath),
       'isDefault': serializer.toJson<bool>(isDefault),
+      'connectionsJson': serializer.toJson<String>(connectionsJson),
+      'descriptionSettingsJson':
+          serializer.toJson<String>(descriptionSettingsJson),
+      'lorebookId': serializer.toJson<String?>(lorebookId),
+      'systemPromptOverride': serializer.toJson<String?>(systemPromptOverride),
+      'postHistoryInstructions':
+          serializer.toJson<String?>(postHistoryInstructions),
+      'tagsJson': serializer.toJson<String>(tagsJson),
+      'creatorNotes': serializer.toJson<String>(creatorNotes),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -4722,6 +4931,14 @@ class Persona extends DataClass implements Insertable<Persona> {
           String? description,
           Value<String?> avatarPath = const Value.absent(),
           bool? isDefault,
+          String? connectionsJson,
+          String? descriptionSettingsJson,
+          Value<String?> lorebookId = const Value.absent(),
+          Value<String?> systemPromptOverride = const Value.absent(),
+          Value<String?> postHistoryInstructions = const Value.absent(),
+          String? tagsJson,
+          String? creatorNotes,
+          bool? isFavorite,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Persona(
@@ -4730,6 +4947,19 @@ class Persona extends DataClass implements Insertable<Persona> {
         description: description ?? this.description,
         avatarPath: avatarPath.present ? avatarPath.value : this.avatarPath,
         isDefault: isDefault ?? this.isDefault,
+        connectionsJson: connectionsJson ?? this.connectionsJson,
+        descriptionSettingsJson:
+            descriptionSettingsJson ?? this.descriptionSettingsJson,
+        lorebookId: lorebookId.present ? lorebookId.value : this.lorebookId,
+        systemPromptOverride: systemPromptOverride.present
+            ? systemPromptOverride.value
+            : this.systemPromptOverride,
+        postHistoryInstructions: postHistoryInstructions.present
+            ? postHistoryInstructions.value
+            : this.postHistoryInstructions,
+        tagsJson: tagsJson ?? this.tagsJson,
+        creatorNotes: creatorNotes ?? this.creatorNotes,
+        isFavorite: isFavorite ?? this.isFavorite,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -4742,6 +4972,26 @@ class Persona extends DataClass implements Insertable<Persona> {
       avatarPath:
           data.avatarPath.present ? data.avatarPath.value : this.avatarPath,
       isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+      connectionsJson: data.connectionsJson.present
+          ? data.connectionsJson.value
+          : this.connectionsJson,
+      descriptionSettingsJson: data.descriptionSettingsJson.present
+          ? data.descriptionSettingsJson.value
+          : this.descriptionSettingsJson,
+      lorebookId:
+          data.lorebookId.present ? data.lorebookId.value : this.lorebookId,
+      systemPromptOverride: data.systemPromptOverride.present
+          ? data.systemPromptOverride.value
+          : this.systemPromptOverride,
+      postHistoryInstructions: data.postHistoryInstructions.present
+          ? data.postHistoryInstructions.value
+          : this.postHistoryInstructions,
+      tagsJson: data.tagsJson.present ? data.tagsJson.value : this.tagsJson,
+      creatorNotes: data.creatorNotes.present
+          ? data.creatorNotes.value
+          : this.creatorNotes,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4755,6 +5005,14 @@ class Persona extends DataClass implements Insertable<Persona> {
           ..write('description: $description, ')
           ..write('avatarPath: $avatarPath, ')
           ..write('isDefault: $isDefault, ')
+          ..write('connectionsJson: $connectionsJson, ')
+          ..write('descriptionSettingsJson: $descriptionSettingsJson, ')
+          ..write('lorebookId: $lorebookId, ')
+          ..write('systemPromptOverride: $systemPromptOverride, ')
+          ..write('postHistoryInstructions: $postHistoryInstructions, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('creatorNotes: $creatorNotes, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4763,7 +5021,21 @@ class Persona extends DataClass implements Insertable<Persona> {
 
   @override
   int get hashCode => Object.hash(
-      id, name, description, avatarPath, isDefault, createdAt, updatedAt);
+      id,
+      name,
+      description,
+      avatarPath,
+      isDefault,
+      connectionsJson,
+      descriptionSettingsJson,
+      lorebookId,
+      systemPromptOverride,
+      postHistoryInstructions,
+      tagsJson,
+      creatorNotes,
+      isFavorite,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4773,6 +5045,14 @@ class Persona extends DataClass implements Insertable<Persona> {
           other.description == this.description &&
           other.avatarPath == this.avatarPath &&
           other.isDefault == this.isDefault &&
+          other.connectionsJson == this.connectionsJson &&
+          other.descriptionSettingsJson == this.descriptionSettingsJson &&
+          other.lorebookId == this.lorebookId &&
+          other.systemPromptOverride == this.systemPromptOverride &&
+          other.postHistoryInstructions == this.postHistoryInstructions &&
+          other.tagsJson == this.tagsJson &&
+          other.creatorNotes == this.creatorNotes &&
+          other.isFavorite == this.isFavorite &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -4783,6 +5063,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
   final Value<String> description;
   final Value<String?> avatarPath;
   final Value<bool> isDefault;
+  final Value<String> connectionsJson;
+  final Value<String> descriptionSettingsJson;
+  final Value<String?> lorebookId;
+  final Value<String?> systemPromptOverride;
+  final Value<String?> postHistoryInstructions;
+  final Value<String> tagsJson;
+  final Value<String> creatorNotes;
+  final Value<bool> isFavorite;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -4792,6 +5080,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
     this.description = const Value.absent(),
     this.avatarPath = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.connectionsJson = const Value.absent(),
+    this.descriptionSettingsJson = const Value.absent(),
+    this.lorebookId = const Value.absent(),
+    this.systemPromptOverride = const Value.absent(),
+    this.postHistoryInstructions = const Value.absent(),
+    this.tagsJson = const Value.absent(),
+    this.creatorNotes = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4802,6 +5098,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
     this.description = const Value.absent(),
     this.avatarPath = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.connectionsJson = const Value.absent(),
+    this.descriptionSettingsJson = const Value.absent(),
+    this.lorebookId = const Value.absent(),
+    this.systemPromptOverride = const Value.absent(),
+    this.postHistoryInstructions = const Value.absent(),
+    this.tagsJson = const Value.absent(),
+    this.creatorNotes = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -4815,6 +5119,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
     Expression<String>? description,
     Expression<String>? avatarPath,
     Expression<bool>? isDefault,
+    Expression<String>? connectionsJson,
+    Expression<String>? descriptionSettingsJson,
+    Expression<String>? lorebookId,
+    Expression<String>? systemPromptOverride,
+    Expression<String>? postHistoryInstructions,
+    Expression<String>? tagsJson,
+    Expression<String>? creatorNotes,
+    Expression<bool>? isFavorite,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -4825,6 +5137,17 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
       if (description != null) 'description': description,
       if (avatarPath != null) 'avatar_path': avatarPath,
       if (isDefault != null) 'is_default': isDefault,
+      if (connectionsJson != null) 'connections_json': connectionsJson,
+      if (descriptionSettingsJson != null)
+        'description_settings_json': descriptionSettingsJson,
+      if (lorebookId != null) 'lorebook_id': lorebookId,
+      if (systemPromptOverride != null)
+        'system_prompt_override': systemPromptOverride,
+      if (postHistoryInstructions != null)
+        'post_history_instructions': postHistoryInstructions,
+      if (tagsJson != null) 'tags_json': tagsJson,
+      if (creatorNotes != null) 'creator_notes': creatorNotes,
+      if (isFavorite != null) 'is_favorite': isFavorite,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -4837,6 +5160,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
       Value<String>? description,
       Value<String?>? avatarPath,
       Value<bool>? isDefault,
+      Value<String>? connectionsJson,
+      Value<String>? descriptionSettingsJson,
+      Value<String?>? lorebookId,
+      Value<String?>? systemPromptOverride,
+      Value<String?>? postHistoryInstructions,
+      Value<String>? tagsJson,
+      Value<String>? creatorNotes,
+      Value<bool>? isFavorite,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
@@ -4846,6 +5177,16 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
       description: description ?? this.description,
       avatarPath: avatarPath ?? this.avatarPath,
       isDefault: isDefault ?? this.isDefault,
+      connectionsJson: connectionsJson ?? this.connectionsJson,
+      descriptionSettingsJson:
+          descriptionSettingsJson ?? this.descriptionSettingsJson,
+      lorebookId: lorebookId ?? this.lorebookId,
+      systemPromptOverride: systemPromptOverride ?? this.systemPromptOverride,
+      postHistoryInstructions:
+          postHistoryInstructions ?? this.postHistoryInstructions,
+      tagsJson: tagsJson ?? this.tagsJson,
+      creatorNotes: creatorNotes ?? this.creatorNotes,
+      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -4870,6 +5211,33 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
     if (isDefault.present) {
       map['is_default'] = Variable<bool>(isDefault.value);
     }
+    if (connectionsJson.present) {
+      map['connections_json'] = Variable<String>(connectionsJson.value);
+    }
+    if (descriptionSettingsJson.present) {
+      map['description_settings_json'] =
+          Variable<String>(descriptionSettingsJson.value);
+    }
+    if (lorebookId.present) {
+      map['lorebook_id'] = Variable<String>(lorebookId.value);
+    }
+    if (systemPromptOverride.present) {
+      map['system_prompt_override'] =
+          Variable<String>(systemPromptOverride.value);
+    }
+    if (postHistoryInstructions.present) {
+      map['post_history_instructions'] =
+          Variable<String>(postHistoryInstructions.value);
+    }
+    if (tagsJson.present) {
+      map['tags_json'] = Variable<String>(tagsJson.value);
+    }
+    if (creatorNotes.present) {
+      map['creator_notes'] = Variable<String>(creatorNotes.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4890,6 +5258,14 @@ class PersonasCompanion extends UpdateCompanion<Persona> {
           ..write('description: $description, ')
           ..write('avatarPath: $avatarPath, ')
           ..write('isDefault: $isDefault, ')
+          ..write('connectionsJson: $connectionsJson, ')
+          ..write('descriptionSettingsJson: $descriptionSettingsJson, ')
+          ..write('lorebookId: $lorebookId, ')
+          ..write('systemPromptOverride: $systemPromptOverride, ')
+          ..write('postHistoryInstructions: $postHistoryInstructions, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('creatorNotes: $creatorNotes, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -9366,6 +9742,14 @@ typedef $$PersonasTableCreateCompanionBuilder = PersonasCompanion Function({
   Value<String> description,
   Value<String?> avatarPath,
   Value<bool> isDefault,
+  Value<String> connectionsJson,
+  Value<String> descriptionSettingsJson,
+  Value<String?> lorebookId,
+  Value<String?> systemPromptOverride,
+  Value<String?> postHistoryInstructions,
+  Value<String> tagsJson,
+  Value<String> creatorNotes,
+  Value<bool> isFavorite,
   required DateTime createdAt,
   required DateTime updatedAt,
   Value<int> rowid,
@@ -9376,6 +9760,14 @@ typedef $$PersonasTableUpdateCompanionBuilder = PersonasCompanion Function({
   Value<String> description,
   Value<String?> avatarPath,
   Value<bool> isDefault,
+  Value<String> connectionsJson,
+  Value<String> descriptionSettingsJson,
+  Value<String?> lorebookId,
+  Value<String?> systemPromptOverride,
+  Value<String?> postHistoryInstructions,
+  Value<String> tagsJson,
+  Value<String> creatorNotes,
+  Value<bool> isFavorite,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -9404,6 +9796,34 @@ class $$PersonasTableFilterComposer
 
   ColumnFilters<bool> get isDefault => $composableBuilder(
       column: $table.isDefault, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get connectionsJson => $composableBuilder(
+      column: $table.connectionsJson,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get descriptionSettingsJson => $composableBuilder(
+      column: $table.descriptionSettingsJson,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lorebookId => $composableBuilder(
+      column: $table.lorebookId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get systemPromptOverride => $composableBuilder(
+      column: $table.systemPromptOverride,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get postHistoryInstructions => $composableBuilder(
+      column: $table.postHistoryInstructions,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tagsJson => $composableBuilder(
+      column: $table.tagsJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get creatorNotes => $composableBuilder(
+      column: $table.creatorNotes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -9436,6 +9856,35 @@ class $$PersonasTableOrderingComposer
   ColumnOrderings<bool> get isDefault => $composableBuilder(
       column: $table.isDefault, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get connectionsJson => $composableBuilder(
+      column: $table.connectionsJson,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get descriptionSettingsJson => $composableBuilder(
+      column: $table.descriptionSettingsJson,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lorebookId => $composableBuilder(
+      column: $table.lorebookId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get systemPromptOverride => $composableBuilder(
+      column: $table.systemPromptOverride,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get postHistoryInstructions => $composableBuilder(
+      column: $table.postHistoryInstructions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tagsJson => $composableBuilder(
+      column: $table.tagsJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get creatorNotes => $composableBuilder(
+      column: $table.creatorNotes,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -9466,6 +9915,30 @@ class $$PersonasTableAnnotationComposer
 
   GeneratedColumn<bool> get isDefault =>
       $composableBuilder(column: $table.isDefault, builder: (column) => column);
+
+  GeneratedColumn<String> get connectionsJson => $composableBuilder(
+      column: $table.connectionsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get descriptionSettingsJson => $composableBuilder(
+      column: $table.descriptionSettingsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get lorebookId => $composableBuilder(
+      column: $table.lorebookId, builder: (column) => column);
+
+  GeneratedColumn<String> get systemPromptOverride => $composableBuilder(
+      column: $table.systemPromptOverride, builder: (column) => column);
+
+  GeneratedColumn<String> get postHistoryInstructions => $composableBuilder(
+      column: $table.postHistoryInstructions, builder: (column) => column);
+
+  GeneratedColumn<String> get tagsJson =>
+      $composableBuilder(column: $table.tagsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get creatorNotes => $composableBuilder(
+      column: $table.creatorNotes, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -9502,6 +9975,14 @@ class $$PersonasTableTableManager extends RootTableManager<
             Value<String> description = const Value.absent(),
             Value<String?> avatarPath = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
+            Value<String> connectionsJson = const Value.absent(),
+            Value<String> descriptionSettingsJson = const Value.absent(),
+            Value<String?> lorebookId = const Value.absent(),
+            Value<String?> systemPromptOverride = const Value.absent(),
+            Value<String?> postHistoryInstructions = const Value.absent(),
+            Value<String> tagsJson = const Value.absent(),
+            Value<String> creatorNotes = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -9512,6 +9993,14 @@ class $$PersonasTableTableManager extends RootTableManager<
             description: description,
             avatarPath: avatarPath,
             isDefault: isDefault,
+            connectionsJson: connectionsJson,
+            descriptionSettingsJson: descriptionSettingsJson,
+            lorebookId: lorebookId,
+            systemPromptOverride: systemPromptOverride,
+            postHistoryInstructions: postHistoryInstructions,
+            tagsJson: tagsJson,
+            creatorNotes: creatorNotes,
+            isFavorite: isFavorite,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -9522,6 +10011,14 @@ class $$PersonasTableTableManager extends RootTableManager<
             Value<String> description = const Value.absent(),
             Value<String?> avatarPath = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
+            Value<String> connectionsJson = const Value.absent(),
+            Value<String> descriptionSettingsJson = const Value.absent(),
+            Value<String?> lorebookId = const Value.absent(),
+            Value<String?> systemPromptOverride = const Value.absent(),
+            Value<String?> postHistoryInstructions = const Value.absent(),
+            Value<String> tagsJson = const Value.absent(),
+            Value<String> creatorNotes = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
             Value<int> rowid = const Value.absent(),
@@ -9532,6 +10029,14 @@ class $$PersonasTableTableManager extends RootTableManager<
             description: description,
             avatarPath: avatarPath,
             isDefault: isDefault,
+            connectionsJson: connectionsJson,
+            descriptionSettingsJson: descriptionSettingsJson,
+            lorebookId: lorebookId,
+            systemPromptOverride: systemPromptOverride,
+            postHistoryInstructions: postHistoryInstructions,
+            tagsJson: tagsJson,
+            creatorNotes: creatorNotes,
+            isFavorite: isFavorite,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,

@@ -3808,4 +3808,117 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get chatLorebooksHint => 'World info books active only in this chat';
+
+  @override
+  String get messagesCleared => 'All messages cleared';
+
+  @override
+  String get selectCharacterCardFiles => 'Select character card files';
+
+  @override
+  String get supportedCharacterCardFormats =>
+      'Batch import supported: PNG, CharX, and JSON';
+
+  @override
+  String get importFromUrl => 'Import from URL';
+
+  @override
+  String get enterCharacterCardUrl => 'Enter a character card URL...';
+
+  @override
+  String get pasteAndImport => 'Paste and import';
+
+  @override
+  String get supportedCommunities => 'Supported communities (tap to open):';
+
+  @override
+  String get publicCardLinksSupported =>
+      'Public PNG and JSON links are also supported';
+
+  @override
+  String get communityLinks => 'Community links';
+
+  @override
+  String importSummaryMixed(Object failed, Object success) {
+    return 'Imported $success character cards; $failed failed';
+  }
+
+  @override
+  String importSummarySuccess(Object count) {
+    return 'Imported $count character cards';
+  }
+
+  @override
+  String get importSummaryFailed => 'All imports failed';
+
+  @override
+  String processingProgress(Object processed, Object total) {
+    return 'Processing: $processed / $total';
+  }
+
+  @override
+  String get importSuccessLabel => 'Succeeded';
+
+  @override
+  String get importFailureLabel => 'Failed';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String importAllCharacters(Object count) {
+    return 'Import all ($count)';
+  }
+
+  @override
+  String get switchLayout => 'Switch layout';
+
+  @override
+  String get stopGenerating => 'Stop generating';
+
+  @override
+  String get imageBackgroundSettings => 'Image background settings';
+
+  @override
+  String get useCharacterImageAsBackground =>
+      'Use character image as background';
+
+  @override
+  String get useCharacterImageAsBackgroundHint =>
+      'Automatically use the character avatar when available';
+
+  @override
+  String get backgroundOpacity => 'Background opacity';
+
+  @override
+  String get backgroundOpacityHint =>
+      'Applies to custom and character image backgrounds';
+
+  @override
+  String get enableBackgroundBlur => 'Enable background blur';
+
+  @override
+  String get enableBackgroundBlurHint =>
+      'Applies blur to all image backgrounds';
+
+  @override
+  String get backgroundPriorityHint =>
+      'Priority: character background > global background > character image > default color';
+
+  @override
+  String get openRouterUpstreamProvider => 'OpenRouter provider';
+
+  @override
+  String get automaticRouting => 'Automatic routing';
+
+  @override
+  String get openRouterProviderHint =>
+      'Choose the upstream provider used for this model';
+
+  @override
+  String get useCurrentChatConnection => 'Use current chat connection';
+
+  @override
+  String get chatConnectionAppliedToEmbeddings =>
+      'Chat endpoint and API key applied to embeddings';
 }

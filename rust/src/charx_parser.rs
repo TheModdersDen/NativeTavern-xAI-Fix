@@ -7,7 +7,7 @@
 use std::io::{Read, Cursor};
 use zip::ZipArchive;
 use crate::error::{CoreError, Result};
-use crate::models::{CharacterCardData, CharacterCardSpec, CharacterAsset, ParsedCharX, ExtractedAsset};
+use crate::models::{CharacterCardData, CharacterCardSpec, ExtractedAsset, ParsedCharX};
 
 /// Common embedded URI prefixes used in CharX files
 const EMBEDDED_PREFIXES: &[&str] = &["embeded://", "embedded://", "__asset:"];
@@ -210,13 +210,16 @@ fn extract_file(archive: &mut ZipArchive<Cursor<&[u8]>>, path: &str) -> Result<V
     // Try case-insensitive search
     let lower_path = path.to_lowercase();
     for i in 0..archive.len() {
-        if let Ok(file) = archive.by_index(i) {
-            if file.name().to_lowercase() == lower_path {
-                let mut file = archive.by_index(i)?;
-                let mut data = Vec::new();
-                file.read_to_end(&mut data)?;
-                return Ok(data);
-            }
+        let matches = archive
+            .by_index(i)
+            .map(|file| file.name().to_lowercase() == lower_path)
+            .unwrap_or(false);
+
+        if matches {
+            let mut file = archive.by_index(i)?;
+            let mut data = Vec::new();
+            file.read_to_end(&mut data)?;
+            return Ok(data);
         }
     }
     
@@ -230,13 +233,13 @@ pub fn create_charx(
     assets: &[(&str, &str, &str, &[u8])], // (type, name, ext, data)
 ) -> Result<Vec<u8>> {
     use std::io::Write;
-    use zip::write::SimpleFileOptions;
+    use zip::write::FileOptions;
     
     let mut buffer = Vec::new();
     let cursor = Cursor::new(&mut buffer);
     let mut zip = zip::ZipWriter::new(cursor);
     
-    let options = SimpleFileOptions::default()
+    let options = FileOptions::default()
         .compression_method(zip::CompressionMethod::Deflated);
     
     // Write card.json

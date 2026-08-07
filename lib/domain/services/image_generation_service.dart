@@ -211,7 +211,39 @@ class ImageGenSettings {
   String get model => models[provider.id] ?? provider.defaultModel;
   
   /// Get the effective API endpoint for current provider
-  String get effectiveEndpoint => apiEndpoint ?? provider.defaultEndpoint;
+  String get effectiveEndpoint {
+    final configuredEndpoint = apiEndpoint?.trim();
+    final endpoint = configuredEndpoint == null || configuredEndpoint.isEmpty
+        ? provider.defaultEndpoint
+        : configuredEndpoint;
+
+    final uri = Uri.tryParse(endpoint);
+    if (uri == null) {
+      return endpoint.replaceFirst(RegExp(r'/+$'), '');
+    }
+
+    var path = uri.path.replaceFirst(RegExp(r'/+$'), '');
+    if (provider == ImageGenProvider.openai ||
+        provider == ImageGenProvider.openaiChat) {
+      const endpointSuffixes = [
+        '/images/generations',
+        '/chat/completions',
+        '/models',
+      ];
+      for (final suffix in endpointSuffixes) {
+        if (path.endsWith(suffix)) {
+          path = path.substring(0, path.length - suffix.length);
+          break;
+        }
+      }
+      path = path.replaceFirst(RegExp(r'/+$'), '');
+      if (path.isEmpty) {
+        path = '/v1';
+      }
+    }
+
+    return uri.replace(path: path).toString().replaceFirst(RegExp(r'/+$'), '');
+  }
 
   ImageGenSettings copyWith({
     bool? enabled,

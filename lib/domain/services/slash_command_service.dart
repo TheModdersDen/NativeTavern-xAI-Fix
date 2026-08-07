@@ -155,12 +155,22 @@ class SlashCommands {
     usage: '/impersonate',
   );
 
+  static const imagine = SlashCommand(
+    name: 'imagine',
+    description: 'Generate an image from a prompt',
+    aliases: ['sd'],
+    usage:
+        '/imagine <prompt> [--width N] [--height N] [--steps N] [--cfg N] [--seed N]',
+    requiresArgument: true,
+  );
+
   static const List<SlashCommand> all = [
     continue_,
     regenerate,
     swipe,
     delswipe,
     impersonate,
+    imagine,
     persona,
     sys,
     bg,

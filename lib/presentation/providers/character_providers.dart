@@ -7,8 +7,16 @@ import 'package:native_tavern/data/repositories/character_repository.dart';
 /// Selected character state
 final selectedCharacterIdProvider = StateProvider<String?>((ref) => null);
 
+/// Character details, invalidated after editor writes so open screens refresh.
+final characterDetailProvider =
+    FutureProvider.family<Character?, String>((ref, id) async {
+  final repo = ref.watch(characterRepositoryProvider);
+  return repo.getCharacter(id);
+});
+
 /// Character list provider
-final characterListProvider = AsyncNotifierProvider<CharacterListNotifier, List<Character>>(() {
+final characterListProvider =
+    AsyncNotifierProvider<CharacterListNotifier, List<Character>>(() {
   return CharacterListNotifier();
 });
 
@@ -52,15 +60,16 @@ class CharacterListNotifier extends AsyncNotifier<List<Character>> {
 final selectedCharacterProvider = FutureProvider<Character?>((ref) async {
   final id = ref.watch(selectedCharacterIdProvider);
   if (id == null) return null;
-  
+
   final repo = ref.watch(characterRepositoryProvider);
   return repo.getCharacter(id);
 });
 
 /// Character search provider
-final characterSearchProvider = FutureProvider.family<List<Character>, String>((ref, query) async {
+final characterSearchProvider =
+    FutureProvider.family<List<Character>, String>((ref, query) async {
   if (query.isEmpty) return [];
-  
+
   final repo = ref.watch(characterRepositoryProvider);
   return repo.searchCharacters(query);
 });

@@ -7,10 +7,13 @@ part 'persona.g.dart';
 enum PersonaLockType {
   /// No lock - persona can be changed freely
   none,
+
   /// Locked to current chat - persona persists for this chat only
   chat,
+
   /// Locked to character - persona is always used with this character
   character,
+
   /// Default lock - this is the default persona
   defaultLock,
 }
@@ -19,14 +22,19 @@ enum PersonaLockType {
 enum PersonaDescriptionPosition {
   /// Before character description
   beforeChar,
-  /// After character description  
+
+  /// After character description
   afterChar,
+
   /// At specific depth in chat history
   atDepth,
+
   /// In system prompt
   inSystemPrompt,
+
   /// Top of Author's Note
   topAN,
+
   /// Bottom of Author's Note
   bottomAN,
 }
@@ -44,8 +52,13 @@ class PersonaConnection with _$PersonaConnection {
   const factory PersonaConnection({
     /// Character ID this persona is connected to (null for groups)
     String? characterId,
+
     /// Group ID this persona is connected to (null for characters)
     String? groupId,
+
+    /// Chat ID this persona is connected to
+    String? chatId,
+
     /// Lock type for this connection
     @Default(PersonaLockType.none) PersonaLockType lockType,
   }) = _PersonaConnection;
@@ -61,8 +74,10 @@ class PersonaDescriptionSettings with _$PersonaDescriptionSettings {
     /// Position where description is inserted
     @Default(PersonaDescriptionPosition.beforeChar)
     PersonaDescriptionPosition position,
+
     /// Depth for atDepth position (0 = after last message)
     @Default(0) int depth,
+
     /// Role for the description message
     @Default(PersonaDescriptionRole.system) PersonaDescriptionRole role,
   }) = _PersonaDescriptionSettings;
@@ -82,37 +97,38 @@ class Persona with _$Persona {
     @Default(false) bool isDefault,
     required DateTime createdAt,
     required DateTime updatedAt,
-    
+
     // === New fields for SillyTavern compatibility ===
-    
+
     /// Connections to characters/groups
     @Default([]) List<PersonaConnection> connections,
-    
+
     /// Description settings (position, depth, role)
     @Default(PersonaDescriptionSettings())
     PersonaDescriptionSettings descriptionSettings,
-    
+
     /// Persona-specific lorebook/world info ID
     /// If set, this world info is activated when persona is active
     String? lorebookId,
-    
+
     /// Custom system prompt override for this persona
     String? systemPromptOverride,
-    
+
     /// Custom post-history instructions for this persona
     String? postHistoryInstructions,
-    
+
     /// Tags for organization
     @Default([]) List<String> tags,
-    
+
     /// Creator notes (not sent to AI)
     @Default('') String creatorNotes,
-    
+
     /// Favorite status
     @Default(false) bool isFavorite,
   }) = _Persona;
 
-  factory Persona.fromJson(Map<String, dynamic> json) => _$PersonaFromJson(json);
+  factory Persona.fromJson(Map<String, dynamic> json) =>
+      _$PersonaFromJson(json);
 }
 
 /// Extension methods for Persona
@@ -125,6 +141,11 @@ extension PersonaExtension on Persona {
   /// Check if persona is connected to a specific group
   bool isConnectedToGroup(String groupId) {
     return connections.any((c) => c.groupId == groupId);
+  }
+
+  /// Check if persona is connected to a specific chat
+  bool isConnectedToChat(String chatId) {
+    return connections.any((c) => c.chatId == chatId);
   }
 
   /// Get connection for a specific character
@@ -172,7 +193,7 @@ Persona createDefaultPersona() {
 /// Create a persona from SillyTavern format
 Persona personaFromSillyTavern(Map<String, dynamic> json) {
   final now = DateTime.now();
-  
+
   // Parse description position
   PersonaDescriptionPosition position = PersonaDescriptionPosition.beforeChar;
   if (json['description_position'] != null) {
@@ -197,7 +218,7 @@ Persona personaFromSillyTavern(Map<String, dynamic> json) {
         break;
     }
   }
-  
+
   // Parse description role
   PersonaDescriptionRole role = PersonaDescriptionRole.system;
   if (json['description_role'] != null) {
@@ -213,15 +234,16 @@ Persona personaFromSillyTavern(Map<String, dynamic> json) {
         break;
     }
   }
-  
+
   return Persona(
-    id: (json['id'] as String?) ?? DateTime.now().millisecondsSinceEpoch.toString(),
+    id: (json['id'] as String?) ??
+        DateTime.now().millisecondsSinceEpoch.toString(),
     name: (json['name'] as String?) ?? 'Unknown',
     description: (json['description'] as String?) ?? '',
     avatarPath: json['avatar'] as String?,
     isDefault: (json['default'] as bool?) ?? false,
-    createdAt: json['created_at'] != null 
-        ? DateTime.tryParse(json['created_at'] as String) ?? now 
+    createdAt: json['created_at'] != null
+        ? DateTime.tryParse(json['created_at'] as String) ?? now
         : now,
     updatedAt: now,
     descriptionSettings: PersonaDescriptionSettings(
@@ -230,9 +252,8 @@ Persona personaFromSillyTavern(Map<String, dynamic> json) {
       role: role,
     ),
     lorebookId: json['lorebook'] as String?,
-    tags: json['tags'] != null 
-        ? List<String>.from(json['tags'] as Iterable) 
-        : [],
+    tags:
+        json['tags'] != null ? List<String>.from(json['tags'] as Iterable) : [],
     creatorNotes: (json['creator_notes'] as String?) ?? '',
   );
 }
@@ -261,7 +282,7 @@ Map<String, dynamic> personaToSillyTavern(Persona persona) {
       positionValue = 5;
       break;
   }
-  
+
   // Convert role to SillyTavern format
   int roleValue = 0; // default: system
   switch (persona.descriptionSettings.role) {
@@ -275,7 +296,7 @@ Map<String, dynamic> personaToSillyTavern(Persona persona) {
       roleValue = 2;
       break;
   }
-  
+
   return {
     'id': persona.id,
     'name': persona.name,

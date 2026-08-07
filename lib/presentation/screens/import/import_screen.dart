@@ -104,7 +104,8 @@ class ImportNotifier extends StateNotifier<ImportState> {
   final UrlImportService _urlImportService;
   final ImagePicker _imagePicker = ImagePicker();
 
-  ImportNotifier(this._importService, this._urlImportService) : super(const ImportState());
+  ImportNotifier(this._importService, this._urlImportService)
+      : super(const ImportState());
 
   Future<void> pickFile() async {
     try {
@@ -115,7 +116,10 @@ class ImportNotifier extends StateNotifier<ImportState> {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        await loadFiles(result.files.where((f) => f.path != null).map((f) => f.path!).toList());
+        await loadFiles(result.files
+            .where((f) => f.path != null)
+            .map((f) => f.path!)
+            .toList());
       }
     } catch (e) {
       state = state.copyWith(error: 'Failed to pick file: $e');
@@ -126,7 +130,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
   Future<void> pickFromGallery() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
+
       final List<XFile> images = await _imagePicker.pickMultiImage(
         maxWidth: 4096,
         maxHeight: 4096,
@@ -332,9 +336,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           : _FilePickerView(
               isLoading: importState.isLoading,
               error: importState.error,
-              onPickFile: () => ref.read(importStateProvider.notifier).pickFile(),
-              onPickFromGallery: () => ref.read(importStateProvider.notifier).pickFromGallery(),
-              onImportUrl: (url) => ref.read(importStateProvider.notifier).importFromUrl(url),
+              onPickFile: () =>
+                  ref.read(importStateProvider.notifier).pickFile(),
+              onPickFromGallery: () =>
+                  ref.read(importStateProvider.notifier).pickFromGallery(),
+              onImportUrl: (url) =>
+                  ref.read(importStateProvider.notifier).importFromUrl(url),
             ),
     );
   }
@@ -377,9 +384,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       // Show summary message
       final message = successCount > 0
           ? errorCount > 0
-              ? '导入成功 $successCount 个，失败 $errorCount 个'
-              : '成功导入 $successCount 个角色卡！'
-          : '所有导入都失败了';
+              ? l10n.importSummaryMixed(successCount, errorCount)
+              : l10n.importSummarySuccess(successCount)
+          : l10n.importSummaryFailed;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -404,16 +411,17 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     String characterName,
   ) async {
     final worldInfoRepo = ref.read(worldInfoRepositoryProvider);
-    
+
     // Create a WorldInfo entry linked to this character
     final worldInfoName = characterBook.name ?? '$characterName Lorebook';
     final worldInfo = await worldInfoRepo.createWorldInfo(
       name: worldInfoName,
-      description: characterBook.description ?? 'Embedded lorebook from $characterName',
+      description:
+          characterBook.description ?? 'Embedded lorebook from $characterName',
       isGlobal: false,
       characterId: characterId,
     );
-    
+
     // Convert and add all CharacterBookEntry as WorldInfoEntry
     for (final entry in characterBook.entries) {
       // Map CharacterBookEntry position to WorldInfoPosition
@@ -421,20 +429,21 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       WorldInfoPosition position;
       switch (entry.position) {
         case 0:
-          position = WorldInfoPosition.before;  // Before Character Definition
+          position = WorldInfoPosition.before; // Before Character Definition
           break;
         case 1:
-          position = WorldInfoPosition.after;   // After Character Definition
+          position = WorldInfoPosition.after; // After Character Definition
           break;
         default:
           position = WorldInfoPosition.after;
       }
-      
+
       await worldInfoRepo.addEntry(
         worldInfoId: worldInfo.id,
         keys: entry.keys,
         content: entry.content,
-        secondaryKeys: entry.secondaryKeys.isNotEmpty ? entry.secondaryKeys : null,
+        secondaryKeys:
+            entry.secondaryKeys.isNotEmpty ? entry.secondaryKeys : null,
         comment: entry.name.isNotEmpty ? entry.name : entry.comment,
         position: position,
         depth: 4, // Default depth
@@ -522,12 +531,13 @@ class _FilePickerViewState extends State<_FilePickerView> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '选择角色卡文件',
+                        AppLocalizations.of(context)!.selectCharacterCardFiles,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '支持批量导入 • PNG, CharX, JSON 格式',
+                        AppLocalizations.of(context)!
+                            .supportedCharacterCardFormats,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.textMuted,
                             ),
@@ -537,7 +547,8 @@ class _FilePickerViewState extends State<_FilePickerView> {
                         ElevatedButton.icon(
                           onPressed: widget.onPickFromGallery,
                           icon: const Icon(Icons.photo_library),
-                          label: Text(AppLocalizations.of(context)!.chooseFromGallery),
+                          label: Text(
+                              AppLocalizations.of(context)!.chooseFromGallery),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(200, 48),
                           ),
@@ -546,7 +557,8 @@ class _FilePickerViewState extends State<_FilePickerView> {
                         OutlinedButton.icon(
                           onPressed: widget.onPickFile,
                           icon: const Icon(Icons.folder_open),
-                          label: Text(AppLocalizations.of(context)!.browseFiles),
+                          label:
+                              Text(AppLocalizations.of(context)!.browseFiles),
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(200, 48),
                           ),
@@ -555,7 +567,8 @@ class _FilePickerViewState extends State<_FilePickerView> {
                         ElevatedButton.icon(
                           onPressed: widget.onPickFile,
                           icon: const Icon(Icons.folder_open),
-                          label: Text(AppLocalizations.of(context)!.browseFiles),
+                          label:
+                              Text(AppLocalizations.of(context)!.browseFiles),
                         ),
                     ],
                   ],
@@ -579,19 +592,23 @@ class _FilePickerViewState extends State<_FilePickerView> {
                 child: Column(
                   children: [
                     InkWell(
-                      onTap: () => setState(() => _showUrlInput = !_showUrlInput),
+                      onTap: () =>
+                          setState(() => _showUrlInput = !_showUrlInput),
                       child: Row(
                         children: [
-                          const Icon(Icons.link, size: 24, color: AppTheme.accentColor),
+                          const Icon(Icons.link,
+                              size: 24, color: AppTheme.accentColor),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              '从网址导入',
+                              AppLocalizations.of(context)!.importFromUrl,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
                           Icon(
-                            _showUrlInput ? Icons.expand_less : Icons.expand_more,
+                            _showUrlInput
+                                ? Icons.expand_less
+                                : Icons.expand_more,
                             color: AppTheme.textMuted,
                           ),
                         ],
@@ -602,7 +619,8 @@ class _FilePickerViewState extends State<_FilePickerView> {
                       TextField(
                         controller: _urlController,
                         decoration: InputDecoration(
-                          hintText: '输入角色卡链接...',
+                          hintText: AppLocalizations.of(context)!
+                              .enterCharacterCardUrl,
                           hintStyle: const TextStyle(color: AppTheme.textMuted),
                           prefixIcon: const Icon(Icons.link, size: 20),
                           suffixIcon: Row(
@@ -611,26 +629,29 @@ class _FilePickerViewState extends State<_FilePickerView> {
                               IconButton(
                                 icon: const Icon(Icons.content_paste, size: 20),
                                 onPressed: _pasteAndImport,
-                                tooltip: '粘贴并导入',
+                                tooltip: AppLocalizations.of(context)!
+                                    .pasteAndImport,
                               ),
                               IconButton(
                                 icon: const Icon(Icons.download, size: 20),
-                                onPressed: widget.isLoading ? null : _handleUrlImport,
-                                tooltip: '导入',
+                                onPressed:
+                                    widget.isLoading ? null : _handleUrlImport,
+                                tooltip: AppLocalizations.of(context)!.import,
                               ),
                             ],
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                         ),
                         onSubmitted: (_) => _handleUrlImport(),
                         enabled: !widget.isLoading,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '支持的社区（点击访问）：',
+                        AppLocalizations.of(context)!.supportedCommunities,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.textMuted,
                             ),
@@ -641,17 +662,28 @@ class _FilePickerViewState extends State<_FilePickerView> {
                         runSpacing: 8,
                         alignment: WrapAlignment.center,
                         children: const [
-                          _CommunityChip(name: 'NativeTavern', url: 'https://nativetavern.com', isPrimary: true),
-                          _CommunityChip(name: 'Chub.ai', url: 'https://chub.ai/characters'),
-                          _CommunityChip(name: 'JanitorAI', url: 'https://janitorai.com'),
-                          _CommunityChip(name: 'Pygmalion', url: 'https://pygmalion.chat'),
-                          _CommunityChip(name: 'RisuRealm', url: 'https://realm.risuai.net'),
-                          _CommunityChip(name: 'AICharacterCards', url: 'https://aicharactercards.com'),
+                          _CommunityChip(
+                              name: 'NativeTavern',
+                              url: 'https://nativetavern.com',
+                              isPrimary: true),
+                          _CommunityChip(
+                              name: 'Chub.ai',
+                              url: 'https://chub.ai/characters'),
+                          _CommunityChip(
+                              name: 'JanitorAI', url: 'https://janitorai.com'),
+                          _CommunityChip(
+                              name: 'Pygmalion', url: 'https://pygmalion.chat'),
+                          _CommunityChip(
+                              name: 'RisuRealm',
+                              url: 'https://realm.risuai.net'),
+                          _CommunityChip(
+                              name: 'AICharacterCards',
+                              url: 'https://aicharactercards.com'),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '也支持公开的 PNG / JSON 链接',
+                        AppLocalizations.of(context)!.publicCardLinksSupported,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.textMuted,
                             ),
@@ -706,13 +738,15 @@ class _FilePickerViewState extends State<_FilePickerView> {
         _FormatTile(
           icon: Icons.image,
           title: AppLocalizations.of(context)!.pngCharacterCard,
-          description: AppLocalizations.of(context)!.characterDataEmbeddedInImage,
+          description:
+              AppLocalizations.of(context)!.characterDataEmbeddedInImage,
         ),
         const SizedBox(height: 8),
         _FormatTile(
           icon: Icons.archive,
           title: AppLocalizations.of(context)!.charxArchive,
-          description: AppLocalizations.of(context)!.zipArchiveWithCharacterData,
+          description:
+              AppLocalizations.of(context)!.zipArchiveWithCharacterData,
         ),
         const SizedBox(height: 8),
         _FormatTile(
@@ -721,10 +755,11 @@ class _FilePickerViewState extends State<_FilePickerView> {
           description: AppLocalizations.of(context)!.plainCharacterCardJson,
         ),
         const SizedBox(height: 8),
-        const _FormatTile(
+        _FormatTile(
           icon: Icons.link,
-          title: '社区链接',
-          description: 'NativeTavern, Chub.ai, JanitorAI, Pygmalion, RisuRealm, AICharacterCards',
+          title: AppLocalizations.of(context)!.communityLinks,
+          description:
+              'NativeTavern, Chub.ai, JanitorAI, Pygmalion, RisuRealm, AICharacterCards',
         ),
       ],
     );
@@ -844,7 +879,7 @@ class _BatchImportResults extends StatelessWidget {
                 const LinearProgressIndicator(),
                 const SizedBox(height: 12),
                 Text(
-                  '处理中: $processedFiles / $totalFiles',
+                  l10n.processingProgress(processedFiles, totalFiles),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ] else ...[
@@ -853,19 +888,19 @@ class _BatchImportResults extends StatelessWidget {
                   children: [
                     _StatChip(
                       icon: Icons.check_circle,
-                      label: '成功',
+                      label: l10n.importSuccessLabel,
                       count: successCount,
                       color: Colors.green,
                     ),
                     _StatChip(
                       icon: Icons.error,
-                      label: '失败',
+                      label: l10n.importFailureLabel,
                       count: errorCount,
                       color: Colors.red,
                     ),
                     _StatChip(
                       icon: Icons.folder,
-                      label: '总计',
+                      label: l10n.totalLabel,
                       count: totalFiles,
                       color: AppTheme.accentColor,
                     ),
@@ -878,7 +913,7 @@ class _BatchImportResults extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: onImportAll,
                       icon: const Icon(Icons.download),
-                      label: Text('导入全部 ($successCount 个角色卡)'),
+                      label: Text(l10n.importAllCharacters(successCount)),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(0, 48),
                       ),
@@ -949,6 +984,7 @@ class _ImportResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -958,7 +994,7 @@ class _ImportResultCard extends StatelessWidget {
             // Status icon
             _buildStatusIcon(),
             const SizedBox(width: 16),
-            
+
             // File info
             Expanded(
               child: Column(
@@ -974,14 +1010,16 @@ class _ImportResultCard extends StatelessWidget {
                   if (result.urlSource != null)
                     Row(
                       children: [
-                        const Icon(Icons.link, size: 12, color: AppTheme.textMuted),
+                        const Icon(Icons.link,
+                            size: 12, color: AppTheme.textMuted),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             result.fileName,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textMuted,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1003,13 +1041,17 @@ class _ImportResultCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.auto_stories, size: 14, color: AppTheme.accentColor),
+                        Icon(Icons.auto_stories,
+                            size: 14, color: AppTheme.accentColor),
                         const SizedBox(width: 4),
                         Text(
-                          '${result.character!.characterBook!.entries.length} 条世界书',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.accentColor,
-                              ),
+                          l10n.entriesCount(
+                            result.character!.characterBook!.entries.length,
+                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.accentColor,
+                                  ),
                         ),
                       ],
                     ),
@@ -1046,7 +1088,8 @@ class _ImportResultCard extends StatelessWidget {
     } else if (result.error != null) {
       return const Icon(Icons.error, color: Colors.red, size: 32);
     } else {
-      return const Icon(Icons.help_outline, color: AppTheme.textMuted, size: 32);
+      return const Icon(Icons.help_outline,
+          color: AppTheme.textMuted, size: 32);
     }
   }
 }
@@ -1111,7 +1154,10 @@ class _CharacterPreview extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'by ${character.creator}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: AppTheme.textMuted,
                                 ),
                           ),
@@ -1120,9 +1166,10 @@ class _CharacterPreview extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'Version: ${character.version}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textMuted,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
                           ),
                         ],
                       ],
@@ -1206,33 +1253,43 @@ class _CharacterPreview extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.format_list_bulleted, size: 20, color: AppTheme.accentColor),
+                        Icon(Icons.format_list_bulleted,
+                            size: 20, color: AppTheme.accentColor),
                         const SizedBox(width: 8),
                         Text(
-                          AppLocalizations.of(context)!.alternateGreetingsCount(character.alternateGreetings.length),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppTheme.accentColor,
-                              ),
+                          AppLocalizations.of(context)!.alternateGreetingsCount(
+                              character.alternateGreetings.length),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: AppTheme.accentColor,
+                                  ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ...character.alternateGreetings.asMap().entries.map((e) => Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        '${e.key + 1}. ${e.value.length > 100 ? '${e.value.substring(0, 100)}...' : e.value}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.textMuted,
-                            ),
-                      ),
-                    )),
+                    ...character.alternateGreetings
+                        .asMap()
+                        .entries
+                        .map((e) => Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                '${e.key + 1}. ${e.value.length > 100 ? '${e.value.substring(0, 100)}...' : e.value}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
+                              ),
+                            )),
                   ],
                 ),
               ),
             ),
 
           // Embedded lorebook
-          if (character.characterBook != null && character.characterBook!.entries.isNotEmpty)
+          if (character.characterBook != null &&
+              character.characterBook!.entries.isNotEmpty)
             Card(
               margin: const EdgeInsets.only(bottom: 16),
               child: Padding(
@@ -1242,13 +1299,16 @@ class _CharacterPreview extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.auto_stories, size: 20, color: AppTheme.accentColor),
+                        Icon(Icons.auto_stories,
+                            size: 20, color: AppTheme.accentColor),
                         const SizedBox(width: 8),
                         Text(
-                          AppLocalizations.of(context)!.embeddedLorebookEntries(character.characterBook!.entries.length),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppTheme.accentColor,
-                              ),
+                          AppLocalizations.of(context)!.embeddedLorebookEntries(
+                              character.characterBook!.entries.length),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: AppTheme.accentColor,
+                                  ),
                         ),
                       ],
                     ),

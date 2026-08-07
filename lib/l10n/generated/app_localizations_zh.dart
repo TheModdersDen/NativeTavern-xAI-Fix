@@ -3781,6 +3781,110 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatLorebooksHint => '仅在本聊天中生效的世界书';
+
+  @override
+  String get messagesCleared => '已清空全部消息';
+
+  @override
+  String get selectCharacterCardFiles => '选择角色卡文件';
+
+  @override
+  String get supportedCharacterCardFormats => '支持批量导入：PNG、CharX 和 JSON';
+
+  @override
+  String get importFromUrl => '从网址导入';
+
+  @override
+  String get enterCharacterCardUrl => '输入角色卡链接...';
+
+  @override
+  String get pasteAndImport => '粘贴并导入';
+
+  @override
+  String get supportedCommunities => '支持的社区（点击访问）：';
+
+  @override
+  String get publicCardLinksSupported => '也支持公开的 PNG 和 JSON 链接';
+
+  @override
+  String get communityLinks => '社区链接';
+
+  @override
+  String importSummaryMixed(Object failed, Object success) {
+    return '成功导入 $success 个角色卡，$failed 个失败';
+  }
+
+  @override
+  String importSummarySuccess(Object count) {
+    return '成功导入 $count 个角色卡';
+  }
+
+  @override
+  String get importSummaryFailed => '所有导入都失败了';
+
+  @override
+  String processingProgress(Object processed, Object total) {
+    return '处理中：$processed / $total';
+  }
+
+  @override
+  String get importSuccessLabel => '成功';
+
+  @override
+  String get importFailureLabel => '失败';
+
+  @override
+  String get totalLabel => '总计';
+
+  @override
+  String importAllCharacters(Object count) {
+    return '导入全部（$count）';
+  }
+
+  @override
+  String get switchLayout => '切换布局';
+
+  @override
+  String get stopGenerating => '停止生成';
+
+  @override
+  String get imageBackgroundSettings => '图片背景设置';
+
+  @override
+  String get useCharacterImageAsBackground => '使用角色卡图片作为背景';
+
+  @override
+  String get useCharacterImageAsBackgroundHint => '角色卡有头像时自动用作聊天背景';
+
+  @override
+  String get backgroundOpacity => '背景透明度';
+
+  @override
+  String get backgroundOpacityHint => '应用于自定义图片和角色卡图片背景';
+
+  @override
+  String get enableBackgroundBlur => '启用背景模糊效果';
+
+  @override
+  String get enableBackgroundBlurHint => '应用模糊效果到所有图片背景';
+
+  @override
+  String get backgroundPriorityHint => '优先级：角色专属背景 > 全局背景 > 角色卡图片 > 默认颜色';
+
+  @override
+  String get openRouterUpstreamProvider => 'OpenRouter 上游提供商';
+
+  @override
+  String get automaticRouting => '自动路由';
+
+  @override
+  String get openRouterProviderHint => '选择此模型实际使用的上游提供商';
+
+  @override
+  String get useCurrentChatConnection => '使用当前聊天连接';
+
+  @override
+  String get chatConnectionAppliedToEmbeddings => '已将聊天接口和 API 密钥用于嵌入';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

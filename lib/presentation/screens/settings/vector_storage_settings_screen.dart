@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
 import 'package:native_tavern/domain/services/vector_storage_service.dart';
+import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/vector_storage_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
@@ -17,6 +18,7 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
     final settings = ref.watch(vectorStorageSettingsProvider);
     final collections = ref.watch(vectorCollectionsProvider);
     final service = ref.watch(vectorStorageServiceProvider);
+    final chatConfig = ref.watch(llmConfigProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -112,6 +114,27 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           // Embedding settings
           _buildSectionHeader(context, 'Embedding Provider'),
           const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.link),
+            label: Text(AppLocalizations.of(context).useCurrentChatConnection),
+            onPressed: settings.enabled &&
+                    chatConfig.apiUrl.trim().isNotEmpty &&
+                    chatConfig.apiKey.trim().isNotEmpty
+                ? () {
+                    ref
+                        .read(vectorStorageSettingsProvider.notifier)
+                        .useChatConnection(
+                          endpoint: chatConfig.apiUrl,
+                          apiKey: chatConfig.apiKey,
+                        );
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(AppLocalizations.of(context)
+                          .chatConnectionAppliedToEmbeddings),
+                    ));
+                  }
+                : null,
+          ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<EmbeddingProvider>(
             value: settings.embeddingProvider,
             decoration: const InputDecoration(
@@ -134,6 +157,8 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            key: ValueKey(
+                'embedding-model-${settings.embeddingProvider.name}-${settings.embeddingModel}'),
             initialValue: settings.embeddingModel ?? settings.embeddingProvider.defaultModel,
             decoration: const InputDecoration(
               labelText: 'Model',
@@ -146,6 +171,8 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            key: ValueKey(
+                'embedding-endpoint-${settings.embeddingProvider.name}-${settings.embeddingEndpoint}'),
             initialValue: settings.embeddingEndpoint ??
                 settings.embeddingProvider.defaultEndpoint,
             decoration: InputDecoration(
@@ -161,6 +188,8 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            key: ValueKey(
+                'embedding-key-${settings.embeddingProvider.name}-${settings.embeddingApiKey?.isNotEmpty ?? false}'),
             initialValue: settings.embeddingApiKey ?? '',
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).apiKey,
@@ -399,6 +428,8 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
 
 /// Section for managing collections
 class _CollectionsSection extends StatelessWidget {
+  static const _noCollectionValue = '__none__';
+
   final List<VectorCollection> collections;
   final String? activeCollectionId;
   final bool enabled;
@@ -421,6 +452,11 @@ class _CollectionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedCollectionId = collections.any(
+      (collection) => collection.id == activeCollectionId,
+    )
+        ? activeCollectionId
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -428,14 +464,14 @@ class _CollectionsSection extends StatelessWidget {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: activeCollectionId,
+                value: selectedCollectionId ?? _noCollectionValue,
                 decoration: const InputDecoration(
                   labelText: 'Active Collection',
                   border: OutlineInputBorder(),
                 ),
                 items: [
                   const DropdownMenuItem(
-                    value: null,
+                    value: _noCollectionValue,
                     child: Text('None'),
                   ),
                   ...collections.map((c) => DropdownMenuItem(
@@ -443,7 +479,11 @@ class _CollectionsSection extends StatelessWidget {
                         child: Text('${c.name} (${c.documentCount} docs)'),
                       )),
                 ],
-                onChanged: enabled ? onCollectionSelected : null,
+                onChanged: enabled
+                    ? (value) => onCollectionSelected(
+                          value == _noCollectionValue ? null : value,
+                        )
+                    : null,
               ),
             ),
             const SizedBox(width: 8),
@@ -475,12 +515,12 @@ class _CollectionsSection extends StatelessWidget {
             ),
           ],
         ),
-        if (activeCollectionId != null) ...[
+        if (selectedCollectionId != null) ...[
           const SizedBox(height: 8),
           _CollectionDetails(
-            collectionId: activeCollectionId!,
-            onExport: () => onExportCollection(activeCollectionId!),
-            onDelete: () => onDeleteCollection(activeCollectionId!),
+            collectionId: selectedCollectionId,
+            onExport: () => onExportCollection(selectedCollectionId),
+            onDelete: () => onDeleteCollection(selectedCollectionId),
           ),
         ],
       ],

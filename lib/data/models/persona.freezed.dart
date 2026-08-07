@@ -26,6 +26,9 @@ mixin _$PersonaConnection {
   /// Group ID this persona is connected to (null for characters)
   String? get groupId => throw _privateConstructorUsedError;
 
+  /// Chat ID this persona is connected to
+  String? get chatId => throw _privateConstructorUsedError;
+
   /// Lock type for this connection
   PersonaLockType get lockType => throw _privateConstructorUsedError;
 
@@ -45,7 +48,11 @@ abstract class $PersonaConnectionCopyWith<$Res> {
           PersonaConnection value, $Res Function(PersonaConnection) then) =
       _$PersonaConnectionCopyWithImpl<$Res, PersonaConnection>;
   @useResult
-  $Res call({String? characterId, String? groupId, PersonaLockType lockType});
+  $Res call(
+      {String? characterId,
+      String? groupId,
+      String? chatId,
+      PersonaLockType lockType});
 }
 
 /// @nodoc
@@ -65,6 +72,7 @@ class _$PersonaConnectionCopyWithImpl<$Res, $Val extends PersonaConnection>
   $Res call({
     Object? characterId = freezed,
     Object? groupId = freezed,
+    Object? chatId = freezed,
     Object? lockType = null,
   }) {
     return _then(_value.copyWith(
@@ -75,6 +83,10 @@ class _$PersonaConnectionCopyWithImpl<$Res, $Val extends PersonaConnection>
       groupId: freezed == groupId
           ? _value.groupId
           : groupId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      chatId: freezed == chatId
+          ? _value.chatId
+          : chatId // ignore: cast_nullable_to_non_nullable
               as String?,
       lockType: null == lockType
           ? _value.lockType
@@ -92,7 +104,11 @@ abstract class _$$PersonaConnectionImplCopyWith<$Res>
       __$$PersonaConnectionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? characterId, String? groupId, PersonaLockType lockType});
+  $Res call(
+      {String? characterId,
+      String? groupId,
+      String? chatId,
+      PersonaLockType lockType});
 }
 
 /// @nodoc
@@ -110,6 +126,7 @@ class __$$PersonaConnectionImplCopyWithImpl<$Res>
   $Res call({
     Object? characterId = freezed,
     Object? groupId = freezed,
+    Object? chatId = freezed,
     Object? lockType = null,
   }) {
     return _then(_$PersonaConnectionImpl(
@@ -120,6 +137,10 @@ class __$$PersonaConnectionImplCopyWithImpl<$Res>
       groupId: freezed == groupId
           ? _value.groupId
           : groupId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      chatId: freezed == chatId
+          ? _value.chatId
+          : chatId // ignore: cast_nullable_to_non_nullable
               as String?,
       lockType: null == lockType
           ? _value.lockType
@@ -133,7 +154,10 @@ class __$$PersonaConnectionImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$PersonaConnectionImpl implements _PersonaConnection {
   const _$PersonaConnectionImpl(
-      {this.characterId, this.groupId, this.lockType = PersonaLockType.none});
+      {this.characterId,
+      this.groupId,
+      this.chatId,
+      this.lockType = PersonaLockType.none});
 
   factory _$PersonaConnectionImpl.fromJson(Map<String, dynamic> json) =>
       _$$PersonaConnectionImplFromJson(json);
@@ -146,6 +170,10 @@ class _$PersonaConnectionImpl implements _PersonaConnection {
   @override
   final String? groupId;
 
+  /// Chat ID this persona is connected to
+  @override
+  final String? chatId;
+
   /// Lock type for this connection
   @override
   @JsonKey()
@@ -153,7 +181,7 @@ class _$PersonaConnectionImpl implements _PersonaConnection {
 
   @override
   String toString() {
-    return 'PersonaConnection(characterId: $characterId, groupId: $groupId, lockType: $lockType)';
+    return 'PersonaConnection(characterId: $characterId, groupId: $groupId, chatId: $chatId, lockType: $lockType)';
   }
 
   @override
@@ -164,13 +192,15 @@ class _$PersonaConnectionImpl implements _PersonaConnection {
             (identical(other.characterId, characterId) ||
                 other.characterId == characterId) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
+            (identical(other.chatId, chatId) || other.chatId == chatId) &&
             (identical(other.lockType, lockType) ||
                 other.lockType == lockType));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, characterId, groupId, lockType);
+  int get hashCode =>
+      Object.hash(runtimeType, characterId, groupId, chatId, lockType);
 
   /// Create a copy of PersonaConnection
   /// with the given fields replaced by the non-null parameter values.
@@ -193,6 +223,7 @@ abstract class _PersonaConnection implements PersonaConnection {
   const factory _PersonaConnection(
       {final String? characterId,
       final String? groupId,
+      final String? chatId,
       final PersonaLockType lockType}) = _$PersonaConnectionImpl;
 
   factory _PersonaConnection.fromJson(Map<String, dynamic> json) =
@@ -205,6 +236,10 @@ abstract class _PersonaConnection implements PersonaConnection {
   /// Group ID this persona is connected to (null for characters)
   @override
   String? get groupId;
+
+  /// Chat ID this persona is connected to
+  @override
+  String? get chatId;
 
   /// Lock type for this connection
   @override

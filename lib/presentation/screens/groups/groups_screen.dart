@@ -7,6 +7,7 @@ import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
+import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
@@ -137,30 +138,36 @@ class _GroupCard extends ConsumerWidget {
                           group.name,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        if (group.description != null && group.description!.isNotEmpty)
+                        if (group.description != null &&
+                            group.description!.isNotEmpty)
                           Text(
                             group.description!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textMuted,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         const SizedBox(height: 4),
                         Text(
-                          AppLocalizations.of(context)!.membersAndMode(group.members.length, (group.settings.responseMode ?? GroupResponseMode.natural).name),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.textMuted,
-                              ),
+                          AppLocalizations.of(context)!.membersAndMode(
+                              group.members.length,
+                              (group.settings.responseMode ??
+                                      GroupResponseMode.natural)
+                                  .name),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.textMuted,
+                                  ),
                         ),
                       ],
                     ),
                   ),
-                  PopupMenuButton(
+                  PopupMenuButton<String>(
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'chat',
-                        onTap: () => _startGroupChat(context, ref),
                         child: ListTile(
                           leading: const Icon(Icons.chat),
                           title: Text(AppLocalizations.of(context)!.startChat),
@@ -169,7 +176,6 @@ class _GroupCard extends ConsumerWidget {
                       ),
                       PopupMenuItem(
                         value: 'edit',
-                        onTap: () => context.push('/groups/${group.id}/edit'),
                         child: ListTile(
                           leading: const Icon(Icons.edit),
                           title: Text(AppLocalizations.of(context)!.edit),
@@ -178,14 +184,27 @@ class _GroupCard extends ConsumerWidget {
                       ),
                       PopupMenuItem(
                         value: 'delete',
-                        onTap: () => _confirmDelete(context, ref),
                         child: ListTile(
                           leading: const Icon(Icons.delete, color: Colors.red),
-                          title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                          title: Text(AppLocalizations.of(context)!.delete,
+                              style: const TextStyle(color: Colors.red)),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
                     ],
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'chat':
+                          _startGroupChat(context, ref);
+                          break;
+                        case 'edit':
+                          context.push('/groups/${group.id}');
+                          break;
+                        case 'delete':
+                          _confirmDelete(context, ref);
+                          break;
+                      }
+                    },
                   ),
                 ],
               ),
@@ -226,7 +245,9 @@ class _GroupCard extends ConsumerWidget {
         itemBuilder: (context, index) {
           final member = group.members[index];
           return FutureBuilder<Character?>(
-            future: ref.read(characterRepositoryProvider).getCharacter(member.characterId),
+            future: ref
+                .read(characterRepositoryProvider)
+                .getCharacter(member.characterId),
             builder: (context, snapshot) {
               final Character? character = snapshot.data;
               return Padding(
@@ -252,7 +273,8 @@ class _GroupCard extends ConsumerWidget {
                               radius: 20,
                               backgroundColor: AppTheme.darkDivider,
                               child: Text(
-                                character?.name.substring(0, 1).toUpperCase() ?? '?',
+                                character?.name.substring(0, 1).toUpperCase() ??
+                                    '?',
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ),
@@ -284,11 +306,18 @@ class _GroupCard extends ConsumerWidget {
     );
   }
 
-  void _startGroupChat(BuildContext context, WidgetRef ref) {
-    // TODO: Create group chat and navigate to it
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.groupChatWillBeImplemented)),
-    );
+  Future<void> _startGroupChat(BuildContext context, WidgetRef ref) async {
+    final chatId =
+        await ref.read(activeChatProvider.notifier).createGroupChat(group);
+    if (!context.mounted) return;
+    if (chatId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToCreateChat)),
+      );
+      return;
+    }
+    context.push('/chat/$chatId');
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
@@ -296,7 +325,8 @@ class _GroupCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteGroup),
-        content: Text(AppLocalizations.of(context)!.deleteGroupConfirmation(group.name)),
+        content: Text(
+            AppLocalizations.of(context)!.deleteGroupConfirmation(group.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -307,7 +337,9 @@ class _GroupCard extends ConsumerWidget {
               Navigator.pop(context);
               ref.read(groupListProvider.notifier).deleteGroup(group.id);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.groupDeleted(group.name))),
+                SnackBar(
+                    content: Text(AppLocalizations.of(context)!
+                        .groupDeleted(group.name))),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -333,7 +365,18 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
   bool _isCreating = false;
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onFormChanged);
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -374,6 +417,12 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
               AppLocalizations.of(context)!.selectCharacters,
               style: Theme.of(context).textTheme.titleSmall,
             ),
+            Text(
+              AppLocalizations.of(context)!.selectAtLeast2Characters,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textMuted,
+                  ),
+            ),
             const SizedBox(height: 8),
             SizedBox(
               height: 200,
@@ -381,14 +430,16 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                 data: (characters) {
                   if (characters.isEmpty) {
                     return Center(
-                      child: Text(AppLocalizations.of(context)!.noCharactersAvailable),
+                      child: Text(
+                          AppLocalizations.of(context)!.noCharactersAvailable),
                     );
                   }
                   return ListView.builder(
                     itemCount: characters.length,
                     itemBuilder: (context, index) {
                       final character = characters[index];
-                      final isSelected = _selectedCharacterIds.contains(character.id);
+                      final isSelected =
+                          _selectedCharacterIds.contains(character.id);
                       return CheckboxListTile(
                         value: isSelected,
                         onChanged: (value) {
@@ -405,11 +456,15 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                             ? CharacterAvatarCircle(
                                 imagePath: character.assets!.avatarPath!,
                                 errorBuilder: (_, __, ___) => CircleAvatar(
-                                  child: Text(character.name.substring(0, 1).toUpperCase()),
+                                  child: Text(character.name
+                                      .substring(0, 1)
+                                      .toUpperCase()),
                                 ),
                               )
                             : CircleAvatar(
-                                child: Text(character.name.substring(0, 1).toUpperCase()),
+                                child: Text(character.name
+                                    .substring(0, 1)
+                                    .toUpperCase()),
                               ),
                       );
                     },
@@ -423,7 +478,8 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  AppLocalizations.of(context)!.charactersSelected(_selectedCharacterIds.length),
+                  AppLocalizations.of(context)!
+                      .charactersSelected(_selectedCharacterIds.length),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppTheme.accentColor,
                       ),
@@ -438,7 +494,9 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
           child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
-          onPressed: _isCreating || _nameController.text.isEmpty || _selectedCharacterIds.length < 2
+          onPressed: _isCreating ||
+                  _nameController.text.trim().isEmpty ||
+                  _selectedCharacterIds.length < 2
               ? null
               : _createGroup,
           child: _isCreating
@@ -454,10 +512,12 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
   }
 
   Future<void> _createGroup() async {
-    if (_nameController.text.isEmpty) return;
+    if (_nameController.text.trim().isEmpty) return;
     if (_selectedCharacterIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.selectAtLeast2Characters)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.selectAtLeast2Characters)),
       );
       return;
     }
@@ -466,21 +526,27 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
 
     try {
       await ref.read(groupListProvider.notifier).createGroup(
-            name: _nameController.text,
-            description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+            name: _nameController.text.trim(),
+            description: _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
             characterIds: _selectedCharacterIds.toList(),
           );
 
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.groupCreatedSuccessfully)),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.groupCreatedSuccessfully)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToCreateGroup(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToCreateGroup(e.toString()))),
         );
       }
     } finally {

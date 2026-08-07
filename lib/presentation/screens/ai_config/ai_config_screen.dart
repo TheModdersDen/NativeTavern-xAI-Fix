@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,11 +99,13 @@ class AIConfigScreen extends ConsumerWidget {
               ),
             ),
 
-          _buildSectionHeader(context, AppLocalizations.of(context)!.presetsAndTemplates),
+          _buildSectionHeader(
+              context, AppLocalizations.of(context)!.presetsAndTemplates),
           ListTile(
             leading: const Icon(Icons.auto_awesome),
             title: Text(AppLocalizations.of(context)!.aiPresets),
-            subtitle: Text(activePreset?.name ?? AppLocalizations.of(context)!.noPresetSelected),
+            subtitle: Text(activePreset?.name ??
+                AppLocalizations.of(context)!.noPresetSelected),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.aiPresets),
           ),
@@ -112,22 +113,26 @@ class AIConfigScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.reorder),
             title: Text(AppLocalizations.of(context)!.promptManager),
-            subtitle: Text(AppLocalizations.of(context)!.orderAndTogglePromptSections),
+            subtitle: Text(
+                AppLocalizations.of(context)!.orderAndTogglePromptSections),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.promptManager),
           ),
 
           const Divider(height: 32),
-          _buildSectionHeader(context, AppLocalizations.of(context)!.llmConnection),
+          _buildSectionHeader(
+              context, AppLocalizations.of(context)!.llmConnection),
           const _ConnectionProfilesTile(),
           const _LLMProviderTile(),
           const _ApiKeyTile(),
           const _ApiUrlTile(),
           const _ModelTile(),
+          const _OpenRouterProviderTile(),
           const _ConnectionTestTile(),
 
           const Divider(height: 32),
-          _buildSectionHeader(context, AppLocalizations.of(context)!.generationSettings),
+          _buildSectionHeader(
+              context, AppLocalizations.of(context)!.generationSettings),
           const _ContextLengthTile(),
           const _MaxTokensTile(),
           const _TemperatureTile(),
@@ -139,7 +144,8 @@ class AIConfigScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.tune),
             title: Text(AppLocalizations.of(context)!.advancedSamplerSettings),
-            subtitle: Text(AppLocalizations.of(context)!.fullControlOverSampling),
+            subtitle:
+                Text(AppLocalizations.of(context)!.fullControlOverSampling),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.advancedSettings),
           ),
@@ -176,7 +182,8 @@ class _InstructTemplateTile extends ConsumerWidget {
       leading: const Icon(Icons.code),
       title: Text(AppLocalizations.of(context)!.instructTemplate),
       subtitle: Text(activeTemplate.name),
-      onTap: () => _showTemplatePicker(context, ref, activeTemplate, allTemplates),
+      onTap: () =>
+          _showTemplatePicker(context, ref, activeTemplate, allTemplates),
     );
   }
 
@@ -229,12 +236,15 @@ class _InstructTemplateTile extends ConsumerWidget {
                     return ListTile(
                       leading: Icon(
                         isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected ? AppTheme.primaryColor : AppTheme.textMuted,
+                        color: isSelected
+                            ? AppTheme.primaryColor
+                            : AppTheme.textMuted,
                       ),
                       title: Text(
                         template.name,
                         style: TextStyle(
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(
@@ -242,8 +252,9 @@ class _InstructTemplateTile extends ConsumerWidget {
                         style: const TextStyle(fontSize: 12),
                       ),
                       onTap: () {
-                        ref.read(activeInstructTemplateIdProvider.notifier).state =
-                            template.id;
+                        ref
+                            .read(activeInstructTemplateIdProvider.notifier)
+                            .state = template.id;
                         Navigator.pop(context);
                       },
                     );
@@ -279,7 +290,8 @@ class _LLMProviderTile extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
+        content:
+            Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -322,18 +334,19 @@ class _LLMProviderTile extends ConsumerWidget {
     if (isChinaRegion) {
       return true;
     }
-    
+
     // Also hide if app language is set to Chinese (zh)
     final locale = Localizations.localeOf(context);
     if (locale.languageCode == 'zh') {
       return true;
     }
-    
+
     return false;
   }
 
   /// Get filtered list of providers based on region and language
-  List<LLMProvider> _getAvailableProviders(BuildContext context, bool isChinaRegion) {
+  List<LLMProvider> _getAvailableProviders(
+      BuildContext context, bool isChinaRegion) {
     final hideOpenAI = _shouldHideOpenAI(context, isChinaRegion);
     return LLMProvider.values.where((provider) {
       // Hide OpenAI in China region or when language is Chinese
@@ -344,12 +357,13 @@ class _LLMProviderTile extends ConsumerWidget {
     }).toList();
   }
 
-  void _showProviderPicker(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showProviderPicker(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     // Get the China region status from provider
     final isChinaAsync = ref.read(isChinaRegionProvider);
     final isChinaRegion = isChinaAsync.valueOrNull ?? false;
     final availableProviders = _getAvailableProviders(context, isChinaRegion);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -375,18 +389,22 @@ class _LLMProviderTile extends ConsumerWidget {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  children: availableProviders.map((provider) => RadioListTile<LLMProvider>(
-                    title: Text(_providerName(provider)),
-                    subtitle: Text(_providerDescription(provider)),
-                    value: provider,
-                    groupValue: config.provider,
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref.read(llmConfigProvider.notifier).updateProvider(value);
-                        Navigator.pop(context);
-                      }
-                    },
-                  )).toList(),
+                  children: availableProviders
+                      .map((provider) => RadioListTile<LLMProvider>(
+                            title: Text(_providerName(provider)),
+                            subtitle: Text(_providerDescription(provider)),
+                            value: provider,
+                            groupValue: config.provider,
+                            onChanged: (value) {
+                              if (value != null) {
+                                ref
+                                    .read(llmConfigProvider.notifier)
+                                    .updateProvider(value);
+                                Navigator.pop(context);
+                              }
+                            },
+                          ))
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -436,15 +454,14 @@ class _ApiKeyTile extends ConsumerStatefulWidget {
   ConsumerState<_ApiKeyTile> createState() => _ApiKeyTileState();
 }
 
-
 class _ApiKeyTileState extends ConsumerState<_ApiKeyTile> {
   bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(llmConfigProvider);
-    final isLocal =
-        config.provider == LLMProvider.ollama || config.provider == LLMProvider.koboldCpp;
+    final isLocal = config.provider == LLMProvider.ollama ||
+        config.provider == LLMProvider.koboldCpp;
 
     if (isLocal) return const SizedBox.shrink();
 
@@ -463,7 +480,9 @@ class _ApiKeyTileState extends ConsumerState<_ApiKeyTile> {
         onPressed: () => setState(() => _obscureText = !_obscureText),
       ),
       onTap: () => _showApiKeyDialog(context, ref, config),
-      onLongPress: config.apiKey.isNotEmpty ? () => _copyToClipboard(context, config.apiKey) : null,
+      onLongPress: config.apiKey.isNotEmpty
+          ? () => _copyToClipboard(context, config.apiKey)
+          : null,
     );
   }
 
@@ -477,7 +496,8 @@ class _ApiKeyTileState extends ConsumerState<_ApiKeyTile> {
     );
   }
 
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showApiKeyDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     final controller = TextEditingController(text: config.apiKey);
 
     showDialog(
@@ -500,7 +520,9 @@ class _ApiKeyTileState extends ConsumerState<_ApiKeyTile> {
           ),
           TextButton(
             onPressed: () {
-              ref.read(llmConfigProvider.notifier).updateApiKey(controller.text);
+              ref
+                  .read(llmConfigProvider.notifier)
+                  .updateApiKey(controller.text);
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.save),
@@ -523,7 +545,9 @@ class _ApiUrlTile extends ConsumerWidget {
       title: Text(AppLocalizations.of(context)!.apiUrl),
       subtitle: Text(config.apiUrl),
       onTap: () => _showApiUrlDialog(context, ref, config),
-      onLongPress: config.apiUrl.isNotEmpty ? () => _copyToClipboard(context, config.apiUrl) : null,
+      onLongPress: config.apiUrl.isNotEmpty
+          ? () => _copyToClipboard(context, config.apiUrl)
+          : null,
     );
   }
 
@@ -531,13 +555,15 @@ class _ApiUrlTile extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
+        content:
+            Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
-  void _showApiUrlDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showApiUrlDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     final controller = TextEditingController(text: config.apiUrl);
 
     showDialog(
@@ -558,7 +584,9 @@ class _ApiUrlTile extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(llmConfigProvider.notifier).updateApiUrl(controller.text);
+              ref
+                  .read(llmConfigProvider.notifier)
+                  .updateApiUrl(controller.text);
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.save),
@@ -594,7 +622,8 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(next.errorMessage ?? AppLocalizations.of(context)!.failedToFetchModels),
+                content: Text(next.errorMessage ??
+                    AppLocalizations.of(context)!.failedToFetchModels),
                 backgroundColor: Colors.red,
               ),
             );
@@ -624,7 +653,9 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
     if (modelFetchState.status == ModelFetchStatus.loading) {
       return Text(AppLocalizations.of(context)!.fetchingModels);
     }
-    return Text(config.model.isEmpty ? AppLocalizations.of(context)!.notSet : config.model);
+    return Text(config.model.isEmpty
+        ? AppLocalizations.of(context)!.notSet
+        : config.model);
   }
 
   void _showModelPicker(BuildContext context, WidgetRef ref, LLMConfig config,
@@ -637,8 +668,8 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
     }
   }
 
-  void _showModelListSheet(
-      BuildContext context, WidgetRef ref, LLMConfig config, List<String> models) {
+  void _showModelListSheet(BuildContext context, WidgetRef ref,
+      LLMConfig config, List<String> models) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -663,7 +694,8 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
     );
   }
 
-  void _showModelInputDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showModelInputDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     final controller = TextEditingController(text: config.model);
 
     showDialog(
@@ -690,7 +722,9 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   final currentConfig = ref.read(llmConfigProvider);
-                  ref.read(modelFetchProvider.notifier).fetchModels(currentConfig);
+                  ref
+                      .read(modelFetchProvider.notifier)
+                      .fetchModels(currentConfig);
                 },
               ),
             ),
@@ -721,7 +755,8 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
     );
   }
 
-  void _showManualInputDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showManualInputDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     final controller = TextEditingController(text: config.model);
 
     showDialog(
@@ -754,6 +789,107 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
   }
 }
 
+class _OpenRouterProviderTile extends ConsumerWidget {
+  const _OpenRouterProviderTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(llmConfigProvider);
+    if (config.provider != LLMProvider.openRouter) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      leading: const Icon(Icons.route),
+      title: Text(l10n.openRouterUpstreamProvider),
+      subtitle: Text(
+        config.openRouterProvider.isEmpty
+            ? l10n.automaticRouting
+            : config.openRouterProvider,
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: config.model.isEmpty
+          ? null
+          : () => _showProviderPicker(context, ref, config),
+    );
+  }
+
+  void _showProviderPicker(
+    BuildContext context,
+    WidgetRef ref,
+    LLMConfig config,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final future = ref.read(llmServiceProvider).getOpenRouterProviders(config);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.65,
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(l10n.openRouterUpstreamProvider),
+                subtitle: Text(l10n.openRouterProviderHint),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: FutureBuilder<List<String>>(
+                  future: future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text('${l10n.error}: ${snapshot.error}'),
+                        ),
+                      );
+                    }
+                    final providers = snapshot.data ?? const [];
+                    return ListView(
+                      children: [
+                        RadioListTile<String>(
+                          value: '',
+                          groupValue: config.openRouterProvider,
+                          title: Text(l10n.automaticRouting),
+                          onChanged: (value) {
+                            ref
+                                .read(llmConfigProvider.notifier)
+                                .updateOpenRouterProvider(value ?? '');
+                            Navigator.pop(sheetContext);
+                          },
+                        ),
+                        ...providers.map(
+                          (provider) => RadioListTile<String>(
+                            value: provider,
+                            groupValue: config.openRouterProvider,
+                            title: Text(provider),
+                            onChanged: (value) {
+                              if (value == null) return;
+                              ref
+                                  .read(llmConfigProvider.notifier)
+                                  .updateOpenRouterProvider(value);
+                              Navigator.pop(sheetContext);
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ConnectionTestTile extends ConsumerWidget {
   const _ConnectionTestTile();
 
@@ -778,7 +914,8 @@ class _ConnectionTestTile extends ConsumerWidget {
           : null,
       onTap: testState.status == ConnectionStatus.testing
           ? null
-          : () => ref.read(connectionTestProvider.notifier).testConnection(config),
+          : () =>
+              ref.read(connectionTestProvider.notifier).testConnection(config),
     );
   }
 
@@ -845,14 +982,17 @@ class _ContextLengthTile extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
+        content:
+            Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
-  void _showContextLengthDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
-    final controller = TextEditingController(text: config.contextLength.toString());
+  void _showContextLengthDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
+    final controller =
+        TextEditingController(text: config.contextLength.toString());
 
     showDialog(
       context: context,
@@ -875,8 +1015,8 @@ class _ContextLengthTile extends ConsumerWidget {
             Text(
               AppLocalizations.of(context)!.contextLengthDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textMuted,
-              ),
+                    color: AppTheme.textMuted,
+                  ),
             ),
           ],
         ),
@@ -923,13 +1063,15 @@ class _MaxTokensTile extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
+        content:
+            Text('${AppLocalizations.of(context)!.copiedToClipboard}: $text'),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
-  void _showMaxTokensDialog(BuildContext context, WidgetRef ref, LLMConfig config) {
+  void _showMaxTokensDialog(
+      BuildContext context, WidgetRef ref, LLMConfig config) {
     final controller = TextEditingController(text: config.maxTokens.toString());
 
     showDialog(
@@ -944,7 +1086,8 @@ class _MaxTokensTile extends ConsumerWidget {
               controller: controller,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.maximumTokensToGenerate,
+                labelText:
+                    AppLocalizations.of(context)!.maximumTokensToGenerate,
                 hintText: '512',
               ),
               autofocus: true,
@@ -953,8 +1096,8 @@ class _MaxTokensTile extends ConsumerWidget {
             Text(
               AppLocalizations.of(context)!.maxTokensDescription,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textMuted,
-              ),
+                    color: AppTheme.textMuted,
+                  ),
             ),
           ],
         ),
@@ -1119,8 +1262,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                       TextButton.icon(
                         icon: const Icon(Icons.add, size: 18),
                         label: Text(AppLocalizations.of(context)!.saveCurrent),
-                        onPressed: () =>
-                            _showSaveDialog(context, ref, current),
+                        onPressed: () => _showSaveDialog(context, ref, current),
                       ),
                     ],
                   ),
@@ -1143,23 +1285,20 @@ class _ConnectionProfilesTile extends ConsumerWidget {
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete_outline),
                                   onPressed: () => ref
-                                      .read(
-                                          connectionProfilesProvider.notifier)
+                                      .read(connectionProfilesProvider.notifier)
                                       .remove(profile.id),
                                 ),
                                 onTap: () async {
                                   await ref
-                                      .read(
-                                          connectionProfilesProvider.notifier)
+                                      .read(connectionProfilesProvider.notifier)
                                       .apply(profile.id);
                                   if (context.mounted) {
                                     Navigator.pop(context);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                          content: Text(
-                                              AppLocalizations.of(context)!
-                                                  .appliedProfile(
-                                                      profile.name))),
+                                          content: Text(AppLocalizations.of(
+                                                  context)!
+                                              .appliedProfile(profile.name))),
                                     );
                                   }
                                 },
@@ -1176,8 +1315,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
     );
   }
 
-  void _showSaveDialog(
-      BuildContext context, WidgetRef ref, LLMConfig current) {
+  void _showSaveDialog(BuildContext context, WidgetRef ref, LLMConfig current) {
     final controller = TextEditingController(
       text: '${_providerLabel(current.provider)} - ${current.model}',
     );
@@ -1200,9 +1338,7 @@ class _ConnectionProfilesTile extends ConsumerWidget {
             onPressed: () {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
-                ref
-                    .read(connectionProfilesProvider.notifier)
-                    .saveCurrent(name);
+                ref.read(connectionProfilesProvider.notifier).saveCurrent(name);
               }
               Navigator.pop(dialogContext);
             },
@@ -1249,13 +1385,11 @@ class _MergeRolesTile extends ConsumerWidget {
     return SwitchListTile(
       secondary: const Icon(Icons.merge_type),
       title: Text(AppLocalizations.of(context)!.mergeConsecutiveRoles),
-      subtitle: Text(
-          AppLocalizations.of(context)!.mergeConsecutiveRolesDescription),
+      subtitle:
+          Text(AppLocalizations.of(context)!.mergeConsecutiveRolesDescription),
       value: config.mergeConsecutiveRoles,
       onChanged: (value) {
-        ref
-            .read(llmConfigProvider.notifier)
-            .updateMergeConsecutiveRoles(value);
+        ref.read(llmConfigProvider.notifier).updateMergeConsecutiveRoles(value);
       },
     );
   }
@@ -1324,8 +1458,9 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
       if (query.isEmpty) {
         _filteredModels = widget.models;
       } else {
-        _filteredModels =
-            widget.models.where((model) => model.toLowerCase().contains(query)).toList();
+        _filteredModels = widget.models
+            .where((model) => model.toLowerCase().contains(query))
+            .toList();
       }
     });
   }
@@ -1346,8 +1481,10 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.selectModelCount(widget.models.length),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      AppLocalizations.of(context)!
+                          .selectModelCount(widget.models.length),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -1388,7 +1525,8 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
             ),
             if (_searchController.text.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -1406,20 +1544,26 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.search_off, size: 48, color: AppTheme.textMuted),
+                          const Icon(Icons.search_off,
+                              size: 48, color: AppTheme.textMuted),
                           const SizedBox(height: 16),
                           Text(
                             AppLocalizations.of(context)!.noModelsFound,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
                                   color: AppTheme.textMuted,
                                 ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            AppLocalizations.of(context)!.tryDifferentSearchTerm,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textMuted,
-                                ),
+                            AppLocalizations.of(context)!
+                                .tryDifferentSearchTerm,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textMuted,
+                                    ),
                           ),
                         ],
                       ),
@@ -1434,12 +1578,15 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
                           title: Text(
                             model,
                             style: TextStyle(
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: isSelected ? AppTheme.accentColor : null,
                             ),
                           ),
                           trailing: isSelected
-                              ? const Icon(Icons.check, color: AppTheme.accentColor)
+                              ? const Icon(Icons.check,
+                                  color: AppTheme.accentColor)
                               : null,
                           onTap: () => widget.onModelSelected(model),
                         );

@@ -25,12 +25,12 @@ enum LLMProvider {
 class LLMResponse {
   final String content;
   final String? reasoning;
-  
+
   const LLMResponse({
     required this.content,
     this.reasoning,
   });
-  
+
   bool get hasReasoning => reasoning != null && reasoning!.isNotEmpty;
 }
 
@@ -39,7 +39,7 @@ class LLMStreamChunk {
   final String? content;
   final String? reasoning;
   final bool isReasoningChunk;
-  
+
   const LLMStreamChunk({
     this.content,
     this.reasoning,
@@ -154,8 +154,7 @@ class ThinkTagParser {
   int _partialSuffixLength(String text, String token) {
     final max = token.length - 1;
     for (var len = max < text.length ? max : text.length; len > 0; len--) {
-      if (token.startsWith(
-          text.substring(text.length - len).toLowerCase())) {
+      if (token.startsWith(text.substring(text.length - len).toLowerCase())) {
         return len;
       }
     }
@@ -200,7 +199,7 @@ class LLMConfig {
   final double frequencyPenalty;
   final double presencePenalty;
   final bool streamEnabled;
-  
+
   // Advanced sampler parameters
   final double typicalP;
   final double minP;
@@ -213,7 +212,7 @@ class LLMConfig {
   final double mirostatEta;
   final List<String> stopSequences;
   final int seed;
-  
+
   // Auto-summarization settings
   final bool autoSummarizeEnabled;
   final double autoSummarizeThreshold;
@@ -229,6 +228,9 @@ class LLMConfig {
   // Required by endpoints that enforce strict user/assistant alternation
   // (e.g. deepseek-reasoner and some proxies)
   final bool mergeConsecutiveRoles;
+
+  /// Optional OpenRouter upstream provider. Empty means automatic routing.
+  final String openRouterProvider;
 
   const LLMConfig({
     required this.provider,
@@ -261,6 +263,7 @@ class LLMConfig {
     this.reasoningEffort = ReasoningEffort.auto,
     this.promptCacheEnabled = false,
     this.mergeConsecutiveRoles = false,
+    this.openRouterProvider = '',
   });
 
   LLMConfig copyWith({
@@ -292,6 +295,7 @@ class LLMConfig {
     String? reasoningEffort,
     bool? promptCacheEnabled,
     bool? mergeConsecutiveRoles,
+    String? openRouterProvider,
   }) {
     return LLMConfig(
       provider: provider ?? this.provider,
@@ -309,7 +313,8 @@ class LLMConfig {
       typicalP: typicalP ?? this.typicalP,
       minP: minP ?? this.minP,
       repetitionPenalty: repetitionPenalty ?? this.repetitionPenalty,
-      repetitionPenaltyRange: repetitionPenaltyRange ?? this.repetitionPenaltyRange,
+      repetitionPenaltyRange:
+          repetitionPenaltyRange ?? this.repetitionPenaltyRange,
       tailFreeSampling: tailFreeSampling ?? this.tailFreeSampling,
       topA: topA ?? this.topA,
       mirostatMode: mirostatMode ?? this.mirostatMode,
@@ -318,11 +323,13 @@ class LLMConfig {
       stopSequences: stopSequences ?? this.stopSequences,
       seed: seed ?? this.seed,
       autoSummarizeEnabled: autoSummarizeEnabled ?? this.autoSummarizeEnabled,
-      autoSummarizeThreshold: autoSummarizeThreshold ?? this.autoSummarizeThreshold,
+      autoSummarizeThreshold:
+          autoSummarizeThreshold ?? this.autoSummarizeThreshold,
       reasoningEffort: reasoningEffort ?? this.reasoningEffort,
       promptCacheEnabled: promptCacheEnabled ?? this.promptCacheEnabled,
       mergeConsecutiveRoles:
           mergeConsecutiveRoles ?? this.mergeConsecutiveRoles,
+      openRouterProvider: openRouterProvider ?? this.openRouterProvider,
     );
   }
 
@@ -355,6 +362,7 @@ class LLMConfig {
         'reasoningEffort': reasoningEffort,
         'promptCacheEnabled': promptCacheEnabled,
         'mergeConsecutiveRoles': mergeConsecutiveRoles,
+        'openRouterProvider': openRouterProvider,
       };
 
   factory LLMConfig.fromJson(Map<String, dynamic> json) => LLMConfig(
@@ -375,21 +383,26 @@ class LLMConfig {
         streamEnabled: json['streamEnabled'] as bool? ?? true,
         typicalP: (json['typicalP'] as num?)?.toDouble() ?? 1.0,
         minP: (json['minP'] as num?)?.toDouble() ?? 0.0,
-        repetitionPenalty: (json['repetitionPenalty'] as num?)?.toDouble() ?? 1.0,
+        repetitionPenalty:
+            (json['repetitionPenalty'] as num?)?.toDouble() ?? 1.0,
         repetitionPenaltyRange: json['repetitionPenaltyRange'] as int? ?? 0,
         tailFreeSampling: (json['tailFreeSampling'] as num?)?.toDouble() ?? 1.0,
         topA: (json['topA'] as num?)?.toDouble() ?? 0.0,
         mirostatMode: json['mirostatMode'] as int? ?? 0,
         mirostatTau: (json['mirostatTau'] as num?)?.toDouble() ?? 5.0,
         mirostatEta: (json['mirostatEta'] as num?)?.toDouble() ?? 0.1,
-        stopSequences: (json['stopSequences'] as List<dynamic>?)?.cast<String>() ?? const [],
+        stopSequences:
+            (json['stopSequences'] as List<dynamic>?)?.cast<String>() ??
+                const [],
         seed: json['seed'] as int? ?? -1,
         autoSummarizeEnabled: json['autoSummarizeEnabled'] as bool? ?? true,
-        autoSummarizeThreshold: (json['autoSummarizeThreshold'] as num?)?.toDouble() ?? 0.8,
-        reasoningEffort: json['reasoningEffort'] as String? ?? ReasoningEffort.auto,
+        autoSummarizeThreshold:
+            (json['autoSummarizeThreshold'] as num?)?.toDouble() ?? 0.8,
+        reasoningEffort:
+            json['reasoningEffort'] as String? ?? ReasoningEffort.auto,
         promptCacheEnabled: json['promptCacheEnabled'] as bool? ?? false,
-        mergeConsecutiveRoles:
-            json['mergeConsecutiveRoles'] as bool? ?? false,
+        mergeConsecutiveRoles: json['mergeConsecutiveRoles'] as bool? ?? false,
+        openRouterProvider: json['openRouterProvider'] as String? ?? '',
       );
 }
 
@@ -420,7 +433,8 @@ class LLMService {
   static bool _isClaudeAdaptiveModel(String model) {
     // ST enables adaptive thinking by default only for Opus 4.7+;
     // newer Claude 5 family models are adaptive as well
-    return RegExp(r'^claude-(opus-4-7|opus-5|sonnet-5|fable-5)').hasMatch(model);
+    return RegExp(r'^claude-(opus-4-7|opus-5|sonnet-5|fable-5)')
+        .hasMatch(model);
   }
 
   /// Apply Claude extended/adaptive thinking based on reasoningEffort.
@@ -614,8 +628,7 @@ class LLMService {
           ];
           messages[target] = msg;
         } else if (content is List && content.isNotEmpty) {
-          final lastBlock =
-              Map<String, dynamic>.from(content.last as Map);
+          final lastBlock = Map<String, dynamic>.from(content.last as Map);
           lastBlock['cache_control'] = cacheControl;
           content[content.length - 1] = lastBlock;
         }
@@ -663,13 +676,13 @@ class LLMService {
     }
     requestData['reasoning_effort'] = value;
   }
-  
+
   /// Log a message to the console
   /// Always calls debugPrint so DebugLogService can capture logs in all build modes
   void _log(String message, {String? error, StackTrace? stackTrace}) {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage = '[$timestamp] LLMService: $message';
-    
+
     debugPrint(logMessage);
     if (error != null) {
       debugPrint('  Error: $error');
@@ -677,7 +690,7 @@ class LLMService {
     if (stackTrace != null) {
       debugPrint('  StackTrace: $stackTrace');
     }
-    
+
     // Also log to developer console for better visibility
     developer.log(
       message,
@@ -688,7 +701,8 @@ class LLMService {
   }
 
   /// Log request details
-  void _logRequest(String endpoint, Map<String, dynamic> data, LLMConfig config) {
+  void _logRequest(
+      String endpoint, Map<String, dynamic> data, LLMConfig config) {
     _log('═══════════════════════════════════════════════════════════════');
     _log('📤 REQUEST to ${config.provider.name}');
     _log('───────────────────────────────────────────────────────────────');
@@ -702,7 +716,7 @@ class LLMService {
     _log('Presence Penalty: ${config.presencePenalty}');
     _log('Stream: ${config.streamEnabled}');
     _log('───────────────────────────────────────────────────────────────');
-    
+
     // Log messages
     final messages = data['messages'] as List<dynamic>?;
     if (messages != null) {
@@ -713,13 +727,16 @@ class LLMService {
         final contentValue = msg['content'];
         String preview;
         if (contentValue is String) {
-          preview = contentValue.length > 200 ? '${contentValue.substring(0, 200)}...' : contentValue;
+          preview = contentValue.length > 200
+              ? '${contentValue.substring(0, 200)}...'
+              : contentValue;
         } else if (contentValue is List) {
           // Multimodal content - summarize the parts
           final parts = contentValue.map((p) {
             if (p is Map<String, dynamic>) {
               final type = p['type'] as String?;
-              if (type == 'text') return 'text: ${(p['text'] as String? ?? '').substring(0, (p['text'] as String? ?? '').length.clamp(0, 50))}...';
+              if (type == 'text')
+                return 'text: ${(p['text'] as String? ?? '').substring(0, (p['text'] as String? ?? '').length.clamp(0, 50))}...';
               if (type == 'image_url') return 'image';
               return type ?? 'unknown';
             }
@@ -732,7 +749,7 @@ class LLMService {
         _log('  [$i] $role: $preview');
       }
     }
-    
+
     // Log system message for Claude (string, or blocks when caching is on)
     final systemValue = data['system'];
     final system = systemValue is String
@@ -744,17 +761,19 @@ class LLMService {
                 .join('\n')
             : null;
     if (system != null) {
-      final preview = system.length > 200 ? '${system.substring(0, 200)}...' : system;
+      final preview =
+          system.length > 200 ? '${system.substring(0, 200)}...' : system;
       _log('System: $preview');
     }
-    
+
     // Log prompt for KoboldCpp
     final prompt = data['prompt'] as String?;
     if (prompt != null) {
-      final preview = prompt.length > 500 ? '${prompt.substring(0, 500)}...' : prompt;
+      final preview =
+          prompt.length > 500 ? '${prompt.substring(0, 500)}...' : prompt;
       _log('Prompt: $preview');
     }
-    
+
     _log('───────────────────────────────────────────────────────────────');
     //   _log('Full Request JSON:');
     //   try {
@@ -771,7 +790,8 @@ class LLMService {
   }
 
   /// Log response details
-  void _logResponse(String provider, dynamic responseData, {int? statusCode, String? contentPreview}) {
+  void _logResponse(String provider, dynamic responseData,
+      {int? statusCode, String? contentPreview}) {
     _log('═══════════════════════════════════════════════════════════════');
     _log('📥 RESPONSE from $provider');
     _log('───────────────────────────────────────────────────────────────');
@@ -800,7 +820,8 @@ class LLMService {
   }
 
   /// Log streaming chunk
-  void _logStreamChunk(String provider, String chunk, {bool isFirst = false, bool isLast = false}) {
+  void _logStreamChunk(String provider, String chunk,
+      {bool isFirst = false, bool isLast = false}) {
     if (isFirst) {
       _log('📥 STREAM START from $provider');
     }
@@ -885,7 +906,6 @@ class LLMService {
   ) async {
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
-
       case LLMProvider.deepSeek:
       case LLMProvider.qwen:
       case LLMProvider.siliconFlow:
@@ -946,8 +966,7 @@ class LLMService {
       }
     } on DioException catch (e) {
       // User-initiated cancel: end the stream quietly, keep partial output
-      if (e.type == DioExceptionType.cancel ||
-          CancelToken.isCancel(e)) {
+      if (e.type == DioExceptionType.cancel || CancelToken.isCancel(e)) {
         _log('Stream cancelled by user');
       } else {
         rethrow;
@@ -968,7 +987,6 @@ class LLMService {
   ) {
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
-
       case LLMProvider.deepSeek:
       case LLMProvider.qwen:
       case LLMProvider.siliconFlow:
@@ -995,11 +1013,11 @@ class LLMService {
   /// Returns a success message or throws an exception with error details
   Future<String> testConnection(LLMConfig config) async {
     _log('Testing connection to ${config.provider.name} at ${config.apiUrl}');
-    _log('API Key: ${config.apiKey.isEmpty ? "(empty)" : "${config.apiKey.substring(0, 8)}..."}');
-    
+    _log(
+        'API Key: ${config.apiKey.isEmpty ? "(empty)" : "${config.apiKey.substring(0, 8)}..."}');
+
     try {
       switch (config.provider) {
-        
         case LLMProvider.openRouter:
         case LLMProvider.deepSeek:
         case LLMProvider.qwen:
@@ -1023,7 +1041,7 @@ class LLMService {
           );
           _log('Response status: ${response.statusCode}');
           _log('Response data: ${response.data}');
-          
+
           if (response.statusCode == 200) {
             final data = response.data as Map<String, dynamic>?;
             final modelCount = (data?['data'] as List?)?.length ?? 0;
@@ -1041,7 +1059,7 @@ class LLMService {
             _log('Error: HTTP ${response.statusCode} - $errorMsg');
             throw Exception('HTTP ${response.statusCode}: $errorMsg');
           }
-          
+
         case LLMProvider.claude:
           if (config.apiKey.isEmpty) {
             _log('Error: API key is empty');
@@ -1061,14 +1079,18 @@ class LLMService {
               validateStatus: (status) => true,
             ),
             data: {
-              'model': config.model.isNotEmpty ? config.model : 'claude-sonnet-4-5-20250929',
+              'model': config.model.isNotEmpty
+                  ? config.model
+                  : 'claude-sonnet-4-5-20250929',
               'max_tokens': 1,
-              'messages': [{'role': 'user', 'content': 'Hi'}],
+              'messages': [
+                {'role': 'user', 'content': 'Hi'}
+              ],
             },
           );
           _log('Response status: ${response.statusCode}');
           _log('Response data: ${response.data}');
-          
+
           // Claude returns 200 for success, 401 for invalid key
           if (response.statusCode == 200) {
             _log('Success: Connected to Claude API');
@@ -1078,14 +1100,15 @@ class LLMService {
             throw Exception('Invalid API key (401 Unauthorized)');
           } else if (response.statusCode == 400) {
             // 400 can mean the request worked but had issues - still connected
-            _log('Success: Connected to Claude API (400 response but connection works)');
+            _log(
+                'Success: Connected to Claude API (400 response but connection works)');
             return 'Connected to Claude API!';
           } else {
             final errorMsg = _extractErrorMessage(response.data);
             _log('Error: HTTP ${response.statusCode} - $errorMsg');
             throw Exception('HTTP ${response.statusCode}: $errorMsg');
           }
-          
+
         case LLMProvider.gemini:
           if (config.apiKey.isEmpty) {
             _log('Error: API key is empty');
@@ -1099,7 +1122,7 @@ class LLMService {
           );
           _log('Response status: ${response.statusCode}');
           _log('Response data: ${response.data}');
-          
+
           if (response.statusCode == 200) {
             final data = response.data as Map<String, dynamic>?;
             final modelCount = (data?['models'] as List?)?.length ?? 0;
@@ -1114,7 +1137,7 @@ class LLMService {
             _log('Error: HTTP ${response.statusCode} - $errorMsg');
             throw Exception('HTTP ${response.statusCode}: $errorMsg');
           }
-          
+
         case LLMProvider.ollama:
           final url = '${config.apiUrl}/api/tags';
           _log('Sending GET request to $url');
@@ -1124,7 +1147,7 @@ class LLMService {
           );
           _log('Response status: ${response.statusCode}');
           _log('Response data: ${response.data}');
-          
+
           if (response.statusCode == 200) {
             final data = response.data as Map<String, dynamic>?;
             final modelCount = (data?['models'] as List?)?.length ?? 0;
@@ -1135,7 +1158,7 @@ class LLMService {
             _log('Error: Cannot connect to Ollama');
             throw Exception('Cannot connect to Ollama at ${config.apiUrl}');
           }
-          
+
         case LLMProvider.koboldCpp:
           final url = '${config.apiUrl}/api/v1/model';
           _log('Sending GET request to $url');
@@ -1145,7 +1168,7 @@ class LLMService {
           );
           _log('Response status: ${response.statusCode}');
           _log('Response data: ${response.data}');
-          
+
           if (response.statusCode == 200) {
             final data = response.data as Map<String, dynamic>?;
             final modelName = data?['result'] as String? ?? 'Unknown';
@@ -1161,7 +1184,7 @@ class LLMService {
       _log('DioException: ${e.type}', error: e.message, stackTrace: stackTrace);
       _log('DioException details: ${e.error}');
       _log('DioException response: ${e.response?.data}');
-      
+
       // Use the new formatter for better error messages
       final errorMessage = _formatDioException(e);
       throw Exception(errorMessage);
@@ -1186,28 +1209,28 @@ class LLMService {
         final message = errorMap['message']?.toString() ?? 'Unknown error';
         final type = errorMap['type']?.toString();
         final code = errorMap['code']?.toString();
-        
+
         final parts = [message];
         if (type != null) parts.add('[Type: $type]');
         if (code != null) parts.add('[Code: $code]');
-        
+
         return parts.join(' ');
       }
       // Generic format
       return data['message']?.toString() ??
-             data['error']?.toString() ??
-             jsonEncode(data); // Show full JSON if no specific message
+          data['error']?.toString() ??
+          jsonEncode(data); // Show full JSON if no specific message
     }
     return data.toString();
   }
-  
+
   /// Format DioException into user-friendly error message
   String _formatDioException(DioException e) {
     final buffer = StringBuffer();
-    
+
     // Add exception type
     buffer.write('Network Error');
-    
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         buffer.write(' (Connection Timeout)');
@@ -1233,31 +1256,30 @@ class LLMService {
       default:
         buffer.write(' (${e.type})');
     }
-    
+
     // Add server response if available
     if (e.response?.data != null) {
-      buffer.write('\\n\\nServer Response:\\n');
+      buffer.write('\n\nServer Response:\n');
       buffer.write(_extractErrorMessage(e.response!.data));
     } else if (e.message != null) {
-      buffer.write('\\n\\n');
+      buffer.write('\n\n');
       buffer.write(e.message!);
     }
-    
+
     // Add underlying error if available
     if (e.error != null && e.error.toString() != e.message) {
-      buffer.write('\\n\\nDetails: ${e.error}');
+      buffer.write('\n\nDetails: ${e.error}');
     }
-    
+
     return buffer.toString();
   }
 
   /// Get available models
   Future<List<String>> getAvailableModels(LLMConfig config) async {
     _log('Fetching available models for ${config.provider.name}');
-    
+
     try {
       switch (config.provider) {
-        
         case LLMProvider.openRouter:
         case LLMProvider.deepSeek:
         case LLMProvider.qwen:
@@ -1285,7 +1307,7 @@ class LLMService {
           modelIds.sort();
           _log('Returning ${modelIds.length} models');
           return modelIds;
-          
+
         case LLMProvider.claude:
           // Try the Anthropic models endpoint, fall back to known models
           try {
@@ -1320,7 +1342,7 @@ class LLMService {
             'claude-haiku-4-5-20251001',
             'claude-opus-4-1-20250805',
           ];
-          
+
         case LLMProvider.gemini:
           _log('Fetching Gemini models from ${config.apiUrl}/models');
           final response = await _dio.get(
@@ -1331,17 +1353,15 @@ class LLMService {
           final models = (data['models'] as List<dynamic>?) ?? [];
           _log('Gemini total models: ${models.length}');
           // Extract model names without filtering
-          final modelIds = models
-              .map((m) {
-                final name = (m as Map<String, dynamic>)['name'] as String;
-                // Remove 'models/' prefix
-                return name.startsWith('models/') ? name.substring(7) : name;
-              })
-              .toList();
+          final modelIds = models.map((m) {
+            final name = (m as Map<String, dynamic>)['name'] as String;
+            // Remove 'models/' prefix
+            return name.startsWith('models/') ? name.substring(7) : name;
+          }).toList();
           modelIds.sort();
           _log('Returning ${modelIds.length} Gemini models');
           return modelIds;
-          
+
         case LLMProvider.ollama:
           _log('Fetching Ollama models from ${config.apiUrl}/api/tags');
           final response = await _dio.get('${config.apiUrl}/api/tags');
@@ -1354,7 +1374,7 @@ class LLMService {
           modelNames.sort();
           _log('Ollama models: ${modelNames.length}');
           return modelNames;
-          
+
         case LLMProvider.koboldCpp:
           // KoboldCpp uses a single loaded model
           _log('Fetching KoboldCpp model from ${config.apiUrl}/api/v1/model');
@@ -1375,6 +1395,54 @@ class LLMService {
     } catch (e, stackTrace) {
       _log('Error fetching models: $e', stackTrace: stackTrace);
       return [];
+    }
+  }
+
+  /// Get upstream providers available for the selected OpenRouter model.
+  Future<List<String>> getOpenRouterProviders(LLMConfig config) async {
+    if (config.provider != LLMProvider.openRouter || config.model.isEmpty) {
+      return const [];
+    }
+    final encodedModel =
+        config.model.split('/').map(Uri.encodeComponent).join('/');
+    final endpoint = '${config.apiUrl}/models/$encodedModel/endpoints';
+    final response = await _dio.get(
+      endpoint,
+      options: Options(
+        headers: config.apiKey.isEmpty
+            ? null
+            : {'Authorization': 'Bearer ${config.apiKey}'},
+        validateStatus: (status) => true,
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        'HTTP ${response.statusCode}: ${_extractErrorMessage(response.data)}',
+      );
+    }
+    final data = response.data as Map<String, dynamic>?;
+    final modelData = data?['data'] as Map<String, dynamic>?;
+    final endpoints = modelData?['endpoints'] as List<dynamic>? ?? const [];
+    final providers = endpoints
+        .whereType<Map<String, dynamic>>()
+        .map((endpoint) => endpoint['provider_name']?.toString() ?? '')
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return providers;
+  }
+
+  void _applyOpenRouterRouting(
+    Map<String, dynamic> requestData,
+    LLMConfig config,
+  ) {
+    if (config.provider == LLMProvider.openRouter &&
+        config.openRouterProvider.isNotEmpty) {
+      requestData['provider'] = {
+        'order': [config.openRouterProvider],
+        'allow_fallbacks': true,
+      };
     }
   }
 
@@ -1401,16 +1469,19 @@ class LLMService {
     if (config.seed != -1) {
       requestData['seed'] = config.seed;
     }
+    _applyOpenRouterRouting(requestData, config);
 
     // Add extended parameters for compatible providers (OpenRouter, local, etc)
     // Official OpenAI API might reject these, so we exclude them for LLMProvider.openai
     if (config.provider != LLMProvider.openai) {
       if (config.topK > 0) requestData['top_k'] = config.topK;
-      if (config.repetitionPenalty != 1.0) requestData['repetition_penalty'] = config.repetitionPenalty;
+      if (config.repetitionPenalty != 1.0)
+        requestData['repetition_penalty'] = config.repetitionPenalty;
       if (config.minP > 0.0) requestData['min_p'] = config.minP;
       if (config.topA > 0.0) requestData['top_a'] = config.topA;
       if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
-      if (config.tailFreeSampling != 1.0) requestData['tfs_z'] = config.tailFreeSampling;
+      if (config.tailFreeSampling != 1.0)
+        requestData['tfs_z'] = config.tailFreeSampling;
     }
 
     _applyOpenAIReasoning(requestData, config);
@@ -1431,12 +1502,16 @@ class LLMService {
     );
 
     // Check for HTTP errors
-    if (response.statusCode == null || response.statusCode! < 200 || response.statusCode! >= 300) {
+    if (response.statusCode == null ||
+        response.statusCode! < 200 ||
+        response.statusCode! >= 300) {
       _log('HTTP Error: ${response.statusCode}');
       _log('Response data: ${response.data}');
-      
+
       final errorMsg = _extractErrorMessage(response.data);
-      throw Exception('HTTP ${response.statusCode}: $errorMsg');
+      throw Exception(
+        'HTTP ${response.statusCode} at $endpoint. Check the API base URL and selected model.\n$errorMsg',
+      );
     }
 
     final data = response.data as Map<String, dynamic>;
@@ -1444,7 +1519,8 @@ class LLMService {
     String? reasoning;
     final choices = data['choices'] as List<dynamic>?;
     if (choices != null && choices.isNotEmpty) {
-      final message = (choices[0] as Map<String, dynamic>)['message'] as Map<String, dynamic>?;
+      final message = (choices[0] as Map<String, dynamic>)['message']
+          as Map<String, dynamic>?;
       content = message?['content'] as String? ?? '';
       // DeepSeek and some providers use reasoning_content for thinking
       reasoning = message?['reasoning_content'] as String?;
@@ -1460,11 +1536,12 @@ class LLMService {
         }
       }
     }
-    
+
     _logResponse(config.provider.name, data,
-      statusCode: response.statusCode,
-      contentPreview: content.length > 100 ? '${content.substring(0, 100)}...' : content);
-    
+        statusCode: response.statusCode,
+        contentPreview:
+            content.length > 100 ? '${content.substring(0, 100)}...' : content);
+
     return LLMResponse(content: content, reasoning: reasoning);
   }
 
@@ -1501,16 +1578,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.startsWith('data: ') && !line.contains('[DONE]')) {
@@ -1519,21 +1597,25 @@ class LLMService {
             final choices = json['choices'] as List<dynamic>?;
             if (choices != null && choices.isNotEmpty) {
               final choice = choices[0] as Map<String, dynamic>;
-              
+
               // Check for finish_reason and log the raw data when present
               final finishReason = choice['finish_reason'];
               if (finishReason != null) {
-                _log('═══════════════════════════════════════════════════════════════');
+                _log(
+                    '═══════════════════════════════════════════════════════════════');
                 _log('🏁 STREAM FINISH - finish_reason: $finishReason');
-                _log('───────────────────────────────────────────────────────────────');
+                _log(
+                    '───────────────────────────────────────────────────────────────');
                 _log('Raw JSON: ${line.substring(6)}');
-                _log('═══════════════════════════════════════════════════════════════');
+                _log(
+                    '═══════════════════════════════════════════════════════════════');
               }
-              
+
               final delta = choice['delta'] as Map<String, dynamic>?;
               final content = delta?['content'] as String?;
               if (content != null) {
-                _logStreamChunk(config.provider.name, content, isFirst: isFirst);
+                _logStreamChunk(config.provider.name, content,
+                    isFirst: isFirst);
                 isFirst = false;
                 fullContent.write(content);
                 yield content;
@@ -1550,7 +1632,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 
@@ -1601,7 +1683,8 @@ class LLMService {
         final blockType = blockMap['type'] as String?;
         if (blockType == 'thinking') {
           // This is a thinking/reasoning block
-          reasoning = (reasoning ?? '') + (blockMap['thinking'] as String? ?? '');
+          reasoning =
+              (reasoning ?? '') + (blockMap['thinking'] as String? ?? '');
         } else if (blockType == 'text') {
           // Regular text content
           content += blockMap['text'] as String? ?? '';
@@ -1609,14 +1692,16 @@ class LLMService {
       }
       // Fallback: if no text block found, try first block's text
       if (content.isEmpty && contentList.isNotEmpty) {
-        content = (contentList[0] as Map<String, dynamic>)['text'] as String? ?? '';
+        content =
+            (contentList[0] as Map<String, dynamic>)['text'] as String? ?? '';
       }
     }
-    
+
     _logResponse(config.provider.name, data,
-      statusCode: response.statusCode,
-      contentPreview: content.length > 100 ? '${content.substring(0, 100)}...' : content);
-    
+        statusCode: response.statusCode,
+        contentPreview:
+            content.length > 100 ? '${content.substring(0, 100)}...' : content);
+
     return LLMResponse(content: content, reasoning: reasoning);
   }
 
@@ -1657,16 +1742,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.startsWith('data: ')) {
@@ -1692,7 +1778,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 
@@ -1701,12 +1787,17 @@ class LLMService {
     List<Map<String, dynamic>> messages,
     LLMConfig config,
   ) async {
-    final contents = messages.map((m) => {
-      'role': m['role'] == 'assistant' ? 'model' : m['role'],
-      'parts': [{'text': m['content']}],
-    }).toList();
+    final contents = messages
+        .map((m) => {
+              'role': m['role'] == 'assistant' ? 'model' : m['role'],
+              'parts': [
+                {'text': m['content']}
+              ],
+            })
+        .toList();
 
-    final endpoint = '${config.apiUrl}/models/${config.model}:generateContent?key=${config.apiKey}';
+    final endpoint =
+        '${config.apiUrl}/models/${config.model}:generateContent?key=${config.apiKey}';
     final generationConfig = <String, dynamic>{
       'maxOutputTokens': config.maxTokens,
       'temperature': config.temperature,
@@ -1735,14 +1826,16 @@ class LLMService {
     String? reasoning;
     final candidates = data['candidates'] as List<dynamic>?;
     if (candidates != null && candidates.isNotEmpty) {
-      final contentData = (candidates[0] as Map<String, dynamic>)['content'] as Map<String, dynamic>?;
+      final contentData = (candidates[0] as Map<String, dynamic>)['content']
+          as Map<String, dynamic>?;
       final parts = contentData?['parts'] as List<dynamic>?;
       if (parts != null && parts.isNotEmpty) {
         // Gemini may have thought in separate parts
         for (final part in parts) {
           final partMap = part as Map<String, dynamic>;
           if (partMap.containsKey('thought')) {
-            reasoning = (reasoning ?? '') + (partMap['thought'] as String? ?? '');
+            reasoning =
+                (reasoning ?? '') + (partMap['thought'] as String? ?? '');
           }
           if (partMap.containsKey('text')) {
             content += partMap['text'] as String? ?? '';
@@ -1750,11 +1843,12 @@ class LLMService {
         }
       }
     }
-    
+
     _logResponse(config.provider.name, data,
-      statusCode: response.statusCode,
-      contentPreview: content.length > 100 ? '${content.substring(0, 100)}...' : content);
-    
+        statusCode: response.statusCode,
+        contentPreview:
+            content.length > 100 ? '${content.substring(0, 100)}...' : content);
+
     return LLMResponse(content: content, reasoning: reasoning);
   }
 
@@ -1794,9 +1888,9 @@ class LLMService {
         'min_p': config.minP,
       },
     };
-    
+
     _logRequest(endpoint, requestData, config);
-    
+
     final response = await _dio.post(
       endpoint,
       options: Options(
@@ -1810,13 +1904,14 @@ class LLMService {
     final message = data['message'] as Map<String, dynamic>?;
     final content = message?['content'] as String? ?? '';
     // Ollama may return thinking in a separate field for some models
-    final reasoning = message?['thinking'] as String? ?? 
-                      message?['reasoning'] as String?;
-    
+    final reasoning =
+        message?['thinking'] as String? ?? message?['reasoning'] as String?;
+
     _logResponse(config.provider.name, data,
-      statusCode: response.statusCode,
-      contentPreview: content.length > 100 ? '${content.substring(0, 100)}...' : content);
-    
+        statusCode: response.statusCode,
+        contentPreview:
+            content.length > 100 ? '${content.substring(0, 100)}...' : content);
+
     return LLMResponse(content: content, reasoning: reasoning);
   }
 
@@ -1836,9 +1931,9 @@ class LLMService {
         'top_k': config.topK,
       },
     };
-    
+
     _logRequest(endpoint, requestData, config);
-    
+
     final response = await _dio.post<ResponseBody>(
       endpoint,
       options: Options(
@@ -1849,16 +1944,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.isNotEmpty) {
@@ -1882,7 +1978,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 
@@ -1912,7 +2008,7 @@ class LLMService {
       'seed': config.seed != -1 ? config.seed : -1,
       'min_p': config.minP,
     };
-    
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post(
@@ -1930,11 +2026,12 @@ class LLMService {
     if (results != null && results.isNotEmpty) {
       content = (results[0] as Map<String, dynamic>)['text'] as String? ?? '';
     }
-    
+
     _logResponse(config.provider.name, data,
-      statusCode: response.statusCode,
-      contentPreview: content.length > 100 ? '${content.substring(0, 100)}...' : content);
-    
+        statusCode: response.statusCode,
+        contentPreview:
+            content.length > 100 ? '${content.substring(0, 100)}...' : content);
+
     // KoboldCpp doesn't typically return reasoning content
     return LLMResponse(content: content, reasoning: null);
   }
@@ -1954,7 +2051,7 @@ class LLMService {
       'top_p': config.topP,
       'top_k': config.topK,
     };
-    
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post<ResponseBody>(
@@ -1967,16 +2064,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.startsWith('data: ')) {
@@ -1999,7 +2097,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 
@@ -2050,21 +2148,24 @@ class LLMService {
       if (config.seed != -1) {
         requestData['seed'] = config.seed;
       }
+      _applyOpenRouterRouting(requestData, config);
 
       // Add extended parameters for compatible providers (OpenRouter, local, etc)
       if (config.provider != LLMProvider.openai) {
         if (config.topK > 0) requestData['top_k'] = config.topK;
-        if (config.repetitionPenalty != 1.0) requestData['repetition_penalty'] = config.repetitionPenalty;
+        if (config.repetitionPenalty != 1.0)
+          requestData['repetition_penalty'] = config.repetitionPenalty;
         if (config.minP > 0.0) requestData['min_p'] = config.minP;
         if (config.topA > 0.0) requestData['top_a'] = config.topA;
         if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
-        if (config.tailFreeSampling != 1.0) requestData['tfs_z'] = config.tailFreeSampling;
+        if (config.tailFreeSampling != 1.0)
+          requestData['tfs_z'] = config.tailFreeSampling;
       }
 
       _applyOpenAIReasoning(requestData, config);
 
       _logRequest(endpoint, requestData, config);
-      
+
       final response = await _dio.post<ResponseBody>(
         endpoint,
         options: Options(
@@ -2080,69 +2181,84 @@ class LLMService {
       );
 
       // Check for HTTP errors before processing stream
-      if (response.statusCode == null || response.statusCode! < 200 || response.statusCode! >= 300) {
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
         _log('HTTP Error in stream: ${response.statusCode}');
         // For streaming, we need to read the error from the response body
         final errorBytes = await response.data!.stream.toList();
         final errorData = utf8.decode(errorBytes.expand((x) => x).toList());
         _log('Error response: $errorData');
-        
+
         try {
           final errorJson = jsonDecode(errorData);
           final errorMsg = _extractErrorMessage(errorJson);
-          throw Exception('HTTP ${response.statusCode}: $errorMsg');
+          throw Exception(
+            'HTTP ${response.statusCode} at $endpoint. Check the API base URL and selected model.\n$errorMsg',
+          );
         } catch (e) {
           if (e is Exception && e.toString().contains('HTTP')) {
             rethrow;
           }
-          throw Exception('HTTP ${response.statusCode}: $errorData');
+          throw Exception(
+            'HTTP ${response.statusCode} at $endpoint. Check the API base URL and selected model.\n$errorData',
+          );
         }
       }
 
-      final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+      final stream =
+          response.data!.stream.cast<List<int>>().transform(utf8.decoder);
       final buffer = StringBuffer();
       final fullContent = StringBuffer();
       final fullReasoning = StringBuffer();
       var isFirst = true;
-      
+
       await for (final chunk in stream) {
         buffer.write(chunk);
         final lines = buffer.toString().split('\n');
         buffer.clear();
-        
+
         for (int i = 0; i < lines.length - 1; i++) {
           final line = lines[i];
           if (line.startsWith('data: ') && !line.contains('[DONE]')) {
             try {
-              final json = jsonDecode(line.substring(6)) as Map<String, dynamic>;
+              final json =
+                  jsonDecode(line.substring(6)) as Map<String, dynamic>;
               final choices = json['choices'] as List<dynamic>?;
               if (choices != null && choices.isNotEmpty) {
                 final choice = choices[0] as Map<String, dynamic>;
                 final delta = choice['delta'] as Map<String, dynamic>?;
-                
+
                 // Check for finish_reason and log the raw data when present
                 final finishReason = choice['finish_reason'];
                 if (finishReason != null) {
-                  _log('═══════════════════════════════════════════════════════════════');
+                  _log(
+                      '═══════════════════════════════════════════════════════════════');
                   _log('🏁 STREAM FINISH - finish_reason: $finishReason');
-                  _log('───────────────────────────────────────────────────────────────');
+                  _log(
+                      '───────────────────────────────────────────────────────────────');
                   _log('Raw JSON: ${line.substring(6)}');
-                  _log('═══════════════════════════════════════════════════════════════');
+                  _log(
+                      '═══════════════════════════════════════════════════════════════');
                 }
-                
+
                 // Check for reasoning_content (OpenAI o1/o3 models)
                 final reasoningContent = delta?['reasoning_content'] as String?;
                 if (reasoningContent != null) {
-                  _logStreamChunk(config.provider.name, '[reasoning] $reasoningContent', isFirst: isFirst);
+                  _logStreamChunk(
+                      config.provider.name, '[reasoning] $reasoningContent',
+                      isFirst: isFirst);
                   isFirst = false;
                   fullReasoning.write(reasoningContent);
-                  yield LLMStreamChunk(reasoning: reasoningContent, isReasoningChunk: true);
+                  yield LLMStreamChunk(
+                      reasoning: reasoningContent, isReasoningChunk: true);
                 }
-                
+
                 // Regular content
                 final content = delta?['content'] as String?;
                 if (content != null) {
-                  _logStreamChunk(config.provider.name, content, isFirst: isFirst);
+                  _logStreamChunk(config.provider.name, content,
+                      isFirst: isFirst);
                   isFirst = false;
                   fullContent.write(content);
                   yield LLMStreamChunk(content: content);
@@ -2158,15 +2274,16 @@ class LLMService {
           buffer.write(lines.last);
         }
       }
-      
+
       _logStreamComplete(config.provider.name, fullContent.toString());
       if (fullReasoning.isNotEmpty) {
         _log('Reasoning content: ${fullReasoning.toString()}');
       }
     } on DioException catch (e, stackTrace) {
-      _log('DioException in stream: ${e.type}', error: e.message, stackTrace: stackTrace);
+      _log('DioException in stream: ${e.type}',
+          error: e.message, stackTrace: stackTrace);
       _log('DioException response: ${e.response?.data}');
-      
+
       final errorMessage = _formatDioException(e);
       throw Exception(errorMessage);
     } catch (e, stackTrace) {
@@ -2213,43 +2330,47 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     final fullThinking = StringBuffer();
     var isFirst = true;
     var currentBlockType = ''; // Track current content block type
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.startsWith('data: ')) {
           try {
             final json = jsonDecode(line.substring(6)) as Map<String, dynamic>;
             final eventType = json['type'] as String?;
-            
+
             // Track content block type for thinking blocks
             if (eventType == 'content_block_start') {
-              final contentBlock = json['content_block'] as Map<String, dynamic>?;
+              final contentBlock =
+                  json['content_block'] as Map<String, dynamic>?;
               currentBlockType = contentBlock?['type'] as String? ?? '';
             }
-            
+
             if (eventType == 'content_block_delta') {
               final delta = json['delta'] as Map<String, dynamic>?;
               final deltaType = delta?['type'] as String?;
-              
+
               // Check for thinking delta (Claude's extended thinking)
               if (deltaType == 'thinking_delta') {
                 final thinking = delta?['thinking'] as String?;
                 if (thinking != null) {
-                  _logStreamChunk(config.provider.name, '[thinking] $thinking', isFirst: isFirst);
+                  _logStreamChunk(config.provider.name, '[thinking] $thinking',
+                      isFirst: isFirst);
                   isFirst = false;
                   fullThinking.write(thinking);
-                  yield LLMStreamChunk(reasoning: thinking, isReasoningChunk: true);
+                  yield LLMStreamChunk(
+                      reasoning: thinking, isReasoningChunk: true);
                 }
               }
               // Regular text delta
@@ -2258,12 +2379,15 @@ class LLMService {
                 if (text != null) {
                   // Check if this is inside a thinking block
                   if (currentBlockType == 'thinking') {
-                    _logStreamChunk(config.provider.name, '[thinking] $text', isFirst: isFirst);
+                    _logStreamChunk(config.provider.name, '[thinking] $text',
+                        isFirst: isFirst);
                     isFirst = false;
                     fullThinking.write(text);
-                    yield LLMStreamChunk(reasoning: text, isReasoningChunk: true);
+                    yield LLMStreamChunk(
+                        reasoning: text, isReasoningChunk: true);
                   } else {
-                    _logStreamChunk(config.provider.name, text, isFirst: isFirst);
+                    _logStreamChunk(config.provider.name, text,
+                        isFirst: isFirst);
                     isFirst = false;
                     fullContent.write(text);
                     yield LLMStreamChunk(content: text);
@@ -2271,7 +2395,7 @@ class LLMService {
                 }
               }
             }
-            
+
             if (eventType == 'content_block_stop') {
               currentBlockType = '';
             }
@@ -2285,7 +2409,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
     if (fullThinking.isNotEmpty) {
       _log('Thinking content: ${fullThinking.toString()}');
@@ -2298,12 +2422,17 @@ class LLMService {
     LLMConfig config,
   ) async* {
     // Gemini 2.0 Flash Thinking returns thought in a separate part
-    final contents = messages.map((m) => {
-      'role': m['role'] == 'assistant' ? 'model' : m['role'],
-      'parts': [{'text': m['content']}],
-    }).toList();
+    final contents = messages
+        .map((m) => {
+              'role': m['role'] == 'assistant' ? 'model' : m['role'],
+              'parts': [
+                {'text': m['content']}
+              ],
+            })
+        .toList();
 
-    final endpoint = '${config.apiUrl}/models/${config.model}:streamGenerateContent?key=${config.apiKey}';
+    final endpoint =
+        '${config.apiUrl}/models/${config.model}:streamGenerateContent?key=${config.apiKey}';
     final generationConfig = <String, dynamic>{
       'maxOutputTokens': config.maxTokens,
       'temperature': config.temperature,
@@ -2328,15 +2457,16 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     final fullThought = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
-      
+
       // Gemini streams JSON array chunks
       try {
         // Try to parse accumulated buffer as JSON
@@ -2351,12 +2481,12 @@ class LLMService {
         }
         // Split by },{ to get individual objects
         final parts = jsonStr.split(RegExp(r'\}\s*,\s*\{'));
-        
+
         for (var i = 0; i < parts.length; i++) {
           var part = parts[i];
           if (i > 0) part = '{$part';
           if (i < parts.length - 1) part = '$part}';
-          
+
           try {
             final json = jsonDecode(part) as Map<String, dynamic>;
             final candidates = json['candidates'] as List<dynamic>?;
@@ -2364,24 +2494,27 @@ class LLMService {
               final candidate = candidates[0] as Map<String, dynamic>;
               final content = candidate['content'] as Map<String, dynamic>?;
               final contentParts = content?['parts'] as List<dynamic>?;
-              
+
               if (contentParts != null) {
                 for (final contentPart in contentParts) {
                   final partMap = contentPart as Map<String, dynamic>;
-                  
+
                   // Check for thought (Gemini 2.0 Flash Thinking)
                   final thought = partMap['thought'] as String?;
                   if (thought != null) {
-                    _logStreamChunk(config.provider.name, '[thought] $thought', isFirst: isFirst);
+                    _logStreamChunk(config.provider.name, '[thought] $thought',
+                        isFirst: isFirst);
                     isFirst = false;
                     fullThought.write(thought);
-                    yield LLMStreamChunk(reasoning: thought, isReasoningChunk: true);
+                    yield LLMStreamChunk(
+                        reasoning: thought, isReasoningChunk: true);
                   }
-                  
+
                   // Regular text
                   final text = partMap['text'] as String?;
                   if (text != null) {
-                    _logStreamChunk(config.provider.name, text, isFirst: isFirst);
+                    _logStreamChunk(config.provider.name, text,
+                        isFirst: isFirst);
                     isFirst = false;
                     fullContent.write(text);
                     yield LLMStreamChunk(content: text);
@@ -2397,7 +2530,7 @@ class LLMService {
         // Buffer not yet parseable, continue accumulating
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
     if (fullThought.isNotEmpty) {
       _log('Thought content: ${fullThought.toString()}');
@@ -2430,9 +2563,9 @@ class LLMService {
         'min_p': config.minP,
       },
     };
-    
+
     _logRequest(endpoint, requestData, config);
-    
+
     final response = await _dio.post<ResponseBody>(
       endpoint,
       options: Options(
@@ -2443,16 +2576,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.isNotEmpty) {
@@ -2476,7 +2610,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 
@@ -2505,7 +2639,7 @@ class LLMService {
       'seed': config.seed != -1 ? config.seed : -1,
       'min_p': config.minP,
     };
-    
+
     _logRequest(endpoint, requestData, config);
 
     final response = await _dio.post<ResponseBody>(
@@ -2518,16 +2652,17 @@ class LLMService {
       cancelToken: _newCancelToken(),
     );
 
-    final stream = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final stream =
+        response.data!.stream.cast<List<int>>().transform(utf8.decoder);
     final buffer = StringBuffer();
     final fullContent = StringBuffer();
     var isFirst = true;
-    
+
     await for (final chunk in stream) {
       buffer.write(chunk);
       final lines = buffer.toString().split('\n');
       buffer.clear();
-      
+
       for (int i = 0; i < lines.length - 1; i++) {
         final line = lines[i];
         if (line.startsWith('data: ')) {
@@ -2550,7 +2685,7 @@ class LLMService {
         buffer.write(lines.last);
       }
     }
-    
+
     _logStreamComplete(config.provider.name, fullContent.toString());
   }
 }

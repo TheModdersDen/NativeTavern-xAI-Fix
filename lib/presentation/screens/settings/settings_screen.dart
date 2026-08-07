@@ -9,6 +9,11 @@ import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
+  return PackageInfo.fromPlatform();
+});
 
 /// Settings screen - App settings only (AI config is in separate tab)
 class SettingsScreen extends ConsumerWidget {
@@ -17,7 +22,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    
+    final packageInfo = ref.watch(packageInfoProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settings),
@@ -62,7 +68,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.backupSettings),
           ),
-          
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.chats),
           ListTile(
@@ -77,7 +82,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.backgroundSettings),
           ),
-          
           const Divider(height: 32),
           _buildSectionHeader(context, 'Multimedia'),
           ListTile(
@@ -110,7 +114,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.spriteSettings),
           ),
-          
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.advanced),
           ListTile(
@@ -149,7 +152,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.vectorStorageSettings),
           ),
-          
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.settings),
           const _LanguageTile(),
@@ -162,25 +164,32 @@ class SettingsScreen extends ConsumerWidget {
           const _ConfirmDeleteTile(),
           const _AutoSaveTile(),
           const _DebugLogTile(),
-          
           ListTile(
             leading: const Icon(Icons.analytics),
             title: Text(l10n.statistics),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.statistics),
           ),
-          
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.about),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(l10n.version),
-            subtitle: const Text('1.0.0 (Build 1)'),
+            subtitle: Text(
+              packageInfo.when(
+                data: (info) => '${info.version}+${info.buildNumber}',
+                loading: () => l10n.loading,
+                error: (_, __) => l10n.error,
+              ),
+            ),
             onLongPress: () {
-              Clipboard.setData(const ClipboardData(text: '1.0.0 (Build 1)'));
+              final info = packageInfo.valueOrNull;
+              if (info == null) return;
+              final version = '${info.version}+${info.buildNumber}';
+              Clipboard.setData(ClipboardData(text: version));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${l10n.copiedToClipboard}: 1.0.0 (Build 1)'),
+                  content: Text('${l10n.copiedToClipboard}: $version'),
                   duration: const Duration(seconds: 2),
                 ),
               );
@@ -193,7 +202,6 @@ class SettingsScreen extends ConsumerWidget {
               showLicensePage(context: context);
             },
           ),
-          
           const SizedBox(height: 32),
         ],
       ),
@@ -231,7 +239,8 @@ class _PersonaTile extends ConsumerWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.push(AppRoutes.personas),
       onLongPress: () {
-        final personaName = activePersonaAsync.valueOrNull?.name ?? l10n.default_;
+        final personaName =
+            activePersonaAsync.valueOrNull?.name ?? l10n.default_;
         Clipboard.setData(ClipboardData(text: personaName));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -309,20 +318,21 @@ class _LanguageTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final currentLocale = ref.watch(localeProvider);
-    
+
     // Find the current locale's display name
     String currentLanguage = l10n.systemTheme;
     if (currentLocale != null) {
       final supportedLocale = supportedLocales.where((sl) {
         if (currentLocale.countryCode != null) {
           return sl.locale.languageCode == currentLocale.languageCode &&
-                 sl.locale.countryCode == currentLocale.countryCode;
+              sl.locale.countryCode == currentLocale.countryCode;
         }
         return sl.locale.languageCode == currentLocale.languageCode &&
-               sl.locale.countryCode == null;
+            sl.locale.countryCode == null;
       }).firstOrNull;
       if (supportedLocale != null) {
-        currentLanguage = '${supportedLocale.nativeName} (${supportedLocale.displayName})';
+        currentLanguage =
+            '${supportedLocale.nativeName} (${supportedLocale.displayName})';
       }
     }
 
@@ -347,7 +357,7 @@ class _LanguageTile extends ConsumerWidget {
   void _showLanguageSelector(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final currentLocale = ref.read(localeProvider);
-    
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -405,7 +415,7 @@ class _LanguageTile extends ConsumerWidget {
                     final isSelected = currentLocale != null &&
                         currentLocale.languageCode == sl.locale.languageCode &&
                         currentLocale.countryCode == sl.locale.countryCode;
-                    
+
                     return ListTile(
                       title: Text(sl.nativeName),
                       subtitle: Text(sl.displayName),

@@ -72,10 +72,23 @@ class GroupRepository {
 
   /// Delete a group
   Future<void> deleteGroup(String id) async {
-    // Delete associated chats first
-    await (_db.delete(_db.chats)..where((t) => t.groupId.equals(id))).go();
-    // Delete the group
-    await (_db.delete(_db.groups)..where((t) => t.id.equals(id))).go();
+    await _db.transaction(() async {
+      final chats = await (_db.select(_db.chats)
+            ..where((table) => table.groupId.equals(id)))
+          .get();
+      for (final chat in chats) {
+        await (_db.delete(_db.bookmarks)
+              ..where((table) => table.chatId.equals(chat.id)))
+            .go();
+        await (_db.delete(_db.messages)
+              ..where((table) => table.chatId.equals(chat.id)))
+            .go();
+      }
+      await (_db.delete(_db.chats)..where((table) => table.groupId.equals(id)))
+          .go();
+      await (_db.delete(_db.groups)..where((table) => table.id.equals(id)))
+          .go();
+    });
   }
 
   /// Add a character to a group
@@ -106,8 +119,7 @@ class GroupRepository {
             ..where((t) => t.id.equals(characterId)))
           .getSingleOrNull();
       if (row == null) return 50;
-      final extensions =
-          jsonDecode(row.extensionsJson) as Map<String, dynamic>;
+      final extensions = jsonDecode(row.extensionsJson) as Map<String, dynamic>;
       final value = extensions['talkativeness'];
       final talkativeness = value is num
           ? value.toDouble()
@@ -126,7 +138,8 @@ class GroupRepository {
     if (group == null) throw Exception('Group not found');
 
     return updateGroup(group.copyWith(
-      members: group.members.where((m) => m.characterId != characterId).toList(),
+      members:
+          group.members.where((m) => m.characterId != characterId).toList(),
     ));
   }
 
@@ -169,7 +182,8 @@ class GroupRepository {
   }
 
   /// Reorder members
-  Future<Group> reorderMembers(String groupId, List<String> orderedCharacterIds) async {
+  Future<Group> reorderMembers(
+      String groupId, List<String> orderedCharacterIds) async {
     final group = await getGroup(groupId);
     if (group == null) throw Exception('Group not found');
 
@@ -204,7 +218,8 @@ class GroupRepository {
       id: Value(group.id),
       name: Value(group.name),
       description: Value(group.description),
-      membersJson: Value(jsonEncode(group.members.map((m) => m.toJson()).toList())),
+      membersJson:
+          Value(jsonEncode(group.members.map((m) => m.toJson()).toList())),
       settingsJson: Value(jsonEncode(group.settings.toJson())),
       avatarPath: Value(group.avatarPath),
       createdAt: Value(group.createdAt),
@@ -215,7 +230,9 @@ class GroupRepository {
   List<GroupMember> _parseMembersJson(String json) {
     try {
       final list = jsonDecode(json) as List;
-      return list.map((m) => GroupMember.fromJson(m as Map<String, dynamic>)).toList();
+      return list
+          .map((m) => GroupMember.fromJson(m as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       return [];
     }

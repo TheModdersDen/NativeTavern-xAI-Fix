@@ -10,7 +10,7 @@ class VectorStorageService {
   /// In-memory storage for collections, persisted to a JSON file
   final Map<String, VectorCollection> _collections = {};
 
-  bool _loaded = false;
+  Future<void>? _loadFuture;
 
   /// Get all collections
   List<VectorCollection> get collections => _collections.values.toList();
@@ -28,9 +28,9 @@ class VectorStorageService {
   }
 
   /// Load persisted collections from disk (idempotent)
-  Future<void> load() async {
-    if (_loaded) return;
-    _loaded = true;
+  Future<void> load() => _loadFuture ??= _load();
+
+  Future<void> _load() async {
     try {
       final file = await _storageFile();
       if (!await file.exists()) return;

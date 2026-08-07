@@ -2,7 +2,7 @@
 enum ChatLayoutMode {
   /// Classic bubble style chat
   bubble,
-  
+
   /// Visual novel style - full screen background with text overlay at bottom
   visualNovel,
 }
@@ -12,19 +12,19 @@ extension ChatLayoutModeExtension on ChatLayoutMode {
   String get displayName {
     switch (this) {
       case ChatLayoutMode.bubble:
-        return '气泡模式';
+        return 'Bubble';
       case ChatLayoutMode.visualNovel:
-        return '小说模式';
+        return 'Visual novel';
     }
   }
-  
+
   /// Toggle to the other mode
   ChatLayoutMode get toggle {
-    return this == ChatLayoutMode.bubble 
-        ? ChatLayoutMode.visualNovel 
+    return this == ChatLayoutMode.bubble
+        ? ChatLayoutMode.visualNovel
         : ChatLayoutMode.bubble;
   }
-  
+
   /// Create from string
   static ChatLayoutMode fromString(String value) {
     switch (value) {
@@ -34,7 +34,7 @@ extension ChatLayoutModeExtension on ChatLayoutMode {
         return ChatLayoutMode.bubble;
     }
   }
-  
+
   /// Convert to string
   String toStringValue() {
     switch (this) {

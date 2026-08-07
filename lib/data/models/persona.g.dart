@@ -11,6 +11,7 @@ _$PersonaConnectionImpl _$$PersonaConnectionImplFromJson(
     _$PersonaConnectionImpl(
       characterId: json['characterId'] as String?,
       groupId: json['groupId'] as String?,
+      chatId: json['chatId'] as String?,
       lockType:
           $enumDecodeNullable(_$PersonaLockTypeEnumMap, json['lockType']) ??
               PersonaLockType.none,
@@ -21,6 +22,7 @@ Map<String, dynamic> _$$PersonaConnectionImplToJson(
     <String, dynamic>{
       'characterId': instance.characterId,
       'groupId': instance.groupId,
+      'chatId': instance.chatId,
       'lockType': _$PersonaLockTypeEnumMap[instance.lockType]!,
     };
 

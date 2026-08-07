@@ -5,6 +5,7 @@ import 'package:native_tavern/data/models/group.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
+import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
@@ -42,17 +43,18 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
   Future<void> _loadGroup() async {
     final groupsAsync = ref.read(groupListProvider);
     final groups = groupsAsync.valueOrNull ?? [];
-    
+
     try {
       final group = groups.firstWhere(
         (g) => g.id == widget.groupId,
       );
-      
+
       setState(() {
         _group = group;
         _nameController.text = group.name;
         _descriptionController.text = group.description ?? '';
-        _responseMode = group.settings.responseMode ?? GroupResponseMode.natural;
+        _responseMode =
+            group.settings.responseMode ?? GroupResponseMode.natural;
         _isLoading = false;
       });
     } catch (e) {
@@ -87,7 +89,8 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteGroup),
-        content: Text(AppLocalizations.of(context)!.deleteGroupAndChats(_group?.name ?? '')),
+        content: Text(AppLocalizations.of(context)!
+            .deleteGroupAndChats(_group?.name ?? '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -113,12 +116,16 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
   Future<void> _addMember() async {
     final charactersAsync = ref.read(characterListProvider);
     final characters = charactersAsync.valueOrNull ?? [];
-    final currentMemberIds = _group?.members.map((m) => m.characterId).toSet() ?? {};
-    final availableCharacters = characters.where((c) => !currentMemberIds.contains(c.id)).toList();
+    final currentMemberIds =
+        _group?.members.map((m) => m.characterId).toSet() ?? {};
+    final availableCharacters =
+        characters.where((c) => !currentMemberIds.contains(c.id)).toList();
 
     if (availableCharacters.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.noMoreCharactersAvailable)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.noMoreCharactersAvailable)),
       );
       return;
     }
@@ -130,31 +137,32 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
 
     if (selected != null && _group != null) {
       await ref.read(groupListProvider.notifier).addMemberToGroup(
-        _group!.id,
-        selected.id,
-      );
+            _group!.id,
+            selected.id,
+          );
       await _loadGroup();
     }
   }
 
   Future<void> _removeMember(String characterId) async {
     if (_group == null) return;
-    
+
     await ref.read(groupListProvider.notifier).removeMemberFromGroup(
-      _group!.id,
-      characterId,
-    );
+          _group!.id,
+          characterId,
+        );
     await _loadGroup();
   }
 
   Future<void> _toggleMemberMute(String characterId) async {
     if (_group == null) return;
-    
-    final member = _group!.members.firstWhere((m) => m.characterId == characterId);
+
+    final member =
+        _group!.members.firstWhere((m) => m.characterId == characterId);
     await ref.read(groupListProvider.notifier).updateMember(
-      _group!.id,
-      member.copyWith(isMuted: !member.isMuted),
-    );
+          _group!.id,
+          member.copyWith(isMuted: !member.isMuted),
+        );
     await _loadGroup();
   }
 
@@ -165,17 +173,28 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
     );
 
     if (result != null && _group != null) {
-      await ref.read(groupListProvider.notifier).updateMember(_group!.id, result);
+      await ref
+          .read(groupListProvider.notifier)
+          .updateMember(_group!.id, result);
       await _loadGroup();
     }
   }
 
-  void _startGroupChat() {
-    ref.read(activeGroupIdProvider.notifier).state = _group?.id;
-    // Navigate to group chat - we'll use the first member as initial character
-    if (_group != null && _group!.members.isNotEmpty) {
-      context.go('/chat/${_group!.members.first.characterId}');
+  Future<void> _startGroupChat() async {
+    final group = _group;
+    if (group == null || group.members.isEmpty) return;
+    ref.read(activeGroupIdProvider.notifier).state = group.id;
+    final chatId =
+        await ref.read(activeChatProvider.notifier).createGroupChat(group);
+    if (!mounted) return;
+    if (chatId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToCreateChat)),
+      );
+      return;
     }
+    context.push('/chat/$chatId');
   }
 
   @override
@@ -190,7 +209,9 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
     if (_group == null) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.error)),
-        body: Center(child: Text(AppLocalizations.of(context)!.characterNotFoundMessage)),
+        body: Center(
+            child:
+                Text(AppLocalizations.of(context)!.characterNotFoundMessage)),
       );
     }
 
@@ -241,7 +262,8 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                   TextField(
                     controller: _descriptionController,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.descriptionOptionalLabel,
+                      labelText: AppLocalizations.of(context)!
+                          .descriptionOptionalLabel,
                       border: const OutlineInputBorder(),
                     ),
                     maxLines: 3,
@@ -269,17 +291,19 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 16),
-                  ...GroupResponseMode.values.map((mode) => RadioListTile<GroupResponseMode>(
-                    title: Text(_getResponseModeTitle(mode, context)),
-                    subtitle: Text(_getResponseModeDescription(mode, context)),
-                    value: mode,
-                    groupValue: _responseMode,
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _responseMode = value);
-                      }
-                    },
-                  )),
+                  ...GroupResponseMode.values
+                      .map((mode) => RadioListTile<GroupResponseMode>(
+                            title: Text(_getResponseModeTitle(mode, context)),
+                            subtitle: Text(
+                                _getResponseModeDescription(mode, context)),
+                            value: mode,
+                            groupValue: _responseMode,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _responseMode = value);
+                              }
+                            },
+                          )),
                 ],
               ),
             ),
@@ -297,7 +321,8 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.membersCount(_group!.members.length),
+                        AppLocalizations.of(context)!
+                            .membersCount(_group!.members.length),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       IconButton(
@@ -323,12 +348,16 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                           newIndex -= 1;
                         }
                         final member = _group!.members[oldIndex];
-                        final newMembers = List<GroupMember>.from(_group!.members);
+                        final newMembers =
+                            List<GroupMember>.from(_group!.members);
                         newMembers.removeAt(oldIndex);
                         newMembers.insert(newIndex, member);
-                        
-                        final updatedGroup = _group!.copyWith(members: newMembers);
-                        await ref.read(groupListProvider.notifier).updateGroup(updatedGroup);
+
+                        final updatedGroup =
+                            _group!.copyWith(members: newMembers);
+                        await ref
+                            .read(groupListProvider.notifier)
+                            .updateGroup(updatedGroup);
                         await _loadGroup();
                       },
                       itemBuilder: (context, index) {
@@ -336,8 +365,10 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                         return _MemberTile(
                           key: ValueKey(member.characterId),
                           member: member,
-                          characterRepository: ref.read(characterRepositoryProvider),
-                          onToggleMute: () => _toggleMemberMute(member.characterId),
+                          characterRepository:
+                              ref.read(characterRepositoryProvider),
+                          onToggleMute: () =>
+                              _toggleMemberMute(member.characterId),
                           onEdit: () => _editMemberSettings(member),
                           onRemove: () => _removeMember(member.characterId),
                         );
@@ -367,7 +398,8 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
     }
   }
 
-  String _getResponseModeDescription(GroupResponseMode mode, BuildContext context) {
+  String _getResponseModeDescription(
+      GroupResponseMode mode, BuildContext context) {
     switch (mode) {
       case GroupResponseMode.sequential:
         return AppLocalizations.of(context)!.charactersRespondInOrder;
@@ -441,7 +473,9 @@ class _MemberTile extends StatelessWidget {
                   member.isMuted ? Icons.volume_off : Icons.volume_up,
                   color: member.isMuted ? Colors.grey : null,
                 ),
-                tooltip: member.isMuted ? AppLocalizations.of(context)!.unmute : AppLocalizations.of(context)!.mute,
+                tooltip: member.isMuted
+                    ? AppLocalizations.of(context)!.unmute
+                    : AppLocalizations.of(context)!.mute,
                 onPressed: onToggleMute,
               ),
               IconButton(
@@ -551,7 +585,8 @@ class _MemberSettingsDialogState extends State<_MemberSettingsDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.talkativenessLabel(_talkativeness.round())),
+          Text(AppLocalizations.of(context)!
+              .talkativenessLabel(_talkativeness.round())),
           Slider(
             value: _talkativeness,
             min: 0,
@@ -595,7 +630,7 @@ class _MemberSettingsDialogState extends State<_MemberSettingsDialog> {
                 .map((w) => w.trim())
                 .where((w) => w.isNotEmpty)
                 .toList();
-            
+
             Navigator.pop(
               context,
               widget.member.copyWith(

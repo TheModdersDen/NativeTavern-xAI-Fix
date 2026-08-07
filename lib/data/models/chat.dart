@@ -2,7 +2,8 @@
 class ChatSummary {
   final String id;
   final String content; // Summarized content
-  final int endMessageIndex; // Index of the last message included in this summary
+  final int
+      endMessageIndex; // Index of the last message included in this summary
   final DateTime createdAt;
 
   const ChatSummary({
@@ -13,18 +14,18 @@ class ChatSummary {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'content': content,
-    'endMessageIndex': endMessageIndex,
-    'createdAt': createdAt.toIso8601String(),
-  };
+        'id': id,
+        'content': content,
+        'endMessageIndex': endMessageIndex,
+        'createdAt': createdAt.toIso8601String(),
+      };
 
   factory ChatSummary.fromJson(Map<String, dynamic> json) => ChatSummary(
-    id: json['id'] as String,
-    content: json['content'] as String,
-    endMessageIndex: json['endMessageIndex'] as int,
-    createdAt: DateTime.parse(json['createdAt'] as String),
-  );
+        id: json['id'] as String,
+        content: json['content'] as String,
+        endMessageIndex: json['endMessageIndex'] as int,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+      );
 }
 
 /// Chat session model
@@ -36,7 +37,8 @@ class Chat {
   final String authorNote; // Author's Note content
   final int authorNoteDepth; // Depth for injection (messages from end)
   final bool authorNoteEnabled; // Whether Author's Note is active
-  final List<ChatSummary> summaries; // History summaries for context compression
+  final List<ChatSummary>
+      summaries; // History summaries for context compression
 
   /// Per-chat settings (persisted as JSON):
   /// startReplyWith, linkedWorldInfoIds, ...
@@ -121,6 +123,7 @@ class Chat {
         'authorNoteDepth': authorNoteDepth,
         'authorNoteEnabled': authorNoteEnabled,
         'summaries': summaries.map((s) => s.toJson()).toList(),
+        'settings': settings,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
@@ -134,8 +137,10 @@ class Chat {
         authorNoteDepth: json['authorNoteDepth'] as int? ?? 4,
         authorNoteEnabled: json['authorNoteEnabled'] as bool? ?? false,
         summaries: (json['summaries'] as List<dynamic>?)
-            ?.map((s) => ChatSummary.fromJson(s as Map<String, dynamic>))
-            .toList() ?? [],
+                ?.map((s) => ChatSummary.fromJson(s as Map<String, dynamic>))
+                .toList() ??
+            [],
+        settings: json['settings'] as Map<String, dynamic>? ?? const {},
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
@@ -167,22 +172,22 @@ class ChatAttachment {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'path': path,
-    if (mimeType != null) 'mimeType': mimeType,
-    if (width != null) 'width': width,
-    if (height != null) 'height': height,
-    if (sizeBytes != null) 'sizeBytes': sizeBytes,
-  };
+        'id': id,
+        'path': path,
+        if (mimeType != null) 'mimeType': mimeType,
+        if (width != null) 'width': width,
+        if (height != null) 'height': height,
+        if (sizeBytes != null) 'sizeBytes': sizeBytes,
+      };
 
   factory ChatAttachment.fromJson(Map<String, dynamic> json) => ChatAttachment(
-    id: json['id'] as String,
-    path: json['path'] as String,
-    mimeType: json['mimeType'] as String?,
-    width: json['width'] as int?,
-    height: json['height'] as int?,
-    sizeBytes: json['sizeBytes'] as int?,
-  );
+        id: json['id'] as String,
+        path: json['path'] as String,
+        mimeType: json['mimeType'] as String?,
+        width: json['width'] as int?,
+        height: json['height'] as int?,
+        sizeBytes: json['sizeBytes'] as int?,
+      );
 }
 
 /// Chat message model
@@ -194,7 +199,8 @@ class ChatMessage {
   final DateTime timestamp;
   final List<String> swipes;
   final int currentSwipeIndex;
-  final String? characterId; // For group chats - which character sent this message
+  final String?
+      characterId; // For group chats - which character sent this message
   final String? characterName; // Cached character name for display
   final String? reasoning; // Chain of Thought / Thinking content from LLM
   final List<String>? reasoningSwipes; // Reasoning content for each swipe
@@ -259,9 +265,11 @@ class ChatMessage {
       swipes: swipes ?? this.swipes,
       currentSwipeIndex: currentSwipeIndex ?? this.currentSwipeIndex,
       characterId: clearCharacterId ? null : (characterId ?? this.characterId),
-      characterName: clearCharacterName ? null : (characterName ?? this.characterName),
+      characterName:
+          clearCharacterName ? null : (characterName ?? this.characterName),
       reasoning: clearReasoning ? null : (reasoning ?? this.reasoning),
-      reasoningSwipes: clearReasoning ? null : (reasoningSwipes ?? this.reasoningSwipes),
+      reasoningSwipes:
+          clearReasoning ? null : (reasoningSwipes ?? this.reasoningSwipes),
       attachments: attachments ?? this.attachments,
     );
   }
@@ -278,7 +286,8 @@ class ChatMessage {
         'characterName': characterName,
         if (reasoning != null) 'reasoning': reasoning,
         if (reasoningSwipes != null) 'reasoningSwipes': reasoningSwipes,
-        if (attachments.isNotEmpty) 'attachments': attachments.map((a) => a.toJson()).toList(),
+        if (attachments.isNotEmpty)
+          'attachments': attachments.map((a) => a.toJson()).toList(),
       };
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
@@ -295,9 +304,11 @@ class ChatMessage {
         characterId: json['characterId'] as String?,
         characterName: json['characterName'] as String?,
         reasoning: json['reasoning'] as String?,
-        reasoningSwipes: (json['reasoningSwipes'] as List<dynamic>?)?.cast<String>(),
+        reasoningSwipes:
+            (json['reasoningSwipes'] as List<dynamic>?)?.cast<String>(),
         attachments: (json['attachments'] as List<dynamic>?)
-            ?.map((a) => ChatAttachment.fromJson(a as Map<String, dynamic>))
-            .toList() ?? [],
+                ?.map((a) => ChatAttachment.fromJson(a as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }
