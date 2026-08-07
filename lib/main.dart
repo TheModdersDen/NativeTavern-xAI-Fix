@@ -13,38 +13,39 @@ import 'package:native_tavern/presentation/screens/import/import_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize core services
   final initData = await InitializationService.initialize();
-  
+
   // Get shared preferences
   final prefs = await SharedPreferences.getInstance();
-  
+
   // Create repositories
   final database = initData.database;
   final characterRepo = CharacterRepository(database, initData.dataPath);
   final chatRepo = ChatRepository(database);
   final worldInfoRepo = WorldInfoRepository(database);
-  
+
   // Create services
   final llmService = LLMService();
   final importService = ImportService(initData.dataPath);
-  
+
   runApp(
     ProviderScope(
       overrides: [
         // Database
         databaseProvider.overrideWithValue(database),
-        
+        dataPathProvider.overrideWithValue(initData.dataPath),
+
         // Repositories
         characterRepositoryProvider.overrideWithValue(characterRepo),
         chatRepositoryProvider.overrideWithValue(chatRepo),
         worldInfoRepositoryProvider.overrideWithValue(worldInfoRepo),
-        
+
         // Services
         llmServiceProvider.overrideWithValue(llmService),
         importServiceProvider.overrideWithValue(importService),
-        
+
         // Shared preferences
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],

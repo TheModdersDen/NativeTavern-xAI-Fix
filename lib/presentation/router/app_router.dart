@@ -15,6 +15,7 @@ import 'package:native_tavern/presentation/screens/settings/theme_settings_scree
 import 'package:native_tavern/presentation/screens/settings/statistics_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/ai_presets_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/sprite_settings_screen.dart';
+import 'package:native_tavern/presentation/screens/settings/live2d_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/tts_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/stt_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/translation_settings_screen.dart';
@@ -63,6 +64,7 @@ abstract class AppRoutes {
   static const tags = '/tags';
   static const spriteSettings = '/sprite-settings';
   static const characterSprites = '/characters/:id/sprites';
+  static const characterLive2D = '/characters/:id/live2d';
   static const ttsSettings = '/tts-settings';
   static const sttSettings = '/stt-settings';
   static const translationSettings = '/translation-settings';
@@ -265,6 +267,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final id = state.pathParameters['id']!;
           final name = state.uri.queryParameters['name'] ?? 'Character';
           return CharacterSpritesScreen(characterId: id, characterName: name);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.characterLive2D,
+        name: 'characterLive2D',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return Live2DSettingsScreen(characterId: id);
         },
       ),
       GoRoute(

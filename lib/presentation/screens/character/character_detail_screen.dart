@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -217,6 +216,12 @@ class _CharacterDetailContentState
               background: _buildAvatarBackground(character),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.animation),
+                tooltip: 'Live2D',
+                onPressed: () =>
+                    context.push('/characters/${character.id}/live2d'),
+              ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () =>

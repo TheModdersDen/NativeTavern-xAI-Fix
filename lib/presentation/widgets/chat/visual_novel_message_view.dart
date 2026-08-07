@@ -28,10 +28,12 @@ class VisualNovelMessageView extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VisualNovelMessageView> createState() => _VisualNovelMessageViewState();
+  ConsumerState<VisualNovelMessageView> createState() =>
+      _VisualNovelMessageViewState();
 }
 
-class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView> {
+class _VisualNovelMessageViewState
+    extends ConsumerState<VisualNovelMessageView> {
   late PageController _pageController;
   int _currentIndex = 0;
 
@@ -146,47 +148,49 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
   }
 
   Widget _buildMessageArea() {
+    final messagePanel = Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.4,
+        minHeight: 150,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withValues(alpha: 0.6),
+            Colors.black.withValues(alpha: 0.8),
+          ],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: widget.messages.length,
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
+        itemBuilder: (context, index) {
+          final message = widget.messages[index];
+          final isLast = index == widget.messages.length - 1;
+          final isGenerating = isLast && widget.isGenerating;
+
+          return _buildMessageCard(message, isGenerating);
+        },
+      ),
+    );
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.4,
-            minHeight: 150,
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.6),
-                Colors.black.withValues(alpha: 0.8),
-              ],
-            ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border: Border(
-              top: BorderSide(
-                color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-          ),
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: widget.messages.length,
-            onPageChanged: (index) {
-              setState(() => _currentIndex = index);
-            },
-            itemBuilder: (context, index) {
-              final message = widget.messages[index];
-              final isLast = index == widget.messages.length - 1;
-              final isGenerating = isLast && widget.isGenerating;
-              
-              return _buildMessageCard(message, isGenerating);
-            },
-          ),
-        ),
+        child: messagePanel,
       ),
     );
   }
@@ -194,7 +198,8 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
   Widget _buildMessageCard(ChatMessage message, bool isGenerating) {
     final isUser = message.role == MessageRole.user;
     final hasSwipes = message.swipes.length > 1;
-    final isLast = widget.messages.isNotEmpty && message == widget.messages.last;
+    final isLast =
+        widget.messages.isNotEmpty && message == widget.messages.last;
 
     return GestureDetector(
       onLongPress: () => widget.onLongPress(message),
@@ -222,8 +227,7 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
                 messageId: message.id,
               ),
             // Swipe controls
-            if (hasSwipes && !isGenerating)
-              _buildSwipeControls(message),
+            if (hasSwipes && !isGenerating) _buildSwipeControls(message),
           ],
         ),
       ),
@@ -237,7 +241,7 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
     if (reasoning == null || reasoning.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     // During streaming, show the streaming version
     if (isStreaming) {
       return Padding(
@@ -249,7 +253,7 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
         ),
       );
     }
-    
+
     // For completed messages, show the collapsible version
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -298,7 +302,10 @@ class _VisualNovelMessageViewState extends ConsumerState<VisualNovelMessageView>
           ),
         ),
         // Speaking indicator for generating
-        if (!isUser && widget.messages.isNotEmpty && message == widget.messages.last && widget.isGenerating)
+        if (!isUser &&
+            widget.messages.isNotEmpty &&
+            message == widget.messages.last &&
+            widget.isGenerating)
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: Container(

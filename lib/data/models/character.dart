@@ -1,3 +1,5 @@
+import 'package:native_tavern/data/models/live2d.dart';
+
 /// Character depth prompt (ST extensions.depth_prompt):
 /// a note injected at a fixed depth in the chat history
 class DepthPrompt {
@@ -95,6 +97,7 @@ class Character {
     String? creator,
     String? version,
     CharacterAssets? assets,
+    bool clearAssets = false,
     CharacterBook? characterBook,
     Map<String, dynamic>? extensions,
     bool? isFavorite,
@@ -113,12 +116,13 @@ class Character {
       alternateGreetings: alternateGreetings ?? this.alternateGreetings,
       exampleMessages: exampleMessages ?? this.exampleMessages,
       systemPrompt: systemPrompt ?? this.systemPrompt,
-      postHistoryInstructions: postHistoryInstructions ?? this.postHistoryInstructions,
+      postHistoryInstructions:
+          postHistoryInstructions ?? this.postHistoryInstructions,
       creatorNotes: creatorNotes ?? this.creatorNotes,
       tags: tags ?? this.tags,
       creator: creator ?? this.creator,
       version: version ?? this.version,
-      assets: assets ?? this.assets,
+      assets: clearAssets ? null : (assets ?? this.assets),
       characterBook: characterBook ?? this.characterBook,
       extensions: extensions ?? this.extensions,
       isFavorite: isFavorite ?? this.isFavorite,
@@ -161,10 +165,13 @@ class Character {
         personality: json['personality'] as String? ?? '',
         scenario: json['scenario'] as String? ?? '',
         firstMessage: json['firstMessage'] as String? ?? '',
-        alternateGreetings: (json['alternateGreetings'] as List<dynamic>?)?.cast<String>() ?? [],
+        alternateGreetings:
+            (json['alternateGreetings'] as List<dynamic>?)?.cast<String>() ??
+                [],
         exampleMessages: json['exampleMessages'] as String? ?? '',
         systemPrompt: json['systemPrompt'] as String? ?? '',
-        postHistoryInstructions: json['postHistoryInstructions'] as String? ?? '',
+        postHistoryInstructions:
+            json['postHistoryInstructions'] as String? ?? '',
         creatorNotes: json['creatorNotes'] as String? ?? '',
         tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
         creator: json['creator'] as String? ?? '',
@@ -173,7 +180,8 @@ class Character {
             ? CharacterAssets.fromJson(json['assets'] as Map<String, dynamic>)
             : null,
         characterBook: json['characterBook'] != null
-            ? CharacterBook.fromJson(json['characterBook'] as Map<String, dynamic>)
+            ? CharacterBook.fromJson(
+                json['characterBook'] as Map<String, dynamic>)
             : null,
         extensions: json['extensions'] as Map<String, dynamic>? ?? {},
         isFavorite: json['isFavorite'] as bool? ?? false,
@@ -188,8 +196,8 @@ class Character {
                 : null,
         talkativeness: (json['talkativeness'] as num?)?.toDouble() ??
             (json['extensions'] is Map<String, dynamic>
-                ? _parseTalkativeness(
-                    (json['extensions'] as Map<String, dynamic>)['talkativeness'])
+                ? _parseTalkativeness((json['extensions']
+                    as Map<String, dynamic>)['talkativeness'])
                 : 0.5),
         createdAt: DateTime.parse(json['createdAt'] as String),
         modifiedAt: DateTime.parse(json['modifiedAt'] as String),
@@ -231,22 +239,32 @@ class CharacterAssets {
   final String? avatarPath;
   final String? avatarUrl;
   final Map<String, String>? expressionPack;
+  final Live2DConfig? live2d;
 
   const CharacterAssets({
     this.avatarPath,
     this.avatarUrl,
     this.expressionPack,
+    this.live2d,
   });
+
+  bool get hasAssets =>
+      avatarPath != null ||
+      avatarUrl != null ||
+      (expressionPack?.isNotEmpty ?? false) ||
+      live2d != null;
 
   CharacterAssets copyWith({
     String? avatarPath,
     String? avatarUrl,
     Map<String, String>? expressionPack,
+    Live2DConfig? live2d,
   }) {
     return CharacterAssets(
       avatarPath: avatarPath ?? this.avatarPath,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       expressionPack: expressionPack ?? this.expressionPack,
+      live2d: live2d ?? this.live2d,
     );
   }
 
@@ -254,12 +272,18 @@ class CharacterAssets {
         'avatarPath': avatarPath,
         'avatarUrl': avatarUrl,
         'expressionPack': expressionPack,
+        'live2d': live2d?.toJson(),
       };
 
-  factory CharacterAssets.fromJson(Map<String, dynamic> json) => CharacterAssets(
+  factory CharacterAssets.fromJson(Map<String, dynamic> json) =>
+      CharacterAssets(
         avatarPath: json['avatarPath'] as String?,
         avatarUrl: json['avatarUrl'] as String?,
-        expressionPack: (json['expressionPack'] as Map<String, dynamic>?)?.cast<String, String>(),
+        expressionPack: (json['expressionPack'] as Map<String, dynamic>?)
+            ?.cast<String, String>(),
+        live2d: json['live2d'] is Map<String, dynamic>
+            ? Live2DConfig.fromJson(json['live2d'] as Map<String, dynamic>)
+            : null,
       );
 }
 
@@ -320,8 +344,10 @@ class CharacterBook {
         tokenBudget: json['token_budget'] as int? ?? 2048,
         recursiveScanning: json['recursive_scanning'] as bool? ?? false,
         entries: (json['entries'] as List<dynamic>?)
-            ?.map((e) => CharacterBookEntry.fromJson(e as Map<String, dynamic>))
-            .toList() ?? [],
+                ?.map((e) =>
+                    CharacterBookEntry.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
         extensions: json['extensions'] as Map<String, dynamic>? ?? {},
       );
 }
@@ -377,10 +403,12 @@ class CharacterBookEntry {
         'extensions': extensions,
       };
 
-  factory CharacterBookEntry.fromJson(Map<String, dynamic> json) => CharacterBookEntry(
+  factory CharacterBookEntry.fromJson(Map<String, dynamic> json) =>
+      CharacterBookEntry(
         id: json['id'] as int? ?? 0,
         keys: (json['keys'] as List<dynamic>?)?.cast<String>() ?? [],
-        secondaryKeys: (json['secondary_keys'] as List<dynamic>?)?.cast<String>() ?? [],
+        secondaryKeys:
+            (json['secondary_keys'] as List<dynamic>?)?.cast<String>() ?? [],
         content: json['content'] as String? ?? '',
         comment: json['comment'] as String? ?? '',
         enabled: json['enabled'] as bool? ?? true,

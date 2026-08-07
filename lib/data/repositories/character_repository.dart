@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -406,6 +405,14 @@ class CharacterRepository {
   // Private helpers
 
   models.Character _characterFromRow(db.Character row) {
+    final storedAssets =
+        models.CharacterAssets.fromJson(_parseJsonMap(row.assetsJson));
+    final assets = models.CharacterAssets(
+      avatarPath: row.avatarPath ?? storedAssets.avatarPath,
+      avatarUrl: storedAssets.avatarUrl,
+      expressionPack: storedAssets.expressionPack,
+      live2d: storedAssets.live2d,
+    );
     return models.Character(
       id: row.id,
       name: row.name,
@@ -421,9 +428,7 @@ class CharacterRepository {
       tags: _parseJsonList(row.tags),
       creator: row.creator,
       version: row.characterVersion,
-      assets: row.avatarPath != null
-          ? models.CharacterAssets(avatarPath: row.avatarPath)
-          : null,
+      assets: assets.hasAssets ? assets : null,
       characterBook: _parseCharacterBook(row.characterBookJson),
       extensions: _parseJsonMap(row.extensionsJson),
       isFavorite: row.isFavorite,
@@ -453,6 +458,7 @@ class CharacterRepository {
       creator: Value(character.creator),
       characterVersion: Value(character.version),
       avatarPath: Value(character.assets?.avatarPath),
+      assetsJson: Value(jsonEncode(character.assets?.toJson() ?? const {})),
       characterBookJson:
           Value(_serializeCharacterBook(character.characterBook)),
       extensionsJson: Value(jsonEncode(character.extensionsForExport())),

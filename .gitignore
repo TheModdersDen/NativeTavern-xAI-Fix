@@ -48,6 +48,9 @@ ios_*
 android
 web
 macos
+!packages/native_tavern_live2d_macos/macos/
+!packages/native_tavern_live2d_macos/macos/**
+packages/native_tavern_live2d_macos/macos/CubismCore/
 linux
 windows
 release

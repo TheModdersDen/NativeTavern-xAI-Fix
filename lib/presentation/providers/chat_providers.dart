@@ -2852,6 +2852,30 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     return buffer.toString();
   }
 
+  Future<void> updateLive2DStageTransform({
+    required double scale,
+    required double offsetX,
+    required double offsetY,
+  }) async {
+    final character = state.character;
+    final assets = character?.assets;
+    final live2d = assets?.live2d;
+    if (character == null || assets == null || live2d == null) return;
+
+    final updatedCharacter = character.copyWith(
+      assets: assets.copyWith(
+        live2d: live2d.copyWith(
+          scale: scale,
+          offsetX: offsetX,
+          offsetY: offsetY,
+        ),
+      ),
+      modifiedAt: DateTime.now(),
+    );
+    state = state.copyWith(character: updatedCharacter);
+    await _characterRepository.updateCharacter(updatedCharacter);
+  }
+
   /// Manually trigger a specific character to respond (for manual mode)
   Future<void> triggerCharacterResponse(
       String characterId, LLMConfig config) async {

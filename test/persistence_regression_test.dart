@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/database/database.dart';
 import 'package:native_tavern/data/models/character.dart' as character_models;
 import 'package:native_tavern/data/models/chat.dart' as chat_models;
+import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/data/models/persona.dart' as persona_models;
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
@@ -68,6 +69,40 @@ void main() {
     expect(loaded.tags, persona.tags);
     expect(loaded.creatorNotes, persona.creatorNotes);
     expect(loaded.isFavorite, isTrue);
+  });
+
+  test('character Live2D assets round-trip through the repository', () async {
+    final repository = CharacterRepository(database, tempDirectory.path);
+    final now = DateTime.now();
+    final character = character_models.Character(
+      id: 'live2d-character',
+      name: 'Live2D Tester',
+      assets: const character_models.CharacterAssets(
+        avatarPath: '/tmp/avatar.png',
+        live2d: Live2DConfig(
+          modelId: 'hiyori_free',
+          displayName: 'Hiyori Momose (Official Sample)',
+          modelDirectory: 'assets/live2d/hiyori_free/',
+          modelFileName: 'hiyori_free_t08.model3.json',
+          idleMotion: Live2DMotionRef(
+            group: 'Idle',
+            index: 0,
+            file: 'motion/hiyori_m01.motion3.json',
+            name: 'hiyori m01',
+          ),
+        ),
+      ),
+      createdAt: now,
+      modifiedAt: now,
+    );
+
+    await repository.createCharacter(character);
+    final loaded = await repository.getCharacter(character.id);
+
+    expect(loaded?.assets?.avatarPath, character.assets?.avatarPath);
+    expect(loaded?.assets?.live2d?.modelId, 'hiyori_free');
+    expect(loaded?.assets?.live2d?.idleMotion?.group, 'Idle');
+    expect(loaded?.assets?.live2d?.idleMotion?.index, 0);
   });
 
   test('chat summaries persist and clearing removes messages but not chat',

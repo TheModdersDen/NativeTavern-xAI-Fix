@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
+
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,7 @@ import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/bookmark_providers.dart';
 import 'package:native_tavern/presentation/providers/background_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
+import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
@@ -37,8 +40,9 @@ import 'package:native_tavern/presentation/providers/image_gen_providers.dart';
 import 'package:native_tavern/presentation/widgets/chat/image_generation_dialog.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
-import 'package:native_tavern/presentation/screens/chat/chat_layout_mode.dart';
 import 'package:native_tavern/presentation/widgets/chat/visual_novel_message_view.dart';
+import 'package:native_tavern/presentation/widgets/chat/sprite_display.dart';
+import 'package:native_tavern/presentation/widgets/live2d/live2d_character_view.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
@@ -64,7 +68,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   bool _showSlashSuggestions = false;
-  bool _showInputMenu = false; // 控制输入框左侧菜单的显示
+  bool _showInputMenu = false;
+  final LayerLink _inputMenuLayerLink = LayerLink();
   final List<ChatAttachment> _pendingAttachments = [];
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -89,6 +94,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final shouldShow = text.startsWith('/') && !text.contains(' ');
     if (shouldShow != _showSlashSuggestions) {
       setState(() => _showSlashSuggestions = shouldShow);
+    }
+  }
+
+  void _setInputMenuVisible(bool visible) {
+    if (_showInputMenu == visible) return;
+    setState(() => _showInputMenu = visible);
+  }
+
+  Future<void> _saveLive2DTransform(
+    String characterId,
+    Live2DStageTransform transform,
+  ) async {
+    try {
+      await ref.read(activeChatProvider.notifier).updateLive2DStageTransform(
+            scale: transform.scale,
+            offsetX: transform.offsetX,
+            offsetY: transform.offsetY,
+          );
+      ref.invalidate(characterDetailProvider(characterId));
+    } catch (error) {
+      if (mounted) _showSnackBar(error.toString());
     }
   }
 
@@ -450,15 +476,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     final request = ref.read(parseImagineCommandProvider)(
-          '/imagine ${argument ?? ''}',
-        );
+      '/imagine ${argument ?? ''}',
+    );
     if (request == null) {
       _showCommandError(SlashCommands.imagine.usage);
       return;
     }
 
     _showSnackBar(l10n.imageGeneration);
-    final result = await ref.read(imageGenStateProvider.notifier).generate(request);
+    final result =
+        await ref.read(imageGenStateProvider.notifier).generate(request);
     if (!mounted) return;
     if (result == null || result.images.isEmpty) {
       final error = ref.read(imageGenStateProvider).error;
@@ -764,59 +791,63 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: _buildAppBar(chatState),
       body: ChatBackgroundWidget(
         characterId: chatState.character?.id,
-        child: Column(
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            // API not configured banner
-            if (!isConfigured) _buildApiConfigBanner(),
+            Column(
+              children: [
+                // API not configured banner
+                if (!isConfigured) _buildApiConfigBanner(),
 
-            // Error banner
-            if (chatState.error != null)
-              Container(
-                padding: const EdgeInsets.all(8),
-                color: Colors.red.withValues(alpha: 0.2),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        chatState.error!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                // Error banner
+                if (chatState.error != null)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.red.withValues(alpha: 0.2),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            chatState.error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () {
+                            // Clear error
+                          },
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      onPressed: () {
-                        // Clear error
-                      },
-                    ),
-                  ],
-                ),
-              ),
+                  ),
 
-            // Messages list
-            Expanded(
-              child: chatState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : chatState.messages.isEmpty
-                      ? _buildEmptyState()
+                // Messages list
+                Expanded(
+                  child: chatState.isLoading
+                      ? const Center(child: CircularProgressIndicator())
                       : _buildMessagesArea(chatState),
-            ),
-
-            // Slash command suggestions
-            if (_showSlashSuggestions)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SlashCommandSuggestions(
-                  input: _messageController.text,
-                  onSelect: _onSlashCommandSelected,
-                  onDismiss: () =>
-                      setState(() => _showSlashSuggestions = false),
                 ),
-              ),
 
-            // Input area
-            _buildInputArea(chatState),
+                // Slash command suggestions
+                if (_showSlashSuggestions)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SlashCommandSuggestions(
+                      input: _messageController.text,
+                      onSelect: _onSlashCommandSelected,
+                      onDismiss: () =>
+                          setState(() => _showSlashSuggestions = false),
+                    ),
+                  ),
+
+                // Input area
+                _buildInputArea(chatState),
+              ],
+            ),
+            if (_showInputMenu) _buildInputMenuOverlay(chatState),
           ],
         ),
       ),
@@ -922,12 +953,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           tooltip: l10n.bookmarks,
           onPressed: () => _showBookmarksDialog(context),
         ),
-        // Layout mode toggle (only show when there's a background)
+        // Live2D supplies a visual stage even when no image background is set.
         if (ref
-                .watch(effectiveBackgroundProvider(chatState.character?.id))
-                .valueOrNull
-                ?.type ==
-            BackgroundType.image)
+                    .watch(
+                      effectiveBackgroundProvider(chatState.character?.id),
+                    )
+                    .valueOrNull
+                    ?.type ==
+                BackgroundType.image ||
+            chatState.character?.assets?.live2d?.enabled == true)
           IconButton(
             icon: Icon(
               ref.watch(appSettingsProvider.select((s) => s.chatLayoutMode)) ==
@@ -963,6 +997,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
+            if (chatState.character != null)
+              const PopupMenuItem(
+                value: 'live2d',
+                child: ListTile(
+                  leading: Icon(Icons.animation),
+                  title: Text('Live2D'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
             PopupMenuItem(
               value: 'author_note',
               child: ListTile(
@@ -1078,6 +1121,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               case 'author_note':
                 showAuthorNoteDialog(context);
                 break;
+              case 'live2d':
+                final characterId = chatState.character?.id;
+                if (characterId != null) {
+                  context.push('/characters/$characterId/live2d');
+                }
+                break;
               case 'start_reply_with':
                 _showStartReplyWithDialog();
                 break;
@@ -1152,34 +1201,99 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ref.watch(effectiveBackgroundProvider(chatState.character?.id));
     final background = backgroundAsync.valueOrNull ?? ChatBackground.none;
     final hasBackground = background.type == BackgroundType.image;
+    final hasLive2D = chatState.character?.assets?.live2d?.enabled == true;
 
-    // Only use visual novel mode when there's an image background
-    if (layoutMode == 'visualNovel' && hasBackground) {
+    if (chatState.messages.isEmpty) {
+      if (!hasLive2D) return _buildEmptyState();
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: _buildLive2DStage(chatState)),
+          _buildEmptyState(),
+        ],
+      );
+    }
+
+    if (layoutMode == 'visualNovel' && (hasBackground || hasLive2D)) {
       return _buildVisualNovelView(chatState);
+    }
+
+    if (hasLive2D) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(child: _buildLive2DStage(chatState)),
+          ),
+          _buildMessageList(chatState),
+        ],
+      );
     }
 
     return _buildMessageList(chatState);
   }
 
   Widget _buildVisualNovelView(ActiveChatState chatState) {
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        // Upper area - shows the background (empty space)
-        const Expanded(child: SizedBox.shrink()),
-        // Bottom area - message overlay
-        VisualNovelMessageView(
-          messages: chatState.messages,
-          character: chatState.character,
-          isGenerating: chatState.isGenerating,
-          onLongPress: (message) =>
-              _showMessageOptionsForVisualNovel(context, message, chatState),
-          onSwipe: (swipeIndex, messageId) {
-            ref
-                .read(activeChatProvider.notifier)
-                .swipeMessage(messageId, swipeIndex);
-          },
+        Positioned.fill(child: _buildLive2DStage(chatState)),
+        Column(
+          children: [
+            const Expanded(child: SizedBox.shrink()),
+            VisualNovelMessageView(
+              messages: chatState.messages,
+              character: chatState.character,
+              isGenerating: chatState.isGenerating,
+              onLongPress: (message) => _showMessageOptionsForVisualNovel(
+                context,
+                message,
+                chatState,
+              ),
+              onSwipe: (swipeIndex, messageId) {
+                ref
+                    .read(activeChatProvider.notifier)
+                    .swipeMessage(messageId, swipeIndex);
+              },
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildLive2DStage(ActiveChatState chatState) {
+    final character = chatState.character;
+    final live2d = character?.assets?.live2d;
+    if (character == null || live2d?.enabled != true) {
+      return const SizedBox.shrink();
+    }
+
+    ChatMessage? latestAssistantMessage;
+    for (final message in chatState.messages.reversed) {
+      if (message.role == MessageRole.assistant) {
+        latestAssistantMessage = message;
+        break;
+      }
+    }
+
+    return Live2DCharacterView(
+      config: live2d!,
+      isSpeaking: chatState.isGenerating,
+      interactive: true,
+      onTransformChanged: (transform) {
+        unawaited(_saveLive2DTransform(character.id, transform));
+      },
+      fallback: latestAssistantMessage == null
+          ? const SizedBox.shrink()
+          : Align(
+              alignment: Alignment.center,
+              child: SpriteDisplay(
+                characterId: character.id,
+                messageContent: latestAssistantMessage.content,
+                isStreaming: chatState.isGenerating,
+              ),
+            ),
     );
   }
 
@@ -1260,7 +1374,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final backgroundAsync =
         ref.watch(effectiveBackgroundProvider(chatState.character?.id));
     final background = backgroundAsync.valueOrNull ?? ChatBackground.none;
-    final hasBackground = background.type != BackgroundType.none;
+    final hasBackground = background.type != BackgroundType.none ||
+        chatState.character?.assets?.live2d?.enabled == true;
 
     return ListView.builder(
       controller: _scrollController,
@@ -1552,12 +1667,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildInputArea(ActiveChatState chatState) {
-    final quickReplyConfig = ref.watch(quickReplyConfigProvider);
-    final enabledReplies = ref.watch(enabledQuickRepliesProvider);
-    final showQuickReplies = quickReplyConfig.showQuickReplies &&
-        enabledReplies.isNotEmpty &&
-        !chatState.isGenerating;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1572,81 +1681,110 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             // Pending attachments preview
             if (_pendingAttachments.isNotEmpty) _buildAttachmentsPreview(),
-            // Menu panel (when expanded)
-            if (_showInputMenu)
-              _buildInputMenuPanel(showQuickReplies, chatState),
             // Input row with menu button
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Menu button
-                IconButton(
-                  icon: Icon(
-                    _showInputMenu ? Icons.close : Icons.menu,
-                    size: 24,
-                    color: _showInputMenu
-                        ? AppTheme.primaryColor
-                        : AppTheme.textMuted,
+            CompositedTransformTarget(
+              link: _inputMenuLayerLink,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Menu button
+                  IconButton(
+                    icon: Icon(
+                      _showInputMenu ? Icons.close : Icons.menu,
+                      size: 24,
+                      color: _showInputMenu
+                          ? AppTheme.primaryColor
+                          : AppTheme.textMuted,
+                    ),
+                    onPressed: () => _setInputMenuVisible(!_showInputMenu),
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 40, minHeight: 40),
                   ),
-                  onPressed: () =>
-                      setState(() => _showInputMenu = !_showInputMenu),
-                  padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 40, minHeight: 40),
-                ),
-                const SizedBox(width: 4),
-                // Input field
-                Expanded(
-                  child: MarkdownInputField(
-                    controller: _messageController,
-                    focusNode: _focusNode,
-                    maxLines: 5,
-                    minLines: 1,
-                    hintText: AppLocalizations.of(context).typeMessage,
-                    onSubmitted: Platform.isIOS || Platform.isAndroid
-                        ? null
-                        : (_) => _sendMessage(),
-                    textInputAction: Platform.isIOS || Platform.isAndroid
-                        ? TextInputAction.newline
-                        : TextInputAction.send,
-                    showToolbar: false,
-                    decoration: InputDecoration(
+                  const SizedBox(width: 4),
+                  // Input field
+                  Expanded(
+                    child: MarkdownInputField(
+                      controller: _messageController,
+                      focusNode: _focusNode,
+                      maxLines: 5,
+                      minLines: 1,
                       hintText: AppLocalizations.of(context).typeMessage,
-                      filled: true,
-                      fillColor: AppTheme.darkBackground,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                      onSubmitted: Platform.isIOS || Platform.isAndroid
+                          ? null
+                          : (_) => _sendMessage(),
+                      textInputAction: Platform.isIOS || Platform.isAndroid
+                          ? TextInputAction.newline
+                          : TextInputAction.send,
+                      showToolbar: false,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context).typeMessage,
+                        filled: true,
+                        fillColor: AppTheme.darkBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                // Show stop button when generating, send button otherwise
-                if (chatState.isGenerating)
-                  IconButton.filled(
-                    onPressed: () => ref
-                        .read(activeChatProvider.notifier)
-                        .cancelGeneration(),
-                    icon: const Icon(Icons.stop_circle),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red,
+                  const SizedBox(width: 8),
+                  // Show stop button when generating, send button otherwise
+                  if (chatState.isGenerating)
+                    IconButton.filled(
+                      onPressed: () => ref
+                          .read(activeChatProvider.notifier)
+                          .cancelGeneration(),
+                      icon: const Icon(Icons.stop_circle),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      tooltip: AppLocalizations.of(context).stopGenerating,
+                    )
+                  else
+                    IconButton.filled(
+                      onPressed: _sendMessage,
+                      icon: const Icon(Icons.send),
+                      tooltip: AppLocalizations.of(context).send,
                     ),
-                    tooltip: AppLocalizations.of(context).stopGenerating,
-                  )
-                else
-                  IconButton.filled(
-                    onPressed: _sendMessage,
-                    icon: const Icon(Icons.send),
-                    tooltip: AppLocalizations.of(context).send,
-                  ),
-              ],
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputMenuOverlay(ActiveChatState chatState) {
+    final quickReplyConfig = ref.watch(quickReplyConfigProvider);
+    final enabledReplies = ref.watch(enabledQuickRepliesProvider);
+    final showQuickReplies = quickReplyConfig.showQuickReplies &&
+        enabledReplies.isNotEmpty &&
+        !chatState.isGenerating;
+    final width = math.max(0.0, MediaQuery.sizeOf(context).width - 32);
+
+    return Positioned.fill(
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: CompositedTransformFollower(
+          link: _inputMenuLayerLink,
+          showWhenUnlinked: false,
+          targetAnchor: Alignment.topLeft,
+          followerAnchor: Alignment.bottomLeft,
+          offset: const Offset(0, -12),
+          child: SizedBox(
+            width: width,
+            child: Material(
+              color: Colors.transparent,
+              elevation: 8,
+              child: _buildInputMenuPanel(showQuickReplies, chatState),
+            ),
+          ),
         ),
       ),
     );
@@ -1655,9 +1793,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   /// Build the expandable menu panel above the input field
   Widget _buildInputMenuPanel(
       bool showQuickReplies, ActiveChatState chatState) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(bottom: 12),
+    return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.darkBackground,
@@ -1677,7 +1813,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 label: AppLocalizations.of(context).attachImage,
                 onTap: () {
                   _showAttachmentOptions();
-                  setState(() => _showInputMenu = false);
+                  _setInputMenuVisible(false);
                 },
               ),
               const SizedBox(width: 8),
@@ -1730,7 +1866,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           .map((reply) => InkWell(
                 onTap: () {
                   _handleQuickReply(reply.message, reply.autoSend);
-                  setState(() => _showInputMenu = false);
+                  _setInputMenuVisible(false);
                 },
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
