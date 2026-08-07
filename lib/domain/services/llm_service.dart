@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:native_tavern/domain/services/context_window_service.dart';
 
 /// LLM Provider enum
 enum LLMProvider {
@@ -409,6 +410,7 @@ class LLMConfig {
 /// LLM Service for generating responses
 class LLMService {
   final Dio _dio = Dio();
+  final ContextWindowService _contextWindowService = ContextWindowService();
 
   /// Token for the in-flight request so cancellation actually aborts the
   /// HTTP connection (stops server-side generation/billing) instead of
@@ -904,6 +906,16 @@ class LLMService {
     List<Map<String, dynamic>> messages,
     LLMConfig config,
   ) async {
+    final responseTokens = _contextWindowService.effectiveResponseTokenLimit(
+      contextLength: config.contextLength,
+      requestedTokens: config.maxTokens,
+    );
+    config = config.copyWith(maxTokens: responseTokens);
+    messages = _contextWindowService.fit(
+      messages,
+      contextLength: config.contextLength,
+      responseTokens: responseTokens,
+    ).messages;
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
       case LLMProvider.deepSeek:
@@ -985,6 +997,16 @@ class LLMService {
     List<Map<String, dynamic>> messages,
     LLMConfig config,
   ) {
+    final responseTokens = _contextWindowService.effectiveResponseTokenLimit(
+      contextLength: config.contextLength,
+      requestedTokens: config.maxTokens,
+    );
+    config = config.copyWith(maxTokens: responseTokens);
+    messages = _contextWindowService.fit(
+      messages,
+      contextLength: config.contextLength,
+      responseTokens: responseTokens,
+    ).messages;
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
       case LLMProvider.deepSeek:
@@ -1255,6 +1277,27 @@ class LLMService {
         break;
       default:
         buffer.write(' (${e.type})');
+    }
+
+    final requestUri = e.requestOptions.uri;
+    final sanitizedUri = requestUri.hasScheme
+        ? Uri(
+            scheme: requestUri.scheme,
+            host: requestUri.host,
+            port: requestUri.hasPort ? requestUri.port : null,
+            path: requestUri.path,
+          ).toString()
+        : requestUri.path;
+    if (sanitizedUri.isNotEmpty) {
+      buffer.write('\n\nRequest: $sanitizedUri');
+    }
+
+    if (e.response?.statusCode == 404) {
+      buffer.write(
+        '\n\nCheck the Base URL in provider settings. Use the API root only '
+        '(for example, https://host/v1) and remove endpoint suffixes such as '
+        '/models or /chat/completions.',
+      );
     }
 
     // Add server response if available

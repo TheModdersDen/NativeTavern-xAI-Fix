@@ -9,6 +9,7 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'character_view_mode.dart';
 
 /// Character list screen
@@ -512,7 +513,7 @@ class _CharacterListTile extends ConsumerWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: PopupMenuButton<String>(
+        trailing: AdaptivePopupMenuButton<String>(
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'chat',

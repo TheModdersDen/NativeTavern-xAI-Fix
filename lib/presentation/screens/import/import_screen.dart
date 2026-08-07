@@ -10,8 +10,10 @@ import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/world_info.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
 import 'package:native_tavern/domain/services/import_service.dart';
+import 'package:native_tavern/domain/services/character_regex_import_service.dart';
 import 'package:native_tavern/domain/services/url_import_service.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
+import 'package:native_tavern/presentation/providers/regex_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
@@ -362,6 +364,14 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         final character = await ref
             .read(characterListProvider.notifier)
             .addCharacter(result.character!);
+
+        final embeddedRegex = parseEmbeddedRegexScripts(
+          result.character!.extensions,
+          characterId: character.id,
+        );
+        await ref
+            .read(characterRegexScriptsProvider(character.id).notifier)
+            .importEmbeddedScripts(embeddedRegex);
 
         // If the character has an embedded lorebook, create a WorldInfo for it
         if (result.character!.characterBook != null &&

@@ -5,6 +5,7 @@ import '../../../data/models/app_theme_config.dart';
 import '../../providers/theme_providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Screen for managing app themes
 class ThemeSettingsScreen extends ConsumerWidget {
@@ -374,7 +375,7 @@ class _ThemeCard extends StatelessWidget {
                   if (isActive)
                     const Icon(Icons.check_circle, size: 14, color: AppTheme.accentColor),
                   if (isCustom && !isActive)
-                    PopupMenuButton<String>(
+                    AdaptivePopupMenuButton<String>(
                       padding: EdgeInsets.zero,
                       iconSize: 14,
                       icon: const Icon(Icons.more_vert, size: 14),

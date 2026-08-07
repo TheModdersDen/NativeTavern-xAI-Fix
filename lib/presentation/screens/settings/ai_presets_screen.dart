@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:native_tavern/core/utils/share_utils.dart';
 import '../../../data/models/ai_preset.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../providers/ai_preset_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/common/adaptive_popup_menu.dart';
 
 /// Screen for managing AI presets
 class AIPresetsScreen extends ConsumerWidget {
@@ -221,7 +223,8 @@ class AIPresetsScreen extends ConsumerWidget {
       ),
     );
 
-    if (name == null || name.isEmpty) return;
+    if (name == null || name.isEmpty || !context.mounted) return;
+    final shareOrigin = sharePositionOrigin(context);
 
     try {
       final json = await ref.read(aiPresetManagerProvider).exportCurrentSettings(name);
@@ -232,11 +235,11 @@ class AIPresetsScreen extends ConsumerWidget {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonString);
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path)],
         subject: 'NativeTavern AI Preset: $name',
-      );
+        sharePositionOrigin: shareOrigin,
+      ));
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -326,6 +329,7 @@ class AIPresetsScreen extends ConsumerWidget {
   }
 
   Future<void> _exportPreset(BuildContext context, AIPreset preset) async {
+    final shareOrigin = sharePositionOrigin(context);
     try {
       final json = preset.toExportJson();
       final jsonString = const JsonEncoder.withIndent('  ').convert(json);
@@ -335,11 +339,11 @@ class AIPresetsScreen extends ConsumerWidget {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonString);
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path)],
         subject: 'NativeTavern AI Preset: ${preset.name}',
-      );
+        sharePositionOrigin: shareOrigin,
+      ));
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
@@ -521,7 +525,7 @@ class _PresetCard extends StatelessWidget {
               ),
               // Actions
               if (!preset.isBuiltIn)
-                PopupMenuButton<String>(
+                AdaptivePopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert),
                   onSelected: (value) {
                     if (value == 'export') onExport?.call();

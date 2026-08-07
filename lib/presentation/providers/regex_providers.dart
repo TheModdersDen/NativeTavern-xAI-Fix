@@ -154,9 +154,10 @@ final characterRegexScriptsProvider = StateNotifierProvider.family<CharacterRege
 /// Notifier for managing character-specific regex scripts
 class CharacterRegexScriptsNotifier extends StateNotifier<List<RegexScript>> {
   final String characterId;
+  late final Future<void> _loadFuture;
   
   CharacterRegexScriptsNotifier(this.characterId) : super([]) {
-    _loadScripts();
+    _loadFuture = _loadScripts();
   }
 
   String get _storageKey => 'character_regex_scripts_$characterId';
@@ -187,6 +188,7 @@ class CharacterRegexScriptsNotifier extends StateNotifier<List<RegexScript>> {
   }
 
   Future<void> addScript(RegexScript script) async {
+    await _loadFuture;
     final newScript = script.copyWith(
       characterId: characterId,
       scriptType: RegexScriptType.character,
@@ -196,16 +198,19 @@ class CharacterRegexScriptsNotifier extends StateNotifier<List<RegexScript>> {
   }
 
   Future<void> updateScript(RegexScript script) async {
+    await _loadFuture;
     state = state.map((s) => s.id == script.id ? script : s).toList();
     await _saveScripts();
   }
 
   Future<void> removeScript(String id) async {
+    await _loadFuture;
     state = state.where((s) => s.id != id).toList();
     await _saveScripts();
   }
 
   Future<void> toggleScript(String id) async {
+    await _loadFuture;
     state = state.map((s) {
       if (s.id == id) {
         return s.copyWith(
@@ -215,6 +220,21 @@ class CharacterRegexScriptsNotifier extends StateNotifier<List<RegexScript>> {
       }
       return s;
     }).toList();
+    await _saveScripts();
+  }
+
+  /// Merge regex scripts embedded in an imported character card.
+  Future<void> importEmbeddedScripts(List<RegexScript> scripts) async {
+    if (scripts.isEmpty) return;
+    await _loadFuture;
+    final importedIds = scripts.map((script) => script.id).toSet();
+    state = [
+      ...state.where((script) => !importedIds.contains(script.id)),
+      ...scripts.map((script) => script.copyWith(
+            characterId: characterId,
+            scriptType: RegexScriptType.character,
+          )),
+    ];
     await _saveScripts();
   }
 }

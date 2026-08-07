@@ -9,6 +9,7 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Home screen showing recent chats
 class HomeScreen extends ConsumerStatefulWidget {
@@ -221,7 +222,7 @@ class _ChatListTile extends ConsumerWidget {
                     color: AppTheme.textMuted,
                   ),
             ),
-            PopupMenuButton<String>(
+            AdaptivePopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, size: 20),
               padding: EdgeInsets.zero,
               onSelected: (value) => _handleMenuAction(context, ref, value),

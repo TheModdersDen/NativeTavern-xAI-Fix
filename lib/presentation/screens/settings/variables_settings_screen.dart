@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/variables_service.dart';
 import 'package:native_tavern/presentation/providers/variables_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Screen for managing variables
@@ -26,7 +27,7 @@ class VariablesSettingsScreen extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.addVariable,
             onPressed: () => _showAddVariableDialog(context, ref),
           ),
-          PopupMenuButton<String>(
+          AdaptivePopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(context, ref, value),
             itemBuilder: (context) => [
               const PopupMenuItem(

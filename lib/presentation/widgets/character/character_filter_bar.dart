@@ -6,6 +6,7 @@ import '../../providers/tag_providers.dart';
 import '../../screens/tags/tags_screen.dart';
 import '../../theme/app_theme.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Filter bar for character list
 class CharacterFilterBar extends ConsumerWidget {
@@ -66,7 +67,7 @@ class CharacterFilterBar extends ConsumerWidget {
                 },
               ),
               // Sort button
-              PopupMenuButton<CharacterSortOption>(
+              AdaptivePopupMenuButton<CharacterSortOption>(
                 icon: const Icon(Icons.sort),
                 tooltip: AppLocalizations.of(context)!.sortBy,
                 onSelected: (option) {

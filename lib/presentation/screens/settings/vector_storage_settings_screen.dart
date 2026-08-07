@@ -7,6 +7,7 @@ import 'package:native_tavern/domain/services/vector_storage_service.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/vector_storage_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Settings screen for Vector Storage / RAG
@@ -492,7 +493,7 @@ class _CollectionsSection extends StatelessWidget {
               onPressed: enabled ? onCreateCollection : null,
               tooltip: 'Create Collection',
             ),
-            PopupMenuButton<String>(
+            AdaptivePopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               enabled: enabled,
               onSelected: (action) {
