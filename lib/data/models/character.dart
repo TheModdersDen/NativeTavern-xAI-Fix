@@ -259,12 +259,13 @@ class CharacterAssets {
     String? avatarUrl,
     Map<String, String>? expressionPack,
     Live2DConfig? live2d,
+    bool clearLive2D = false,
   }) {
     return CharacterAssets(
       avatarPath: avatarPath ?? this.avatarPath,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       expressionPack: expressionPack ?? this.expressionPack,
-      live2d: live2d ?? this.live2d,
+      live2d: clearLive2D ? null : (live2d ?? this.live2d),
     );
   }
 

@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/chat_background.dart';
+import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
@@ -45,6 +46,7 @@ import 'package:native_tavern/domain/services/image_generation_service.dart';
 import 'package:native_tavern/presentation/widgets/chat/visual_novel_message_view.dart';
 import 'package:native_tavern/presentation/widgets/chat/sprite_display.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_character_view.dart';
+import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
@@ -1221,14 +1223,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     if (hasLive2D) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(
-            child: IgnorePointer(child: _buildLive2DStage(chatState)),
-          ),
-          _buildMessageList(chatState),
-        ],
+      final character = chatState.character!;
+      final live2d = character.assets!.live2d!;
+      return Live2DTwoFingerGestureRegion(
+        initialTransform: Live2DStageTransform.constrained(
+          scale: live2d.scale,
+          offsetX: live2d.offsetX,
+          offsetY: live2d.offsetY,
+        ),
+        onTransformEnd: (transform) {
+          unawaited(_saveLive2DTransform(character.id, transform));
+        },
+        builder: (context, transform) => Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: _buildLive2DStage(
+                  chatState,
+                  configOverride: live2d.copyWith(
+                    scale: transform.scale,
+                    offsetX: transform.offsetX,
+                    offsetY: transform.offsetY,
+                  ),
+                  interactive: false,
+                  persistTransform: false,
+                ),
+              ),
+            ),
+            _buildMessageList(chatState),
+          ],
+        ),
       );
     }
 
@@ -1264,9 +1289,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildLive2DStage(ActiveChatState chatState) {
+  Widget _buildLive2DStage(
+    ActiveChatState chatState, {
+    Live2DConfig? configOverride,
+    bool interactive = true,
+    bool persistTransform = true,
+  }) {
     final character = chatState.character;
-    final live2d = character?.assets?.live2d;
+    final live2d = configOverride ?? character?.assets?.live2d;
     if (character == null || live2d?.enabled != true) {
       return const SizedBox.shrink();
     }
@@ -1282,10 +1312,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Live2DCharacterView(
       config: live2d!,
       isSpeaking: chatState.isGenerating,
-      interactive: true,
-      onTransformChanged: (transform) {
-        unawaited(_saveLive2DTransform(character.id, transform));
-      },
+      interactive: interactive,
+      onTransformChanged: persistTransform
+          ? (transform) {
+              unawaited(_saveLive2DTransform(character.id, transform));
+            }
+          : null,
       fallback: latestAssistantMessage == null
           ? const SizedBox.shrink()
           : Align(
