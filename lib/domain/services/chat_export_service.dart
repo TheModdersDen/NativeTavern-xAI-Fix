@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:path_provider/path_provider.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/character.dart';
@@ -109,6 +110,7 @@ class ChatExportService {
     Character character, {
     String? userName,
     bool useJsonl = true,
+    Rect? sharePositionOrigin,
   }) async {
     final content = useJsonl
         ? await exportToJsonl(chat, messages, character, userName: userName)
@@ -122,11 +124,11 @@ class ChatExportService {
     final file = File('${tempDir.path}/$fileName');
     await file.writeAsString(content);
 
-    // Share the file using the new share_plus API
-    await Share.shareXFiles(
-      [XFile(file.path)],
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path)],
       subject: 'Chat with ${character.name}',
-    );
+      sharePositionOrigin: sharePositionOrigin,
+    ));
   }
 
   /// Save exported chat to downloads folder

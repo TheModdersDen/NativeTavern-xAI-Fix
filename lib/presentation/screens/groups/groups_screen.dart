@@ -11,6 +11,7 @@ import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Groups list screen
 class GroupsScreen extends ConsumerWidget {
@@ -164,7 +165,7 @@ class _GroupCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  PopupMenuButton<String>(
+                  AdaptivePopupMenuButton<String>(
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'chat',

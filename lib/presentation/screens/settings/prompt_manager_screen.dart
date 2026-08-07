@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/data/models/prompt_manager.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
@@ -24,7 +26,7 @@ class PromptManagerScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.promptManager),
         actions: [
-          PopupMenuButton<String>(
+          AdaptivePopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             tooltip: AppLocalizations.of(context)!.moreOptions,
             onSelected: (value) {
@@ -316,7 +318,8 @@ class PromptManagerScreen extends ConsumerWidget {
       ),
     );
 
-    if (name == null || name.isEmpty) return;
+    if (name == null || name.isEmpty || !context.mounted) return;
+    final shareOrigin = sharePositionOrigin(context);
 
     try {
       final json = ref.read(promptManagerProvider.notifier).exportToJson(name);
@@ -328,11 +331,11 @@ class PromptManagerScreen extends ConsumerWidget {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonString);
 
-      // ignore: deprecated_member_use
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path)],
         subject: 'NativeTavern Prompt Preset: $name',
-      );
+        sharePositionOrigin: shareOrigin,
+      ));
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

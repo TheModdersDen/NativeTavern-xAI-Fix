@@ -6,6 +6,7 @@ import 'package:native_tavern/data/models/logit_bias.dart';
 import 'package:native_tavern/domain/services/logit_bias_service.dart';
 import 'package:native_tavern/presentation/providers/logit_bias_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Settings screen for Logit Bias configuration
@@ -340,7 +341,7 @@ class _PresetSelector extends StatelessWidget {
               onPressed: onAddPreset,
               tooltip: AppLocalizations.of(context)!.newPreset,
             ),
-            PopupMenuButton<String>(
+            AdaptivePopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (action) {
                 switch (action) {

@@ -9,6 +9,7 @@ import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Character detail screen
 class CharacterDetailScreen extends ConsumerWidget {
@@ -227,7 +228,7 @@ class _CharacterDetailContentState
                 onPressed: () =>
                     context.push('/characters/${character.id}/edit'),
               ),
-              PopupMenuButton<String>(
+              AdaptivePopupMenuButton<String>(
                 onSelected: (value) => _handleMenuAction(value, character),
                 itemBuilder: (context) => [
                   PopupMenuItem(

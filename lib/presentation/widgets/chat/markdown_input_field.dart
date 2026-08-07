@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// A text input field with markdown formatting support
 /// 
@@ -396,7 +397,7 @@ class MarkdownToolbar extends StatelessWidget {
           tooltip: 'Code (⌘`)',
           onTap: () => _applyFormat(MarkdownFormat.inlineCode),
         ),
-        PopupMenuButton<MarkdownFormat>(
+        AdaptivePopupMenuButton<MarkdownFormat>(
           icon: Icon(
             Icons.more_horiz,
             size: 18,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/tag.dart';
 import 'package:native_tavern/presentation/providers/tag_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Screen for managing tags
@@ -218,7 +219,7 @@ class _TagListItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            PopupMenuButton<String>(
+            AdaptivePopupMenuButton<String>(
               onSelected: (value) {
                 switch (value) {
                   case 'edit':

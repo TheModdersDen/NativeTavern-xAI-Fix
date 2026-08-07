@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Screen for managing user personas
 class PersonasScreen extends ConsumerWidget {
@@ -280,7 +281,7 @@ class _PersonaCard extends StatelessWidget {
               ),
               
               // Actions
-              PopupMenuButton<String>(
+              AdaptivePopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: AppTheme.textMuted),
                 onSelected: (value) {
                   switch (value) {

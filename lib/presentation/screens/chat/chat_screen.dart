@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/chat_background.dart';
+import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
@@ -31,6 +32,7 @@ import 'package:native_tavern/presentation/widgets/chat/bookmark_dialog.dart';
 import 'package:native_tavern/presentation/widgets/chat/chat_background_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/message_content_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/quick_reply_bar.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/presentation/widgets/chat/markdown_input_field.dart';
 import 'package:native_tavern/presentation/widgets/chat/reasoning_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/slash_command_suggestions.dart';
@@ -987,7 +989,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             tooltip: l10n.regenerate,
             onPressed: _regenerateMessage,
           ),
-        PopupMenuButton(
+        AdaptivePopupMenuButton<String>(
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'character',
@@ -2338,6 +2340,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         chatState.character!,
         userName: userName,
         useJsonl: useJsonl,
+        sharePositionOrigin: sharePositionOrigin(context),
       );
     } catch (e) {
       final l10n = AppLocalizations.of(context);

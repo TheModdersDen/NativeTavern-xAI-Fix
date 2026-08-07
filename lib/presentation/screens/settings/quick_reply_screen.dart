@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../data/models/quick_reply.dart';
 import '../../providers/quick_reply_providers.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Screen for managing quick replies
 class QuickReplyScreen extends ConsumerWidget {
@@ -254,7 +255,7 @@ class _QuickReplyTile extends StatelessWidget {
               value: reply.enabled,
               onChanged: (_) => onToggle(),
             ),
-            PopupMenuButton<String>(
+            AdaptivePopupMenuButton<String>(
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'edit',
