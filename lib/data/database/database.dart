@@ -284,83 +284,88 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Handle migrations
-        if (from < 2) {
-          // Add swipes columns to messages
-          await m.addColumn(messages, messages.swipes);
-          await m.addColumn(messages, messages.currentSwipeIndex);
-        }
-        if (from < 3) {
-          // Add personas table
-          await m.createTable(personas);
-        }
-        if (from < 4) {
-          // Add groups and bookmarks tables
-          await m.createTable(groups);
-          await m.createTable(bookmarks);
-        }
-        if (from < 5) {
-          // Add characterId and characterName to messages for group chats
-          await m.addColumn(messages, messages.characterId);
-          await m.addColumn(messages, messages.characterName);
-        }
-        if (from < 6) {
-          // Add alternateGreetings and characterBookJson to characters
-          await m.addColumn(characters, characters.alternateGreetings);
-          await m.addColumn(characters, characters.characterBookJson);
-        }
-        if (from < 7) {
-          // Add Author's Note columns to chats
-          await m.addColumn(chats, chats.authorNote);
-          await m.addColumn(chats, chats.authorNoteDepth);
-          await m.addColumn(chats, chats.authorNoteEnabled);
-        }
-        if (from < 8) {
-          // Add isFavorite column to characters
-          await m.addColumn(characters, characters.isFavorite);
-        }
-        if (from < 9) {
-          // Add tags and character_tags tables
-          await m.createTable(tags);
-          await m.createTable(characterTags);
-        }
-        if (from < 10) {
-          // Add attachmentsJson column to messages for image attachments
-          await m.addColumn(messages, messages.attachmentsJson);
-        }
-        if (from < 11) {
-          // Add missing SillyTavern-compatible fields to world info entries
-          await m.addColumn(worldInfoEntries, worldInfoEntries.useGroupScoring);
-          await m.addColumn(worldInfoEntries, worldInfoEntries.automationId);
-          await m.addColumn(
-              worldInfoEntries, worldInfoEntries.delayUntilRecursion);
-        }
-        if (from < 12) {
-          // Add missing SillyTavern-compatible fields to world infos
-          await m.addColumn(worldInfos, worldInfos.scanDepth);
-          await m.addColumn(worldInfos, worldInfos.caseSensitive);
-          await m.addColumn(worldInfos, worldInfos.matchWholeWords);
-          await m.addColumn(worldInfos, worldInfos.useGroupScoring);
-          await m.addColumn(worldInfos, worldInfos.recursionDepth);
-          await m.addColumn(worldInfos, worldInfos.extensionsJson);
-        }
-        if (from < 13) {
-          // Add GlobalStates table for settings persistence
-          await m.createTable(globalStates);
-        }
-        // Versions before v3 did not have a personas table. createTable above
-        // uses the current schema, so only add these columns to an existing
-        // legacy personas table.
-        if (from >= 3 && from < 14) {
-          await m.addColumn(personas, personas.connectionsJson);
-          await m.addColumn(personas, personas.descriptionSettingsJson);
-          await m.addColumn(personas, personas.lorebookId);
-          await m.addColumn(personas, personas.systemPromptOverride);
-          await m.addColumn(personas, personas.postHistoryInstructions);
-          await m.addColumn(personas, personas.tagsJson);
-          await m.addColumn(personas, personas.creatorNotes);
-          await m.addColumn(personas, personas.isFavorite);
-        }
+        // SQLite supports transactional DDL. Keep the version upgrade atomic
+        // so a failed step can be retried from the unchanged legacy schema.
+        await transaction(() async {
+          // Handle migrations
+          if (from < 2) {
+            // Add swipes columns to messages
+            await m.addColumn(messages, messages.swipes);
+            await m.addColumn(messages, messages.currentSwipeIndex);
+          }
+          if (from < 3) {
+            // Add personas table
+            await m.createTable(personas);
+          }
+          if (from < 4) {
+            // Add groups and bookmarks tables
+            await m.createTable(groups);
+            await m.createTable(bookmarks);
+          }
+          if (from < 5) {
+            // Add characterId and characterName to messages for group chats
+            await m.addColumn(messages, messages.characterId);
+            await m.addColumn(messages, messages.characterName);
+          }
+          if (from < 6) {
+            // Add alternateGreetings and characterBookJson to characters
+            await m.addColumn(characters, characters.alternateGreetings);
+            await m.addColumn(characters, characters.characterBookJson);
+          }
+          if (from < 7) {
+            // Add Author's Note columns to chats
+            await m.addColumn(chats, chats.authorNote);
+            await m.addColumn(chats, chats.authorNoteDepth);
+            await m.addColumn(chats, chats.authorNoteEnabled);
+          }
+          if (from < 8) {
+            // Add isFavorite column to characters
+            await m.addColumn(characters, characters.isFavorite);
+          }
+          if (from < 9) {
+            // Add tags and character_tags tables
+            await m.createTable(tags);
+            await m.createTable(characterTags);
+          }
+          if (from < 10) {
+            // Add attachmentsJson column to messages for image attachments
+            await m.addColumn(messages, messages.attachmentsJson);
+          }
+          if (from < 11) {
+            // Add missing SillyTavern-compatible fields to world info entries
+            await m.addColumn(
+                worldInfoEntries, worldInfoEntries.useGroupScoring);
+            await m.addColumn(worldInfoEntries, worldInfoEntries.automationId);
+            await m.addColumn(
+                worldInfoEntries, worldInfoEntries.delayUntilRecursion);
+          }
+          if (from < 12) {
+            // Add missing SillyTavern-compatible fields to world infos
+            await m.addColumn(worldInfos, worldInfos.scanDepth);
+            await m.addColumn(worldInfos, worldInfos.caseSensitive);
+            await m.addColumn(worldInfos, worldInfos.matchWholeWords);
+            await m.addColumn(worldInfos, worldInfos.useGroupScoring);
+            await m.addColumn(worldInfos, worldInfos.recursionDepth);
+            await m.addColumn(worldInfos, worldInfos.extensionsJson);
+          }
+          if (from < 13) {
+            // Add GlobalStates table for settings persistence
+            await m.createTable(globalStates);
+          }
+          // Versions before v3 did not have a personas table. createTable
+          // above uses the current schema, so only add these columns to an
+          // existing legacy personas table.
+          if (from >= 3 && from < 14) {
+            await m.addColumn(personas, personas.connectionsJson);
+            await m.addColumn(personas, personas.descriptionSettingsJson);
+            await m.addColumn(personas, personas.lorebookId);
+            await m.addColumn(personas, personas.systemPromptOverride);
+            await m.addColumn(personas, personas.postHistoryInstructions);
+            await m.addColumn(personas, personas.tagsJson);
+            await m.addColumn(personas, personas.creatorNotes);
+            await m.addColumn(personas, personas.isFavorite);
+          }
+        });
       },
     );
   }
