@@ -338,6 +338,10 @@ class _MemoryRepositoryStub implements LongTermMemoryRepository {
   Future<LongTermMemory> create(LongTermMemory memory) async => memory;
 
   @override
+  Future<List<LongTermMemory>> createAll(List<LongTermMemory> memories) async =>
+      memories;
+
+  @override
   Future<void> delete(String id) async {}
 
   @override
@@ -357,7 +361,22 @@ class _MemoryRepositoryStub implements LongTermMemoryRepository {
       const [];
 
   @override
+  Future<List<LongTermMemory>> findByStates(
+    Set<MemoryState> states, {
+    bool includeExpired = true,
+    DateTime? at,
+  }) async =>
+      const [];
+
+  @override
   Future<void> rebuildSearchIndex() async {}
+
+  @override
+  Future<LongTermMemory> resolve(
+    LongTermMemory resolved, {
+    Set<String> supersededMemoryIds = const <String>{},
+  }) async =>
+      resolved;
 
   @override
   Future<List<LongTermMemorySearchResult>> search(

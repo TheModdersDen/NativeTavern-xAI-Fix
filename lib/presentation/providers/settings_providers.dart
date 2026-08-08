@@ -686,6 +686,7 @@ class AppSettings {
   final bool enableBackgroundBlur;
   final double backgroundOpacity;
   final String chatLayoutMode;
+  final bool memoryAutoExtractionEnabled;
 
   const AppSettings({
     this.theme = 'dark',
@@ -700,6 +701,7 @@ class AppSettings {
     this.enableBackgroundBlur = false,
     this.backgroundOpacity = 1.0,
     this.chatLayoutMode = 'bubble',
+    this.memoryAutoExtractionEnabled = false,
   });
 
   AppSettings copyWith({
@@ -715,6 +717,7 @@ class AppSettings {
     bool? enableBackgroundBlur,
     double? backgroundOpacity,
     String? chatLayoutMode,
+    bool? memoryAutoExtractionEnabled,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -731,6 +734,8 @@ class AppSettings {
       enableBackgroundBlur: enableBackgroundBlur ?? this.enableBackgroundBlur,
       backgroundOpacity: backgroundOpacity ?? this.backgroundOpacity,
       chatLayoutMode: chatLayoutMode ?? this.chatLayoutMode,
+      memoryAutoExtractionEnabled:
+          memoryAutoExtractionEnabled ?? this.memoryAutoExtractionEnabled,
     );
   }
 
@@ -747,6 +752,7 @@ class AppSettings {
         'enableBackgroundBlur': enableBackgroundBlur,
         'backgroundOpacity': backgroundOpacity,
         'chatLayoutMode': chatLayoutMode,
+        'memoryAutoExtractionEnabled': memoryAutoExtractionEnabled,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -765,6 +771,8 @@ class AppSettings {
       enableBackgroundBlur: json['enableBackgroundBlur'] as bool? ?? false,
       backgroundOpacity: (json['backgroundOpacity'] as num?)?.toDouble() ?? 1.0,
       chatLayoutMode: json['chatLayoutMode'] as String? ?? 'bubble',
+      memoryAutoExtractionEnabled:
+          json['memoryAutoExtractionEnabled'] as bool? ?? false,
     );
   }
 }
@@ -887,6 +895,11 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   void updateChatLayoutMode(String mode) {
     state = state.copyWith(chatLayoutMode: mode);
+    _saveSettings();
+  }
+
+  void updateMemoryAutoExtraction(bool enabled) {
+    state = state.copyWith(memoryAutoExtractionEnabled: enabled);
     _saveSettings();
   }
 

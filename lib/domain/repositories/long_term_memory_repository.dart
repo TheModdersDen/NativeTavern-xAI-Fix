@@ -17,6 +17,9 @@ abstract interface class LongTermMemoryRepository {
 
   Future<LongTermMemory> create(LongTermMemory memory);
 
+  /// Creates a batch atomically. No record is retained when one write fails.
+  Future<List<LongTermMemory>> createAll(List<LongTermMemory> memories);
+
   Future<LongTermMemory> update(LongTermMemory memory);
 
   Future<void> delete(String id);
@@ -35,6 +38,13 @@ abstract interface class LongTermMemoryRepository {
     String? messageId,
   });
 
+  /// Lists memories across owner scopes for inbox and lifecycle processing.
+  Future<List<LongTermMemory>> findByStates(
+    Set<MemoryState> states, {
+    bool includeExpired = true,
+    DateTime? at,
+  });
+
   /// Finds the most relevant memories in one exact owner scope.
   ///
   /// User input is treated as plain text rather than FTS query syntax. By
@@ -50,6 +60,15 @@ abstract interface class LongTermMemoryRepository {
 
   /// Recreates the derived full-text index from canonical memory records.
   Future<void> rebuildSearchIndex();
+
+  /// Makes [resolved] active and atomically supersedes prior records.
+  ///
+  /// The prior records must share [resolved]'s exact scope. Locked records
+  /// cannot be replaced through this automatic governance boundary.
+  Future<LongTermMemory> resolve(
+    LongTermMemory resolved, {
+    Set<String> supersededMemoryIds = const <String>{},
+  });
 
   /// Applies one lifecycle state to a group of records atomically.
   ///

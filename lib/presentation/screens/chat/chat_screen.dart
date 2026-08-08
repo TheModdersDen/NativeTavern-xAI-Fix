@@ -64,8 +64,13 @@ final chatExportServiceProvider = Provider<ChatExportService>((ref) {
 /// Chat screen for conversations
 class ChatScreen extends ConsumerStatefulWidget {
   final String chatId;
+  final String? initialMessageId;
 
-  const ChatScreen({super.key, required this.chatId});
+  const ChatScreen({
+    super.key,
+    required this.chatId,
+    this.initialMessageId,
+  });
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -82,6 +87,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   final ChatTTSAutoPlayController _ttsAutoPlayController =
       ChatTTSAutoPlayController();
+  final Map<String, GlobalKey<_MessageBubbleState>> _messageKeys = {};
+  bool _initialMessageJumpScheduled = false;
+  String? _highlightedMessageId;
 
   @override
   void initState() {
@@ -105,6 +113,65 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (shouldShow != _showSlashSuggestions) {
       setState(() => _showSlashSuggestions = shouldShow);
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chatId != widget.chatId ||
+        oldWidget.initialMessageId != widget.initialMessageId) {
+      _initialMessageJumpScheduled = false;
+      _highlightedMessageId = null;
+      _messageKeys.clear();
+    }
+  }
+
+  void _scheduleInitialMessageJump(List<ChatMessage> messages) {
+    final targetId = widget.initialMessageId;
+    if (_initialMessageJumpScheduled || targetId == null || messages.isEmpty) {
+      return;
+    }
+    final actualIndex =
+        messages.indexWhere((message) => message.id == targetId);
+    if (actualIndex < 0) {
+      _initialMessageJumpScheduled = true;
+      return;
+    }
+    _initialMessageJumpScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !_scrollController.hasClients) return;
+      final reversedIndex = messages.length - 1 - actualIndex;
+      final denominator = math.max(1, messages.length - 1);
+      final estimatedOffset = _scrollController.position.maxScrollExtent *
+          reversedIndex /
+          denominator;
+      _scrollController.jumpTo(
+        estimatedOffset.clamp(
+          _scrollController.position.minScrollExtent,
+          _scrollController.position.maxScrollExtent,
+        ),
+      );
+
+      for (var attempt = 0; attempt < 4 && mounted; attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+        final targetContext = _messageKeys[targetId]?.currentContext;
+        if (targetContext == null || !targetContext.mounted) continue;
+        await Scrollable.ensureVisible(
+          targetContext,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+        if (!mounted) return;
+        setState(() => _highlightedMessageId = targetId);
+        Future<void>.delayed(const Duration(seconds: 2), () {
+          if (mounted && _highlightedMessageId == targetId) {
+            setState(() => _highlightedMessageId = null);
+          }
+        });
+        return;
+      }
+    });
   }
 
   void _setInputMenuVisible(bool visible) {
@@ -1254,6 +1321,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
+    if (widget.initialMessageId != null) {
+      return _buildMessageList(chatState);
+    }
+
     if (layoutMode == 'visualNovel' && (hasBackground || hasLive2D)) {
       return _buildVisualNovelView(chatState);
     }
@@ -1477,6 +1548,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageList(ActiveChatState chatState) {
+    _scheduleInitialMessageJump(chatState.messages);
     final config = ref.read(llmConfigProvider);
     final backgroundAsync =
         ref.watch(effectiveBackgroundProvider(chatState.character?.id));
@@ -1501,7 +1573,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ref.watch(appSettingsProvider.select((s) => s.chatLayoutMode));
 
         return _MessageBubble(
-          key: ValueKey(message.id),
+          key: _messageKeys.putIfAbsent(
+            message.id,
+            () => GlobalKey<_MessageBubbleState>(),
+          ),
           message: message,
           messageIndex:
               actualIndex, // Use actual index for bookmarks and other features
@@ -1512,6 +1587,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           hasBackground: hasBackground,
           bubbleOpacity: background.bubbleOpacity,
           layoutMode: layoutMode,
+          highlighted: _highlightedMessageId == message.id,
           onSwipe: (swipeIndex) {
             ref.read(activeChatProvider.notifier).swipeMessage(
                   message.id,
@@ -2636,6 +2712,7 @@ class _MessageBubble extends StatefulWidget {
   final bool hasBackground;
   final double bubbleOpacity;
   final String layoutMode;
+  final bool highlighted;
   final void Function(int) onSwipe;
   final Future<void> Function(int)? onDeleteSwipe;
   final void Function(String) onEdit;
@@ -2657,6 +2734,7 @@ class _MessageBubble extends StatefulWidget {
     this.hasBackground = false,
     this.bubbleOpacity = 0.8,
     this.layoutMode = 'bubble',
+    this.highlighted = false,
     required this.onSwipe,
     this.onDeleteSwipe,
     required this.onEdit,
@@ -2845,10 +2923,12 @@ class _MessageBubbleState extends State<_MessageBubble> {
             : Colors.black.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isUser
-              ? AppTheme.accentColor.withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.3),
-          width: 1,
+          color: widget.highlighted
+              ? Theme.of(context).colorScheme.tertiary
+              : isUser
+                  ? AppTheme.accentColor.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.3),
+          width: widget.highlighted ? 3 : 1,
         ),
         // Glass morphism effect
         boxShadow: [
@@ -2870,6 +2950,12 @@ class _MessageBubbleState extends State<_MessageBubble> {
                 ? AppTheme.darkCard.withValues(alpha: widget.bubbleOpacity)
                 : AppTheme.darkCard),
         borderRadius: BorderRadius.circular(16),
+        border: widget.highlighted
+            ? Border.all(
+                color: Theme.of(context).colorScheme.tertiary,
+                width: 3,
+              )
+            : null,
       );
     }
   }
