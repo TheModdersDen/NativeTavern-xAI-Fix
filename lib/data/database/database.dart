@@ -670,9 +670,14 @@ class AppDatabase extends _$AppDatabase {
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
-        final searchIndexCreated = await _ensureLongTermMemorySearchIndex();
-        if (searchIndexCreated) {
+        final memorySearchIndexCreated =
+            await _ensureLongTermMemorySearchIndex();
+        if (memorySearchIndexCreated) {
           await _rebuildLongTermMemorySearchIndex();
+        }
+        final dataBankSearchIndexCreated = await _ensureDataBankSearchIndex();
+        if (dataBankSearchIndexCreated) {
+          await _rebuildDataBankSearchIndex();
         }
       },
     );
@@ -682,6 +687,75 @@ class AppDatabase extends _$AppDatabase {
   Future<void> rebuildLongTermMemorySearchIndex() async {
     await _ensureLongTermMemorySearchIndex();
     await _rebuildLongTermMemorySearchIndex();
+  }
+
+  /// Recreates the derived Data Bank FTS index from canonical text chunks.
+  Future<void> rebuildDataBankSearchIndex() async {
+    await _ensureDataBankSearchIndex();
+    await _rebuildDataBankSearchIndex();
+  }
+
+  Future<bool> _ensureDataBankSearchIndex() async {
+    final existing = await customSelect(
+      'SELECT 1 AS found FROM sqlite_master '
+      "WHERE type = 'table' AND name = 'data_bank_text_chunks_fts'",
+    ).getSingleOrNull();
+    final created = existing == null;
+
+    await customStatement('''
+      CREATE VIRTUAL TABLE IF NOT EXISTS data_bank_text_chunks_fts USING fts5(
+        id UNINDEXED,
+        text_content,
+        content = 'data_bank_text_chunks',
+        content_rowid = 'rowid',
+        tokenize = 'unicode61 remove_diacritics 2'
+      )
+    ''');
+    await _createDataBankSearchTriggers();
+    return created;
+  }
+
+  Future<void> _createDataBankSearchTriggers() async {
+    const statements = [
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_chunk_fts_insert
+        AFTER INSERT ON data_bank_text_chunks
+        BEGIN
+          INSERT INTO data_bank_text_chunks_fts(rowid, id, text_content)
+          VALUES (NEW.rowid, NEW.id, NEW.text_content);
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_chunk_fts_delete
+        AFTER DELETE ON data_bank_text_chunks
+        BEGIN
+          INSERT INTO data_bank_text_chunks_fts(
+            data_bank_text_chunks_fts, rowid, id, text_content
+          ) VALUES ('delete', OLD.rowid, OLD.id, OLD.text_content);
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_chunk_fts_update
+        AFTER UPDATE OF id, text_content ON data_bank_text_chunks
+        BEGIN
+          INSERT INTO data_bank_text_chunks_fts(
+            data_bank_text_chunks_fts, rowid, id, text_content
+          ) VALUES ('delete', OLD.rowid, OLD.id, OLD.text_content);
+          INSERT INTO data_bank_text_chunks_fts(rowid, id, text_content)
+          VALUES (NEW.rowid, NEW.id, NEW.text_content);
+        END
+      ''',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _rebuildDataBankSearchIndex() {
+    return customStatement(
+      'INSERT INTO data_bank_text_chunks_fts(data_bank_text_chunks_fts) '
+      "VALUES ('rebuild')",
+    );
   }
 
   Future<bool> _ensureLongTermMemorySearchIndex() async {
