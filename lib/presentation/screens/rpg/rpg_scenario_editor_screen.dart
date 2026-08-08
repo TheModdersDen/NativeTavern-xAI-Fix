@@ -624,6 +624,7 @@ class _ScalarEditor extends StatefulWidget {
 class _ScalarEditorState extends State<_ScalarEditor> {
   late final TextEditingController _text;
   late final FocusNode _focus;
+  final ScrollController _scroll = ScrollController(keepScrollOffset: false);
   String? _localError;
 
   @override
@@ -644,6 +645,7 @@ class _ScalarEditorState extends State<_ScalarEditor> {
   void dispose() {
     _text.dispose();
     _focus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -685,6 +687,7 @@ class _ScalarEditorState extends State<_ScalarEditor> {
         key: Key('rpg-field-${widget.path.key}'),
         controller: _text,
         focusNode: _focus,
+        scrollController: _scroll,
         maxLines: _isLongText(widget.path) ? 3 : 1,
         keyboardType: widget.value is num
             ? const TextInputType.numberWithOptions(
