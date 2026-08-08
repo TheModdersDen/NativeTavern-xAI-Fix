@@ -336,6 +336,16 @@ final class ToolAssistantMessage {
   bool get hasToolCalls => toolCalls.isNotEmpty;
 }
 
+final class ToolProviderTurn {
+  ToolProviderTurn({
+    required this.assistant,
+    required Map<String, dynamic> continuationMessage,
+  }) : continuationMessage = copyToolJsonObject(continuationMessage);
+
+  final ToolAssistantMessage assistant;
+  final Map<String, dynamic> continuationMessage;
+}
+
 final class ToolStreamUpdate {
   final String textDelta;
   final String reasoningDelta;

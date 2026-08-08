@@ -55,6 +55,7 @@ import 'package:native_tavern/presentation/widgets/common/character_avatar_image
 import 'package:native_tavern/domain/services/image_generation_service.dart';
 import 'package:native_tavern/presentation/widgets/chat/visual_novel_message_view.dart';
 import 'package:native_tavern/presentation/widgets/chat/tts_playback_controls.dart';
+import 'package:native_tavern/presentation/widgets/chat/tool_activity_panel.dart';
 import 'package:native_tavern/presentation/widgets/chat/sprite_display.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_character_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
@@ -1080,6 +1081,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   chatId: widget.chatId,
                   onDisable: _toggleRpgMode,
                 ),
+
+                ToolActivityPanel(chatId: widget.chatId),
 
                 // Slash command suggestions
                 if (_showSlashSuggestions)

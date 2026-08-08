@@ -142,6 +142,14 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.mcpSettings),
           ),
           ListTile(
+            key: const Key('tool-calling-settings-tile'),
+            leading: const Icon(Icons.build_outlined),
+            title: const Text('Tool calling'),
+            subtitle: const Text('Built-in tools, approvals, and limits'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.toolCallingSettings),
+          ),
+          ListTile(
             leading: const Icon(Icons.find_replace),
             title: Text(l10n.regex),
             trailing: const Icon(Icons.chevron_right),

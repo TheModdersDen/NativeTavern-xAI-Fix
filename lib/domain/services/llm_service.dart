@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:native_tavern/domain/models/tool_calling.dart';
 import 'package:native_tavern/domain/services/context_window_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
+import 'package:native_tavern/domain/services/tool_calling/tool_calling_adapter.dart';
 
 /// LLM Provider enum
 enum LLMProvider {
@@ -444,6 +446,332 @@ class LLMService {
     if (token != null && !token.isCancelled) {
       token.cancel('Cancelled by user');
     }
+  }
+
+  /// Executes one non-streaming provider turn with native tool calling.
+  /// Provider-native assistant messages are returned unchanged so signatures
+  /// and tool-call identities can be replayed on the next round.
+  Future<ToolProviderTurn> generateToolTurn({
+    required List<Map<String, dynamic>> baseMessages,
+    required List<Map<String, dynamic>> continuationMessages,
+    required LLMConfig config,
+    required ToolCallingConfiguration toolConfiguration,
+    required ToolCallingAdapter adapter,
+    required ToolCancellationToken cancellationToken,
+  }) async {
+    cancellationToken.throwIfCancelled();
+    final responseTokens = _contextWindowService.effectiveResponseTokenLimit(
+      contextLength: config.contextLength,
+      requestedTokens: config.maxTokens,
+    );
+    config = config.copyWith(maxTokens: responseTokens);
+    final fittedBase = _contextWindowService
+        .fit(
+          baseMessages,
+          contextLength: config.contextLength,
+          responseTokens: responseTokens,
+        )
+        .messages;
+
+    return switch (config.provider) {
+      LLMProvider.claude => _generateClaudeToolTurn(
+          fittedBase,
+          continuationMessages,
+          config,
+          toolConfiguration,
+          adapter,
+          cancellationToken,
+        ),
+      LLMProvider.gemini => _generateGeminiToolTurn(
+          fittedBase,
+          continuationMessages,
+          config,
+          toolConfiguration,
+          adapter,
+          cancellationToken,
+        ),
+      LLMProvider.openAICompatible ||
+      LLMProvider.openai ||
+      LLMProvider.deepSeek ||
+      LLMProvider.qwen ||
+      LLMProvider.openRouter ||
+      LLMProvider.siliconFlow ||
+      LLMProvider.moonshot ||
+      LLMProvider.zai ||
+      LLMProvider.miniMax =>
+        _generateOpenAiToolTurn(
+          fittedBase,
+          continuationMessages,
+          config,
+          toolConfiguration,
+          adapter,
+          cancellationToken,
+        ),
+      LLMProvider.ollama ||
+      LLMProvider.koboldCpp =>
+        throw const ToolProtocolException(
+          'unsupported_provider',
+          'The selected provider does not support the tool loop.',
+        ),
+    };
+  }
+
+  Future<ToolProviderTurn> _generateOpenAiToolTurn(
+    List<Map<String, dynamic>> baseMessages,
+    List<Map<String, dynamic>> continuationMessages,
+    LLMConfig config,
+    ToolCallingConfiguration toolConfiguration,
+    ToolCallingAdapter adapter,
+    ToolCancellationToken cancellationToken,
+  ) async {
+    final endpoint = '${config.apiUrl}/chat/completions';
+    final baseRequest = <String, dynamic>{
+      'model': config.model,
+      'messages': [...baseMessages, ...continuationMessages],
+      'max_tokens': config.maxTokens,
+      'temperature': config.temperature,
+      'top_p': config.topP,
+      'frequency_penalty': config.frequencyPenalty,
+      'presence_penalty': config.presencePenalty,
+      if (config.stopSequences.isNotEmpty) 'stop': config.stopSequences,
+      if (config.seed != -1) 'seed': config.seed,
+    };
+    _applyOpenRouterRouting(baseRequest, config);
+    if (config.provider != LLMProvider.openai) {
+      if (config.topK > 0) baseRequest['top_k'] = config.topK;
+      if (config.repetitionPenalty != 1.0) {
+        baseRequest['repetition_penalty'] = config.repetitionPenalty;
+      }
+      if (config.minP > 0.0) baseRequest['min_p'] = config.minP;
+      if (config.topA > 0.0) baseRequest['top_a'] = config.topA;
+      if (config.typicalP != 1.0) {
+        baseRequest['typical_p'] = config.typicalP;
+      }
+      if (config.tailFreeSampling != 1.0) {
+        baseRequest['tfs_z'] = config.tailFreeSampling;
+      }
+    }
+    _applyOpenAIReasoning(baseRequest, config);
+    final data = await _postToolJson(
+      endpoint: endpoint,
+      data: adapter.decorateRequest(baseRequest, toolConfiguration),
+      headers: {
+        'Authorization': 'Bearer ${config.apiKey}',
+        'Content-Type': 'application/json',
+      },
+      cancellationToken: cancellationToken,
+    );
+    final choices = toolObjectList(data['choices']);
+    final rawMessage =
+        choices.isEmpty ? null : toolObject(choices.first['message']);
+    if (rawMessage == null) {
+      throw const ToolProtocolException(
+        'invalid_provider_response',
+        'The provider returned no assistant message.',
+      );
+    }
+    return ToolProviderTurn(
+      assistant: adapter.parseResponse(data),
+      continuationMessage: rawMessage,
+    );
+  }
+
+  Future<ToolProviderTurn> _generateClaudeToolTurn(
+    List<Map<String, dynamic>> baseMessages,
+    List<Map<String, dynamic>> continuationMessages,
+    LLMConfig config,
+    ToolCallingConfiguration toolConfiguration,
+    ToolCallingAdapter adapter,
+    ToolCancellationToken cancellationToken,
+  ) async {
+    final system = baseMessages
+        .where((message) => message['role'] == 'system')
+        .map((message) => message['content']?.toString() ?? '')
+        .where((content) => content.isNotEmpty)
+        .join('\n\n');
+    final messages = _mergeNativeMessages([
+      for (final message in baseMessages)
+        if (message['role'] != 'system') _claudeMessage(message),
+      ...continuationMessages,
+    ]);
+    final baseRequest = <String, dynamic>{
+      'model': config.model,
+      'max_tokens': config.maxTokens,
+      if (system.isNotEmpty) 'system': system,
+      'messages': messages,
+    };
+    final data = await _postToolJson(
+      endpoint: '${config.apiUrl}/v1/messages',
+      data: adapter.decorateRequest(baseRequest, toolConfiguration),
+      headers: {
+        'x-api-key': config.apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      cancellationToken: cancellationToken,
+    );
+    final content = data['content'];
+    if (content is! List) {
+      throw const ToolProtocolException(
+        'invalid_provider_response',
+        'Claude returned no assistant content.',
+      );
+    }
+    return ToolProviderTurn(
+      assistant: adapter.parseResponse(data),
+      continuationMessage: {'role': 'assistant', 'content': content},
+    );
+  }
+
+  Future<ToolProviderTurn> _generateGeminiToolTurn(
+    List<Map<String, dynamic>> baseMessages,
+    List<Map<String, dynamic>> continuationMessages,
+    LLMConfig config,
+    ToolCallingConfiguration toolConfiguration,
+    ToolCallingAdapter adapter,
+    ToolCancellationToken cancellationToken,
+  ) async {
+    final system = baseMessages
+        .where((message) => message['role'] == 'system')
+        .map((message) => message['content']?.toString() ?? '')
+        .where((content) => content.isNotEmpty)
+        .join('\n\n');
+    final generationConfig = <String, dynamic>{
+      'maxOutputTokens': config.maxTokens,
+      'temperature': config.temperature,
+      'topP': config.topP,
+      'topK': config.topK,
+    };
+    _applyGeminiThinking(generationConfig, config);
+    final baseRequest = <String, dynamic>{
+      'contents': _mergeNativeMessages([
+        for (final message in baseMessages)
+          if (message['role'] != 'system') _geminiMessage(message),
+        ...continuationMessages,
+      ]),
+      if (system.isNotEmpty)
+        'systemInstruction': {
+          'parts': [
+            {'text': system},
+          ],
+        },
+      'generationConfig': generationConfig,
+    };
+    final data = await _postToolJson(
+      endpoint:
+          '${config.apiUrl}/models/${Uri.encodeComponent(config.model)}:generateContent?key=${Uri.encodeQueryComponent(config.apiKey)}',
+      data: adapter.decorateRequest(baseRequest, toolConfiguration),
+      headers: {'Content-Type': 'application/json'},
+      cancellationToken: cancellationToken,
+    );
+    final candidates = toolObjectList(data['candidates']);
+    final content =
+        candidates.isEmpty ? null : toolObject(candidates.first['content']);
+    if (content == null) {
+      throw const ToolProtocolException(
+        'invalid_provider_response',
+        'Gemini returned no assistant content.',
+      );
+    }
+    return ToolProviderTurn(
+      assistant: adapter.parseResponse(data),
+      continuationMessage: {...content, 'role': content['role'] ?? 'model'},
+    );
+  }
+
+  Future<Map<String, dynamic>> _postToolJson({
+    required String endpoint,
+    required Map<String, dynamic> data,
+    required Map<String, String> headers,
+    required ToolCancellationToken cancellationToken,
+  }) async {
+    final cancelToken = _newCancelToken();
+    cancellationToken.whenCancelled((reason) {
+      if (!cancelToken.isCancelled) cancelToken.cancel(reason);
+    });
+    try {
+      final response = await _dio.post<Object?>(
+        endpoint,
+        options: Options(headers: headers, validateStatus: (_) => true),
+        data: data,
+        cancelToken: cancelToken,
+      );
+      cancellationToken.throwIfCancelled();
+      final status = response.statusCode;
+      if (status == null || status < 200 || status >= 300) {
+        throw ToolProtocolException(
+          'provider_http_error',
+          'The tool request failed with HTTP ${status ?? 'unknown'}.',
+        );
+      }
+      final body = response.data;
+      if (body is Map<String, dynamic>) return body;
+      if (body is Map) return Map<String, dynamic>.from(body);
+      throw const ToolProtocolException(
+        'invalid_provider_response',
+        'The provider returned a non-object response.',
+      );
+    } on DioException catch (error) {
+      if (cancellationToken.isCancelled ||
+          error.type == DioExceptionType.cancel ||
+          CancelToken.isCancel(error)) {
+        throw const ToolProtocolException(
+          'cancelled',
+          'Tool generation was cancelled.',
+        );
+      }
+      throw const ToolProtocolException(
+        'provider_request_failed',
+        'The tool request could not reach the provider.',
+      );
+    }
+  }
+
+  static Map<String, dynamic> _claudeMessage(Map<String, dynamic> message) {
+    final role = message['role'] == 'assistant' ? 'assistant' : 'user';
+    final content = message['content'];
+    return {
+      'role': role,
+      'content': content is List
+          ? content
+          : [
+              {'type': 'text', 'text': content?.toString() ?? ''},
+            ],
+    };
+  }
+
+  static Map<String, dynamic> _geminiMessage(Map<String, dynamic> message) {
+    final role = message['role'] == 'assistant' ? 'model' : 'user';
+    final content = message['content'];
+    return {
+      'role': role,
+      'parts': content is List
+          ? content
+          : [
+              {'text': content?.toString() ?? ''},
+            ],
+    };
+  }
+
+  static List<Map<String, dynamic>> _mergeNativeMessages(
+    Iterable<Map<String, dynamic>> source,
+  ) {
+    final result = <Map<String, dynamic>>[];
+    for (final message in source) {
+      final role = message['role'];
+      final partsKey = message.containsKey('parts') ? 'parts' : 'content';
+      final parts = message[partsKey];
+      final previous = result.isEmpty ? null : result.last;
+      if (previous != null &&
+          previous['role'] == role &&
+          previous[partsKey] is List &&
+          parts is List) {
+        previous[partsKey] = [...(previous[partsKey] as List), ...parts];
+      } else {
+        result.add(Map<String, dynamic>.from(message));
+      }
+    }
+    return result;
   }
 
   /// Claude models that use adaptive thinking (effort string instead of budget tokens)
