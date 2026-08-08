@@ -20,6 +20,7 @@ import 'package:native_tavern/domain/services/chat_summarization_service.dart';
 import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
+import 'package:native_tavern/presentation/providers/memory_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
@@ -759,6 +760,16 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.addMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
+      if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled) {
+        unawaited(
+          _ref.read(memoryInboxProvider.notifier).extractChat(
+                state.chat!.id,
+                automatic: true,
+                turnMessages: [userMessage, finalMessage],
+                config: config,
+              ),
+        );
+      }
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -2660,6 +2671,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     List<ChatAttachment> attachments = const [],
   }) async {
     if (state.chat == null || state.group == null) return;
+    final turnStart = state.messages.length;
 
     // Add user message
     final userMessage = ChatMessage(
@@ -2685,6 +2697,18 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     // Generate responses from each selected character
     for (final characterId in responders) {
       await _generateGroupCharacterResponse(characterId, config);
+    }
+    final turnMessages = state.messages.skip(turnStart).toList(growable: false);
+    if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled &&
+        turnMessages.any((message) => message.role == MessageRole.assistant)) {
+      unawaited(
+        _ref.read(memoryInboxProvider.notifier).extractChat(
+              state.chat!.id,
+              automatic: true,
+              turnMessages: turnMessages,
+              config: config,
+            ),
+      );
     }
   }
 

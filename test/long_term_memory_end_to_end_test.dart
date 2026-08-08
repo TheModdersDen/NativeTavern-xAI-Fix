@@ -149,6 +149,15 @@ class _JsonMemoryRepository implements LongTermMemoryRepository {
   }
 
   @override
+  Future<List<LongTermMemory>> createAll(List<LongTermMemory> memories) async {
+    final created = <LongTermMemory>[];
+    for (final memory in memories) {
+      created.add(await create(memory));
+    }
+    return created;
+  }
+
+  @override
   Future<void> delete(String id) async {
     _records.remove(id);
   }
@@ -185,7 +194,38 @@ class _JsonMemoryRepository implements LongTermMemoryRepository {
   }
 
   @override
+  Future<List<LongTermMemory>> findByStates(
+    Set<MemoryState> states, {
+    bool includeExpired = true,
+    DateTime? at,
+  }) async {
+    return _all().where((memory) {
+      if (states.isNotEmpty && !states.contains(memory.state)) return false;
+      return includeExpired || !memory.isExpiredAt(at ?? now);
+    }).toList();
+  }
+
+  @override
   Future<void> rebuildSearchIndex() async {}
+
+  @override
+  Future<LongTermMemory> resolve(
+    LongTermMemory resolved, {
+    Set<String> supersededMemoryIds = const <String>{},
+  }) async {
+    _write(resolved);
+    for (final id in supersededMemoryIds) {
+      final prior = _read(id)!;
+      _write(
+        prior.copyWith(
+          state: MemoryState.superseded,
+          supersededByMemoryId: resolved.id,
+          updatedAt: now,
+        ),
+      );
+    }
+    return resolved;
+  }
 
   @override
   Future<List<LongTermMemorySearchResult>> search(

@@ -82,6 +82,14 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.backgroundSettings),
           ),
+          ListTile(
+            key: const Key('memory-inbox-settings-tile'),
+            leading: const Icon(Icons.memory),
+            title: const Text('Memory inbox'),
+            subtitle: const Text('Review and maintain long-term memories'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.memoryInbox),
+          ),
           const Divider(height: 32),
           _buildSectionHeader(context, 'Multimedia'),
           ListTile(
@@ -119,7 +127,8 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.health_and_safety_outlined),
             title: const Text('Capability check'),
-            subtitle: const Text('Availability, permissions, and configuration'),
+            subtitle:
+                const Text('Availability, permissions, and configuration'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.capabilityDiagnostics),
           ),

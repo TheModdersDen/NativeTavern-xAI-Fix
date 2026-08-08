@@ -22,13 +22,25 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
 
   @override
   Future<LongTermMemory> create(LongTermMemory memory) async {
+    return (await createAll([memory])).single;
+  }
+
+  @override
+  Future<List<LongTermMemory>> createAll(
+    List<LongTermMemory> memories,
+  ) async {
+    if (memories.isEmpty) return const [];
     await _database.transaction(() async {
-      await _database.into(_database.longTermMemories).insert(
-            _toCompanion(memory),
-          );
-      await _insertSourceMessages(memory);
+      for (final memory in memories) {
+        await _database.into(_database.longTermMemories).insert(
+              _toCompanion(memory),
+            );
+        await _insertSourceMessages(memory);
+      }
     });
-    return (await getById(memory.id))!;
+    return Future.wait(
+      memories.map((memory) async => (await getById(memory.id))!),
+    );
   }
 
   @override
@@ -99,6 +111,33 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
       query.where((table) => table.id.isIn(memoryIds!));
     }
     query.orderBy([(table) => OrderingTerm.asc(table.id)]);
+    final rows = await query.get();
+    return Future.wait(rows.map(_toModel));
+  }
+
+  @override
+  Future<List<LongTermMemory>> findByStates(
+    Set<MemoryState> states, {
+    bool includeExpired = true,
+    DateTime? at,
+  }) async {
+    final query = _database.select(_database.longTermMemories);
+    if (states.isNotEmpty) {
+      query.where(
+          (table) => table.state.isIn(states.map((state) => state.name)));
+    }
+    if (!includeExpired) {
+      final instant = at ?? _now();
+      query.where(
+        (table) =>
+            table.expiresAt.isNull() |
+            table.expiresAt.isBiggerThanValue(instant),
+      );
+    }
+    query.orderBy([
+      (table) => OrderingTerm.desc(table.updatedAt),
+      (table) => OrderingTerm.asc(table.id),
+    ]);
     final rows = await query.get();
     return Future.wait(rows.map(_toModel));
   }
@@ -201,6 +240,70 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
   }
 
   @override
+  Future<LongTermMemory> resolve(
+    LongTermMemory resolved, {
+    Set<String> supersededMemoryIds = const <String>{},
+  }) async {
+    if (resolved.state != MemoryState.active) {
+      throw ArgumentError('A resolved memory must be active.');
+    }
+    if (supersededMemoryIds.contains(resolved.id)) {
+      throw ArgumentError('A memory cannot supersede itself.');
+    }
+
+    await _database.transaction(() async {
+      final priorRows = supersededMemoryIds.isEmpty
+          ? <LongTermMemoryRow>[]
+          : await (_database.select(_database.longTermMemories)
+                ..where((table) => table.id.isIn(supersededMemoryIds)))
+              .get();
+      final found = priorRows.map((row) => row.id).toSet();
+      final missing = supersededMemoryIds.difference(found);
+      if (missing.isNotEmpty) {
+        throw StateError('Memory ${missing.first} does not exist.');
+      }
+      for (final row in priorRows) {
+        if (row.locked) {
+          throw StateError('Locked memory ${row.id} cannot be replaced.');
+        }
+        if (!_rowHasScope(row, resolved.scope)) {
+          throw StateError('Memory ${row.id} has a different scope.');
+        }
+      }
+
+      final existing = await (_database.select(_database.longTermMemories)
+            ..where((table) => table.id.equals(resolved.id)))
+          .getSingleOrNull();
+      if (existing == null) {
+        await _database.into(_database.longTermMemories).insert(
+              _toCompanion(resolved),
+            );
+      } else {
+        await (_database.delete(_database.longTermMemorySourceMessages)
+              ..where((table) => table.memoryId.equals(resolved.id)))
+            .go();
+        await (_database.update(_database.longTermMemories)
+              ..where((table) => table.id.equals(resolved.id)))
+            .write(_toCompanion(resolved));
+      }
+      await _insertSourceMessages(resolved);
+
+      if (supersededMemoryIds.isNotEmpty) {
+        await (_database.update(_database.longTermMemories)
+              ..where((table) => table.id.isIn(supersededMemoryIds)))
+            .write(
+          LongTermMemoriesCompanion(
+            state: const Value('superseded'),
+            supersededByMemoryId: Value(resolved.id),
+            updatedAt: Value(_now()),
+          ),
+        );
+      }
+    });
+    return (await getById(resolved.id))!;
+  }
+
+  @override
   Future<void> updateStates({
     required Set<String> memoryIds,
     required MemoryState state,
@@ -254,6 +357,14 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
       MemoryScopeKind.chat => kind & table.chatId.equals(scope.chatId!),
       MemoryScopeKind.group => kind & table.groupId.equals(scope.groupId!),
     };
+  }
+
+  bool _rowHasScope(LongTermMemoryRow row, MemoryScope scope) {
+    return row.scopeKind == scope.kind.name &&
+        row.characterId == scope.characterId &&
+        row.personaId == scope.personaId &&
+        row.chatId == scope.chatId &&
+        row.groupId == scope.groupId;
   }
 
   Future<void> _insertSourceMessages(LongTermMemory memory) async {
