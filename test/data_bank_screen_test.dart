@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/models/data_bank.dart';
+import 'package:native_tavern/data/models/data_bank_context.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/services/data_bank_ingestion_service.dart';
 import 'package:native_tavern/domain/services/data_bank_library_service.dart';
 import 'package:native_tavern/presentation/controllers/data_bank_library_controller.dart';
+import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
+import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/screens/data_bank/data_bank_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('management screen exposes document states and real actions',
@@ -61,6 +65,78 @@ void main() {
 
     expect(operations.deletedIds, ['ready']);
     expect(find.text('ready.md'), findsNothing);
+  });
+
+  testWidgets('chat retrieval settings and citation diagnostics are operable',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = DataBankLibraryController(_FakeDataBankOperations());
+    final chunk = _chunk('ready');
+    final diagnostics = DataBankContextSnapshot(
+      sessionId: 'session-1',
+      originalQuery: 'eastern channel',
+      queries: const ['eastern channel'],
+      mode: DataBankRetrievalMode.localFts,
+      sources: [
+        DataBankContextSource(
+          label: 'D1',
+          documentName: 'ready.md',
+          snippet: 'Eastern channel match',
+          injectedText: chunk.text,
+          citation: chunk.toCitation('ready'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          lastDataBankContextProvider.overrideWith((ref) => diagnostics),
+        ],
+        child: MaterialApp(
+          home: DataBankScreen(
+            controller: controller,
+            fileGateway: const _NullFileGateway(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('data-bank-context-settings')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('data-bank-context-enabled')), findsOneWidget);
+    expect(find.byKey(const Key('data-bank-query-rewrite')), findsOneWidget);
+    expect(
+      find.byKey(const Key('data-bank-semantic-reranking')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('data-bank-query-rewrite')));
+    await tester.pumpAndSettle();
+    final stored = preferences.getString('data_bank_context_settings');
+    expect(stored, contains('"queryRewriteEnabled":true'));
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('data-bank-retrieval-diagnostics')),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('data-bank-retrieval-diagnostics')),
+      findsOneWidget,
+    );
+    expect(find.text('ready.md'), findsOneWidget);
+    expect(find.textContaining('chars 0-42'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('data-bank-open-diagnostics')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('data-bank-citation-list')), findsOneWidget);
+    expect(
+        find.textContaining('Ships use the eastern channel'), findsOneWidget);
   });
 }
 

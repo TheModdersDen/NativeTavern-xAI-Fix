@@ -20,34 +20,37 @@ class ChatRepository {
 
   /// Get all chats
   Future<List<models.Chat>> getAllChats() async {
-    final rows = await (_db.select(_db.chats)
-          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
-        .get();
+    final rows = await (_db.select(
+      _db.chats,
+    )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).get();
     return rows.map(_chatFromRow).toList();
   }
 
   /// Get chats for a specific character
   Future<List<models.Chat>> getChatsForCharacter(String characterId) async {
-    final rows = await (_db.select(_db.chats)
-          ..where((t) => t.characterId.equals(characterId))
-          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
-        .get();
+    final rows =
+        await (_db.select(_db.chats)
+              ..where((t) => t.characterId.equals(characterId))
+              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+            .get();
     return rows.map(_chatFromRow).toList();
   }
 
   /// Get recent chats
   Future<List<models.Chat>> getRecentChats({int limit = 10}) async {
-    final rows = await (_db.select(_db.chats)
-          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
-          ..limit(limit))
-        .get();
+    final rows =
+        await (_db.select(_db.chats)
+              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+              ..limit(limit))
+            .get();
     return rows.map(_chatFromRow).toList();
   }
 
   /// Get chat by ID
   Future<models.Chat?> getChat(String id) async {
-    final row = await (_db.select(_db.chats)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.chats,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row != null ? _chatFromRow(row) : null;
   }
 
@@ -70,18 +73,22 @@ class ChatRepository {
       updatedAt: now,
     );
 
-    await _db.into(_db.chats).insert(ChatsCompanion(
-          id: Value(newChat.id),
-          characterId: Value(newChat.characterId),
-          groupId: Value(newChat.groupId),
-          title: Value(newChat.title),
-          authorNote: Value(newChat.authorNote),
-          authorNoteDepth: Value(newChat.authorNoteDepth),
-          authorNoteEnabled: Value(newChat.authorNoteEnabled),
-          settingsJson: Value(_encodeSettings(newChat)),
-          createdAt: Value(newChat.createdAt),
-          updatedAt: Value(newChat.updatedAt),
-        ));
+    await _db
+        .into(_db.chats)
+        .insert(
+          ChatsCompanion(
+            id: Value(newChat.id),
+            characterId: Value(newChat.characterId),
+            groupId: Value(newChat.groupId),
+            title: Value(newChat.title),
+            authorNote: Value(newChat.authorNote),
+            authorNoteDepth: Value(newChat.authorNoteDepth),
+            authorNoteEnabled: Value(newChat.authorNoteEnabled),
+            settingsJson: Value(_encodeSettings(newChat)),
+            createdAt: Value(newChat.createdAt),
+            updatedAt: Value(newChat.updatedAt),
+          ),
+        );
 
     return newChat;
   }
@@ -90,15 +97,16 @@ class ChatRepository {
   Future<models.Chat> updateChat(models.Chat chat) async {
     final now = DateTime.now();
 
-    await (_db.update(_db.chats)..where((t) => t.id.equals(chat.id)))
-        .write(ChatsCompanion(
-      title: Value(chat.title),
-      authorNote: Value(chat.authorNote),
-      authorNoteDepth: Value(chat.authorNoteDepth),
-      authorNoteEnabled: Value(chat.authorNoteEnabled),
-      settingsJson: Value(_encodeSettings(chat)),
-      updatedAt: Value(now),
-    ));
+    await (_db.update(_db.chats)..where((t) => t.id.equals(chat.id))).write(
+      ChatsCompanion(
+        title: Value(chat.title),
+        authorNote: Value(chat.authorNote),
+        authorNoteDepth: Value(chat.authorNoteDepth),
+        authorNoteEnabled: Value(chat.authorNoteEnabled),
+        settingsJson: Value(_encodeSettings(chat)),
+        updatedAt: Value(now),
+      ),
+    );
 
     return chat.copyWith(updatedAt: now);
   }
@@ -114,10 +122,11 @@ class ChatRepository {
 
   /// Get messages for a chat
   Future<List<models.ChatMessage>> getMessages(String chatId) async {
-    final rows = await (_db.select(_db.messages)
-          ..where((t) => t.chatId.equals(chatId))
-          ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
-        .get();
+    final rows =
+        await (_db.select(_db.messages)
+              ..where((t) => t.chatId.equals(chatId))
+              ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+            .get();
     return rows.map(_messageFromRow).toList();
   }
 
@@ -127,19 +136,27 @@ class ChatRepository {
 
     final newMessage = message.copyWith(id: id);
 
-    await _db.into(_db.messages).insert(MessagesCompanion(
-          id: Value(newMessage.id),
-          chatId: Value(newMessage.chatId),
-          role: Value(newMessage.role.name),
-          content: Value(newMessage.content),
-          timestamp: Value(newMessage.timestamp),
-          swipes: Value(jsonEncode(newMessage.swipes)),
-          currentSwipeIndex: Value(newMessage.currentSwipeIndex),
-          characterId: Value(newMessage.characterId),
-          characterName: Value(newMessage.characterName),
-          attachmentsJson: Value(jsonEncode(
-              newMessage.attachments.map((a) => a.toJson()).toList())),
-        ));
+    await _db
+        .into(_db.messages)
+        .insert(
+          MessagesCompanion(
+            id: Value(newMessage.id),
+            chatId: Value(newMessage.chatId),
+            role: Value(newMessage.role.name),
+            content: Value(newMessage.content),
+            timestamp: Value(newMessage.timestamp),
+            swipes: Value(jsonEncode(newMessage.swipes)),
+            currentSwipeIndex: Value(newMessage.currentSwipeIndex),
+            characterId: Value(newMessage.characterId),
+            characterName: Value(newMessage.characterName),
+            metadataJson: Value(jsonEncode(newMessage.metadata)),
+            attachmentsJson: Value(
+              jsonEncode(
+                newMessage.attachments.map((a) => a.toJson()).toList(),
+              ),
+            ),
+          ),
+        );
 
     // Update chat's updatedAt
     await (_db.update(_db.chats)..where((t) => t.id.equals(message.chatId)))
@@ -150,16 +167,21 @@ class ChatRepository {
 
   /// Update a message
   Future<models.ChatMessage> updateMessage(models.ChatMessage message) async {
-    await (_db.update(_db.messages)..where((t) => t.id.equals(message.id)))
-        .write(MessagesCompanion(
-      content: Value(message.content),
-      swipes: Value(jsonEncode(message.swipes)),
-      currentSwipeIndex: Value(message.currentSwipeIndex),
-      characterId: Value(message.characterId),
-      characterName: Value(message.characterName),
-      attachmentsJson: Value(
-          jsonEncode(message.attachments.map((a) => a.toJson()).toList())),
-    ));
+    await (_db.update(
+      _db.messages,
+    )..where((t) => t.id.equals(message.id))).write(
+      MessagesCompanion(
+        content: Value(message.content),
+        swipes: Value(jsonEncode(message.swipes)),
+        currentSwipeIndex: Value(message.currentSwipeIndex),
+        characterId: Value(message.characterId),
+        characterName: Value(message.characterName),
+        metadataJson: Value(jsonEncode(message.metadata)),
+        attachmentsJson: Value(
+          jsonEncode(message.attachments.map((a) => a.toJson()).toList()),
+        ),
+      ),
+    );
 
     // Update chat's updatedAt
     await (_db.update(_db.chats)..where((t) => t.id.equals(message.chatId)))
@@ -176,10 +198,12 @@ class ChatRepository {
   /// Delete all messages and message-dependent data while keeping the chat.
   Future<void> clearMessages(String chatId) async {
     await _db.transaction(() async {
-      await (_db.delete(_db.bookmarks)..where((t) => t.chatId.equals(chatId)))
-          .go();
-      await (_db.delete(_db.messages)..where((t) => t.chatId.equals(chatId)))
-          .go();
+      await (_db.delete(
+        _db.bookmarks,
+      )..where((t) => t.chatId.equals(chatId))).go();
+      await (_db.delete(
+        _db.messages,
+      )..where((t) => t.chatId.equals(chatId))).go();
       await (_db.update(_db.chats)..where((t) => t.id.equals(chatId))).write(
         ChatsCompanion(updatedAt: Value(DateTime.now())),
       );
@@ -188,28 +212,30 @@ class ChatRepository {
 
   /// Get message count for a chat
   Future<int> getMessageCount(String chatId) async {
-    final messages = await (_db.select(_db.messages)
-          ..where((t) => t.chatId.equals(chatId)))
-        .get();
+    final messages = await (_db.select(
+      _db.messages,
+    )..where((t) => t.chatId.equals(chatId))).get();
     return messages.length;
   }
 
   /// Get last message of a chat
   Future<models.ChatMessage?> getLastMessage(String chatId) async {
-    final row = await (_db.select(_db.messages)
-          ..where((t) => t.chatId.equals(chatId))
-          ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
-          ..limit(1))
-        .getSingleOrNull();
+    final row =
+        await (_db.select(_db.messages)
+              ..where((t) => t.chatId.equals(chatId))
+              ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
+              ..limit(1))
+            .getSingleOrNull();
     return row != null ? _messageFromRow(row) : null;
   }
 
   /// Get chats for a group
   Future<List<models.Chat>> getChatsForGroup(String groupId) async {
-    final rows = await (_db.select(_db.chats)
-          ..where((t) => t.groupId.equals(groupId))
-          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
-        .get();
+    final rows =
+        await (_db.select(_db.chats)
+              ..where((t) => t.groupId.equals(groupId))
+              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+            .get();
     return rows.map(_chatFromRow).toList();
   }
 
@@ -231,7 +257,8 @@ class ChatRepository {
       authorNoteDepth: row.authorNoteDepth,
       authorNoteEnabled: row.authorNoteEnabled,
       settings: settings,
-      summaries: (settings['summaries'] as List<dynamic>?)
+      summaries:
+          (settings['summaries'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
               .map(models.ChatSummary.fromJson)
               .toList() ??
@@ -262,6 +289,7 @@ class ChatRepository {
       currentSwipeIndex: row.currentSwipeIndex,
       characterId: row.characterId,
       characterName: row.characterName,
+      metadata: _parseMetadata(row.metadataJson),
       attachments: _parseAttachments(row.attachmentsJson),
     );
   }
@@ -279,11 +307,21 @@ class ChatRepository {
     try {
       final list = jsonDecode(json) as List;
       return list
-          .map((item) =>
-              models.ChatAttachment.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                models.ChatAttachment.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     } catch (_) {
       return [];
+    }
+  }
+
+  Map<String, dynamic> _parseMetadata(String json) {
+    try {
+      return Map<String, dynamic>.from(jsonDecode(json) as Map);
+    } catch (_) {
+      return const {};
     }
   }
 }

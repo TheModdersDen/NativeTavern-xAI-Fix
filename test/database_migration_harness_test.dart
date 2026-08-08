@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/models/long_term_memory.dart';
+import 'package:native_tavern/data/repositories/drift_data_bank_repository.dart';
 import 'package:native_tavern/data/repositories/drift_long_term_memory_repository.dart';
+import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/services/database_backup_service.dart';
 
 import 'support/database_migration_harness.dart';
@@ -159,6 +161,29 @@ void main() {
     expect(await readSchemaVersion(database), 15);
     expect(matches.map((result) => result.memory.id), ['memory-1']);
     expect(matches.single.memory.source.sourceMessageIds, ['message-1']);
+  });
+
+  test('existing v15 data recovers a missing Data Bank search index', () async {
+    final file = File('${harness.directory.path}/data_bank_fts.sqlite');
+    var database = harness.openWithProductionMigrations(file);
+    await seedCurrentRepresentativeData(database);
+    await database.customStatement('DROP TABLE data_bank_text_chunks_fts');
+    await harness.close(database);
+
+    database = harness.openWithProductionMigrations(file);
+    final repository = DriftDataBankRepository(database);
+    final matches = await repository.search(
+      'Fixture source',
+      filter: const DataBankSearchFilter.forContext(
+        characterId: 'character-1',
+        chatId: 'chat-1',
+      ),
+    );
+
+    expect(await readSchemaVersion(database), 15);
+    expect(matches.map((result) => result.chunk.id), ['chunk-1']);
+    expect(matches.single.citation.documentId, 'document-1');
+    expect(matches.single.citation.documentVersionId, 'version-1');
   });
 
   test('failed v15 migration rolls back every new table', () async {
