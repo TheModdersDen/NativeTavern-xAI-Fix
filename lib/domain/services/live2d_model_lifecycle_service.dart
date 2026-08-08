@@ -37,11 +37,27 @@ class Live2DDeletionResult {
   });
 }
 
+class Live2DDeletionConfirmation {
+  final Live2DDeletionPlan _reviewedPlan;
+  final Object _issuer;
+  final Object _nonce;
+
+  const Live2DDeletionConfirmation._({
+    required Live2DDeletionPlan reviewedPlan,
+    required Object issuer,
+    required Object nonce,
+  })  : _reviewedPlan = reviewedPlan,
+        _issuer = issuer,
+        _nonce = nonce;
+}
+
 class Live2DModelLifecycleService {
   final CharacterRepository characterRepository;
   final Live2DImportService importService;
+  final Object _confirmationIssuer = Object();
+  final Set<Object> _pendingConfirmations = Set.identity();
 
-  const Live2DModelLifecycleService({
+  Live2DModelLifecycleService({
     required this.characterRepository,
     required this.importService,
   });
@@ -62,18 +78,32 @@ class Live2DModelLifecycleService {
     );
   }
 
+  Live2DDeletionConfirmation confirmDeletion(Live2DDeletionPlan reviewedPlan) {
+    final nonce = Object();
+    _pendingConfirmations.add(nonce);
+    return Live2DDeletionConfirmation._(
+      reviewedPlan: reviewedPlan,
+      issuer: _confirmationIssuer,
+      nonce: nonce,
+    );
+  }
+
   Future<Live2DDeletionResult> deleteImportedModel(
-    Live2DModelDefinition definition, {
-    Set<String>? confirmedCharacterIds,
-  }) async {
-    final plan = await planDeletion(definition);
-    if (confirmedCharacterIds != null) {
-      final currentIds = plan.affectedCharacters.map((c) => c.id).toSet();
-      if (!_sameSet(currentIds, confirmedCharacterIds)) {
-        throw const Live2DDeletionException(
-          'Model references changed. Review the affected characters again.',
-        );
-      }
+    Live2DDeletionConfirmation confirmation,
+  ) async {
+    if (!identical(confirmation._issuer, _confirmationIssuer) ||
+        !_pendingConfirmations.remove(confirmation._nonce)) {
+      throw const Live2DDeletionException(
+        'A fresh deletion confirmation is required.',
+      );
+    }
+
+    final reviewedPlan = confirmation._reviewedPlan;
+    final plan = await planDeletion(reviewedPlan.target);
+    if (!_samePlan(plan, reviewedPlan)) {
+      throw const Live2DDeletionException(
+        'Model references changed. Review the affected characters again.',
+      );
     }
 
     final changed = <Character>[];
@@ -90,7 +120,8 @@ class Live2DModelLifecycleService {
     }
 
     try {
-      final deletion = await importService.deleteImportedPackage(definition);
+      final deletion =
+          await importService.deleteImportedPackage(reviewedPlan.target);
       return Live2DDeletionResult(
         plan: plan,
         cleanupPending: deletion.cleanupPending,
@@ -149,7 +180,36 @@ class Live2DModelLifecycleService {
     }
   }
 
-  bool _sameSet(Set<String> left, Set<String> right) {
+  bool _samePlan(Live2DDeletionPlan current, Live2DDeletionPlan reviewed) {
+    return _sameDefinition(current.target, reviewed.target) &&
+        _sameSet(
+          current.packageModels.map(_definitionKey).toSet(),
+          reviewed.packageModels.map(_definitionKey).toSet(),
+        ) &&
+        _sameSet(
+          current.affectedCharacters.map((character) => character.id).toSet(),
+          reviewed.affectedCharacters.map((character) => character.id).toSet(),
+        );
+  }
+
+  bool _sameDefinition(
+    Live2DModelDefinition left,
+    Live2DModelDefinition right,
+  ) {
+    return _definitionKey(left) == _definitionKey(right);
+  }
+
+  String _definitionKey(Live2DModelDefinition definition) {
+    return [
+      definition.id,
+      definition.displayName,
+      p.normalize(definition.modelDirectory),
+      p.normalize(definition.modelFileName),
+      definition.source.name,
+    ].join('\u0000');
+  }
+
+  bool _sameSet<T>(Set<T> left, Set<T> right) {
     return left.length == right.length && left.containsAll(right);
   }
 }

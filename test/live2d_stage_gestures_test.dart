@@ -75,6 +75,7 @@ void main() {
               offsetX: 0,
               offsetY: 0,
             ),
+            resetOnDoubleTap: true,
             onTransformEnd: completed.add,
             builder: (context, transform) => ListView(
               controller: scrollController,
@@ -90,6 +91,47 @@ void main() {
 
     expect(scrollController.offset, greaterThan(0));
     expect(completed, isEmpty);
+  });
+
+  testWidgets('double tap resets and persists the stage transform',
+      (tester) async {
+    final completed = <Live2DStageTransform>[];
+    Live2DStageTransform? displayed;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 240,
+          height: 320,
+          child: Live2DTwoFingerGestureRegion(
+            initialTransform: const Live2DStageTransform(
+              scale: 2,
+              offsetX: 0.25,
+              offsetY: -0.5,
+            ),
+            resetOnDoubleTap: true,
+            onTransformEnd: completed.add,
+            builder: (context, transform) {
+              displayed = transform;
+              return const ColoredBox(
+                key: ValueKey('double-tap-surface'),
+                color: Colors.transparent,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final surface = find.byKey(const ValueKey('double-tap-surface'));
+    await tester.tap(surface);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(surface);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    const reset = Live2DStageTransform(scale: 1, offsetX: 0, offsetY: 0);
+    expect(displayed, reset);
+    expect(completed, [reset]);
   });
 
   testWidgets('two fingers scale the stage and emit one completed transform',
