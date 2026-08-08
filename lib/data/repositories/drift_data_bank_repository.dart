@@ -5,14 +5,7 @@ import 'package:native_tavern/data/database/database.dart';
 import 'package:native_tavern/data/models/data_bank.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 
-final class DriftDataBankRepository
-    implements
-        DataBankDocumentRepository,
-        DataBankVersionRepository,
-        DataBankSectionRepository,
-        DataBankChunkRepository,
-        DataBankBindingRepository,
-        DataBankLifecycleRepository {
+final class DriftDataBankRepository implements DataBankRepository {
   const DriftDataBankRepository(this._database);
 
   final AppDatabase _database;
@@ -212,6 +205,127 @@ final class DriftDataBankRepository
   }
 
   @override
+  Future<List<DataBankSearchResult>> search(
+    String query, {
+    int topK = 20,
+    DataBankSearchFilter filter = const DataBankSearchFilter(),
+  }) async {
+    if (topK <= 0) {
+      throw RangeError.range(topK, 1, null, 'topK');
+    }
+    final matchQuery = _plainTextFtsQuery(query);
+    if (matchQuery == null) return const [];
+
+    final conditions = <String>[
+      'data_bank_text_chunks_fts MATCH ?',
+      'd.current_version_id = v.id',
+      'd.is_placeholder = 0',
+      'd.processing_state = ?',
+      'd.index_state = ?',
+    ];
+    final variables = <Variable<Object>>[
+      Variable<String>(matchQuery),
+      Variable<String>(DataBankProcessingState.ready.name),
+      Variable<String>(DataBankIndexState.indexed.name),
+    ];
+
+    if (filter.documentIds.isNotEmpty) {
+      final ids = filter.documentIds.toList()..sort();
+      conditions.add('d.id IN (${List.filled(ids.length, '?').join(', ')})');
+      variables.addAll(ids.map(Variable<String>.new));
+    }
+    if (!filter.includeUnbound) {
+      final scopes = <String>[];
+      if (filter.includeGlobal) {
+        scopes.add("b.scope = 'global'");
+      }
+      if (filter.characterId != null) {
+        scopes.add("(b.scope = 'character' AND b.character_id = ?)");
+        variables.add(Variable<String>(filter.characterId!));
+      }
+      if (filter.chatId != null) {
+        scopes.add("(b.scope = 'chat' AND b.chat_id = ?)");
+        variables.add(Variable<String>(filter.chatId!));
+      }
+      if (scopes.isEmpty) return const [];
+      conditions.add('''
+        EXISTS (
+          SELECT 1 FROM data_bank_bindings AS b
+          WHERE b.document_id = d.id
+            AND b.enabled = 1
+            AND (${scopes.join(' OR ')})
+        )
+      ''');
+    }
+    variables.add(Variable<int>(topK));
+
+    final rows = await _database
+        .customSelect(
+          '''
+        SELECT
+          c.id AS chunk_id,
+          c.document_version_id,
+          c.section_id,
+          c.ordinal,
+          c.text_content,
+          c.locator_json,
+          d.id AS document_id,
+          v.original_file_name,
+          bm25(data_bank_text_chunks_fts) AS rank,
+          snippet(data_bank_text_chunks_fts, 1, '', '', ' ... ', 24)
+            AS match_snippet
+        FROM data_bank_text_chunks_fts
+        JOIN data_bank_text_chunks AS c
+          ON c.rowid = data_bank_text_chunks_fts.rowid
+        JOIN data_bank_document_versions AS v
+          ON v.id = c.document_version_id
+        JOIN data_bank_documents AS d
+          ON d.id = v.document_id
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY bm25(data_bank_text_chunks_fts) ASC,
+                 d.updated_at DESC,
+                 c.ordinal ASC,
+                 c.id ASC
+        LIMIT ?
+      ''',
+          variables: variables,
+          readsFrom: {
+            _database.dataBankTextChunks,
+            _database.dataBankDocumentVersions,
+            _database.dataBankDocuments,
+            _database.dataBankBindings,
+          },
+        )
+        .get();
+
+    return rows.map((row) {
+      final chunk = DataBankTextChunk(
+        id: row.read<String>('chunk_id'),
+        documentVersionId: row.read<String>('document_version_id'),
+        sectionId: row.readNullable<String>('section_id'),
+        ordinal: row.read<int>('ordinal'),
+        text: row.read<String>('text_content'),
+        locator: DataBankSourceLocator.fromJson(
+          _decodeMap(row.read<String>('locator_json')),
+        ),
+      );
+      final documentId = row.read<String>('document_id');
+      return DataBankSearchResult(
+        chunk: chunk,
+        citation: chunk.toCitation(documentId),
+        documentName: row.read<String>('original_file_name'),
+        snippet: row.read<String>('match_snippet'),
+        rank: row.read<double>('rank'),
+      );
+    }).toList(growable: false);
+  }
+
+  @override
+  Future<void> rebuildSearchIndex() {
+    return _database.rebuildDataBankSearchIndex();
+  }
+
+  @override
   Future<List<DataBankBinding>> listBindingsForDocument(
     String documentId, {
     bool includeDisabled = false,
@@ -398,16 +512,21 @@ final class DriftDataBankRepository
 
   @override
   Future<void> setDocumentEnabled(String documentId, bool enabled) async {
-    final document = await _requireDocument(documentId);
-    if (document.processingState == DataBankProcessingState.deleted) {
-      throw StateError('Deleted documents cannot be enabled or disabled.');
-    }
-    if (enabled == document.isEnabled) return;
-    final next = enabled
-        ? DataBankProcessingState.pending
-        : DataBankProcessingState.disabled;
-    document.processingState.validateTransitionTo(next);
-    await saveDocument(_transitionedDocument(document, next, null));
+    await _database.transaction(() async {
+      final document = await _requireDocument(documentId);
+      final version = await _requireVersion(document.currentVersionId);
+      if (document.processingState == DataBankProcessingState.deleted) {
+        throw StateError('Deleted documents cannot be enabled or disabled.');
+      }
+      if (enabled == document.isEnabled) return;
+      final next = enabled
+          ? DataBankProcessingState.pending
+          : DataBankProcessingState.disabled;
+      document.processingState.validateTransitionTo(next);
+      version.processingState.validateTransitionTo(next);
+      await _writeVersion(_transitionedVersion(version, next, null));
+      await saveDocument(_transitionedDocument(document, next, null));
+    });
   }
 
   @override
@@ -417,12 +536,188 @@ final class DriftDataBankRepository
       DataBankProcessingState.deleted,
     );
     await saveDocument(
-      _transitionedDocument(
-        document,
-        DataBankProcessingState.deleted,
-        null,
-      ),
+      _transitionedDocument(document, DataBankProcessingState.deleted, null),
     );
+  }
+
+  @override
+  Future<DataBankDocumentVersion?> findVersionByContentHash(
+    DataBankContentHash contentHash,
+  ) async {
+    final query = _database.select(_database.dataBankDocumentVersions).join([
+      innerJoin(
+        _database.dataBankDocuments,
+        _database.dataBankDocuments.id.equalsExp(
+          _database.dataBankDocumentVersions.documentId,
+        ),
+      ),
+    ])
+      ..where(
+        _database.dataBankDocumentVersions.hashAlgorithm.equals(
+              contentHash.algorithm.name,
+            ) &
+            _database.dataBankDocumentVersions.hashDigest.equals(
+              contentHash.digest,
+            ) &
+            _database.dataBankDocuments.processingState.isNotValue(
+              DataBankProcessingState.deleted.name,
+            ) &
+            _database.dataBankDocuments.isPlaceholder.equals(false),
+      )
+      ..orderBy([
+        OrderingTerm.asc(_database.dataBankDocumentVersions.importedAt),
+        OrderingTerm.asc(_database.dataBankDocumentVersions.id),
+      ])
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row == null
+        ? null
+        : _versionFromRow(row.readTable(_database.dataBankDocumentVersions));
+  }
+
+  @override
+  Future<void> createPendingDocument({
+    required DataBankDocument document,
+    required DataBankDocumentVersion version,
+    required DataBankBinding initialBinding,
+  }) async {
+    if (document.currentVersionId != version.id ||
+        document.id != version.documentId ||
+        initialBinding.documentId != document.id ||
+        document.processingState != DataBankProcessingState.pending ||
+        version.processingState != DataBankProcessingState.pending) {
+      throw ArgumentError('The pending Data Bank import is inconsistent.');
+    }
+    await _database.transaction(() async {
+      await saveVersion(version);
+      await saveDocument(document);
+      await saveBinding(initialBinding);
+    });
+  }
+
+  @override
+  Future<void> beginProcessing({
+    required String documentId,
+    required String versionId,
+    required DateTime startedAt,
+  }) async {
+    await _database.transaction(() async {
+      final document = await _requireDocument(documentId);
+      final version = await _requireVersion(versionId);
+      if (document.currentVersionId != versionId ||
+          version.documentId != documentId) {
+        throw ArgumentError('Only the current version can be processed.');
+      }
+      if (document.processingState == DataBankProcessingState.processing &&
+          version.processingState == DataBankProcessingState.processing) {
+        return;
+      }
+      if (document.processingState != DataBankProcessingState.pending ||
+          version.processingState != DataBankProcessingState.pending) {
+        throw StateError(
+          'The Data Bank document is not queued for processing.',
+        );
+      }
+      await _writeVersion(
+        _copyVersion(
+          version,
+          processingState: DataBankProcessingState.processing,
+          indexState: DataBankIndexState.indexing,
+        ),
+      );
+      await saveDocument(
+        _copyDocument(
+          document,
+          processingState: DataBankProcessingState.processing,
+          indexState: DataBankIndexState.indexing,
+          updatedAt: startedAt,
+        ),
+      );
+    });
+  }
+
+  @override
+  Future<void> completeProcessing({
+    required String documentId,
+    required String versionId,
+    required List<DataBankSection> sections,
+    required List<DataBankTextChunk> chunks,
+    required DateTime completedAt,
+  }) async {
+    await _database.transaction(() async {
+      final document = await _requireDocument(documentId);
+      final version = await _requireVersion(versionId);
+      if (document.currentVersionId != versionId ||
+          version.documentId != documentId ||
+          sections.any((entry) => entry.documentVersionId != versionId) ||
+          chunks.any((entry) => entry.documentVersionId != versionId)) {
+        throw ArgumentError(
+          'Processed Data Bank content has invalid ownership.',
+        );
+      }
+      if (document.processingState != DataBankProcessingState.processing ||
+          version.processingState != DataBankProcessingState.processing) {
+        throw StateError('The Data Bank document is not being processed.');
+      }
+      await replaceSections(versionId, sections);
+      await replaceChunks(versionId, chunks);
+      await _writeVersion(
+        _copyVersion(
+          version,
+          processingState: DataBankProcessingState.ready,
+          indexState: DataBankIndexState.indexed,
+        ),
+      );
+      await saveDocument(
+        _copyDocument(
+          document,
+          processingState: DataBankProcessingState.ready,
+          indexState: DataBankIndexState.indexed,
+          updatedAt: completedAt,
+        ),
+      );
+    });
+  }
+
+  @override
+  Future<void> failProcessing({
+    required String documentId,
+    required String versionId,
+    required DataBankFailure failure,
+  }) async {
+    await _database.transaction(() async {
+      final document = await _requireDocument(documentId);
+      final version = await _requireVersion(versionId);
+      if (document.currentVersionId != versionId ||
+          version.documentId != documentId) {
+        throw ArgumentError('Only the current version can fail processing.');
+      }
+      await _writeVersion(
+        _copyVersion(
+          version,
+          processingState: DataBankProcessingState.failed,
+          indexState: DataBankIndexState.failed,
+          failure: failure,
+        ),
+      );
+      await saveDocument(
+        _copyDocument(
+          document,
+          processingState: DataBankProcessingState.failed,
+          indexState: DataBankIndexState.failed,
+          failure: failure,
+          updatedAt: failure.occurredAt,
+        ),
+      );
+    });
+  }
+
+  @override
+  Future<void> purgeDocument(String documentId) async {
+    await (_database.delete(
+      _database.dataBankDocuments,
+    )..where((table) => table.id.equals(documentId)))
+        .go();
   }
 
   Future<void> _writeVersion(DataBankDocumentVersion version) async {
@@ -576,6 +871,25 @@ DataBankDocument _transitionedDocument(
   );
 }
 
+DataBankDocument _copyDocument(
+  DataBankDocument document, {
+  required DataBankProcessingState processingState,
+  required DataBankIndexState indexState,
+  DataBankFailure? failure,
+  DateTime? updatedAt,
+}) {
+  return DataBankDocument(
+    id: document.id,
+    currentVersionId: document.currentVersionId,
+    processingState: processingState,
+    indexState: indexState,
+    failure: failure,
+    reprocessing: document.reprocessing,
+    createdAt: document.createdAt,
+    updatedAt: updatedAt ?? document.updatedAt,
+  );
+}
+
 DataBankDocumentVersion _transitionedVersion(
   DataBankDocumentVersion version,
   DataBankProcessingState to,
@@ -593,6 +907,29 @@ DataBankDocumentVersion _transitionedVersion(
     importedAt: version.importedAt,
     processingState: to,
     indexState: _indexStateAfterTransition(version.indexState, to),
+    failure: failure,
+    reprocessing: version.reprocessing,
+  );
+}
+
+DataBankDocumentVersion _copyVersion(
+  DataBankDocumentVersion version, {
+  required DataBankProcessingState processingState,
+  required DataBankIndexState indexState,
+  DataBankFailure? failure,
+}) {
+  return DataBankDocumentVersion(
+    id: version.id,
+    documentId: version.documentId,
+    versionNumber: version.versionNumber,
+    supersedesVersionId: version.supersedesVersionId,
+    originalFileName: version.originalFileName,
+    mediaType: version.mediaType,
+    byteSize: version.byteSize,
+    contentHash: version.contentHash,
+    importedAt: version.importedAt,
+    processingState: processingState,
+    indexState: indexState,
     failure: failure,
     reprocessing: version.reprocessing,
   );
@@ -633,4 +970,13 @@ T _enumByName<T extends Enum>(Iterable<T> values, String name) {
     (value) => value.name == name,
     orElse: () => throw StateError('Unsupported persisted enum value: $name'),
   );
+}
+
+String? _plainTextFtsQuery(String input) {
+  final tokens = RegExp(
+    r'[\p{L}\p{N}]+',
+    unicode: true,
+  ).allMatches(input).map((match) => match.group(0)!).toList();
+  if (tokens.isEmpty) return null;
+  return tokens.map((token) => '"$token"*').join(' AND ');
 }
