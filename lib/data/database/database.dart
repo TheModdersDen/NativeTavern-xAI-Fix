@@ -255,6 +255,280 @@ class GlobalStates extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+@DataClassName('LongTermMemoryRow')
+class LongTermMemories extends Table {
+  TextColumn get id => text()();
+  TextColumn get kind => text()();
+  TextColumn get scopeKind => text()();
+  TextColumn get characterId => text()
+      .nullable()
+      .references(Characters, #id, onDelete: KeyAction.cascade)();
+  TextColumn get personaId => text()
+      .nullable()
+      .references(Personas, #id, onDelete: KeyAction.cascade)();
+  @ReferenceName('memoryScopeChat')
+  TextColumn get chatId =>
+      text().nullable().references(Chats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get groupId =>
+      text().nullable().references(Groups, #id, onDelete: KeyAction.cascade)();
+  TextColumn get state => text()();
+  TextColumn get content => text()();
+  TextColumn get sourceOrigin => text()();
+  @ReferenceName('memorySourceChat')
+  TextColumn get sourceChatId =>
+      text().nullable().references(Chats, #id, onDelete: KeyAction.setNull)();
+  DateTimeColumn get extractedAt => dateTime().nullable()();
+  TextColumn get providerId => text().nullable()();
+  TextColumn get modelId => text().nullable()();
+  RealColumn get importance => real()();
+  RealColumn get confidence => real()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get expiresAt => dateTime().nullable()();
+  BoolColumn get locked => boolean().withDefault(const Constant(false))();
+  TextColumn get normalizedIdentityKey => text()();
+  TextColumn get supersededByMemoryId => text().nullable().references(
+        LongTermMemories,
+        #id,
+        onDelete: KeyAction.setNull,
+        initiallyDeferred: true,
+      )();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => const [
+        'CHECK (importance >= 0 AND importance <= 1)',
+        'CHECK (confidence >= 0 AND confidence <= 1)',
+        'CHECK ((state = \'superseded\') = '
+            '(superseded_by_memory_id IS NOT NULL))',
+        'CHECK ('
+            "(scope_kind = 'character' AND character_id IS NOT NULL AND "
+            'persona_id IS NULL AND chat_id IS NULL AND group_id IS NULL) OR '
+            "(scope_kind = 'characterPersona' AND character_id IS NOT NULL AND "
+            'persona_id IS NOT NULL AND chat_id IS NULL AND group_id IS NULL) OR '
+            "(scope_kind = 'chat' AND character_id IS NULL AND "
+            'persona_id IS NULL AND chat_id IS NOT NULL AND group_id IS NULL) OR '
+            "(scope_kind = 'group' AND character_id IS NULL AND "
+            'persona_id IS NULL AND chat_id IS NULL AND group_id IS NOT NULL)'
+            ')',
+      ];
+}
+
+@DataClassName('LongTermMemorySourceMessageRow')
+class LongTermMemorySourceMessages extends Table {
+  TextColumn get memoryId => text().references(
+        LongTermMemories,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  TextColumn get messageId =>
+      text().references(Messages, #id, onDelete: KeyAction.cascade)();
+  IntColumn get ordinal => integer()();
+
+  @override
+  Set<Column> get primaryKey => {memoryId, messageId};
+}
+
+@DataClassName('RpgScenarioRow')
+class RpgScenarios extends Table {
+  TextColumn get id => text()();
+  TextColumn get version => text()();
+  IntColumn get contractSchemaVersion => integer()();
+  TextColumn get scenarioJson => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('RpgStateSnapshotRow')
+class RpgStateSnapshots extends Table {
+  TextColumn get id => text()();
+  TextColumn get scenarioId =>
+      text().references(RpgScenarios, #id, onDelete: KeyAction.cascade)();
+  TextColumn get scenarioVersion => text()();
+  TextColumn get branchId => text()();
+  TextColumn get parentSnapshotId => text().nullable().references(
+        RpgStateSnapshots,
+        #id,
+        onDelete: KeyAction.setNull,
+        initiallyDeferred: true,
+      )();
+  IntColumn get turn => integer()();
+  IntColumn get randomState => integer()();
+  IntColumn get rollsConsumed => integer()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get stateHash => text().nullable()();
+  TextColumn get snapshotJson => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('RpgChatStateRow')
+class RpgChatStates extends Table {
+  TextColumn get chatId =>
+      text().references(Chats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get scenarioId =>
+      text().references(RpgScenarios, #id, onDelete: KeyAction.cascade)();
+  TextColumn get currentSnapshotId => text().nullable().references(
+        RpgStateSnapshots,
+        #id,
+        onDelete: KeyAction.setNull,
+      )();
+  IntColumn get turn => integer()();
+  TextColumn get stateJson => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {chatId};
+}
+
+@DataClassName('DataBankDocumentRow')
+class DataBankDocuments extends Table {
+  TextColumn get id => text()();
+  TextColumn get currentVersionId => text().nullable()();
+  TextColumn get processingState => text()();
+  TextColumn get indexState => text()();
+  TextColumn get failureJson => text().nullable()();
+  TextColumn get reprocessingJson => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isPlaceholder =>
+      boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('DataBankDocumentVersionRow')
+class DataBankDocumentVersions extends Table {
+  TextColumn get id => text()();
+  TextColumn get documentId =>
+      text().references(DataBankDocuments, #id, onDelete: KeyAction.cascade)();
+  IntColumn get versionNumber => integer()();
+  TextColumn get supersedesVersionId => text().nullable().references(
+        DataBankDocumentVersions,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+  TextColumn get originalFileName => text()();
+  TextColumn get mediaType => text()();
+  IntColumn get byteSize => integer()();
+  TextColumn get hashAlgorithm => text()();
+  TextColumn get hashDigest => text()();
+  DateTimeColumn get importedAt => dateTime()();
+  TextColumn get processingState => text()();
+  TextColumn get indexState => text()();
+  TextColumn get failureJson => text().nullable()();
+  TextColumn get reprocessingJson => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {documentId, versionNumber},
+        {documentId, hashAlgorithm, hashDigest},
+      ];
+
+  @override
+  List<String> get customConstraints => const [
+        'CHECK (version_number >= 1)',
+        'CHECK (byte_size >= 0)',
+      ];
+}
+
+@DataClassName('DataBankSectionRow')
+class DataBankSections extends Table {
+  TextColumn get id => text()();
+  TextColumn get documentVersionId => text().references(
+        DataBankDocumentVersions,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  TextColumn get kind => text()();
+  TextColumn get title => text().nullable()();
+  IntColumn get ordinal => integer()();
+  TextColumn get parentSectionId => text().nullable().references(
+        DataBankSections,
+        #id,
+        onDelete: KeyAction.setNull,
+        initiallyDeferred: true,
+      )();
+  TextColumn get locatorJson => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {documentVersionId, ordinal},
+      ];
+}
+
+@DataClassName('DataBankTextChunkRow')
+class DataBankTextChunks extends Table {
+  TextColumn get id => text()();
+  TextColumn get documentVersionId => text().references(
+        DataBankDocumentVersions,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  TextColumn get sectionId => text().nullable().references(
+        DataBankSections,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  IntColumn get ordinal => integer()();
+  TextColumn get textContent => text()();
+  TextColumn get locatorJson => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {documentVersionId, ordinal},
+      ];
+}
+
+@DataClassName('DataBankBindingRow')
+class DataBankBindings extends Table {
+  TextColumn get id => text()();
+  TextColumn get documentId =>
+      text().references(DataBankDocuments, #id, onDelete: KeyAction.cascade)();
+  TextColumn get scope => text()();
+  TextColumn get characterId => text()
+      .nullable()
+      .references(Characters, #id, onDelete: KeyAction.cascade)();
+  TextColumn get chatId =>
+      text().nullable().references(Chats, #id, onDelete: KeyAction.cascade)();
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {documentId, scope, characterId, chatId},
+      ];
+
+  @override
+  List<String> get customConstraints => const [
+        'CHECK ('
+            "(scope = 'global' AND character_id IS NULL AND chat_id IS NULL) OR "
+            "(scope = 'character' AND character_id IS NOT NULL AND chat_id IS NULL) OR "
+            "(scope = 'chat' AND character_id IS NULL AND chat_id IS NOT NULL)"
+            ')',
+      ];
+}
+
 /// App database
 @DriftDatabase(tables: [
   Characters,
@@ -269,19 +543,31 @@ class GlobalStates extends Table {
   Tags,
   CharacterTags,
   GlobalStates,
+  LongTermMemories,
+  LongTermMemorySourceMessages,
+  RpgScenarios,
+  RpgStateSnapshots,
+  RpgChatStates,
+  DataBankDocuments,
+  DataBankDocumentVersions,
+  DataBankSections,
+  DataBankTextChunks,
+  DataBankBindings,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+  AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
+        await _createV15Indexes();
+        await _createV15Triggers();
       },
       onUpgrade: (Migrator m, int from, int to) async {
         // SQLite supports transactional DDL. Keep the version upgrade atomic
@@ -365,9 +651,151 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(personas, personas.creatorNotes);
             await m.addColumn(personas, personas.isFavorite);
           }
+          if (from < 15) {
+            await _assertNoPartialV15Schema();
+            await m.createTable(longTermMemories);
+            await m.createTable(longTermMemorySourceMessages);
+            await m.createTable(rpgScenarios);
+            await m.createTable(rpgStateSnapshots);
+            await m.createTable(rpgChatStates);
+            await m.createTable(dataBankDocuments);
+            await m.createTable(dataBankDocumentVersions);
+            await m.createTable(dataBankSections);
+            await m.createTable(dataBankTextChunks);
+            await m.createTable(dataBankBindings);
+            await _createV15Indexes();
+            await _createV15Triggers();
+          }
         });
       },
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
+      },
     );
+  }
+
+  Future<void> _createV15Indexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS long_term_memories_scope_idx '
+          'ON long_term_memories '
+          '(scope_kind, character_id, persona_id, chat_id, group_id, state)',
+      'CREATE INDEX IF NOT EXISTS long_term_memories_source_chat_idx '
+          'ON long_term_memories (source_chat_id)',
+      'CREATE INDEX IF NOT EXISTS long_term_memory_source_message_idx '
+          'ON long_term_memory_source_messages (message_id, memory_id)',
+      'CREATE INDEX IF NOT EXISTS rpg_snapshots_branch_idx '
+          'ON rpg_state_snapshots (scenario_id, branch_id, turn)',
+      'CREATE INDEX IF NOT EXISTS data_bank_versions_document_idx '
+          'ON data_bank_document_versions (document_id, version_number)',
+      'CREATE INDEX IF NOT EXISTS data_bank_sections_version_idx '
+          'ON data_bank_sections (document_version_id, ordinal)',
+      'CREATE INDEX IF NOT EXISTS data_bank_chunks_version_idx '
+          'ON data_bank_text_chunks (document_version_id, ordinal)',
+      'CREATE INDEX IF NOT EXISTS data_bank_bindings_scope_idx '
+          'ON data_bank_bindings (scope, character_id, chat_id, enabled)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS data_bank_binding_global_unique '
+          "ON data_bank_bindings (document_id) WHERE scope = 'global'",
+      'CREATE UNIQUE INDEX IF NOT EXISTS data_bank_binding_character_unique '
+          'ON data_bank_bindings (document_id, character_id) '
+          "WHERE scope = 'character'",
+      'CREATE UNIQUE INDEX IF NOT EXISTS data_bank_binding_chat_unique '
+          'ON data_bank_bindings (document_id, chat_id) '
+          "WHERE scope = 'chat'",
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _assertNoPartialV15Schema() async {
+    const tableNames = [
+      'long_term_memories',
+      'long_term_memory_source_messages',
+      'rpg_scenarios',
+      'rpg_state_snapshots',
+      'rpg_chat_states',
+      'data_bank_documents',
+      'data_bank_document_versions',
+      'data_bank_sections',
+      'data_bank_text_chunks',
+      'data_bank_bindings',
+    ];
+    final placeholders = List.filled(tableNames.length, '?').join(', ');
+    final rows = await customSelect(
+      'SELECT name FROM sqlite_master '
+      "WHERE type = 'table' AND name IN ($placeholders)",
+      variables: tableNames.map(Variable<String>.new).toList(),
+    ).get();
+    if (rows.isNotEmpty) {
+      throw StateError(
+        'Partial v15 schema detected: '
+        '${rows.map((row) => row.read<String>('name')).join(', ')}',
+      );
+    }
+  }
+
+  Future<void> _createV15Triggers() async {
+    const statements = [
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_document_current_version_insert
+        BEFORE INSERT ON data_bank_documents
+        WHEN NEW.current_version_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM data_bank_document_versions
+          WHERE id = NEW.current_version_id AND document_id = NEW.id
+        )
+        BEGIN
+          SELECT RAISE(ABORT, 'current Data Bank version must belong to document');
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_document_current_version_update
+        BEFORE UPDATE OF current_version_id ON data_bank_documents
+        WHEN NEW.current_version_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM data_bank_document_versions
+          WHERE id = NEW.current_version_id AND document_id = NEW.id
+        )
+        BEGIN
+          SELECT RAISE(ABORT, 'current Data Bank version must belong to document');
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS data_bank_current_version_delete
+        AFTER DELETE ON data_bank_document_versions
+        BEGIN
+          UPDATE data_bank_documents
+          SET current_version_id = NULL, is_placeholder = 1
+          WHERE id = OLD.document_id AND current_version_id = OLD.id;
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS memory_source_chat_removed
+        AFTER UPDATE OF source_chat_id ON long_term_memories
+        WHEN OLD.source_chat_id IS NOT NULL AND NEW.source_chat_id IS NULL
+        BEGIN
+          UPDATE long_term_memories
+          SET source_origin = 'manual', extracted_at = NULL,
+              provider_id = NULL, model_id = NULL
+          WHERE id = NEW.id;
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS memory_last_source_message_removed
+        AFTER DELETE ON long_term_memory_source_messages
+        WHEN NOT EXISTS (
+          SELECT 1 FROM long_term_memory_source_messages
+          WHERE memory_id = OLD.memory_id
+        )
+        BEGIN
+          UPDATE long_term_memories
+          SET source_origin = 'manual', source_chat_id = NULL,
+              extracted_at = NULL, provider_id = NULL, model_id = NULL
+          WHERE id = OLD.memory_id;
+        END
+      ''',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
   }
 }
 

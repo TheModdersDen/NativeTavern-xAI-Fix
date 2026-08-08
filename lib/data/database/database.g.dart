@@ -6842,6 +6842,5086 @@ class GlobalStatesCompanion extends UpdateCompanion<GlobalState> {
   }
 }
 
+class $LongTermMemoriesTable extends LongTermMemories
+    with TableInfo<$LongTermMemoriesTable, LongTermMemoryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LongTermMemoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _scopeKindMeta =
+      const VerificationMeta('scopeKind');
+  @override
+  late final GeneratedColumn<String> scopeKind = GeneratedColumn<String>(
+      'scope_kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _characterIdMeta =
+      const VerificationMeta('characterId');
+  @override
+  late final GeneratedColumn<String> characterId = GeneratedColumn<String>(
+      'character_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES characters (id) ON DELETE CASCADE'));
+  static const VerificationMeta _personaIdMeta =
+      const VerificationMeta('personaId');
+  @override
+  late final GeneratedColumn<String> personaId = GeneratedColumn<String>(
+      'persona_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES personas (id) ON DELETE CASCADE'));
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
+      'chat_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE CASCADE'));
+  static const VerificationMeta _groupIdMeta =
+      const VerificationMeta('groupId');
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+      'group_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES "groups" (id) ON DELETE CASCADE'));
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+      'state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sourceOriginMeta =
+      const VerificationMeta('sourceOrigin');
+  @override
+  late final GeneratedColumn<String> sourceOrigin = GeneratedColumn<String>(
+      'source_origin', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sourceChatIdMeta =
+      const VerificationMeta('sourceChatId');
+  @override
+  late final GeneratedColumn<String> sourceChatId = GeneratedColumn<String>(
+      'source_chat_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE SET NULL'));
+  static const VerificationMeta _extractedAtMeta =
+      const VerificationMeta('extractedAt');
+  @override
+  late final GeneratedColumn<DateTime> extractedAt = GeneratedColumn<DateTime>(
+      'extracted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _providerIdMeta =
+      const VerificationMeta('providerId');
+  @override
+  late final GeneratedColumn<String> providerId = GeneratedColumn<String>(
+      'provider_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _modelIdMeta =
+      const VerificationMeta('modelId');
+  @override
+  late final GeneratedColumn<String> modelId = GeneratedColumn<String>(
+      'model_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _importanceMeta =
+      const VerificationMeta('importance');
+  @override
+  late final GeneratedColumn<double> importance = GeneratedColumn<double>(
+      'importance', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _confidenceMeta =
+      const VerificationMeta('confidence');
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+      'confidence', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _expiresAtMeta =
+      const VerificationMeta('expiresAt');
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+      'expires_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _lockedMeta = const VerificationMeta('locked');
+  @override
+  late final GeneratedColumn<bool> locked = GeneratedColumn<bool>(
+      'locked', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("locked" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _normalizedIdentityKeyMeta =
+      const VerificationMeta('normalizedIdentityKey');
+  @override
+  late final GeneratedColumn<String> normalizedIdentityKey =
+      GeneratedColumn<String>('normalized_identity_key', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _supersededByMemoryIdMeta =
+      const VerificationMeta('supersededByMemoryId');
+  @override
+  late final GeneratedColumn<String> supersededByMemoryId = GeneratedColumn<
+          String>('superseded_by_memory_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES long_term_memories (id) ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        kind,
+        scopeKind,
+        characterId,
+        personaId,
+        chatId,
+        groupId,
+        state,
+        content,
+        sourceOrigin,
+        sourceChatId,
+        extractedAt,
+        providerId,
+        modelId,
+        importance,
+        confidence,
+        createdAt,
+        updatedAt,
+        expiresAt,
+        locked,
+        normalizedIdentityKey,
+        supersededByMemoryId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'long_term_memories';
+  @override
+  VerificationContext validateIntegrity(Insertable<LongTermMemoryRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('scope_kind')) {
+      context.handle(_scopeKindMeta,
+          scopeKind.isAcceptableOrUnknown(data['scope_kind']!, _scopeKindMeta));
+    } else if (isInserting) {
+      context.missing(_scopeKindMeta);
+    }
+    if (data.containsKey('character_id')) {
+      context.handle(
+          _characterIdMeta,
+          characterId.isAcceptableOrUnknown(
+              data['character_id']!, _characterIdMeta));
+    }
+    if (data.containsKey('persona_id')) {
+      context.handle(_personaIdMeta,
+          personaId.isAcceptableOrUnknown(data['persona_id']!, _personaIdMeta));
+    }
+    if (data.containsKey('chat_id')) {
+      context.handle(_chatIdMeta,
+          chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('source_origin')) {
+      context.handle(
+          _sourceOriginMeta,
+          sourceOrigin.isAcceptableOrUnknown(
+              data['source_origin']!, _sourceOriginMeta));
+    } else if (isInserting) {
+      context.missing(_sourceOriginMeta);
+    }
+    if (data.containsKey('source_chat_id')) {
+      context.handle(
+          _sourceChatIdMeta,
+          sourceChatId.isAcceptableOrUnknown(
+              data['source_chat_id']!, _sourceChatIdMeta));
+    }
+    if (data.containsKey('extracted_at')) {
+      context.handle(
+          _extractedAtMeta,
+          extractedAt.isAcceptableOrUnknown(
+              data['extracted_at']!, _extractedAtMeta));
+    }
+    if (data.containsKey('provider_id')) {
+      context.handle(
+          _providerIdMeta,
+          providerId.isAcceptableOrUnknown(
+              data['provider_id']!, _providerIdMeta));
+    }
+    if (data.containsKey('model_id')) {
+      context.handle(_modelIdMeta,
+          modelId.isAcceptableOrUnknown(data['model_id']!, _modelIdMeta));
+    }
+    if (data.containsKey('importance')) {
+      context.handle(
+          _importanceMeta,
+          importance.isAcceptableOrUnknown(
+              data['importance']!, _importanceMeta));
+    } else if (isInserting) {
+      context.missing(_importanceMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+          _confidenceMeta,
+          confidence.isAcceptableOrUnknown(
+              data['confidence']!, _confidenceMeta));
+    } else if (isInserting) {
+      context.missing(_confidenceMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(_expiresAtMeta,
+          expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));
+    }
+    if (data.containsKey('locked')) {
+      context.handle(_lockedMeta,
+          locked.isAcceptableOrUnknown(data['locked']!, _lockedMeta));
+    }
+    if (data.containsKey('normalized_identity_key')) {
+      context.handle(
+          _normalizedIdentityKeyMeta,
+          normalizedIdentityKey.isAcceptableOrUnknown(
+              data['normalized_identity_key']!, _normalizedIdentityKeyMeta));
+    } else if (isInserting) {
+      context.missing(_normalizedIdentityKeyMeta);
+    }
+    if (data.containsKey('superseded_by_memory_id')) {
+      context.handle(
+          _supersededByMemoryIdMeta,
+          supersededByMemoryId.isAcceptableOrUnknown(
+              data['superseded_by_memory_id']!, _supersededByMemoryIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LongTermMemoryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LongTermMemoryRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      scopeKind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scope_kind'])!,
+      characterId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}character_id']),
+      personaId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}persona_id']),
+      chatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id']),
+      groupId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}group_id']),
+      state: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      sourceOrigin: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source_origin'])!,
+      sourceChatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source_chat_id']),
+      extractedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}extracted_at']),
+      providerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}provider_id']),
+      modelId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}model_id']),
+      importance: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}importance'])!,
+      confidence: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}confidence'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      expiresAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}expires_at']),
+      locked: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}locked'])!,
+      normalizedIdentityKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}normalized_identity_key'])!,
+      supersededByMemoryId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}superseded_by_memory_id']),
+    );
+  }
+
+  @override
+  $LongTermMemoriesTable createAlias(String alias) {
+    return $LongTermMemoriesTable(attachedDatabase, alias);
+  }
+}
+
+class LongTermMemoryRow extends DataClass
+    implements Insertable<LongTermMemoryRow> {
+  final String id;
+  final String kind;
+  final String scopeKind;
+  final String? characterId;
+  final String? personaId;
+  final String? chatId;
+  final String? groupId;
+  final String state;
+  final String content;
+  final String sourceOrigin;
+  final String? sourceChatId;
+  final DateTime? extractedAt;
+  final String? providerId;
+  final String? modelId;
+  final double importance;
+  final double confidence;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? expiresAt;
+  final bool locked;
+  final String normalizedIdentityKey;
+  final String? supersededByMemoryId;
+  const LongTermMemoryRow(
+      {required this.id,
+      required this.kind,
+      required this.scopeKind,
+      this.characterId,
+      this.personaId,
+      this.chatId,
+      this.groupId,
+      required this.state,
+      required this.content,
+      required this.sourceOrigin,
+      this.sourceChatId,
+      this.extractedAt,
+      this.providerId,
+      this.modelId,
+      required this.importance,
+      required this.confidence,
+      required this.createdAt,
+      required this.updatedAt,
+      this.expiresAt,
+      required this.locked,
+      required this.normalizedIdentityKey,
+      this.supersededByMemoryId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['kind'] = Variable<String>(kind);
+    map['scope_kind'] = Variable<String>(scopeKind);
+    if (!nullToAbsent || characterId != null) {
+      map['character_id'] = Variable<String>(characterId);
+    }
+    if (!nullToAbsent || personaId != null) {
+      map['persona_id'] = Variable<String>(personaId);
+    }
+    if (!nullToAbsent || chatId != null) {
+      map['chat_id'] = Variable<String>(chatId);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
+    }
+    map['state'] = Variable<String>(state);
+    map['content'] = Variable<String>(content);
+    map['source_origin'] = Variable<String>(sourceOrigin);
+    if (!nullToAbsent || sourceChatId != null) {
+      map['source_chat_id'] = Variable<String>(sourceChatId);
+    }
+    if (!nullToAbsent || extractedAt != null) {
+      map['extracted_at'] = Variable<DateTime>(extractedAt);
+    }
+    if (!nullToAbsent || providerId != null) {
+      map['provider_id'] = Variable<String>(providerId);
+    }
+    if (!nullToAbsent || modelId != null) {
+      map['model_id'] = Variable<String>(modelId);
+    }
+    map['importance'] = Variable<double>(importance);
+    map['confidence'] = Variable<double>(confidence);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<DateTime>(expiresAt);
+    }
+    map['locked'] = Variable<bool>(locked);
+    map['normalized_identity_key'] = Variable<String>(normalizedIdentityKey);
+    if (!nullToAbsent || supersededByMemoryId != null) {
+      map['superseded_by_memory_id'] = Variable<String>(supersededByMemoryId);
+    }
+    return map;
+  }
+
+  LongTermMemoriesCompanion toCompanion(bool nullToAbsent) {
+    return LongTermMemoriesCompanion(
+      id: Value(id),
+      kind: Value(kind),
+      scopeKind: Value(scopeKind),
+      characterId: characterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(characterId),
+      personaId: personaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personaId),
+      chatId:
+          chatId == null && nullToAbsent ? const Value.absent() : Value(chatId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      state: Value(state),
+      content: Value(content),
+      sourceOrigin: Value(sourceOrigin),
+      sourceChatId: sourceChatId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceChatId),
+      extractedAt: extractedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extractedAt),
+      providerId: providerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(providerId),
+      modelId: modelId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modelId),
+      importance: Value(importance),
+      confidence: Value(confidence),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+      locked: Value(locked),
+      normalizedIdentityKey: Value(normalizedIdentityKey),
+      supersededByMemoryId: supersededByMemoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supersededByMemoryId),
+    );
+  }
+
+  factory LongTermMemoryRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LongTermMemoryRow(
+      id: serializer.fromJson<String>(json['id']),
+      kind: serializer.fromJson<String>(json['kind']),
+      scopeKind: serializer.fromJson<String>(json['scopeKind']),
+      characterId: serializer.fromJson<String?>(json['characterId']),
+      personaId: serializer.fromJson<String?>(json['personaId']),
+      chatId: serializer.fromJson<String?>(json['chatId']),
+      groupId: serializer.fromJson<String?>(json['groupId']),
+      state: serializer.fromJson<String>(json['state']),
+      content: serializer.fromJson<String>(json['content']),
+      sourceOrigin: serializer.fromJson<String>(json['sourceOrigin']),
+      sourceChatId: serializer.fromJson<String?>(json['sourceChatId']),
+      extractedAt: serializer.fromJson<DateTime?>(json['extractedAt']),
+      providerId: serializer.fromJson<String?>(json['providerId']),
+      modelId: serializer.fromJson<String?>(json['modelId']),
+      importance: serializer.fromJson<double>(json['importance']),
+      confidence: serializer.fromJson<double>(json['confidence']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
+      locked: serializer.fromJson<bool>(json['locked']),
+      normalizedIdentityKey:
+          serializer.fromJson<String>(json['normalizedIdentityKey']),
+      supersededByMemoryId:
+          serializer.fromJson<String?>(json['supersededByMemoryId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'kind': serializer.toJson<String>(kind),
+      'scopeKind': serializer.toJson<String>(scopeKind),
+      'characterId': serializer.toJson<String?>(characterId),
+      'personaId': serializer.toJson<String?>(personaId),
+      'chatId': serializer.toJson<String?>(chatId),
+      'groupId': serializer.toJson<String?>(groupId),
+      'state': serializer.toJson<String>(state),
+      'content': serializer.toJson<String>(content),
+      'sourceOrigin': serializer.toJson<String>(sourceOrigin),
+      'sourceChatId': serializer.toJson<String?>(sourceChatId),
+      'extractedAt': serializer.toJson<DateTime?>(extractedAt),
+      'providerId': serializer.toJson<String?>(providerId),
+      'modelId': serializer.toJson<String?>(modelId),
+      'importance': serializer.toJson<double>(importance),
+      'confidence': serializer.toJson<double>(confidence),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'expiresAt': serializer.toJson<DateTime?>(expiresAt),
+      'locked': serializer.toJson<bool>(locked),
+      'normalizedIdentityKey': serializer.toJson<String>(normalizedIdentityKey),
+      'supersededByMemoryId': serializer.toJson<String?>(supersededByMemoryId),
+    };
+  }
+
+  LongTermMemoryRow copyWith(
+          {String? id,
+          String? kind,
+          String? scopeKind,
+          Value<String?> characterId = const Value.absent(),
+          Value<String?> personaId = const Value.absent(),
+          Value<String?> chatId = const Value.absent(),
+          Value<String?> groupId = const Value.absent(),
+          String? state,
+          String? content,
+          String? sourceOrigin,
+          Value<String?> sourceChatId = const Value.absent(),
+          Value<DateTime?> extractedAt = const Value.absent(),
+          Value<String?> providerId = const Value.absent(),
+          Value<String?> modelId = const Value.absent(),
+          double? importance,
+          double? confidence,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> expiresAt = const Value.absent(),
+          bool? locked,
+          String? normalizedIdentityKey,
+          Value<String?> supersededByMemoryId = const Value.absent()}) =>
+      LongTermMemoryRow(
+        id: id ?? this.id,
+        kind: kind ?? this.kind,
+        scopeKind: scopeKind ?? this.scopeKind,
+        characterId: characterId.present ? characterId.value : this.characterId,
+        personaId: personaId.present ? personaId.value : this.personaId,
+        chatId: chatId.present ? chatId.value : this.chatId,
+        groupId: groupId.present ? groupId.value : this.groupId,
+        state: state ?? this.state,
+        content: content ?? this.content,
+        sourceOrigin: sourceOrigin ?? this.sourceOrigin,
+        sourceChatId:
+            sourceChatId.present ? sourceChatId.value : this.sourceChatId,
+        extractedAt: extractedAt.present ? extractedAt.value : this.extractedAt,
+        providerId: providerId.present ? providerId.value : this.providerId,
+        modelId: modelId.present ? modelId.value : this.modelId,
+        importance: importance ?? this.importance,
+        confidence: confidence ?? this.confidence,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+        locked: locked ?? this.locked,
+        normalizedIdentityKey:
+            normalizedIdentityKey ?? this.normalizedIdentityKey,
+        supersededByMemoryId: supersededByMemoryId.present
+            ? supersededByMemoryId.value
+            : this.supersededByMemoryId,
+      );
+  LongTermMemoryRow copyWithCompanion(LongTermMemoriesCompanion data) {
+    return LongTermMemoryRow(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      scopeKind: data.scopeKind.present ? data.scopeKind.value : this.scopeKind,
+      characterId:
+          data.characterId.present ? data.characterId.value : this.characterId,
+      personaId: data.personaId.present ? data.personaId.value : this.personaId,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      state: data.state.present ? data.state.value : this.state,
+      content: data.content.present ? data.content.value : this.content,
+      sourceOrigin: data.sourceOrigin.present
+          ? data.sourceOrigin.value
+          : this.sourceOrigin,
+      sourceChatId: data.sourceChatId.present
+          ? data.sourceChatId.value
+          : this.sourceChatId,
+      extractedAt:
+          data.extractedAt.present ? data.extractedAt.value : this.extractedAt,
+      providerId:
+          data.providerId.present ? data.providerId.value : this.providerId,
+      modelId: data.modelId.present ? data.modelId.value : this.modelId,
+      importance:
+          data.importance.present ? data.importance.value : this.importance,
+      confidence:
+          data.confidence.present ? data.confidence.value : this.confidence,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      locked: data.locked.present ? data.locked.value : this.locked,
+      normalizedIdentityKey: data.normalizedIdentityKey.present
+          ? data.normalizedIdentityKey.value
+          : this.normalizedIdentityKey,
+      supersededByMemoryId: data.supersededByMemoryId.present
+          ? data.supersededByMemoryId.value
+          : this.supersededByMemoryId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LongTermMemoryRow(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('scopeKind: $scopeKind, ')
+          ..write('characterId: $characterId, ')
+          ..write('personaId: $personaId, ')
+          ..write('chatId: $chatId, ')
+          ..write('groupId: $groupId, ')
+          ..write('state: $state, ')
+          ..write('content: $content, ')
+          ..write('sourceOrigin: $sourceOrigin, ')
+          ..write('sourceChatId: $sourceChatId, ')
+          ..write('extractedAt: $extractedAt, ')
+          ..write('providerId: $providerId, ')
+          ..write('modelId: $modelId, ')
+          ..write('importance: $importance, ')
+          ..write('confidence: $confidence, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('locked: $locked, ')
+          ..write('normalizedIdentityKey: $normalizedIdentityKey, ')
+          ..write('supersededByMemoryId: $supersededByMemoryId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        id,
+        kind,
+        scopeKind,
+        characterId,
+        personaId,
+        chatId,
+        groupId,
+        state,
+        content,
+        sourceOrigin,
+        sourceChatId,
+        extractedAt,
+        providerId,
+        modelId,
+        importance,
+        confidence,
+        createdAt,
+        updatedAt,
+        expiresAt,
+        locked,
+        normalizedIdentityKey,
+        supersededByMemoryId
+      ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LongTermMemoryRow &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.scopeKind == this.scopeKind &&
+          other.characterId == this.characterId &&
+          other.personaId == this.personaId &&
+          other.chatId == this.chatId &&
+          other.groupId == this.groupId &&
+          other.state == this.state &&
+          other.content == this.content &&
+          other.sourceOrigin == this.sourceOrigin &&
+          other.sourceChatId == this.sourceChatId &&
+          other.extractedAt == this.extractedAt &&
+          other.providerId == this.providerId &&
+          other.modelId == this.modelId &&
+          other.importance == this.importance &&
+          other.confidence == this.confidence &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.expiresAt == this.expiresAt &&
+          other.locked == this.locked &&
+          other.normalizedIdentityKey == this.normalizedIdentityKey &&
+          other.supersededByMemoryId == this.supersededByMemoryId);
+}
+
+class LongTermMemoriesCompanion extends UpdateCompanion<LongTermMemoryRow> {
+  final Value<String> id;
+  final Value<String> kind;
+  final Value<String> scopeKind;
+  final Value<String?> characterId;
+  final Value<String?> personaId;
+  final Value<String?> chatId;
+  final Value<String?> groupId;
+  final Value<String> state;
+  final Value<String> content;
+  final Value<String> sourceOrigin;
+  final Value<String?> sourceChatId;
+  final Value<DateTime?> extractedAt;
+  final Value<String?> providerId;
+  final Value<String?> modelId;
+  final Value<double> importance;
+  final Value<double> confidence;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> expiresAt;
+  final Value<bool> locked;
+  final Value<String> normalizedIdentityKey;
+  final Value<String?> supersededByMemoryId;
+  final Value<int> rowid;
+  const LongTermMemoriesCompanion({
+    this.id = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.scopeKind = const Value.absent(),
+    this.characterId = const Value.absent(),
+    this.personaId = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.content = const Value.absent(),
+    this.sourceOrigin = const Value.absent(),
+    this.sourceChatId = const Value.absent(),
+    this.extractedAt = const Value.absent(),
+    this.providerId = const Value.absent(),
+    this.modelId = const Value.absent(),
+    this.importance = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.locked = const Value.absent(),
+    this.normalizedIdentityKey = const Value.absent(),
+    this.supersededByMemoryId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LongTermMemoriesCompanion.insert({
+    required String id,
+    required String kind,
+    required String scopeKind,
+    this.characterId = const Value.absent(),
+    this.personaId = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    required String state,
+    required String content,
+    required String sourceOrigin,
+    this.sourceChatId = const Value.absent(),
+    this.extractedAt = const Value.absent(),
+    this.providerId = const Value.absent(),
+    this.modelId = const Value.absent(),
+    required double importance,
+    required double confidence,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.expiresAt = const Value.absent(),
+    this.locked = const Value.absent(),
+    required String normalizedIdentityKey,
+    this.supersededByMemoryId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        kind = Value(kind),
+        scopeKind = Value(scopeKind),
+        state = Value(state),
+        content = Value(content),
+        sourceOrigin = Value(sourceOrigin),
+        importance = Value(importance),
+        confidence = Value(confidence),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        normalizedIdentityKey = Value(normalizedIdentityKey);
+  static Insertable<LongTermMemoryRow> custom({
+    Expression<String>? id,
+    Expression<String>? kind,
+    Expression<String>? scopeKind,
+    Expression<String>? characterId,
+    Expression<String>? personaId,
+    Expression<String>? chatId,
+    Expression<String>? groupId,
+    Expression<String>? state,
+    Expression<String>? content,
+    Expression<String>? sourceOrigin,
+    Expression<String>? sourceChatId,
+    Expression<DateTime>? extractedAt,
+    Expression<String>? providerId,
+    Expression<String>? modelId,
+    Expression<double>? importance,
+    Expression<double>? confidence,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? expiresAt,
+    Expression<bool>? locked,
+    Expression<String>? normalizedIdentityKey,
+    Expression<String>? supersededByMemoryId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (scopeKind != null) 'scope_kind': scopeKind,
+      if (characterId != null) 'character_id': characterId,
+      if (personaId != null) 'persona_id': personaId,
+      if (chatId != null) 'chat_id': chatId,
+      if (groupId != null) 'group_id': groupId,
+      if (state != null) 'state': state,
+      if (content != null) 'content': content,
+      if (sourceOrigin != null) 'source_origin': sourceOrigin,
+      if (sourceChatId != null) 'source_chat_id': sourceChatId,
+      if (extractedAt != null) 'extracted_at': extractedAt,
+      if (providerId != null) 'provider_id': providerId,
+      if (modelId != null) 'model_id': modelId,
+      if (importance != null) 'importance': importance,
+      if (confidence != null) 'confidence': confidence,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (locked != null) 'locked': locked,
+      if (normalizedIdentityKey != null)
+        'normalized_identity_key': normalizedIdentityKey,
+      if (supersededByMemoryId != null)
+        'superseded_by_memory_id': supersededByMemoryId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LongTermMemoriesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? kind,
+      Value<String>? scopeKind,
+      Value<String?>? characterId,
+      Value<String?>? personaId,
+      Value<String?>? chatId,
+      Value<String?>? groupId,
+      Value<String>? state,
+      Value<String>? content,
+      Value<String>? sourceOrigin,
+      Value<String?>? sourceChatId,
+      Value<DateTime?>? extractedAt,
+      Value<String?>? providerId,
+      Value<String?>? modelId,
+      Value<double>? importance,
+      Value<double>? confidence,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? expiresAt,
+      Value<bool>? locked,
+      Value<String>? normalizedIdentityKey,
+      Value<String?>? supersededByMemoryId,
+      Value<int>? rowid}) {
+    return LongTermMemoriesCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      scopeKind: scopeKind ?? this.scopeKind,
+      characterId: characterId ?? this.characterId,
+      personaId: personaId ?? this.personaId,
+      chatId: chatId ?? this.chatId,
+      groupId: groupId ?? this.groupId,
+      state: state ?? this.state,
+      content: content ?? this.content,
+      sourceOrigin: sourceOrigin ?? this.sourceOrigin,
+      sourceChatId: sourceChatId ?? this.sourceChatId,
+      extractedAt: extractedAt ?? this.extractedAt,
+      providerId: providerId ?? this.providerId,
+      modelId: modelId ?? this.modelId,
+      importance: importance ?? this.importance,
+      confidence: confidence ?? this.confidence,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      locked: locked ?? this.locked,
+      normalizedIdentityKey:
+          normalizedIdentityKey ?? this.normalizedIdentityKey,
+      supersededByMemoryId: supersededByMemoryId ?? this.supersededByMemoryId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (scopeKind.present) {
+      map['scope_kind'] = Variable<String>(scopeKind.value);
+    }
+    if (characterId.present) {
+      map['character_id'] = Variable<String>(characterId.value);
+    }
+    if (personaId.present) {
+      map['persona_id'] = Variable<String>(personaId.value);
+    }
+    if (chatId.present) {
+      map['chat_id'] = Variable<String>(chatId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (sourceOrigin.present) {
+      map['source_origin'] = Variable<String>(sourceOrigin.value);
+    }
+    if (sourceChatId.present) {
+      map['source_chat_id'] = Variable<String>(sourceChatId.value);
+    }
+    if (extractedAt.present) {
+      map['extracted_at'] = Variable<DateTime>(extractedAt.value);
+    }
+    if (providerId.present) {
+      map['provider_id'] = Variable<String>(providerId.value);
+    }
+    if (modelId.present) {
+      map['model_id'] = Variable<String>(modelId.value);
+    }
+    if (importance.present) {
+      map['importance'] = Variable<double>(importance.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (locked.present) {
+      map['locked'] = Variable<bool>(locked.value);
+    }
+    if (normalizedIdentityKey.present) {
+      map['normalized_identity_key'] =
+          Variable<String>(normalizedIdentityKey.value);
+    }
+    if (supersededByMemoryId.present) {
+      map['superseded_by_memory_id'] =
+          Variable<String>(supersededByMemoryId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LongTermMemoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('scopeKind: $scopeKind, ')
+          ..write('characterId: $characterId, ')
+          ..write('personaId: $personaId, ')
+          ..write('chatId: $chatId, ')
+          ..write('groupId: $groupId, ')
+          ..write('state: $state, ')
+          ..write('content: $content, ')
+          ..write('sourceOrigin: $sourceOrigin, ')
+          ..write('sourceChatId: $sourceChatId, ')
+          ..write('extractedAt: $extractedAt, ')
+          ..write('providerId: $providerId, ')
+          ..write('modelId: $modelId, ')
+          ..write('importance: $importance, ')
+          ..write('confidence: $confidence, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('locked: $locked, ')
+          ..write('normalizedIdentityKey: $normalizedIdentityKey, ')
+          ..write('supersededByMemoryId: $supersededByMemoryId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LongTermMemorySourceMessagesTable extends LongTermMemorySourceMessages
+    with
+        TableInfo<$LongTermMemorySourceMessagesTable,
+            LongTermMemorySourceMessageRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LongTermMemorySourceMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _memoryIdMeta =
+      const VerificationMeta('memoryId');
+  @override
+  late final GeneratedColumn<String> memoryId = GeneratedColumn<String>(
+      'memory_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES long_term_memories (id) ON DELETE CASCADE'));
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  @override
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
+  static const VerificationMeta _ordinalMeta =
+      const VerificationMeta('ordinal');
+  @override
+  late final GeneratedColumn<int> ordinal = GeneratedColumn<int>(
+      'ordinal', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [memoryId, messageId, ordinal];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'long_term_memory_source_messages';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LongTermMemorySourceMessageRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('memory_id')) {
+      context.handle(_memoryIdMeta,
+          memoryId.isAcceptableOrUnknown(data['memory_id']!, _memoryIdMeta));
+    } else if (isInserting) {
+      context.missing(_memoryIdMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('ordinal')) {
+      context.handle(_ordinalMeta,
+          ordinal.isAcceptableOrUnknown(data['ordinal']!, _ordinalMeta));
+    } else if (isInserting) {
+      context.missing(_ordinalMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {memoryId, messageId};
+  @override
+  LongTermMemorySourceMessageRow map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LongTermMemorySourceMessageRow(
+      memoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}memory_id'])!,
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      ordinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordinal'])!,
+    );
+  }
+
+  @override
+  $LongTermMemorySourceMessagesTable createAlias(String alias) {
+    return $LongTermMemorySourceMessagesTable(attachedDatabase, alias);
+  }
+}
+
+class LongTermMemorySourceMessageRow extends DataClass
+    implements Insertable<LongTermMemorySourceMessageRow> {
+  final String memoryId;
+  final String messageId;
+  final int ordinal;
+  const LongTermMemorySourceMessageRow(
+      {required this.memoryId, required this.messageId, required this.ordinal});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['memory_id'] = Variable<String>(memoryId);
+    map['message_id'] = Variable<String>(messageId);
+    map['ordinal'] = Variable<int>(ordinal);
+    return map;
+  }
+
+  LongTermMemorySourceMessagesCompanion toCompanion(bool nullToAbsent) {
+    return LongTermMemorySourceMessagesCompanion(
+      memoryId: Value(memoryId),
+      messageId: Value(messageId),
+      ordinal: Value(ordinal),
+    );
+  }
+
+  factory LongTermMemorySourceMessageRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LongTermMemorySourceMessageRow(
+      memoryId: serializer.fromJson<String>(json['memoryId']),
+      messageId: serializer.fromJson<String>(json['messageId']),
+      ordinal: serializer.fromJson<int>(json['ordinal']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'memoryId': serializer.toJson<String>(memoryId),
+      'messageId': serializer.toJson<String>(messageId),
+      'ordinal': serializer.toJson<int>(ordinal),
+    };
+  }
+
+  LongTermMemorySourceMessageRow copyWith(
+          {String? memoryId, String? messageId, int? ordinal}) =>
+      LongTermMemorySourceMessageRow(
+        memoryId: memoryId ?? this.memoryId,
+        messageId: messageId ?? this.messageId,
+        ordinal: ordinal ?? this.ordinal,
+      );
+  LongTermMemorySourceMessageRow copyWithCompanion(
+      LongTermMemorySourceMessagesCompanion data) {
+    return LongTermMemorySourceMessageRow(
+      memoryId: data.memoryId.present ? data.memoryId.value : this.memoryId,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      ordinal: data.ordinal.present ? data.ordinal.value : this.ordinal,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LongTermMemorySourceMessageRow(')
+          ..write('memoryId: $memoryId, ')
+          ..write('messageId: $messageId, ')
+          ..write('ordinal: $ordinal')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(memoryId, messageId, ordinal);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LongTermMemorySourceMessageRow &&
+          other.memoryId == this.memoryId &&
+          other.messageId == this.messageId &&
+          other.ordinal == this.ordinal);
+}
+
+class LongTermMemorySourceMessagesCompanion
+    extends UpdateCompanion<LongTermMemorySourceMessageRow> {
+  final Value<String> memoryId;
+  final Value<String> messageId;
+  final Value<int> ordinal;
+  final Value<int> rowid;
+  const LongTermMemorySourceMessagesCompanion({
+    this.memoryId = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.ordinal = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LongTermMemorySourceMessagesCompanion.insert({
+    required String memoryId,
+    required String messageId,
+    required int ordinal,
+    this.rowid = const Value.absent(),
+  })  : memoryId = Value(memoryId),
+        messageId = Value(messageId),
+        ordinal = Value(ordinal);
+  static Insertable<LongTermMemorySourceMessageRow> custom({
+    Expression<String>? memoryId,
+    Expression<String>? messageId,
+    Expression<int>? ordinal,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (memoryId != null) 'memory_id': memoryId,
+      if (messageId != null) 'message_id': messageId,
+      if (ordinal != null) 'ordinal': ordinal,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LongTermMemorySourceMessagesCompanion copyWith(
+      {Value<String>? memoryId,
+      Value<String>? messageId,
+      Value<int>? ordinal,
+      Value<int>? rowid}) {
+    return LongTermMemorySourceMessagesCompanion(
+      memoryId: memoryId ?? this.memoryId,
+      messageId: messageId ?? this.messageId,
+      ordinal: ordinal ?? this.ordinal,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (memoryId.present) {
+      map['memory_id'] = Variable<String>(memoryId.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (ordinal.present) {
+      map['ordinal'] = Variable<int>(ordinal.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LongTermMemorySourceMessagesCompanion(')
+          ..write('memoryId: $memoryId, ')
+          ..write('messageId: $messageId, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RpgScenariosTable extends RpgScenarios
+    with TableInfo<$RpgScenariosTable, RpgScenarioRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RpgScenariosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _versionMeta =
+      const VerificationMeta('version');
+  @override
+  late final GeneratedColumn<String> version = GeneratedColumn<String>(
+      'version', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contractSchemaVersionMeta =
+      const VerificationMeta('contractSchemaVersion');
+  @override
+  late final GeneratedColumn<int> contractSchemaVersion = GeneratedColumn<int>(
+      'contract_schema_version', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _scenarioJsonMeta =
+      const VerificationMeta('scenarioJson');
+  @override
+  late final GeneratedColumn<String> scenarioJson = GeneratedColumn<String>(
+      'scenario_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, version, contractSchemaVersion, scenarioJson, createdAt, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rpg_scenarios';
+  @override
+  VerificationContext validateIntegrity(Insertable<RpgScenarioRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(_versionMeta,
+          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('contract_schema_version')) {
+      context.handle(
+          _contractSchemaVersionMeta,
+          contractSchemaVersion.isAcceptableOrUnknown(
+              data['contract_schema_version']!, _contractSchemaVersionMeta));
+    } else if (isInserting) {
+      context.missing(_contractSchemaVersionMeta);
+    }
+    if (data.containsKey('scenario_json')) {
+      context.handle(
+          _scenarioJsonMeta,
+          scenarioJson.isAcceptableOrUnknown(
+              data['scenario_json']!, _scenarioJsonMeta));
+    } else if (isInserting) {
+      context.missing(_scenarioJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RpgScenarioRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RpgScenarioRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}version'])!,
+      contractSchemaVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}contract_schema_version'])!,
+      scenarioJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scenario_json'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $RpgScenariosTable createAlias(String alias) {
+    return $RpgScenariosTable(attachedDatabase, alias);
+  }
+}
+
+class RpgScenarioRow extends DataClass implements Insertable<RpgScenarioRow> {
+  final String id;
+  final String version;
+  final int contractSchemaVersion;
+  final String scenarioJson;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const RpgScenarioRow(
+      {required this.id,
+      required this.version,
+      required this.contractSchemaVersion,
+      required this.scenarioJson,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['version'] = Variable<String>(version);
+    map['contract_schema_version'] = Variable<int>(contractSchemaVersion);
+    map['scenario_json'] = Variable<String>(scenarioJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  RpgScenariosCompanion toCompanion(bool nullToAbsent) {
+    return RpgScenariosCompanion(
+      id: Value(id),
+      version: Value(version),
+      contractSchemaVersion: Value(contractSchemaVersion),
+      scenarioJson: Value(scenarioJson),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory RpgScenarioRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RpgScenarioRow(
+      id: serializer.fromJson<String>(json['id']),
+      version: serializer.fromJson<String>(json['version']),
+      contractSchemaVersion:
+          serializer.fromJson<int>(json['contractSchemaVersion']),
+      scenarioJson: serializer.fromJson<String>(json['scenarioJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'version': serializer.toJson<String>(version),
+      'contractSchemaVersion': serializer.toJson<int>(contractSchemaVersion),
+      'scenarioJson': serializer.toJson<String>(scenarioJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  RpgScenarioRow copyWith(
+          {String? id,
+          String? version,
+          int? contractSchemaVersion,
+          String? scenarioJson,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      RpgScenarioRow(
+        id: id ?? this.id,
+        version: version ?? this.version,
+        contractSchemaVersion:
+            contractSchemaVersion ?? this.contractSchemaVersion,
+        scenarioJson: scenarioJson ?? this.scenarioJson,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  RpgScenarioRow copyWithCompanion(RpgScenariosCompanion data) {
+    return RpgScenarioRow(
+      id: data.id.present ? data.id.value : this.id,
+      version: data.version.present ? data.version.value : this.version,
+      contractSchemaVersion: data.contractSchemaVersion.present
+          ? data.contractSchemaVersion.value
+          : this.contractSchemaVersion,
+      scenarioJson: data.scenarioJson.present
+          ? data.scenarioJson.value
+          : this.scenarioJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgScenarioRow(')
+          ..write('id: $id, ')
+          ..write('version: $version, ')
+          ..write('contractSchemaVersion: $contractSchemaVersion, ')
+          ..write('scenarioJson: $scenarioJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, version, contractSchemaVersion, scenarioJson, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RpgScenarioRow &&
+          other.id == this.id &&
+          other.version == this.version &&
+          other.contractSchemaVersion == this.contractSchemaVersion &&
+          other.scenarioJson == this.scenarioJson &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RpgScenariosCompanion extends UpdateCompanion<RpgScenarioRow> {
+  final Value<String> id;
+  final Value<String> version;
+  final Value<int> contractSchemaVersion;
+  final Value<String> scenarioJson;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const RpgScenariosCompanion({
+    this.id = const Value.absent(),
+    this.version = const Value.absent(),
+    this.contractSchemaVersion = const Value.absent(),
+    this.scenarioJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RpgScenariosCompanion.insert({
+    required String id,
+    required String version,
+    required int contractSchemaVersion,
+    required String scenarioJson,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        version = Value(version),
+        contractSchemaVersion = Value(contractSchemaVersion),
+        scenarioJson = Value(scenarioJson),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<RpgScenarioRow> custom({
+    Expression<String>? id,
+    Expression<String>? version,
+    Expression<int>? contractSchemaVersion,
+    Expression<String>? scenarioJson,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (version != null) 'version': version,
+      if (contractSchemaVersion != null)
+        'contract_schema_version': contractSchemaVersion,
+      if (scenarioJson != null) 'scenario_json': scenarioJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RpgScenariosCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? version,
+      Value<int>? contractSchemaVersion,
+      Value<String>? scenarioJson,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return RpgScenariosCompanion(
+      id: id ?? this.id,
+      version: version ?? this.version,
+      contractSchemaVersion:
+          contractSchemaVersion ?? this.contractSchemaVersion,
+      scenarioJson: scenarioJson ?? this.scenarioJson,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<String>(version.value);
+    }
+    if (contractSchemaVersion.present) {
+      map['contract_schema_version'] =
+          Variable<int>(contractSchemaVersion.value);
+    }
+    if (scenarioJson.present) {
+      map['scenario_json'] = Variable<String>(scenarioJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgScenariosCompanion(')
+          ..write('id: $id, ')
+          ..write('version: $version, ')
+          ..write('contractSchemaVersion: $contractSchemaVersion, ')
+          ..write('scenarioJson: $scenarioJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RpgStateSnapshotsTable extends RpgStateSnapshots
+    with TableInfo<$RpgStateSnapshotsTable, RpgStateSnapshotRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RpgStateSnapshotsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _scenarioIdMeta =
+      const VerificationMeta('scenarioId');
+  @override
+  late final GeneratedColumn<String> scenarioId = GeneratedColumn<String>(
+      'scenario_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES rpg_scenarios (id) ON DELETE CASCADE'));
+  static const VerificationMeta _scenarioVersionMeta =
+      const VerificationMeta('scenarioVersion');
+  @override
+  late final GeneratedColumn<String> scenarioVersion = GeneratedColumn<String>(
+      'scenario_version', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _branchIdMeta =
+      const VerificationMeta('branchId');
+  @override
+  late final GeneratedColumn<String> branchId = GeneratedColumn<String>(
+      'branch_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _parentSnapshotIdMeta =
+      const VerificationMeta('parentSnapshotId');
+  @override
+  late final GeneratedColumn<String> parentSnapshotId = GeneratedColumn<String>(
+      'parent_snapshot_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES rpg_state_snapshots (id) ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED'));
+  static const VerificationMeta _turnMeta = const VerificationMeta('turn');
+  @override
+  late final GeneratedColumn<int> turn = GeneratedColumn<int>(
+      'turn', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _randomStateMeta =
+      const VerificationMeta('randomState');
+  @override
+  late final GeneratedColumn<int> randomState = GeneratedColumn<int>(
+      'random_state', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _rollsConsumedMeta =
+      const VerificationMeta('rollsConsumed');
+  @override
+  late final GeneratedColumn<int> rollsConsumed = GeneratedColumn<int>(
+      'rolls_consumed', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _stateHashMeta =
+      const VerificationMeta('stateHash');
+  @override
+  late final GeneratedColumn<String> stateHash = GeneratedColumn<String>(
+      'state_hash', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _snapshotJsonMeta =
+      const VerificationMeta('snapshotJson');
+  @override
+  late final GeneratedColumn<String> snapshotJson = GeneratedColumn<String>(
+      'snapshot_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        scenarioId,
+        scenarioVersion,
+        branchId,
+        parentSnapshotId,
+        turn,
+        randomState,
+        rollsConsumed,
+        createdAt,
+        stateHash,
+        snapshotJson
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rpg_state_snapshots';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<RpgStateSnapshotRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('scenario_id')) {
+      context.handle(
+          _scenarioIdMeta,
+          scenarioId.isAcceptableOrUnknown(
+              data['scenario_id']!, _scenarioIdMeta));
+    } else if (isInserting) {
+      context.missing(_scenarioIdMeta);
+    }
+    if (data.containsKey('scenario_version')) {
+      context.handle(
+          _scenarioVersionMeta,
+          scenarioVersion.isAcceptableOrUnknown(
+              data['scenario_version']!, _scenarioVersionMeta));
+    } else if (isInserting) {
+      context.missing(_scenarioVersionMeta);
+    }
+    if (data.containsKey('branch_id')) {
+      context.handle(_branchIdMeta,
+          branchId.isAcceptableOrUnknown(data['branch_id']!, _branchIdMeta));
+    } else if (isInserting) {
+      context.missing(_branchIdMeta);
+    }
+    if (data.containsKey('parent_snapshot_id')) {
+      context.handle(
+          _parentSnapshotIdMeta,
+          parentSnapshotId.isAcceptableOrUnknown(
+              data['parent_snapshot_id']!, _parentSnapshotIdMeta));
+    }
+    if (data.containsKey('turn')) {
+      context.handle(
+          _turnMeta, turn.isAcceptableOrUnknown(data['turn']!, _turnMeta));
+    } else if (isInserting) {
+      context.missing(_turnMeta);
+    }
+    if (data.containsKey('random_state')) {
+      context.handle(
+          _randomStateMeta,
+          randomState.isAcceptableOrUnknown(
+              data['random_state']!, _randomStateMeta));
+    } else if (isInserting) {
+      context.missing(_randomStateMeta);
+    }
+    if (data.containsKey('rolls_consumed')) {
+      context.handle(
+          _rollsConsumedMeta,
+          rollsConsumed.isAcceptableOrUnknown(
+              data['rolls_consumed']!, _rollsConsumedMeta));
+    } else if (isInserting) {
+      context.missing(_rollsConsumedMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('state_hash')) {
+      context.handle(_stateHashMeta,
+          stateHash.isAcceptableOrUnknown(data['state_hash']!, _stateHashMeta));
+    }
+    if (data.containsKey('snapshot_json')) {
+      context.handle(
+          _snapshotJsonMeta,
+          snapshotJson.isAcceptableOrUnknown(
+              data['snapshot_json']!, _snapshotJsonMeta));
+    } else if (isInserting) {
+      context.missing(_snapshotJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RpgStateSnapshotRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RpgStateSnapshotRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      scenarioId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scenario_id'])!,
+      scenarioVersion: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}scenario_version'])!,
+      branchId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}branch_id'])!,
+      parentSnapshotId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}parent_snapshot_id']),
+      turn: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}turn'])!,
+      randomState: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}random_state'])!,
+      rollsConsumed: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}rolls_consumed'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      stateHash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state_hash']),
+      snapshotJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}snapshot_json'])!,
+    );
+  }
+
+  @override
+  $RpgStateSnapshotsTable createAlias(String alias) {
+    return $RpgStateSnapshotsTable(attachedDatabase, alias);
+  }
+}
+
+class RpgStateSnapshotRow extends DataClass
+    implements Insertable<RpgStateSnapshotRow> {
+  final String id;
+  final String scenarioId;
+  final String scenarioVersion;
+  final String branchId;
+  final String? parentSnapshotId;
+  final int turn;
+  final int randomState;
+  final int rollsConsumed;
+  final DateTime createdAt;
+  final String? stateHash;
+  final String snapshotJson;
+  const RpgStateSnapshotRow(
+      {required this.id,
+      required this.scenarioId,
+      required this.scenarioVersion,
+      required this.branchId,
+      this.parentSnapshotId,
+      required this.turn,
+      required this.randomState,
+      required this.rollsConsumed,
+      required this.createdAt,
+      this.stateHash,
+      required this.snapshotJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['scenario_id'] = Variable<String>(scenarioId);
+    map['scenario_version'] = Variable<String>(scenarioVersion);
+    map['branch_id'] = Variable<String>(branchId);
+    if (!nullToAbsent || parentSnapshotId != null) {
+      map['parent_snapshot_id'] = Variable<String>(parentSnapshotId);
+    }
+    map['turn'] = Variable<int>(turn);
+    map['random_state'] = Variable<int>(randomState);
+    map['rolls_consumed'] = Variable<int>(rollsConsumed);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || stateHash != null) {
+      map['state_hash'] = Variable<String>(stateHash);
+    }
+    map['snapshot_json'] = Variable<String>(snapshotJson);
+    return map;
+  }
+
+  RpgStateSnapshotsCompanion toCompanion(bool nullToAbsent) {
+    return RpgStateSnapshotsCompanion(
+      id: Value(id),
+      scenarioId: Value(scenarioId),
+      scenarioVersion: Value(scenarioVersion),
+      branchId: Value(branchId),
+      parentSnapshotId: parentSnapshotId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentSnapshotId),
+      turn: Value(turn),
+      randomState: Value(randomState),
+      rollsConsumed: Value(rollsConsumed),
+      createdAt: Value(createdAt),
+      stateHash: stateHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stateHash),
+      snapshotJson: Value(snapshotJson),
+    );
+  }
+
+  factory RpgStateSnapshotRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RpgStateSnapshotRow(
+      id: serializer.fromJson<String>(json['id']),
+      scenarioId: serializer.fromJson<String>(json['scenarioId']),
+      scenarioVersion: serializer.fromJson<String>(json['scenarioVersion']),
+      branchId: serializer.fromJson<String>(json['branchId']),
+      parentSnapshotId: serializer.fromJson<String?>(json['parentSnapshotId']),
+      turn: serializer.fromJson<int>(json['turn']),
+      randomState: serializer.fromJson<int>(json['randomState']),
+      rollsConsumed: serializer.fromJson<int>(json['rollsConsumed']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      stateHash: serializer.fromJson<String?>(json['stateHash']),
+      snapshotJson: serializer.fromJson<String>(json['snapshotJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'scenarioId': serializer.toJson<String>(scenarioId),
+      'scenarioVersion': serializer.toJson<String>(scenarioVersion),
+      'branchId': serializer.toJson<String>(branchId),
+      'parentSnapshotId': serializer.toJson<String?>(parentSnapshotId),
+      'turn': serializer.toJson<int>(turn),
+      'randomState': serializer.toJson<int>(randomState),
+      'rollsConsumed': serializer.toJson<int>(rollsConsumed),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'stateHash': serializer.toJson<String?>(stateHash),
+      'snapshotJson': serializer.toJson<String>(snapshotJson),
+    };
+  }
+
+  RpgStateSnapshotRow copyWith(
+          {String? id,
+          String? scenarioId,
+          String? scenarioVersion,
+          String? branchId,
+          Value<String?> parentSnapshotId = const Value.absent(),
+          int? turn,
+          int? randomState,
+          int? rollsConsumed,
+          DateTime? createdAt,
+          Value<String?> stateHash = const Value.absent(),
+          String? snapshotJson}) =>
+      RpgStateSnapshotRow(
+        id: id ?? this.id,
+        scenarioId: scenarioId ?? this.scenarioId,
+        scenarioVersion: scenarioVersion ?? this.scenarioVersion,
+        branchId: branchId ?? this.branchId,
+        parentSnapshotId: parentSnapshotId.present
+            ? parentSnapshotId.value
+            : this.parentSnapshotId,
+        turn: turn ?? this.turn,
+        randomState: randomState ?? this.randomState,
+        rollsConsumed: rollsConsumed ?? this.rollsConsumed,
+        createdAt: createdAt ?? this.createdAt,
+        stateHash: stateHash.present ? stateHash.value : this.stateHash,
+        snapshotJson: snapshotJson ?? this.snapshotJson,
+      );
+  RpgStateSnapshotRow copyWithCompanion(RpgStateSnapshotsCompanion data) {
+    return RpgStateSnapshotRow(
+      id: data.id.present ? data.id.value : this.id,
+      scenarioId:
+          data.scenarioId.present ? data.scenarioId.value : this.scenarioId,
+      scenarioVersion: data.scenarioVersion.present
+          ? data.scenarioVersion.value
+          : this.scenarioVersion,
+      branchId: data.branchId.present ? data.branchId.value : this.branchId,
+      parentSnapshotId: data.parentSnapshotId.present
+          ? data.parentSnapshotId.value
+          : this.parentSnapshotId,
+      turn: data.turn.present ? data.turn.value : this.turn,
+      randomState:
+          data.randomState.present ? data.randomState.value : this.randomState,
+      rollsConsumed: data.rollsConsumed.present
+          ? data.rollsConsumed.value
+          : this.rollsConsumed,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      stateHash: data.stateHash.present ? data.stateHash.value : this.stateHash,
+      snapshotJson: data.snapshotJson.present
+          ? data.snapshotJson.value
+          : this.snapshotJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgStateSnapshotRow(')
+          ..write('id: $id, ')
+          ..write('scenarioId: $scenarioId, ')
+          ..write('scenarioVersion: $scenarioVersion, ')
+          ..write('branchId: $branchId, ')
+          ..write('parentSnapshotId: $parentSnapshotId, ')
+          ..write('turn: $turn, ')
+          ..write('randomState: $randomState, ')
+          ..write('rollsConsumed: $rollsConsumed, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('stateHash: $stateHash, ')
+          ..write('snapshotJson: $snapshotJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      scenarioId,
+      scenarioVersion,
+      branchId,
+      parentSnapshotId,
+      turn,
+      randomState,
+      rollsConsumed,
+      createdAt,
+      stateHash,
+      snapshotJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RpgStateSnapshotRow &&
+          other.id == this.id &&
+          other.scenarioId == this.scenarioId &&
+          other.scenarioVersion == this.scenarioVersion &&
+          other.branchId == this.branchId &&
+          other.parentSnapshotId == this.parentSnapshotId &&
+          other.turn == this.turn &&
+          other.randomState == this.randomState &&
+          other.rollsConsumed == this.rollsConsumed &&
+          other.createdAt == this.createdAt &&
+          other.stateHash == this.stateHash &&
+          other.snapshotJson == this.snapshotJson);
+}
+
+class RpgStateSnapshotsCompanion extends UpdateCompanion<RpgStateSnapshotRow> {
+  final Value<String> id;
+  final Value<String> scenarioId;
+  final Value<String> scenarioVersion;
+  final Value<String> branchId;
+  final Value<String?> parentSnapshotId;
+  final Value<int> turn;
+  final Value<int> randomState;
+  final Value<int> rollsConsumed;
+  final Value<DateTime> createdAt;
+  final Value<String?> stateHash;
+  final Value<String> snapshotJson;
+  final Value<int> rowid;
+  const RpgStateSnapshotsCompanion({
+    this.id = const Value.absent(),
+    this.scenarioId = const Value.absent(),
+    this.scenarioVersion = const Value.absent(),
+    this.branchId = const Value.absent(),
+    this.parentSnapshotId = const Value.absent(),
+    this.turn = const Value.absent(),
+    this.randomState = const Value.absent(),
+    this.rollsConsumed = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.stateHash = const Value.absent(),
+    this.snapshotJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RpgStateSnapshotsCompanion.insert({
+    required String id,
+    required String scenarioId,
+    required String scenarioVersion,
+    required String branchId,
+    this.parentSnapshotId = const Value.absent(),
+    required int turn,
+    required int randomState,
+    required int rollsConsumed,
+    required DateTime createdAt,
+    this.stateHash = const Value.absent(),
+    required String snapshotJson,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        scenarioId = Value(scenarioId),
+        scenarioVersion = Value(scenarioVersion),
+        branchId = Value(branchId),
+        turn = Value(turn),
+        randomState = Value(randomState),
+        rollsConsumed = Value(rollsConsumed),
+        createdAt = Value(createdAt),
+        snapshotJson = Value(snapshotJson);
+  static Insertable<RpgStateSnapshotRow> custom({
+    Expression<String>? id,
+    Expression<String>? scenarioId,
+    Expression<String>? scenarioVersion,
+    Expression<String>? branchId,
+    Expression<String>? parentSnapshotId,
+    Expression<int>? turn,
+    Expression<int>? randomState,
+    Expression<int>? rollsConsumed,
+    Expression<DateTime>? createdAt,
+    Expression<String>? stateHash,
+    Expression<String>? snapshotJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (scenarioId != null) 'scenario_id': scenarioId,
+      if (scenarioVersion != null) 'scenario_version': scenarioVersion,
+      if (branchId != null) 'branch_id': branchId,
+      if (parentSnapshotId != null) 'parent_snapshot_id': parentSnapshotId,
+      if (turn != null) 'turn': turn,
+      if (randomState != null) 'random_state': randomState,
+      if (rollsConsumed != null) 'rolls_consumed': rollsConsumed,
+      if (createdAt != null) 'created_at': createdAt,
+      if (stateHash != null) 'state_hash': stateHash,
+      if (snapshotJson != null) 'snapshot_json': snapshotJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RpgStateSnapshotsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? scenarioId,
+      Value<String>? scenarioVersion,
+      Value<String>? branchId,
+      Value<String?>? parentSnapshotId,
+      Value<int>? turn,
+      Value<int>? randomState,
+      Value<int>? rollsConsumed,
+      Value<DateTime>? createdAt,
+      Value<String?>? stateHash,
+      Value<String>? snapshotJson,
+      Value<int>? rowid}) {
+    return RpgStateSnapshotsCompanion(
+      id: id ?? this.id,
+      scenarioId: scenarioId ?? this.scenarioId,
+      scenarioVersion: scenarioVersion ?? this.scenarioVersion,
+      branchId: branchId ?? this.branchId,
+      parentSnapshotId: parentSnapshotId ?? this.parentSnapshotId,
+      turn: turn ?? this.turn,
+      randomState: randomState ?? this.randomState,
+      rollsConsumed: rollsConsumed ?? this.rollsConsumed,
+      createdAt: createdAt ?? this.createdAt,
+      stateHash: stateHash ?? this.stateHash,
+      snapshotJson: snapshotJson ?? this.snapshotJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (scenarioId.present) {
+      map['scenario_id'] = Variable<String>(scenarioId.value);
+    }
+    if (scenarioVersion.present) {
+      map['scenario_version'] = Variable<String>(scenarioVersion.value);
+    }
+    if (branchId.present) {
+      map['branch_id'] = Variable<String>(branchId.value);
+    }
+    if (parentSnapshotId.present) {
+      map['parent_snapshot_id'] = Variable<String>(parentSnapshotId.value);
+    }
+    if (turn.present) {
+      map['turn'] = Variable<int>(turn.value);
+    }
+    if (randomState.present) {
+      map['random_state'] = Variable<int>(randomState.value);
+    }
+    if (rollsConsumed.present) {
+      map['rolls_consumed'] = Variable<int>(rollsConsumed.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (stateHash.present) {
+      map['state_hash'] = Variable<String>(stateHash.value);
+    }
+    if (snapshotJson.present) {
+      map['snapshot_json'] = Variable<String>(snapshotJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgStateSnapshotsCompanion(')
+          ..write('id: $id, ')
+          ..write('scenarioId: $scenarioId, ')
+          ..write('scenarioVersion: $scenarioVersion, ')
+          ..write('branchId: $branchId, ')
+          ..write('parentSnapshotId: $parentSnapshotId, ')
+          ..write('turn: $turn, ')
+          ..write('randomState: $randomState, ')
+          ..write('rollsConsumed: $rollsConsumed, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('stateHash: $stateHash, ')
+          ..write('snapshotJson: $snapshotJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RpgChatStatesTable extends RpgChatStates
+    with TableInfo<$RpgChatStatesTable, RpgChatStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RpgChatStatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
+      'chat_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE CASCADE'));
+  static const VerificationMeta _scenarioIdMeta =
+      const VerificationMeta('scenarioId');
+  @override
+  late final GeneratedColumn<String> scenarioId = GeneratedColumn<String>(
+      'scenario_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES rpg_scenarios (id) ON DELETE CASCADE'));
+  static const VerificationMeta _currentSnapshotIdMeta =
+      const VerificationMeta('currentSnapshotId');
+  @override
+  late final GeneratedColumn<String> currentSnapshotId =
+      GeneratedColumn<String>('current_snapshot_id', aliasedName, true,
+          type: DriftSqlType.string,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'REFERENCES rpg_state_snapshots (id) ON DELETE SET NULL'));
+  static const VerificationMeta _turnMeta = const VerificationMeta('turn');
+  @override
+  late final GeneratedColumn<int> turn = GeneratedColumn<int>(
+      'turn', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _stateJsonMeta =
+      const VerificationMeta('stateJson');
+  @override
+  late final GeneratedColumn<String> stateJson = GeneratedColumn<String>(
+      'state_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [chatId, scenarioId, currentSnapshotId, turn, stateJson, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rpg_chat_states';
+  @override
+  VerificationContext validateIntegrity(Insertable<RpgChatStateRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('chat_id')) {
+      context.handle(_chatIdMeta,
+          chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
+    } else if (isInserting) {
+      context.missing(_chatIdMeta);
+    }
+    if (data.containsKey('scenario_id')) {
+      context.handle(
+          _scenarioIdMeta,
+          scenarioId.isAcceptableOrUnknown(
+              data['scenario_id']!, _scenarioIdMeta));
+    } else if (isInserting) {
+      context.missing(_scenarioIdMeta);
+    }
+    if (data.containsKey('current_snapshot_id')) {
+      context.handle(
+          _currentSnapshotIdMeta,
+          currentSnapshotId.isAcceptableOrUnknown(
+              data['current_snapshot_id']!, _currentSnapshotIdMeta));
+    }
+    if (data.containsKey('turn')) {
+      context.handle(
+          _turnMeta, turn.isAcceptableOrUnknown(data['turn']!, _turnMeta));
+    } else if (isInserting) {
+      context.missing(_turnMeta);
+    }
+    if (data.containsKey('state_json')) {
+      context.handle(_stateJsonMeta,
+          stateJson.isAcceptableOrUnknown(data['state_json']!, _stateJsonMeta));
+    } else if (isInserting) {
+      context.missing(_stateJsonMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {chatId};
+  @override
+  RpgChatStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RpgChatStateRow(
+      chatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
+      scenarioId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scenario_id'])!,
+      currentSnapshotId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}current_snapshot_id']),
+      turn: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}turn'])!,
+      stateJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state_json'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $RpgChatStatesTable createAlias(String alias) {
+    return $RpgChatStatesTable(attachedDatabase, alias);
+  }
+}
+
+class RpgChatStateRow extends DataClass implements Insertable<RpgChatStateRow> {
+  final String chatId;
+  final String scenarioId;
+  final String? currentSnapshotId;
+  final int turn;
+  final String stateJson;
+  final DateTime updatedAt;
+  const RpgChatStateRow(
+      {required this.chatId,
+      required this.scenarioId,
+      this.currentSnapshotId,
+      required this.turn,
+      required this.stateJson,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['chat_id'] = Variable<String>(chatId);
+    map['scenario_id'] = Variable<String>(scenarioId);
+    if (!nullToAbsent || currentSnapshotId != null) {
+      map['current_snapshot_id'] = Variable<String>(currentSnapshotId);
+    }
+    map['turn'] = Variable<int>(turn);
+    map['state_json'] = Variable<String>(stateJson);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  RpgChatStatesCompanion toCompanion(bool nullToAbsent) {
+    return RpgChatStatesCompanion(
+      chatId: Value(chatId),
+      scenarioId: Value(scenarioId),
+      currentSnapshotId: currentSnapshotId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentSnapshotId),
+      turn: Value(turn),
+      stateJson: Value(stateJson),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory RpgChatStateRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RpgChatStateRow(
+      chatId: serializer.fromJson<String>(json['chatId']),
+      scenarioId: serializer.fromJson<String>(json['scenarioId']),
+      currentSnapshotId:
+          serializer.fromJson<String?>(json['currentSnapshotId']),
+      turn: serializer.fromJson<int>(json['turn']),
+      stateJson: serializer.fromJson<String>(json['stateJson']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'chatId': serializer.toJson<String>(chatId),
+      'scenarioId': serializer.toJson<String>(scenarioId),
+      'currentSnapshotId': serializer.toJson<String?>(currentSnapshotId),
+      'turn': serializer.toJson<int>(turn),
+      'stateJson': serializer.toJson<String>(stateJson),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  RpgChatStateRow copyWith(
+          {String? chatId,
+          String? scenarioId,
+          Value<String?> currentSnapshotId = const Value.absent(),
+          int? turn,
+          String? stateJson,
+          DateTime? updatedAt}) =>
+      RpgChatStateRow(
+        chatId: chatId ?? this.chatId,
+        scenarioId: scenarioId ?? this.scenarioId,
+        currentSnapshotId: currentSnapshotId.present
+            ? currentSnapshotId.value
+            : this.currentSnapshotId,
+        turn: turn ?? this.turn,
+        stateJson: stateJson ?? this.stateJson,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  RpgChatStateRow copyWithCompanion(RpgChatStatesCompanion data) {
+    return RpgChatStateRow(
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      scenarioId:
+          data.scenarioId.present ? data.scenarioId.value : this.scenarioId,
+      currentSnapshotId: data.currentSnapshotId.present
+          ? data.currentSnapshotId.value
+          : this.currentSnapshotId,
+      turn: data.turn.present ? data.turn.value : this.turn,
+      stateJson: data.stateJson.present ? data.stateJson.value : this.stateJson,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgChatStateRow(')
+          ..write('chatId: $chatId, ')
+          ..write('scenarioId: $scenarioId, ')
+          ..write('currentSnapshotId: $currentSnapshotId, ')
+          ..write('turn: $turn, ')
+          ..write('stateJson: $stateJson, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      chatId, scenarioId, currentSnapshotId, turn, stateJson, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RpgChatStateRow &&
+          other.chatId == this.chatId &&
+          other.scenarioId == this.scenarioId &&
+          other.currentSnapshotId == this.currentSnapshotId &&
+          other.turn == this.turn &&
+          other.stateJson == this.stateJson &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RpgChatStatesCompanion extends UpdateCompanion<RpgChatStateRow> {
+  final Value<String> chatId;
+  final Value<String> scenarioId;
+  final Value<String?> currentSnapshotId;
+  final Value<int> turn;
+  final Value<String> stateJson;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const RpgChatStatesCompanion({
+    this.chatId = const Value.absent(),
+    this.scenarioId = const Value.absent(),
+    this.currentSnapshotId = const Value.absent(),
+    this.turn = const Value.absent(),
+    this.stateJson = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RpgChatStatesCompanion.insert({
+    required String chatId,
+    required String scenarioId,
+    this.currentSnapshotId = const Value.absent(),
+    required int turn,
+    required String stateJson,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : chatId = Value(chatId),
+        scenarioId = Value(scenarioId),
+        turn = Value(turn),
+        stateJson = Value(stateJson),
+        updatedAt = Value(updatedAt);
+  static Insertable<RpgChatStateRow> custom({
+    Expression<String>? chatId,
+    Expression<String>? scenarioId,
+    Expression<String>? currentSnapshotId,
+    Expression<int>? turn,
+    Expression<String>? stateJson,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (chatId != null) 'chat_id': chatId,
+      if (scenarioId != null) 'scenario_id': scenarioId,
+      if (currentSnapshotId != null) 'current_snapshot_id': currentSnapshotId,
+      if (turn != null) 'turn': turn,
+      if (stateJson != null) 'state_json': stateJson,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RpgChatStatesCompanion copyWith(
+      {Value<String>? chatId,
+      Value<String>? scenarioId,
+      Value<String?>? currentSnapshotId,
+      Value<int>? turn,
+      Value<String>? stateJson,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return RpgChatStatesCompanion(
+      chatId: chatId ?? this.chatId,
+      scenarioId: scenarioId ?? this.scenarioId,
+      currentSnapshotId: currentSnapshotId ?? this.currentSnapshotId,
+      turn: turn ?? this.turn,
+      stateJson: stateJson ?? this.stateJson,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (chatId.present) {
+      map['chat_id'] = Variable<String>(chatId.value);
+    }
+    if (scenarioId.present) {
+      map['scenario_id'] = Variable<String>(scenarioId.value);
+    }
+    if (currentSnapshotId.present) {
+      map['current_snapshot_id'] = Variable<String>(currentSnapshotId.value);
+    }
+    if (turn.present) {
+      map['turn'] = Variable<int>(turn.value);
+    }
+    if (stateJson.present) {
+      map['state_json'] = Variable<String>(stateJson.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RpgChatStatesCompanion(')
+          ..write('chatId: $chatId, ')
+          ..write('scenarioId: $scenarioId, ')
+          ..write('currentSnapshotId: $currentSnapshotId, ')
+          ..write('turn: $turn, ')
+          ..write('stateJson: $stateJson, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DataBankDocumentsTable extends DataBankDocuments
+    with TableInfo<$DataBankDocumentsTable, DataBankDocumentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DataBankDocumentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _currentVersionIdMeta =
+      const VerificationMeta('currentVersionId');
+  @override
+  late final GeneratedColumn<String> currentVersionId = GeneratedColumn<String>(
+      'current_version_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _processingStateMeta =
+      const VerificationMeta('processingState');
+  @override
+  late final GeneratedColumn<String> processingState = GeneratedColumn<String>(
+      'processing_state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _indexStateMeta =
+      const VerificationMeta('indexState');
+  @override
+  late final GeneratedColumn<String> indexState = GeneratedColumn<String>(
+      'index_state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _failureJsonMeta =
+      const VerificationMeta('failureJson');
+  @override
+  late final GeneratedColumn<String> failureJson = GeneratedColumn<String>(
+      'failure_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _reprocessingJsonMeta =
+      const VerificationMeta('reprocessingJson');
+  @override
+  late final GeneratedColumn<String> reprocessingJson = GeneratedColumn<String>(
+      'reprocessing_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _isPlaceholderMeta =
+      const VerificationMeta('isPlaceholder');
+  @override
+  late final GeneratedColumn<bool> isPlaceholder = GeneratedColumn<bool>(
+      'is_placeholder', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_placeholder" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        currentVersionId,
+        processingState,
+        indexState,
+        failureJson,
+        reprocessingJson,
+        createdAt,
+        updatedAt,
+        isPlaceholder
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'data_bank_documents';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<DataBankDocumentRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('current_version_id')) {
+      context.handle(
+          _currentVersionIdMeta,
+          currentVersionId.isAcceptableOrUnknown(
+              data['current_version_id']!, _currentVersionIdMeta));
+    }
+    if (data.containsKey('processing_state')) {
+      context.handle(
+          _processingStateMeta,
+          processingState.isAcceptableOrUnknown(
+              data['processing_state']!, _processingStateMeta));
+    } else if (isInserting) {
+      context.missing(_processingStateMeta);
+    }
+    if (data.containsKey('index_state')) {
+      context.handle(
+          _indexStateMeta,
+          indexState.isAcceptableOrUnknown(
+              data['index_state']!, _indexStateMeta));
+    } else if (isInserting) {
+      context.missing(_indexStateMeta);
+    }
+    if (data.containsKey('failure_json')) {
+      context.handle(
+          _failureJsonMeta,
+          failureJson.isAcceptableOrUnknown(
+              data['failure_json']!, _failureJsonMeta));
+    }
+    if (data.containsKey('reprocessing_json')) {
+      context.handle(
+          _reprocessingJsonMeta,
+          reprocessingJson.isAcceptableOrUnknown(
+              data['reprocessing_json']!, _reprocessingJsonMeta));
+    } else if (isInserting) {
+      context.missing(_reprocessingJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_placeholder')) {
+      context.handle(
+          _isPlaceholderMeta,
+          isPlaceholder.isAcceptableOrUnknown(
+              data['is_placeholder']!, _isPlaceholderMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DataBankDocumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DataBankDocumentRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      currentVersionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}current_version_id']),
+      processingState: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}processing_state'])!,
+      indexState: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}index_state'])!,
+      failureJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}failure_json']),
+      reprocessingJson: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}reprocessing_json'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      isPlaceholder: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_placeholder'])!,
+    );
+  }
+
+  @override
+  $DataBankDocumentsTable createAlias(String alias) {
+    return $DataBankDocumentsTable(attachedDatabase, alias);
+  }
+}
+
+class DataBankDocumentRow extends DataClass
+    implements Insertable<DataBankDocumentRow> {
+  final String id;
+  final String? currentVersionId;
+  final String processingState;
+  final String indexState;
+  final String? failureJson;
+  final String reprocessingJson;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isPlaceholder;
+  const DataBankDocumentRow(
+      {required this.id,
+      this.currentVersionId,
+      required this.processingState,
+      required this.indexState,
+      this.failureJson,
+      required this.reprocessingJson,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.isPlaceholder});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || currentVersionId != null) {
+      map['current_version_id'] = Variable<String>(currentVersionId);
+    }
+    map['processing_state'] = Variable<String>(processingState);
+    map['index_state'] = Variable<String>(indexState);
+    if (!nullToAbsent || failureJson != null) {
+      map['failure_json'] = Variable<String>(failureJson);
+    }
+    map['reprocessing_json'] = Variable<String>(reprocessingJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_placeholder'] = Variable<bool>(isPlaceholder);
+    return map;
+  }
+
+  DataBankDocumentsCompanion toCompanion(bool nullToAbsent) {
+    return DataBankDocumentsCompanion(
+      id: Value(id),
+      currentVersionId: currentVersionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentVersionId),
+      processingState: Value(processingState),
+      indexState: Value(indexState),
+      failureJson: failureJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(failureJson),
+      reprocessingJson: Value(reprocessingJson),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isPlaceholder: Value(isPlaceholder),
+    );
+  }
+
+  factory DataBankDocumentRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DataBankDocumentRow(
+      id: serializer.fromJson<String>(json['id']),
+      currentVersionId: serializer.fromJson<String?>(json['currentVersionId']),
+      processingState: serializer.fromJson<String>(json['processingState']),
+      indexState: serializer.fromJson<String>(json['indexState']),
+      failureJson: serializer.fromJson<String?>(json['failureJson']),
+      reprocessingJson: serializer.fromJson<String>(json['reprocessingJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isPlaceholder: serializer.fromJson<bool>(json['isPlaceholder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'currentVersionId': serializer.toJson<String?>(currentVersionId),
+      'processingState': serializer.toJson<String>(processingState),
+      'indexState': serializer.toJson<String>(indexState),
+      'failureJson': serializer.toJson<String?>(failureJson),
+      'reprocessingJson': serializer.toJson<String>(reprocessingJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isPlaceholder': serializer.toJson<bool>(isPlaceholder),
+    };
+  }
+
+  DataBankDocumentRow copyWith(
+          {String? id,
+          Value<String?> currentVersionId = const Value.absent(),
+          String? processingState,
+          String? indexState,
+          Value<String?> failureJson = const Value.absent(),
+          String? reprocessingJson,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? isPlaceholder}) =>
+      DataBankDocumentRow(
+        id: id ?? this.id,
+        currentVersionId: currentVersionId.present
+            ? currentVersionId.value
+            : this.currentVersionId,
+        processingState: processingState ?? this.processingState,
+        indexState: indexState ?? this.indexState,
+        failureJson: failureJson.present ? failureJson.value : this.failureJson,
+        reprocessingJson: reprocessingJson ?? this.reprocessingJson,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        isPlaceholder: isPlaceholder ?? this.isPlaceholder,
+      );
+  DataBankDocumentRow copyWithCompanion(DataBankDocumentsCompanion data) {
+    return DataBankDocumentRow(
+      id: data.id.present ? data.id.value : this.id,
+      currentVersionId: data.currentVersionId.present
+          ? data.currentVersionId.value
+          : this.currentVersionId,
+      processingState: data.processingState.present
+          ? data.processingState.value
+          : this.processingState,
+      indexState:
+          data.indexState.present ? data.indexState.value : this.indexState,
+      failureJson:
+          data.failureJson.present ? data.failureJson.value : this.failureJson,
+      reprocessingJson: data.reprocessingJson.present
+          ? data.reprocessingJson.value
+          : this.reprocessingJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isPlaceholder: data.isPlaceholder.present
+          ? data.isPlaceholder.value
+          : this.isPlaceholder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankDocumentRow(')
+          ..write('id: $id, ')
+          ..write('currentVersionId: $currentVersionId, ')
+          ..write('processingState: $processingState, ')
+          ..write('indexState: $indexState, ')
+          ..write('failureJson: $failureJson, ')
+          ..write('reprocessingJson: $reprocessingJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isPlaceholder: $isPlaceholder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      currentVersionId,
+      processingState,
+      indexState,
+      failureJson,
+      reprocessingJson,
+      createdAt,
+      updatedAt,
+      isPlaceholder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DataBankDocumentRow &&
+          other.id == this.id &&
+          other.currentVersionId == this.currentVersionId &&
+          other.processingState == this.processingState &&
+          other.indexState == this.indexState &&
+          other.failureJson == this.failureJson &&
+          other.reprocessingJson == this.reprocessingJson &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isPlaceholder == this.isPlaceholder);
+}
+
+class DataBankDocumentsCompanion extends UpdateCompanion<DataBankDocumentRow> {
+  final Value<String> id;
+  final Value<String?> currentVersionId;
+  final Value<String> processingState;
+  final Value<String> indexState;
+  final Value<String?> failureJson;
+  final Value<String> reprocessingJson;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isPlaceholder;
+  final Value<int> rowid;
+  const DataBankDocumentsCompanion({
+    this.id = const Value.absent(),
+    this.currentVersionId = const Value.absent(),
+    this.processingState = const Value.absent(),
+    this.indexState = const Value.absent(),
+    this.failureJson = const Value.absent(),
+    this.reprocessingJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isPlaceholder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DataBankDocumentsCompanion.insert({
+    required String id,
+    this.currentVersionId = const Value.absent(),
+    required String processingState,
+    required String indexState,
+    this.failureJson = const Value.absent(),
+    required String reprocessingJson,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isPlaceholder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        processingState = Value(processingState),
+        indexState = Value(indexState),
+        reprocessingJson = Value(reprocessingJson),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<DataBankDocumentRow> custom({
+    Expression<String>? id,
+    Expression<String>? currentVersionId,
+    Expression<String>? processingState,
+    Expression<String>? indexState,
+    Expression<String>? failureJson,
+    Expression<String>? reprocessingJson,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isPlaceholder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (currentVersionId != null) 'current_version_id': currentVersionId,
+      if (processingState != null) 'processing_state': processingState,
+      if (indexState != null) 'index_state': indexState,
+      if (failureJson != null) 'failure_json': failureJson,
+      if (reprocessingJson != null) 'reprocessing_json': reprocessingJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isPlaceholder != null) 'is_placeholder': isPlaceholder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DataBankDocumentsCompanion copyWith(
+      {Value<String>? id,
+      Value<String?>? currentVersionId,
+      Value<String>? processingState,
+      Value<String>? indexState,
+      Value<String?>? failureJson,
+      Value<String>? reprocessingJson,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? isPlaceholder,
+      Value<int>? rowid}) {
+    return DataBankDocumentsCompanion(
+      id: id ?? this.id,
+      currentVersionId: currentVersionId ?? this.currentVersionId,
+      processingState: processingState ?? this.processingState,
+      indexState: indexState ?? this.indexState,
+      failureJson: failureJson ?? this.failureJson,
+      reprocessingJson: reprocessingJson ?? this.reprocessingJson,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isPlaceholder: isPlaceholder ?? this.isPlaceholder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (currentVersionId.present) {
+      map['current_version_id'] = Variable<String>(currentVersionId.value);
+    }
+    if (processingState.present) {
+      map['processing_state'] = Variable<String>(processingState.value);
+    }
+    if (indexState.present) {
+      map['index_state'] = Variable<String>(indexState.value);
+    }
+    if (failureJson.present) {
+      map['failure_json'] = Variable<String>(failureJson.value);
+    }
+    if (reprocessingJson.present) {
+      map['reprocessing_json'] = Variable<String>(reprocessingJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isPlaceholder.present) {
+      map['is_placeholder'] = Variable<bool>(isPlaceholder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankDocumentsCompanion(')
+          ..write('id: $id, ')
+          ..write('currentVersionId: $currentVersionId, ')
+          ..write('processingState: $processingState, ')
+          ..write('indexState: $indexState, ')
+          ..write('failureJson: $failureJson, ')
+          ..write('reprocessingJson: $reprocessingJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isPlaceholder: $isPlaceholder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DataBankDocumentVersionsTable extends DataBankDocumentVersions
+    with TableInfo<$DataBankDocumentVersionsTable, DataBankDocumentVersionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DataBankDocumentVersionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _documentIdMeta =
+      const VerificationMeta('documentId');
+  @override
+  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
+      'document_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES data_bank_documents (id) ON DELETE CASCADE'));
+  static const VerificationMeta _versionNumberMeta =
+      const VerificationMeta('versionNumber');
+  @override
+  late final GeneratedColumn<int> versionNumber = GeneratedColumn<int>(
+      'version_number', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _supersedesVersionIdMeta =
+      const VerificationMeta('supersedesVersionId');
+  @override
+  late final GeneratedColumn<String> supersedesVersionId = GeneratedColumn<
+          String>('supersedes_version_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES data_bank_document_versions (id) ON DELETE RESTRICT'));
+  static const VerificationMeta _originalFileNameMeta =
+      const VerificationMeta('originalFileName');
+  @override
+  late final GeneratedColumn<String> originalFileName = GeneratedColumn<String>(
+      'original_file_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mediaTypeMeta =
+      const VerificationMeta('mediaType');
+  @override
+  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
+      'media_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _byteSizeMeta =
+      const VerificationMeta('byteSize');
+  @override
+  late final GeneratedColumn<int> byteSize = GeneratedColumn<int>(
+      'byte_size', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _hashAlgorithmMeta =
+      const VerificationMeta('hashAlgorithm');
+  @override
+  late final GeneratedColumn<String> hashAlgorithm = GeneratedColumn<String>(
+      'hash_algorithm', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _hashDigestMeta =
+      const VerificationMeta('hashDigest');
+  @override
+  late final GeneratedColumn<String> hashDigest = GeneratedColumn<String>(
+      'hash_digest', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _importedAtMeta =
+      const VerificationMeta('importedAt');
+  @override
+  late final GeneratedColumn<DateTime> importedAt = GeneratedColumn<DateTime>(
+      'imported_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _processingStateMeta =
+      const VerificationMeta('processingState');
+  @override
+  late final GeneratedColumn<String> processingState = GeneratedColumn<String>(
+      'processing_state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _indexStateMeta =
+      const VerificationMeta('indexState');
+  @override
+  late final GeneratedColumn<String> indexState = GeneratedColumn<String>(
+      'index_state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _failureJsonMeta =
+      const VerificationMeta('failureJson');
+  @override
+  late final GeneratedColumn<String> failureJson = GeneratedColumn<String>(
+      'failure_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _reprocessingJsonMeta =
+      const VerificationMeta('reprocessingJson');
+  @override
+  late final GeneratedColumn<String> reprocessingJson = GeneratedColumn<String>(
+      'reprocessing_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        documentId,
+        versionNumber,
+        supersedesVersionId,
+        originalFileName,
+        mediaType,
+        byteSize,
+        hashAlgorithm,
+        hashDigest,
+        importedAt,
+        processingState,
+        indexState,
+        failureJson,
+        reprocessingJson
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'data_bank_document_versions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<DataBankDocumentVersionRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('document_id')) {
+      context.handle(
+          _documentIdMeta,
+          documentId.isAcceptableOrUnknown(
+              data['document_id']!, _documentIdMeta));
+    } else if (isInserting) {
+      context.missing(_documentIdMeta);
+    }
+    if (data.containsKey('version_number')) {
+      context.handle(
+          _versionNumberMeta,
+          versionNumber.isAcceptableOrUnknown(
+              data['version_number']!, _versionNumberMeta));
+    } else if (isInserting) {
+      context.missing(_versionNumberMeta);
+    }
+    if (data.containsKey('supersedes_version_id')) {
+      context.handle(
+          _supersedesVersionIdMeta,
+          supersedesVersionId.isAcceptableOrUnknown(
+              data['supersedes_version_id']!, _supersedesVersionIdMeta));
+    }
+    if (data.containsKey('original_file_name')) {
+      context.handle(
+          _originalFileNameMeta,
+          originalFileName.isAcceptableOrUnknown(
+              data['original_file_name']!, _originalFileNameMeta));
+    } else if (isInserting) {
+      context.missing(_originalFileNameMeta);
+    }
+    if (data.containsKey('media_type')) {
+      context.handle(_mediaTypeMeta,
+          mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta));
+    } else if (isInserting) {
+      context.missing(_mediaTypeMeta);
+    }
+    if (data.containsKey('byte_size')) {
+      context.handle(_byteSizeMeta,
+          byteSize.isAcceptableOrUnknown(data['byte_size']!, _byteSizeMeta));
+    } else if (isInserting) {
+      context.missing(_byteSizeMeta);
+    }
+    if (data.containsKey('hash_algorithm')) {
+      context.handle(
+          _hashAlgorithmMeta,
+          hashAlgorithm.isAcceptableOrUnknown(
+              data['hash_algorithm']!, _hashAlgorithmMeta));
+    } else if (isInserting) {
+      context.missing(_hashAlgorithmMeta);
+    }
+    if (data.containsKey('hash_digest')) {
+      context.handle(
+          _hashDigestMeta,
+          hashDigest.isAcceptableOrUnknown(
+              data['hash_digest']!, _hashDigestMeta));
+    } else if (isInserting) {
+      context.missing(_hashDigestMeta);
+    }
+    if (data.containsKey('imported_at')) {
+      context.handle(
+          _importedAtMeta,
+          importedAt.isAcceptableOrUnknown(
+              data['imported_at']!, _importedAtMeta));
+    } else if (isInserting) {
+      context.missing(_importedAtMeta);
+    }
+    if (data.containsKey('processing_state')) {
+      context.handle(
+          _processingStateMeta,
+          processingState.isAcceptableOrUnknown(
+              data['processing_state']!, _processingStateMeta));
+    } else if (isInserting) {
+      context.missing(_processingStateMeta);
+    }
+    if (data.containsKey('index_state')) {
+      context.handle(
+          _indexStateMeta,
+          indexState.isAcceptableOrUnknown(
+              data['index_state']!, _indexStateMeta));
+    } else if (isInserting) {
+      context.missing(_indexStateMeta);
+    }
+    if (data.containsKey('failure_json')) {
+      context.handle(
+          _failureJsonMeta,
+          failureJson.isAcceptableOrUnknown(
+              data['failure_json']!, _failureJsonMeta));
+    }
+    if (data.containsKey('reprocessing_json')) {
+      context.handle(
+          _reprocessingJsonMeta,
+          reprocessingJson.isAcceptableOrUnknown(
+              data['reprocessing_json']!, _reprocessingJsonMeta));
+    } else if (isInserting) {
+      context.missing(_reprocessingJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {documentId, versionNumber},
+        {documentId, hashAlgorithm, hashDigest},
+      ];
+  @override
+  DataBankDocumentVersionRow map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DataBankDocumentVersionRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      documentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_id'])!,
+      versionNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}version_number'])!,
+      supersedesVersionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}supersedes_version_id']),
+      originalFileName: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}original_file_name'])!,
+      mediaType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_type'])!,
+      byteSize: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}byte_size'])!,
+      hashAlgorithm: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}hash_algorithm'])!,
+      hashDigest: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}hash_digest'])!,
+      importedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}imported_at'])!,
+      processingState: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}processing_state'])!,
+      indexState: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}index_state'])!,
+      failureJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}failure_json']),
+      reprocessingJson: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}reprocessing_json'])!,
+    );
+  }
+
+  @override
+  $DataBankDocumentVersionsTable createAlias(String alias) {
+    return $DataBankDocumentVersionsTable(attachedDatabase, alias);
+  }
+}
+
+class DataBankDocumentVersionRow extends DataClass
+    implements Insertable<DataBankDocumentVersionRow> {
+  final String id;
+  final String documentId;
+  final int versionNumber;
+  final String? supersedesVersionId;
+  final String originalFileName;
+  final String mediaType;
+  final int byteSize;
+  final String hashAlgorithm;
+  final String hashDigest;
+  final DateTime importedAt;
+  final String processingState;
+  final String indexState;
+  final String? failureJson;
+  final String reprocessingJson;
+  const DataBankDocumentVersionRow(
+      {required this.id,
+      required this.documentId,
+      required this.versionNumber,
+      this.supersedesVersionId,
+      required this.originalFileName,
+      required this.mediaType,
+      required this.byteSize,
+      required this.hashAlgorithm,
+      required this.hashDigest,
+      required this.importedAt,
+      required this.processingState,
+      required this.indexState,
+      this.failureJson,
+      required this.reprocessingJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['document_id'] = Variable<String>(documentId);
+    map['version_number'] = Variable<int>(versionNumber);
+    if (!nullToAbsent || supersedesVersionId != null) {
+      map['supersedes_version_id'] = Variable<String>(supersedesVersionId);
+    }
+    map['original_file_name'] = Variable<String>(originalFileName);
+    map['media_type'] = Variable<String>(mediaType);
+    map['byte_size'] = Variable<int>(byteSize);
+    map['hash_algorithm'] = Variable<String>(hashAlgorithm);
+    map['hash_digest'] = Variable<String>(hashDigest);
+    map['imported_at'] = Variable<DateTime>(importedAt);
+    map['processing_state'] = Variable<String>(processingState);
+    map['index_state'] = Variable<String>(indexState);
+    if (!nullToAbsent || failureJson != null) {
+      map['failure_json'] = Variable<String>(failureJson);
+    }
+    map['reprocessing_json'] = Variable<String>(reprocessingJson);
+    return map;
+  }
+
+  DataBankDocumentVersionsCompanion toCompanion(bool nullToAbsent) {
+    return DataBankDocumentVersionsCompanion(
+      id: Value(id),
+      documentId: Value(documentId),
+      versionNumber: Value(versionNumber),
+      supersedesVersionId: supersedesVersionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supersedesVersionId),
+      originalFileName: Value(originalFileName),
+      mediaType: Value(mediaType),
+      byteSize: Value(byteSize),
+      hashAlgorithm: Value(hashAlgorithm),
+      hashDigest: Value(hashDigest),
+      importedAt: Value(importedAt),
+      processingState: Value(processingState),
+      indexState: Value(indexState),
+      failureJson: failureJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(failureJson),
+      reprocessingJson: Value(reprocessingJson),
+    );
+  }
+
+  factory DataBankDocumentVersionRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DataBankDocumentVersionRow(
+      id: serializer.fromJson<String>(json['id']),
+      documentId: serializer.fromJson<String>(json['documentId']),
+      versionNumber: serializer.fromJson<int>(json['versionNumber']),
+      supersedesVersionId:
+          serializer.fromJson<String?>(json['supersedesVersionId']),
+      originalFileName: serializer.fromJson<String>(json['originalFileName']),
+      mediaType: serializer.fromJson<String>(json['mediaType']),
+      byteSize: serializer.fromJson<int>(json['byteSize']),
+      hashAlgorithm: serializer.fromJson<String>(json['hashAlgorithm']),
+      hashDigest: serializer.fromJson<String>(json['hashDigest']),
+      importedAt: serializer.fromJson<DateTime>(json['importedAt']),
+      processingState: serializer.fromJson<String>(json['processingState']),
+      indexState: serializer.fromJson<String>(json['indexState']),
+      failureJson: serializer.fromJson<String?>(json['failureJson']),
+      reprocessingJson: serializer.fromJson<String>(json['reprocessingJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'documentId': serializer.toJson<String>(documentId),
+      'versionNumber': serializer.toJson<int>(versionNumber),
+      'supersedesVersionId': serializer.toJson<String?>(supersedesVersionId),
+      'originalFileName': serializer.toJson<String>(originalFileName),
+      'mediaType': serializer.toJson<String>(mediaType),
+      'byteSize': serializer.toJson<int>(byteSize),
+      'hashAlgorithm': serializer.toJson<String>(hashAlgorithm),
+      'hashDigest': serializer.toJson<String>(hashDigest),
+      'importedAt': serializer.toJson<DateTime>(importedAt),
+      'processingState': serializer.toJson<String>(processingState),
+      'indexState': serializer.toJson<String>(indexState),
+      'failureJson': serializer.toJson<String?>(failureJson),
+      'reprocessingJson': serializer.toJson<String>(reprocessingJson),
+    };
+  }
+
+  DataBankDocumentVersionRow copyWith(
+          {String? id,
+          String? documentId,
+          int? versionNumber,
+          Value<String?> supersedesVersionId = const Value.absent(),
+          String? originalFileName,
+          String? mediaType,
+          int? byteSize,
+          String? hashAlgorithm,
+          String? hashDigest,
+          DateTime? importedAt,
+          String? processingState,
+          String? indexState,
+          Value<String?> failureJson = const Value.absent(),
+          String? reprocessingJson}) =>
+      DataBankDocumentVersionRow(
+        id: id ?? this.id,
+        documentId: documentId ?? this.documentId,
+        versionNumber: versionNumber ?? this.versionNumber,
+        supersedesVersionId: supersedesVersionId.present
+            ? supersedesVersionId.value
+            : this.supersedesVersionId,
+        originalFileName: originalFileName ?? this.originalFileName,
+        mediaType: mediaType ?? this.mediaType,
+        byteSize: byteSize ?? this.byteSize,
+        hashAlgorithm: hashAlgorithm ?? this.hashAlgorithm,
+        hashDigest: hashDigest ?? this.hashDigest,
+        importedAt: importedAt ?? this.importedAt,
+        processingState: processingState ?? this.processingState,
+        indexState: indexState ?? this.indexState,
+        failureJson: failureJson.present ? failureJson.value : this.failureJson,
+        reprocessingJson: reprocessingJson ?? this.reprocessingJson,
+      );
+  DataBankDocumentVersionRow copyWithCompanion(
+      DataBankDocumentVersionsCompanion data) {
+    return DataBankDocumentVersionRow(
+      id: data.id.present ? data.id.value : this.id,
+      documentId:
+          data.documentId.present ? data.documentId.value : this.documentId,
+      versionNumber: data.versionNumber.present
+          ? data.versionNumber.value
+          : this.versionNumber,
+      supersedesVersionId: data.supersedesVersionId.present
+          ? data.supersedesVersionId.value
+          : this.supersedesVersionId,
+      originalFileName: data.originalFileName.present
+          ? data.originalFileName.value
+          : this.originalFileName,
+      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
+      byteSize: data.byteSize.present ? data.byteSize.value : this.byteSize,
+      hashAlgorithm: data.hashAlgorithm.present
+          ? data.hashAlgorithm.value
+          : this.hashAlgorithm,
+      hashDigest:
+          data.hashDigest.present ? data.hashDigest.value : this.hashDigest,
+      importedAt:
+          data.importedAt.present ? data.importedAt.value : this.importedAt,
+      processingState: data.processingState.present
+          ? data.processingState.value
+          : this.processingState,
+      indexState:
+          data.indexState.present ? data.indexState.value : this.indexState,
+      failureJson:
+          data.failureJson.present ? data.failureJson.value : this.failureJson,
+      reprocessingJson: data.reprocessingJson.present
+          ? data.reprocessingJson.value
+          : this.reprocessingJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankDocumentVersionRow(')
+          ..write('id: $id, ')
+          ..write('documentId: $documentId, ')
+          ..write('versionNumber: $versionNumber, ')
+          ..write('supersedesVersionId: $supersedesVersionId, ')
+          ..write('originalFileName: $originalFileName, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('byteSize: $byteSize, ')
+          ..write('hashAlgorithm: $hashAlgorithm, ')
+          ..write('hashDigest: $hashDigest, ')
+          ..write('importedAt: $importedAt, ')
+          ..write('processingState: $processingState, ')
+          ..write('indexState: $indexState, ')
+          ..write('failureJson: $failureJson, ')
+          ..write('reprocessingJson: $reprocessingJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      documentId,
+      versionNumber,
+      supersedesVersionId,
+      originalFileName,
+      mediaType,
+      byteSize,
+      hashAlgorithm,
+      hashDigest,
+      importedAt,
+      processingState,
+      indexState,
+      failureJson,
+      reprocessingJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DataBankDocumentVersionRow &&
+          other.id == this.id &&
+          other.documentId == this.documentId &&
+          other.versionNumber == this.versionNumber &&
+          other.supersedesVersionId == this.supersedesVersionId &&
+          other.originalFileName == this.originalFileName &&
+          other.mediaType == this.mediaType &&
+          other.byteSize == this.byteSize &&
+          other.hashAlgorithm == this.hashAlgorithm &&
+          other.hashDigest == this.hashDigest &&
+          other.importedAt == this.importedAt &&
+          other.processingState == this.processingState &&
+          other.indexState == this.indexState &&
+          other.failureJson == this.failureJson &&
+          other.reprocessingJson == this.reprocessingJson);
+}
+
+class DataBankDocumentVersionsCompanion
+    extends UpdateCompanion<DataBankDocumentVersionRow> {
+  final Value<String> id;
+  final Value<String> documentId;
+  final Value<int> versionNumber;
+  final Value<String?> supersedesVersionId;
+  final Value<String> originalFileName;
+  final Value<String> mediaType;
+  final Value<int> byteSize;
+  final Value<String> hashAlgorithm;
+  final Value<String> hashDigest;
+  final Value<DateTime> importedAt;
+  final Value<String> processingState;
+  final Value<String> indexState;
+  final Value<String?> failureJson;
+  final Value<String> reprocessingJson;
+  final Value<int> rowid;
+  const DataBankDocumentVersionsCompanion({
+    this.id = const Value.absent(),
+    this.documentId = const Value.absent(),
+    this.versionNumber = const Value.absent(),
+    this.supersedesVersionId = const Value.absent(),
+    this.originalFileName = const Value.absent(),
+    this.mediaType = const Value.absent(),
+    this.byteSize = const Value.absent(),
+    this.hashAlgorithm = const Value.absent(),
+    this.hashDigest = const Value.absent(),
+    this.importedAt = const Value.absent(),
+    this.processingState = const Value.absent(),
+    this.indexState = const Value.absent(),
+    this.failureJson = const Value.absent(),
+    this.reprocessingJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DataBankDocumentVersionsCompanion.insert({
+    required String id,
+    required String documentId,
+    required int versionNumber,
+    this.supersedesVersionId = const Value.absent(),
+    required String originalFileName,
+    required String mediaType,
+    required int byteSize,
+    required String hashAlgorithm,
+    required String hashDigest,
+    required DateTime importedAt,
+    required String processingState,
+    required String indexState,
+    this.failureJson = const Value.absent(),
+    required String reprocessingJson,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        documentId = Value(documentId),
+        versionNumber = Value(versionNumber),
+        originalFileName = Value(originalFileName),
+        mediaType = Value(mediaType),
+        byteSize = Value(byteSize),
+        hashAlgorithm = Value(hashAlgorithm),
+        hashDigest = Value(hashDigest),
+        importedAt = Value(importedAt),
+        processingState = Value(processingState),
+        indexState = Value(indexState),
+        reprocessingJson = Value(reprocessingJson);
+  static Insertable<DataBankDocumentVersionRow> custom({
+    Expression<String>? id,
+    Expression<String>? documentId,
+    Expression<int>? versionNumber,
+    Expression<String>? supersedesVersionId,
+    Expression<String>? originalFileName,
+    Expression<String>? mediaType,
+    Expression<int>? byteSize,
+    Expression<String>? hashAlgorithm,
+    Expression<String>? hashDigest,
+    Expression<DateTime>? importedAt,
+    Expression<String>? processingState,
+    Expression<String>? indexState,
+    Expression<String>? failureJson,
+    Expression<String>? reprocessingJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (documentId != null) 'document_id': documentId,
+      if (versionNumber != null) 'version_number': versionNumber,
+      if (supersedesVersionId != null)
+        'supersedes_version_id': supersedesVersionId,
+      if (originalFileName != null) 'original_file_name': originalFileName,
+      if (mediaType != null) 'media_type': mediaType,
+      if (byteSize != null) 'byte_size': byteSize,
+      if (hashAlgorithm != null) 'hash_algorithm': hashAlgorithm,
+      if (hashDigest != null) 'hash_digest': hashDigest,
+      if (importedAt != null) 'imported_at': importedAt,
+      if (processingState != null) 'processing_state': processingState,
+      if (indexState != null) 'index_state': indexState,
+      if (failureJson != null) 'failure_json': failureJson,
+      if (reprocessingJson != null) 'reprocessing_json': reprocessingJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DataBankDocumentVersionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? documentId,
+      Value<int>? versionNumber,
+      Value<String?>? supersedesVersionId,
+      Value<String>? originalFileName,
+      Value<String>? mediaType,
+      Value<int>? byteSize,
+      Value<String>? hashAlgorithm,
+      Value<String>? hashDigest,
+      Value<DateTime>? importedAt,
+      Value<String>? processingState,
+      Value<String>? indexState,
+      Value<String?>? failureJson,
+      Value<String>? reprocessingJson,
+      Value<int>? rowid}) {
+    return DataBankDocumentVersionsCompanion(
+      id: id ?? this.id,
+      documentId: documentId ?? this.documentId,
+      versionNumber: versionNumber ?? this.versionNumber,
+      supersedesVersionId: supersedesVersionId ?? this.supersedesVersionId,
+      originalFileName: originalFileName ?? this.originalFileName,
+      mediaType: mediaType ?? this.mediaType,
+      byteSize: byteSize ?? this.byteSize,
+      hashAlgorithm: hashAlgorithm ?? this.hashAlgorithm,
+      hashDigest: hashDigest ?? this.hashDigest,
+      importedAt: importedAt ?? this.importedAt,
+      processingState: processingState ?? this.processingState,
+      indexState: indexState ?? this.indexState,
+      failureJson: failureJson ?? this.failureJson,
+      reprocessingJson: reprocessingJson ?? this.reprocessingJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (documentId.present) {
+      map['document_id'] = Variable<String>(documentId.value);
+    }
+    if (versionNumber.present) {
+      map['version_number'] = Variable<int>(versionNumber.value);
+    }
+    if (supersedesVersionId.present) {
+      map['supersedes_version_id'] =
+          Variable<String>(supersedesVersionId.value);
+    }
+    if (originalFileName.present) {
+      map['original_file_name'] = Variable<String>(originalFileName.value);
+    }
+    if (mediaType.present) {
+      map['media_type'] = Variable<String>(mediaType.value);
+    }
+    if (byteSize.present) {
+      map['byte_size'] = Variable<int>(byteSize.value);
+    }
+    if (hashAlgorithm.present) {
+      map['hash_algorithm'] = Variable<String>(hashAlgorithm.value);
+    }
+    if (hashDigest.present) {
+      map['hash_digest'] = Variable<String>(hashDigest.value);
+    }
+    if (importedAt.present) {
+      map['imported_at'] = Variable<DateTime>(importedAt.value);
+    }
+    if (processingState.present) {
+      map['processing_state'] = Variable<String>(processingState.value);
+    }
+    if (indexState.present) {
+      map['index_state'] = Variable<String>(indexState.value);
+    }
+    if (failureJson.present) {
+      map['failure_json'] = Variable<String>(failureJson.value);
+    }
+    if (reprocessingJson.present) {
+      map['reprocessing_json'] = Variable<String>(reprocessingJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankDocumentVersionsCompanion(')
+          ..write('id: $id, ')
+          ..write('documentId: $documentId, ')
+          ..write('versionNumber: $versionNumber, ')
+          ..write('supersedesVersionId: $supersedesVersionId, ')
+          ..write('originalFileName: $originalFileName, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('byteSize: $byteSize, ')
+          ..write('hashAlgorithm: $hashAlgorithm, ')
+          ..write('hashDigest: $hashDigest, ')
+          ..write('importedAt: $importedAt, ')
+          ..write('processingState: $processingState, ')
+          ..write('indexState: $indexState, ')
+          ..write('failureJson: $failureJson, ')
+          ..write('reprocessingJson: $reprocessingJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DataBankSectionsTable extends DataBankSections
+    with TableInfo<$DataBankSectionsTable, DataBankSectionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DataBankSectionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _documentVersionIdMeta =
+      const VerificationMeta('documentVersionId');
+  @override
+  late final GeneratedColumn<String> documentVersionId =
+      GeneratedColumn<String>('document_version_id', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'REFERENCES data_bank_document_versions (id) ON DELETE CASCADE'));
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _ordinalMeta =
+      const VerificationMeta('ordinal');
+  @override
+  late final GeneratedColumn<int> ordinal = GeneratedColumn<int>(
+      'ordinal', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _parentSectionIdMeta =
+      const VerificationMeta('parentSectionId');
+  @override
+  late final GeneratedColumn<String> parentSectionId = GeneratedColumn<String>(
+      'parent_section_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES data_bank_sections (id) ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED'));
+  static const VerificationMeta _locatorJsonMeta =
+      const VerificationMeta('locatorJson');
+  @override
+  late final GeneratedColumn<String> locatorJson = GeneratedColumn<String>(
+      'locator_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        documentVersionId,
+        kind,
+        title,
+        ordinal,
+        parentSectionId,
+        locatorJson
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'data_bank_sections';
+  @override
+  VerificationContext validateIntegrity(Insertable<DataBankSectionRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('document_version_id')) {
+      context.handle(
+          _documentVersionIdMeta,
+          documentVersionId.isAcceptableOrUnknown(
+              data['document_version_id']!, _documentVersionIdMeta));
+    } else if (isInserting) {
+      context.missing(_documentVersionIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('ordinal')) {
+      context.handle(_ordinalMeta,
+          ordinal.isAcceptableOrUnknown(data['ordinal']!, _ordinalMeta));
+    } else if (isInserting) {
+      context.missing(_ordinalMeta);
+    }
+    if (data.containsKey('parent_section_id')) {
+      context.handle(
+          _parentSectionIdMeta,
+          parentSectionId.isAcceptableOrUnknown(
+              data['parent_section_id']!, _parentSectionIdMeta));
+    }
+    if (data.containsKey('locator_json')) {
+      context.handle(
+          _locatorJsonMeta,
+          locatorJson.isAcceptableOrUnknown(
+              data['locator_json']!, _locatorJsonMeta));
+    } else if (isInserting) {
+      context.missing(_locatorJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {documentVersionId, ordinal},
+      ];
+  @override
+  DataBankSectionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DataBankSectionRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      documentVersionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}document_version_id'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      ordinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordinal'])!,
+      parentSectionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}parent_section_id']),
+      locatorJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}locator_json'])!,
+    );
+  }
+
+  @override
+  $DataBankSectionsTable createAlias(String alias) {
+    return $DataBankSectionsTable(attachedDatabase, alias);
+  }
+}
+
+class DataBankSectionRow extends DataClass
+    implements Insertable<DataBankSectionRow> {
+  final String id;
+  final String documentVersionId;
+  final String kind;
+  final String? title;
+  final int ordinal;
+  final String? parentSectionId;
+  final String locatorJson;
+  const DataBankSectionRow(
+      {required this.id,
+      required this.documentVersionId,
+      required this.kind,
+      this.title,
+      required this.ordinal,
+      this.parentSectionId,
+      required this.locatorJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['document_version_id'] = Variable<String>(documentVersionId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['ordinal'] = Variable<int>(ordinal);
+    if (!nullToAbsent || parentSectionId != null) {
+      map['parent_section_id'] = Variable<String>(parentSectionId);
+    }
+    map['locator_json'] = Variable<String>(locatorJson);
+    return map;
+  }
+
+  DataBankSectionsCompanion toCompanion(bool nullToAbsent) {
+    return DataBankSectionsCompanion(
+      id: Value(id),
+      documentVersionId: Value(documentVersionId),
+      kind: Value(kind),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      ordinal: Value(ordinal),
+      parentSectionId: parentSectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentSectionId),
+      locatorJson: Value(locatorJson),
+    );
+  }
+
+  factory DataBankSectionRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DataBankSectionRow(
+      id: serializer.fromJson<String>(json['id']),
+      documentVersionId: serializer.fromJson<String>(json['documentVersionId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      title: serializer.fromJson<String?>(json['title']),
+      ordinal: serializer.fromJson<int>(json['ordinal']),
+      parentSectionId: serializer.fromJson<String?>(json['parentSectionId']),
+      locatorJson: serializer.fromJson<String>(json['locatorJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'documentVersionId': serializer.toJson<String>(documentVersionId),
+      'kind': serializer.toJson<String>(kind),
+      'title': serializer.toJson<String?>(title),
+      'ordinal': serializer.toJson<int>(ordinal),
+      'parentSectionId': serializer.toJson<String?>(parentSectionId),
+      'locatorJson': serializer.toJson<String>(locatorJson),
+    };
+  }
+
+  DataBankSectionRow copyWith(
+          {String? id,
+          String? documentVersionId,
+          String? kind,
+          Value<String?> title = const Value.absent(),
+          int? ordinal,
+          Value<String?> parentSectionId = const Value.absent(),
+          String? locatorJson}) =>
+      DataBankSectionRow(
+        id: id ?? this.id,
+        documentVersionId: documentVersionId ?? this.documentVersionId,
+        kind: kind ?? this.kind,
+        title: title.present ? title.value : this.title,
+        ordinal: ordinal ?? this.ordinal,
+        parentSectionId: parentSectionId.present
+            ? parentSectionId.value
+            : this.parentSectionId,
+        locatorJson: locatorJson ?? this.locatorJson,
+      );
+  DataBankSectionRow copyWithCompanion(DataBankSectionsCompanion data) {
+    return DataBankSectionRow(
+      id: data.id.present ? data.id.value : this.id,
+      documentVersionId: data.documentVersionId.present
+          ? data.documentVersionId.value
+          : this.documentVersionId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      title: data.title.present ? data.title.value : this.title,
+      ordinal: data.ordinal.present ? data.ordinal.value : this.ordinal,
+      parentSectionId: data.parentSectionId.present
+          ? data.parentSectionId.value
+          : this.parentSectionId,
+      locatorJson:
+          data.locatorJson.present ? data.locatorJson.value : this.locatorJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankSectionRow(')
+          ..write('id: $id, ')
+          ..write('documentVersionId: $documentVersionId, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('parentSectionId: $parentSectionId, ')
+          ..write('locatorJson: $locatorJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, documentVersionId, kind, title, ordinal,
+      parentSectionId, locatorJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DataBankSectionRow &&
+          other.id == this.id &&
+          other.documentVersionId == this.documentVersionId &&
+          other.kind == this.kind &&
+          other.title == this.title &&
+          other.ordinal == this.ordinal &&
+          other.parentSectionId == this.parentSectionId &&
+          other.locatorJson == this.locatorJson);
+}
+
+class DataBankSectionsCompanion extends UpdateCompanion<DataBankSectionRow> {
+  final Value<String> id;
+  final Value<String> documentVersionId;
+  final Value<String> kind;
+  final Value<String?> title;
+  final Value<int> ordinal;
+  final Value<String?> parentSectionId;
+  final Value<String> locatorJson;
+  final Value<int> rowid;
+  const DataBankSectionsCompanion({
+    this.id = const Value.absent(),
+    this.documentVersionId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.title = const Value.absent(),
+    this.ordinal = const Value.absent(),
+    this.parentSectionId = const Value.absent(),
+    this.locatorJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DataBankSectionsCompanion.insert({
+    required String id,
+    required String documentVersionId,
+    required String kind,
+    this.title = const Value.absent(),
+    required int ordinal,
+    this.parentSectionId = const Value.absent(),
+    required String locatorJson,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        documentVersionId = Value(documentVersionId),
+        kind = Value(kind),
+        ordinal = Value(ordinal),
+        locatorJson = Value(locatorJson);
+  static Insertable<DataBankSectionRow> custom({
+    Expression<String>? id,
+    Expression<String>? documentVersionId,
+    Expression<String>? kind,
+    Expression<String>? title,
+    Expression<int>? ordinal,
+    Expression<String>? parentSectionId,
+    Expression<String>? locatorJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (documentVersionId != null) 'document_version_id': documentVersionId,
+      if (kind != null) 'kind': kind,
+      if (title != null) 'title': title,
+      if (ordinal != null) 'ordinal': ordinal,
+      if (parentSectionId != null) 'parent_section_id': parentSectionId,
+      if (locatorJson != null) 'locator_json': locatorJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DataBankSectionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? documentVersionId,
+      Value<String>? kind,
+      Value<String?>? title,
+      Value<int>? ordinal,
+      Value<String?>? parentSectionId,
+      Value<String>? locatorJson,
+      Value<int>? rowid}) {
+    return DataBankSectionsCompanion(
+      id: id ?? this.id,
+      documentVersionId: documentVersionId ?? this.documentVersionId,
+      kind: kind ?? this.kind,
+      title: title ?? this.title,
+      ordinal: ordinal ?? this.ordinal,
+      parentSectionId: parentSectionId ?? this.parentSectionId,
+      locatorJson: locatorJson ?? this.locatorJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (documentVersionId.present) {
+      map['document_version_id'] = Variable<String>(documentVersionId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (ordinal.present) {
+      map['ordinal'] = Variable<int>(ordinal.value);
+    }
+    if (parentSectionId.present) {
+      map['parent_section_id'] = Variable<String>(parentSectionId.value);
+    }
+    if (locatorJson.present) {
+      map['locator_json'] = Variable<String>(locatorJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankSectionsCompanion(')
+          ..write('id: $id, ')
+          ..write('documentVersionId: $documentVersionId, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('parentSectionId: $parentSectionId, ')
+          ..write('locatorJson: $locatorJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DataBankTextChunksTable extends DataBankTextChunks
+    with TableInfo<$DataBankTextChunksTable, DataBankTextChunkRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DataBankTextChunksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _documentVersionIdMeta =
+      const VerificationMeta('documentVersionId');
+  @override
+  late final GeneratedColumn<String> documentVersionId =
+      GeneratedColumn<String>('document_version_id', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'REFERENCES data_bank_document_versions (id) ON DELETE CASCADE'));
+  static const VerificationMeta _sectionIdMeta =
+      const VerificationMeta('sectionId');
+  @override
+  late final GeneratedColumn<String> sectionId = GeneratedColumn<String>(
+      'section_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES data_bank_sections (id) ON DELETE CASCADE'));
+  static const VerificationMeta _ordinalMeta =
+      const VerificationMeta('ordinal');
+  @override
+  late final GeneratedColumn<int> ordinal = GeneratedColumn<int>(
+      'ordinal', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _textContentMeta =
+      const VerificationMeta('textContent');
+  @override
+  late final GeneratedColumn<String> textContent = GeneratedColumn<String>(
+      'text_content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _locatorJsonMeta =
+      const VerificationMeta('locatorJson');
+  @override
+  late final GeneratedColumn<String> locatorJson = GeneratedColumn<String>(
+      'locator_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, documentVersionId, sectionId, ordinal, textContent, locatorJson];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'data_bank_text_chunks';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<DataBankTextChunkRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('document_version_id')) {
+      context.handle(
+          _documentVersionIdMeta,
+          documentVersionId.isAcceptableOrUnknown(
+              data['document_version_id']!, _documentVersionIdMeta));
+    } else if (isInserting) {
+      context.missing(_documentVersionIdMeta);
+    }
+    if (data.containsKey('section_id')) {
+      context.handle(_sectionIdMeta,
+          sectionId.isAcceptableOrUnknown(data['section_id']!, _sectionIdMeta));
+    }
+    if (data.containsKey('ordinal')) {
+      context.handle(_ordinalMeta,
+          ordinal.isAcceptableOrUnknown(data['ordinal']!, _ordinalMeta));
+    } else if (isInserting) {
+      context.missing(_ordinalMeta);
+    }
+    if (data.containsKey('text_content')) {
+      context.handle(
+          _textContentMeta,
+          textContent.isAcceptableOrUnknown(
+              data['text_content']!, _textContentMeta));
+    } else if (isInserting) {
+      context.missing(_textContentMeta);
+    }
+    if (data.containsKey('locator_json')) {
+      context.handle(
+          _locatorJsonMeta,
+          locatorJson.isAcceptableOrUnknown(
+              data['locator_json']!, _locatorJsonMeta));
+    } else if (isInserting) {
+      context.missing(_locatorJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {documentVersionId, ordinal},
+      ];
+  @override
+  DataBankTextChunkRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DataBankTextChunkRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      documentVersionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}document_version_id'])!,
+      sectionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}section_id']),
+      ordinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ordinal'])!,
+      textContent: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}text_content'])!,
+      locatorJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}locator_json'])!,
+    );
+  }
+
+  @override
+  $DataBankTextChunksTable createAlias(String alias) {
+    return $DataBankTextChunksTable(attachedDatabase, alias);
+  }
+}
+
+class DataBankTextChunkRow extends DataClass
+    implements Insertable<DataBankTextChunkRow> {
+  final String id;
+  final String documentVersionId;
+  final String? sectionId;
+  final int ordinal;
+  final String textContent;
+  final String locatorJson;
+  const DataBankTextChunkRow(
+      {required this.id,
+      required this.documentVersionId,
+      this.sectionId,
+      required this.ordinal,
+      required this.textContent,
+      required this.locatorJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['document_version_id'] = Variable<String>(documentVersionId);
+    if (!nullToAbsent || sectionId != null) {
+      map['section_id'] = Variable<String>(sectionId);
+    }
+    map['ordinal'] = Variable<int>(ordinal);
+    map['text_content'] = Variable<String>(textContent);
+    map['locator_json'] = Variable<String>(locatorJson);
+    return map;
+  }
+
+  DataBankTextChunksCompanion toCompanion(bool nullToAbsent) {
+    return DataBankTextChunksCompanion(
+      id: Value(id),
+      documentVersionId: Value(documentVersionId),
+      sectionId: sectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sectionId),
+      ordinal: Value(ordinal),
+      textContent: Value(textContent),
+      locatorJson: Value(locatorJson),
+    );
+  }
+
+  factory DataBankTextChunkRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DataBankTextChunkRow(
+      id: serializer.fromJson<String>(json['id']),
+      documentVersionId: serializer.fromJson<String>(json['documentVersionId']),
+      sectionId: serializer.fromJson<String?>(json['sectionId']),
+      ordinal: serializer.fromJson<int>(json['ordinal']),
+      textContent: serializer.fromJson<String>(json['textContent']),
+      locatorJson: serializer.fromJson<String>(json['locatorJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'documentVersionId': serializer.toJson<String>(documentVersionId),
+      'sectionId': serializer.toJson<String?>(sectionId),
+      'ordinal': serializer.toJson<int>(ordinal),
+      'textContent': serializer.toJson<String>(textContent),
+      'locatorJson': serializer.toJson<String>(locatorJson),
+    };
+  }
+
+  DataBankTextChunkRow copyWith(
+          {String? id,
+          String? documentVersionId,
+          Value<String?> sectionId = const Value.absent(),
+          int? ordinal,
+          String? textContent,
+          String? locatorJson}) =>
+      DataBankTextChunkRow(
+        id: id ?? this.id,
+        documentVersionId: documentVersionId ?? this.documentVersionId,
+        sectionId: sectionId.present ? sectionId.value : this.sectionId,
+        ordinal: ordinal ?? this.ordinal,
+        textContent: textContent ?? this.textContent,
+        locatorJson: locatorJson ?? this.locatorJson,
+      );
+  DataBankTextChunkRow copyWithCompanion(DataBankTextChunksCompanion data) {
+    return DataBankTextChunkRow(
+      id: data.id.present ? data.id.value : this.id,
+      documentVersionId: data.documentVersionId.present
+          ? data.documentVersionId.value
+          : this.documentVersionId,
+      sectionId: data.sectionId.present ? data.sectionId.value : this.sectionId,
+      ordinal: data.ordinal.present ? data.ordinal.value : this.ordinal,
+      textContent:
+          data.textContent.present ? data.textContent.value : this.textContent,
+      locatorJson:
+          data.locatorJson.present ? data.locatorJson.value : this.locatorJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankTextChunkRow(')
+          ..write('id: $id, ')
+          ..write('documentVersionId: $documentVersionId, ')
+          ..write('sectionId: $sectionId, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('textContent: $textContent, ')
+          ..write('locatorJson: $locatorJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, documentVersionId, sectionId, ordinal, textContent, locatorJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DataBankTextChunkRow &&
+          other.id == this.id &&
+          other.documentVersionId == this.documentVersionId &&
+          other.sectionId == this.sectionId &&
+          other.ordinal == this.ordinal &&
+          other.textContent == this.textContent &&
+          other.locatorJson == this.locatorJson);
+}
+
+class DataBankTextChunksCompanion
+    extends UpdateCompanion<DataBankTextChunkRow> {
+  final Value<String> id;
+  final Value<String> documentVersionId;
+  final Value<String?> sectionId;
+  final Value<int> ordinal;
+  final Value<String> textContent;
+  final Value<String> locatorJson;
+  final Value<int> rowid;
+  const DataBankTextChunksCompanion({
+    this.id = const Value.absent(),
+    this.documentVersionId = const Value.absent(),
+    this.sectionId = const Value.absent(),
+    this.ordinal = const Value.absent(),
+    this.textContent = const Value.absent(),
+    this.locatorJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DataBankTextChunksCompanion.insert({
+    required String id,
+    required String documentVersionId,
+    this.sectionId = const Value.absent(),
+    required int ordinal,
+    required String textContent,
+    required String locatorJson,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        documentVersionId = Value(documentVersionId),
+        ordinal = Value(ordinal),
+        textContent = Value(textContent),
+        locatorJson = Value(locatorJson);
+  static Insertable<DataBankTextChunkRow> custom({
+    Expression<String>? id,
+    Expression<String>? documentVersionId,
+    Expression<String>? sectionId,
+    Expression<int>? ordinal,
+    Expression<String>? textContent,
+    Expression<String>? locatorJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (documentVersionId != null) 'document_version_id': documentVersionId,
+      if (sectionId != null) 'section_id': sectionId,
+      if (ordinal != null) 'ordinal': ordinal,
+      if (textContent != null) 'text_content': textContent,
+      if (locatorJson != null) 'locator_json': locatorJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DataBankTextChunksCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? documentVersionId,
+      Value<String?>? sectionId,
+      Value<int>? ordinal,
+      Value<String>? textContent,
+      Value<String>? locatorJson,
+      Value<int>? rowid}) {
+    return DataBankTextChunksCompanion(
+      id: id ?? this.id,
+      documentVersionId: documentVersionId ?? this.documentVersionId,
+      sectionId: sectionId ?? this.sectionId,
+      ordinal: ordinal ?? this.ordinal,
+      textContent: textContent ?? this.textContent,
+      locatorJson: locatorJson ?? this.locatorJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (documentVersionId.present) {
+      map['document_version_id'] = Variable<String>(documentVersionId.value);
+    }
+    if (sectionId.present) {
+      map['section_id'] = Variable<String>(sectionId.value);
+    }
+    if (ordinal.present) {
+      map['ordinal'] = Variable<int>(ordinal.value);
+    }
+    if (textContent.present) {
+      map['text_content'] = Variable<String>(textContent.value);
+    }
+    if (locatorJson.present) {
+      map['locator_json'] = Variable<String>(locatorJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankTextChunksCompanion(')
+          ..write('id: $id, ')
+          ..write('documentVersionId: $documentVersionId, ')
+          ..write('sectionId: $sectionId, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('textContent: $textContent, ')
+          ..write('locatorJson: $locatorJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DataBankBindingsTable extends DataBankBindings
+    with TableInfo<$DataBankBindingsTable, DataBankBindingRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DataBankBindingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _documentIdMeta =
+      const VerificationMeta('documentId');
+  @override
+  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
+      'document_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES data_bank_documents (id) ON DELETE CASCADE'));
+  static const VerificationMeta _scopeMeta = const VerificationMeta('scope');
+  @override
+  late final GeneratedColumn<String> scope = GeneratedColumn<String>(
+      'scope', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _characterIdMeta =
+      const VerificationMeta('characterId');
+  @override
+  late final GeneratedColumn<String> characterId = GeneratedColumn<String>(
+      'character_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES characters (id) ON DELETE CASCADE'));
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
+      'chat_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE CASCADE'));
+  static const VerificationMeta _enabledMeta =
+      const VerificationMeta('enabled');
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+      'enabled', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("enabled" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        documentId,
+        scope,
+        characterId,
+        chatId,
+        enabled,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'data_bank_bindings';
+  @override
+  VerificationContext validateIntegrity(Insertable<DataBankBindingRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('document_id')) {
+      context.handle(
+          _documentIdMeta,
+          documentId.isAcceptableOrUnknown(
+              data['document_id']!, _documentIdMeta));
+    } else if (isInserting) {
+      context.missing(_documentIdMeta);
+    }
+    if (data.containsKey('scope')) {
+      context.handle(
+          _scopeMeta, scope.isAcceptableOrUnknown(data['scope']!, _scopeMeta));
+    } else if (isInserting) {
+      context.missing(_scopeMeta);
+    }
+    if (data.containsKey('character_id')) {
+      context.handle(
+          _characterIdMeta,
+          characterId.isAcceptableOrUnknown(
+              data['character_id']!, _characterIdMeta));
+    }
+    if (data.containsKey('chat_id')) {
+      context.handle(_chatIdMeta,
+          chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(_enabledMeta,
+          enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {documentId, scope, characterId, chatId},
+      ];
+  @override
+  DataBankBindingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DataBankBindingRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      documentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_id'])!,
+      scope: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scope'])!,
+      characterId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}character_id']),
+      chatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id']),
+      enabled: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}enabled'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $DataBankBindingsTable createAlias(String alias) {
+    return $DataBankBindingsTable(attachedDatabase, alias);
+  }
+}
+
+class DataBankBindingRow extends DataClass
+    implements Insertable<DataBankBindingRow> {
+  final String id;
+  final String documentId;
+  final String scope;
+  final String? characterId;
+  final String? chatId;
+  final bool enabled;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const DataBankBindingRow(
+      {required this.id,
+      required this.documentId,
+      required this.scope,
+      this.characterId,
+      this.chatId,
+      required this.enabled,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['document_id'] = Variable<String>(documentId);
+    map['scope'] = Variable<String>(scope);
+    if (!nullToAbsent || characterId != null) {
+      map['character_id'] = Variable<String>(characterId);
+    }
+    if (!nullToAbsent || chatId != null) {
+      map['chat_id'] = Variable<String>(chatId);
+    }
+    map['enabled'] = Variable<bool>(enabled);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DataBankBindingsCompanion toCompanion(bool nullToAbsent) {
+    return DataBankBindingsCompanion(
+      id: Value(id),
+      documentId: Value(documentId),
+      scope: Value(scope),
+      characterId: characterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(characterId),
+      chatId:
+          chatId == null && nullToAbsent ? const Value.absent() : Value(chatId),
+      enabled: Value(enabled),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DataBankBindingRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DataBankBindingRow(
+      id: serializer.fromJson<String>(json['id']),
+      documentId: serializer.fromJson<String>(json['documentId']),
+      scope: serializer.fromJson<String>(json['scope']),
+      characterId: serializer.fromJson<String?>(json['characterId']),
+      chatId: serializer.fromJson<String?>(json['chatId']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'documentId': serializer.toJson<String>(documentId),
+      'scope': serializer.toJson<String>(scope),
+      'characterId': serializer.toJson<String?>(characterId),
+      'chatId': serializer.toJson<String?>(chatId),
+      'enabled': serializer.toJson<bool>(enabled),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DataBankBindingRow copyWith(
+          {String? id,
+          String? documentId,
+          String? scope,
+          Value<String?> characterId = const Value.absent(),
+          Value<String?> chatId = const Value.absent(),
+          bool? enabled,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      DataBankBindingRow(
+        id: id ?? this.id,
+        documentId: documentId ?? this.documentId,
+        scope: scope ?? this.scope,
+        characterId: characterId.present ? characterId.value : this.characterId,
+        chatId: chatId.present ? chatId.value : this.chatId,
+        enabled: enabled ?? this.enabled,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  DataBankBindingRow copyWithCompanion(DataBankBindingsCompanion data) {
+    return DataBankBindingRow(
+      id: data.id.present ? data.id.value : this.id,
+      documentId:
+          data.documentId.present ? data.documentId.value : this.documentId,
+      scope: data.scope.present ? data.scope.value : this.scope,
+      characterId:
+          data.characterId.present ? data.characterId.value : this.characterId,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankBindingRow(')
+          ..write('id: $id, ')
+          ..write('documentId: $documentId, ')
+          ..write('scope: $scope, ')
+          ..write('characterId: $characterId, ')
+          ..write('chatId: $chatId, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, documentId, scope, characterId, chatId,
+      enabled, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DataBankBindingRow &&
+          other.id == this.id &&
+          other.documentId == this.documentId &&
+          other.scope == this.scope &&
+          other.characterId == this.characterId &&
+          other.chatId == this.chatId &&
+          other.enabled == this.enabled &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DataBankBindingsCompanion extends UpdateCompanion<DataBankBindingRow> {
+  final Value<String> id;
+  final Value<String> documentId;
+  final Value<String> scope;
+  final Value<String?> characterId;
+  final Value<String?> chatId;
+  final Value<bool> enabled;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const DataBankBindingsCompanion({
+    this.id = const Value.absent(),
+    this.documentId = const Value.absent(),
+    this.scope = const Value.absent(),
+    this.characterId = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DataBankBindingsCompanion.insert({
+    required String id,
+    required String documentId,
+    required String scope,
+    this.characterId = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.enabled = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        documentId = Value(documentId),
+        scope = Value(scope),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<DataBankBindingRow> custom({
+    Expression<String>? id,
+    Expression<String>? documentId,
+    Expression<String>? scope,
+    Expression<String>? characterId,
+    Expression<String>? chatId,
+    Expression<bool>? enabled,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (documentId != null) 'document_id': documentId,
+      if (scope != null) 'scope': scope,
+      if (characterId != null) 'character_id': characterId,
+      if (chatId != null) 'chat_id': chatId,
+      if (enabled != null) 'enabled': enabled,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DataBankBindingsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? documentId,
+      Value<String>? scope,
+      Value<String?>? characterId,
+      Value<String?>? chatId,
+      Value<bool>? enabled,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return DataBankBindingsCompanion(
+      id: id ?? this.id,
+      documentId: documentId ?? this.documentId,
+      scope: scope ?? this.scope,
+      characterId: characterId ?? this.characterId,
+      chatId: chatId ?? this.chatId,
+      enabled: enabled ?? this.enabled,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (documentId.present) {
+      map['document_id'] = Variable<String>(documentId.value);
+    }
+    if (scope.present) {
+      map['scope'] = Variable<String>(scope.value);
+    }
+    if (characterId.present) {
+      map['character_id'] = Variable<String>(characterId.value);
+    }
+    if (chatId.present) {
+      map['chat_id'] = Variable<String>(chatId.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DataBankBindingsCompanion(')
+          ..write('id: $id, ')
+          ..write('documentId: $documentId, ')
+          ..write('scope: $scope, ')
+          ..write('characterId: $characterId, ')
+          ..write('chatId: $chatId, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6858,6 +11938,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TagsTable tags = $TagsTable(this);
   late final $CharacterTagsTable characterTags = $CharacterTagsTable(this);
   late final $GlobalStatesTable globalStates = $GlobalStatesTable(this);
+  late final $LongTermMemoriesTable longTermMemories =
+      $LongTermMemoriesTable(this);
+  late final $LongTermMemorySourceMessagesTable longTermMemorySourceMessages =
+      $LongTermMemorySourceMessagesTable(this);
+  late final $RpgScenariosTable rpgScenarios = $RpgScenariosTable(this);
+  late final $RpgStateSnapshotsTable rpgStateSnapshots =
+      $RpgStateSnapshotsTable(this);
+  late final $RpgChatStatesTable rpgChatStates = $RpgChatStatesTable(this);
+  late final $DataBankDocumentsTable dataBankDocuments =
+      $DataBankDocumentsTable(this);
+  late final $DataBankDocumentVersionsTable dataBankDocumentVersions =
+      $DataBankDocumentVersionsTable(this);
+  late final $DataBankSectionsTable dataBankSections =
+      $DataBankSectionsTable(this);
+  late final $DataBankTextChunksTable dataBankTextChunks =
+      $DataBankTextChunksTable(this);
+  late final $DataBankBindingsTable dataBankBindings =
+      $DataBankBindingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6874,8 +11972,173 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         bookmarks,
         tags,
         characterTags,
-        globalStates
+        globalStates,
+        longTermMemories,
+        longTermMemorySourceMessages,
+        rpgScenarios,
+        rpgStateSnapshots,
+        rpgChatStates,
+        dataBankDocuments,
+        dataBankDocumentVersions,
+        dataBankSections,
+        dataBankTextChunks,
+        dataBankBindings
       ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('characters',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('personas',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('groups',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('long_term_memories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memories', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('long_term_memories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memory_source_messages',
+                  kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('long_term_memory_source_messages',
+                  kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('rpg_scenarios',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('rpg_state_snapshots', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('rpg_state_snapshots',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('rpg_state_snapshots', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('rpg_chat_states', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('rpg_scenarios',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('rpg_chat_states', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('rpg_state_snapshots',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('rpg_chat_states', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_documents',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_document_versions',
+                  kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_document_versions',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_sections', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_sections',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_sections', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_document_versions',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_text_chunks', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_sections',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_text_chunks', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('data_bank_documents',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_bindings', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('characters',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_bindings', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('data_bank_bindings', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$CharactersTableCreateCompanionBuilder = CharactersCompanion Function({
@@ -6972,6 +12235,40 @@ final class $$CharactersTableReferences
         .filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_characterTagsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LongTermMemoriesTable, List<LongTermMemoryRow>>
+      _longTermMemoriesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemories,
+              aliasName: $_aliasNameGenerator(
+                  db.characters.id, db.longTermMemories.characterId));
+
+  $$LongTermMemoriesTableProcessedTableManager get longTermMemoriesRefs {
+    final manager = $$LongTermMemoriesTableTableManager(
+            $_db, $_db.longTermMemories)
+        .filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_longTermMemoriesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$DataBankBindingsTable, List<DataBankBindingRow>>
+      _dataBankBindingsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.dataBankBindings,
+              aliasName: $_aliasNameGenerator(
+                  db.characters.id, db.dataBankBindings.characterId));
+
+  $$DataBankBindingsTableProcessedTableManager get dataBankBindingsRefs {
+    final manager = $$DataBankBindingsTableTableManager(
+            $_db, $_db.dataBankBindings)
+        .filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankBindingsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7110,6 +12407,48 @@ class $$CharactersTableFilterComposer
             $$CharacterTagsTableFilterComposer(
               $db: $db,
               $table: $db.characterTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> longTermMemoriesRefs(
+      Expression<bool> Function($$LongTermMemoriesTableFilterComposer f) f) {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.characterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> dataBankBindingsRefs(
+      Expression<bool> Function($$DataBankBindingsTableFilterComposer f) f) {
+    final $$DataBankBindingsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.characterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7335,6 +12674,48 @@ class $$CharactersTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> longTermMemoriesRefs<T extends Object>(
+      Expression<T> Function($$LongTermMemoriesTableAnnotationComposer a) f) {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.characterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> dataBankBindingsRefs<T extends Object>(
+      Expression<T> Function($$DataBankBindingsTableAnnotationComposer a) f) {
+    final $$DataBankBindingsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.characterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$CharactersTableTableManager extends RootTableManager<
@@ -7349,7 +12730,11 @@ class $$CharactersTableTableManager extends RootTableManager<
     (Character, $$CharactersTableReferences),
     Character,
     PrefetchHooks Function(
-        {bool chatsRefs, bool worldInfosRefs, bool characterTagsRefs})> {
+        {bool chatsRefs,
+        bool worldInfosRefs,
+        bool characterTagsRefs,
+        bool longTermMemoriesRefs,
+        bool dataBankBindingsRefs})> {
   $$CharactersTableTableManager(_$AppDatabase db, $CharactersTable table)
       : super(TableManagerState(
           db: db,
@@ -7465,13 +12850,17 @@ class $$CharactersTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {chatsRefs = false,
               worldInfosRefs = false,
-              characterTagsRefs = false}) {
+              characterTagsRefs = false,
+              longTermMemoriesRefs = false,
+              dataBankBindingsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (chatsRefs) db.chats,
                 if (worldInfosRefs) db.worldInfos,
-                if (characterTagsRefs) db.characterTags
+                if (characterTagsRefs) db.characterTags,
+                if (longTermMemoriesRefs) db.longTermMemories,
+                if (dataBankBindingsRefs) db.dataBankBindings
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -7514,6 +12903,32 @@ class $$CharactersTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.characterId == item.id),
+                        typedResults: items),
+                  if (longTermMemoriesRefs)
+                    await $_getPrefetchedData<Character, $CharactersTable,
+                            LongTermMemoryRow>(
+                        currentTable: table,
+                        referencedTable: $$CharactersTableReferences
+                            ._longTermMemoriesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CharactersTableReferences(db, table, p0)
+                                .longTermMemoriesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.characterId == item.id),
+                        typedResults: items),
+                  if (dataBankBindingsRefs)
+                    await $_getPrefetchedData<Character, $CharactersTable,
+                            DataBankBindingRow>(
+                        currentTable: table,
+                        referencedTable: $$CharactersTableReferences
+                            ._dataBankBindingsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CharactersTableReferences(db, table, p0)
+                                .dataBankBindingsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.characterId == item.id),
                         typedResults: items)
                 ];
               },
@@ -7534,7 +12949,11 @@ typedef $$CharactersTableProcessedTableManager = ProcessedTableManager<
     (Character, $$CharactersTableReferences),
     Character,
     PrefetchHooks Function(
-        {bool chatsRefs, bool worldInfosRefs, bool characterTagsRefs})>;
+        {bool chatsRefs,
+        bool worldInfosRefs,
+        bool characterTagsRefs,
+        bool longTermMemoriesRefs,
+        bool dataBankBindingsRefs})>;
 typedef $$ChatsTableCreateCompanionBuilder = ChatsCompanion Function({
   required String id,
   required String characterId,
@@ -7605,6 +13024,70 @@ final class $$ChatsTableReferences
         .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_bookmarksRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LongTermMemoriesTable, List<LongTermMemoryRow>>
+      _memoryScopeChatTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.longTermMemories,
+          aliasName:
+              $_aliasNameGenerator(db.chats.id, db.longTermMemories.chatId));
+
+  $$LongTermMemoriesTableProcessedTableManager get memoryScopeChat {
+    final manager =
+        $$LongTermMemoriesTableTableManager($_db, $_db.longTermMemories)
+            .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_memoryScopeChatTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LongTermMemoriesTable, List<LongTermMemoryRow>>
+      _memorySourceChatTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemories,
+              aliasName: $_aliasNameGenerator(
+                  db.chats.id, db.longTermMemories.sourceChatId));
+
+  $$LongTermMemoriesTableProcessedTableManager get memorySourceChat {
+    final manager =
+        $$LongTermMemoriesTableTableManager($_db, $_db.longTermMemories).filter(
+            (f) => f.sourceChatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_memorySourceChatTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RpgChatStatesTable, List<RpgChatStateRow>>
+      _rpgChatStatesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.rpgChatStates,
+              aliasName:
+                  $_aliasNameGenerator(db.chats.id, db.rpgChatStates.chatId));
+
+  $$RpgChatStatesTableProcessedTableManager get rpgChatStatesRefs {
+    final manager = $$RpgChatStatesTableTableManager($_db, $_db.rpgChatStates)
+        .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_rpgChatStatesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$DataBankBindingsTable, List<DataBankBindingRow>>
+      _dataBankBindingsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.dataBankBindings,
+              aliasName: $_aliasNameGenerator(
+                  db.chats.id, db.dataBankBindings.chatId));
+
+  $$DataBankBindingsTableProcessedTableManager get dataBankBindingsRefs {
+    final manager =
+        $$DataBankBindingsTableTableManager($_db, $_db.dataBankBindings)
+            .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankBindingsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7701,6 +13184,90 @@ class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
             $$BookmarksTableFilterComposer(
               $db: $db,
               $table: $db.bookmarks,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> memoryScopeChat(
+      Expression<bool> Function($$LongTermMemoriesTableFilterComposer f) f) {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> memorySourceChat(
+      Expression<bool> Function($$LongTermMemoriesTableFilterComposer f) f) {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.sourceChatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> rpgChatStatesRefs(
+      Expression<bool> Function($$RpgChatStatesTableFilterComposer f) f) {
+    final $$RpgChatStatesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> dataBankBindingsRefs(
+      Expression<bool> Function($$DataBankBindingsTableFilterComposer f) f) {
+    final $$DataBankBindingsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7867,6 +13434,90 @@ class $$ChatsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> memoryScopeChat<T extends Object>(
+      Expression<T> Function($$LongTermMemoriesTableAnnotationComposer a) f) {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> memorySourceChat<T extends Object>(
+      Expression<T> Function($$LongTermMemoriesTableAnnotationComposer a) f) {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.sourceChatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> rpgChatStatesRefs<T extends Object>(
+      Expression<T> Function($$RpgChatStatesTableAnnotationComposer a) f) {
+    final $$RpgChatStatesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> dataBankBindingsRefs<T extends Object>(
+      Expression<T> Function($$DataBankBindingsTableAnnotationComposer a) f) {
+    final $$DataBankBindingsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ChatsTableTableManager extends RootTableManager<
@@ -7881,7 +13532,13 @@ class $$ChatsTableTableManager extends RootTableManager<
     (Chat, $$ChatsTableReferences),
     Chat,
     PrefetchHooks Function(
-        {bool characterId, bool messagesRefs, bool bookmarksRefs})> {
+        {bool characterId,
+        bool messagesRefs,
+        bool bookmarksRefs,
+        bool memoryScopeChat,
+        bool memorySourceChat,
+        bool rpgChatStatesRefs,
+        bool dataBankBindingsRefs})> {
   $$ChatsTableTableManager(_$AppDatabase db, $ChatsTable table)
       : super(TableManagerState(
           db: db,
@@ -7951,12 +13608,20 @@ class $$ChatsTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {characterId = false,
               messagesRefs = false,
-              bookmarksRefs = false}) {
+              bookmarksRefs = false,
+              memoryScopeChat = false,
+              memorySourceChat = false,
+              rpgChatStatesRefs = false,
+              dataBankBindingsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (messagesRefs) db.messages,
-                if (bookmarksRefs) db.bookmarks
+                if (bookmarksRefs) db.bookmarks,
+                if (memoryScopeChat) db.longTermMemories,
+                if (memorySourceChat) db.longTermMemories,
+                if (rpgChatStatesRefs) db.rpgChatStates,
+                if (dataBankBindingsRefs) db.dataBankBindings
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -8007,6 +13672,58 @@ class $$ChatsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.chatId == item.id),
+                        typedResults: items),
+                  if (memoryScopeChat)
+                    await $_getPrefetchedData<Chat, $ChatsTable,
+                            LongTermMemoryRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChatsTableReferences._memoryScopeChatTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .memoryScopeChat,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.chatId == item.id),
+                        typedResults: items),
+                  if (memorySourceChat)
+                    await $_getPrefetchedData<Chat, $ChatsTable,
+                            LongTermMemoryRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChatsTableReferences._memorySourceChatTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .memorySourceChat,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.sourceChatId == item.id),
+                        typedResults: items),
+                  if (rpgChatStatesRefs)
+                    await $_getPrefetchedData<Chat, $ChatsTable,
+                            RpgChatStateRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChatsTableReferences._rpgChatStatesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .rpgChatStatesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.chatId == item.id),
+                        typedResults: items),
+                  if (dataBankBindingsRefs)
+                    await $_getPrefetchedData<Chat, $ChatsTable,
+                            DataBankBindingRow>(
+                        currentTable: table,
+                        referencedTable: $$ChatsTableReferences
+                            ._dataBankBindingsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .dataBankBindingsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.chatId == item.id),
                         typedResults: items)
                 ];
               },
@@ -8027,7 +13744,13 @@ typedef $$ChatsTableProcessedTableManager = ProcessedTableManager<
     (Chat, $$ChatsTableReferences),
     Chat,
     PrefetchHooks Function(
-        {bool characterId, bool messagesRefs, bool bookmarksRefs})>;
+        {bool characterId,
+        bool messagesRefs,
+        bool bookmarksRefs,
+        bool memoryScopeChat,
+        bool memorySourceChat,
+        bool rpgChatStatesRefs,
+        bool dataBankBindingsRefs})>;
 typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String id,
   required String chatId,
@@ -8077,6 +13800,25 @@ final class $$MessagesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$LongTermMemorySourceMessagesTable,
+          List<LongTermMemorySourceMessageRow>>
+      _longTermMemorySourceMessagesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemorySourceMessages,
+              aliasName: $_aliasNameGenerator(
+                  db.messages.id, db.longTermMemorySourceMessages.messageId));
+
+  $$LongTermMemorySourceMessagesTableProcessedTableManager
+      get longTermMemorySourceMessagesRefs {
+    final manager = $$LongTermMemorySourceMessagesTableTableManager(
+            $_db, $_db.longTermMemorySourceMessages)
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_longTermMemorySourceMessagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
   }
 }
 
@@ -8145,6 +13887,30 @@ class $$MessagesTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> longTermMemorySourceMessagesRefs(
+      Expression<bool> Function(
+              $$LongTermMemorySourceMessagesTableFilterComposer f)
+          f) {
+    final $$LongTermMemorySourceMessagesTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.longTermMemorySourceMessages,
+            getReferencedColumn: (t) => t.messageId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LongTermMemorySourceMessagesTableFilterComposer(
+                  $db: $db,
+                  $table: $db.longTermMemorySourceMessages,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
   }
 }
 
@@ -8282,6 +14048,30 @@ class $$MessagesTableAnnotationComposer
             ));
     return composer;
   }
+
+  Expression<T> longTermMemorySourceMessagesRefs<T extends Object>(
+      Expression<T> Function(
+              $$LongTermMemorySourceMessagesTableAnnotationComposer a)
+          f) {
+    final $$LongTermMemorySourceMessagesTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.longTermMemorySourceMessages,
+            getReferencedColumn: (t) => t.messageId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LongTermMemorySourceMessagesTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.longTermMemorySourceMessages,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$MessagesTableTableManager extends RootTableManager<
@@ -8295,7 +14085,8 @@ class $$MessagesTableTableManager extends RootTableManager<
     $$MessagesTableUpdateCompanionBuilder,
     (Message, $$MessagesTableReferences),
     Message,
-    PrefetchHooks Function({bool chatId})> {
+    PrefetchHooks Function(
+        {bool chatId, bool longTermMemorySourceMessagesRefs})> {
   $$MessagesTableTableManager(_$AppDatabase db, $MessagesTable table)
       : super(TableManagerState(
           db: db,
@@ -8374,10 +14165,14 @@ class $$MessagesTableTableManager extends RootTableManager<
               .map((e) =>
                   (e.readTable(table), $$MessagesTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({chatId = false}) {
+          prefetchHooksCallback: (
+              {chatId = false, longTermMemorySourceMessagesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [
+                if (longTermMemorySourceMessagesRefs)
+                  db.longTermMemorySourceMessages
+              ],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -8404,7 +14199,21 @@ class $$MessagesTableTableManager extends RootTableManager<
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (longTermMemorySourceMessagesRefs)
+                    await $_getPrefetchedData<Message, $MessagesTable,
+                            LongTermMemorySourceMessageRow>(
+                        currentTable: table,
+                        referencedTable: $$MessagesTableReferences
+                            ._longTermMemorySourceMessagesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MessagesTableReferences(db, table, p0)
+                                .longTermMemorySourceMessagesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.messageId == item.id),
+                        typedResults: items)
+                ];
               },
             );
           },
@@ -8422,7 +14231,8 @@ typedef $$MessagesTableProcessedTableManager = ProcessedTableManager<
     $$MessagesTableUpdateCompanionBuilder,
     (Message, $$MessagesTableReferences),
     Message,
-    PrefetchHooks Function({bool chatId})>;
+    PrefetchHooks Function(
+        {bool chatId, bool longTermMemorySourceMessagesRefs})>;
 typedef $$WorldInfosTableCreateCompanionBuilder = WorldInfosCompanion Function({
   required String id,
   required String name,
@@ -9773,6 +15583,28 @@ typedef $$PersonasTableUpdateCompanionBuilder = PersonasCompanion Function({
   Value<int> rowid,
 });
 
+final class $$PersonasTableReferences
+    extends BaseReferences<_$AppDatabase, $PersonasTable, Persona> {
+  $$PersonasTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LongTermMemoriesTable, List<LongTermMemoryRow>>
+      _longTermMemoriesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemories,
+              aliasName: $_aliasNameGenerator(
+                  db.personas.id, db.longTermMemories.personaId));
+
+  $$LongTermMemoriesTableProcessedTableManager get longTermMemoriesRefs {
+    final manager = $$LongTermMemoriesTableTableManager(
+            $_db, $_db.longTermMemories)
+        .filter((f) => f.personaId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_longTermMemoriesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
 class $$PersonasTableFilterComposer
     extends Composer<_$AppDatabase, $PersonasTable> {
   $$PersonasTableFilterComposer({
@@ -9830,6 +15662,27 @@ class $$PersonasTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> longTermMemoriesRefs(
+      Expression<bool> Function($$LongTermMemoriesTableFilterComposer f) f) {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.personaId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$PersonasTableOrderingComposer
@@ -9945,6 +15798,27 @@ class $$PersonasTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> longTermMemoriesRefs<T extends Object>(
+      Expression<T> Function($$LongTermMemoriesTableAnnotationComposer a) f) {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.personaId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$PersonasTableTableManager extends RootTableManager<
@@ -9956,9 +15830,9 @@ class $$PersonasTableTableManager extends RootTableManager<
     $$PersonasTableAnnotationComposer,
     $$PersonasTableCreateCompanionBuilder,
     $$PersonasTableUpdateCompanionBuilder,
-    (Persona, BaseReferences<_$AppDatabase, $PersonasTable, Persona>),
+    (Persona, $$PersonasTableReferences),
     Persona,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool longTermMemoriesRefs})> {
   $$PersonasTableTableManager(_$AppDatabase db, $PersonasTable table)
       : super(TableManagerState(
           db: db,
@@ -10042,9 +15916,35 @@ class $$PersonasTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) =>
+                  (e.readTable(table), $$PersonasTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({longTermMemoriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (longTermMemoriesRefs) db.longTermMemories
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (longTermMemoriesRefs)
+                    await $_getPrefetchedData<Persona, $PersonasTable,
+                            LongTermMemoryRow>(
+                        currentTable: table,
+                        referencedTable: $$PersonasTableReferences
+                            ._longTermMemoriesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PersonasTableReferences(db, table, p0)
+                                .longTermMemoriesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.personaId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -10057,9 +15957,9 @@ typedef $$PersonasTableProcessedTableManager = ProcessedTableManager<
     $$PersonasTableAnnotationComposer,
     $$PersonasTableCreateCompanionBuilder,
     $$PersonasTableUpdateCompanionBuilder,
-    (Persona, BaseReferences<_$AppDatabase, $PersonasTable, Persona>),
+    (Persona, $$PersonasTableReferences),
     Persona,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool longTermMemoriesRefs})>;
 typedef $$GroupsTableCreateCompanionBuilder = GroupsCompanion Function({
   required String id,
   required String name,
@@ -10082,6 +15982,28 @@ typedef $$GroupsTableUpdateCompanionBuilder = GroupsCompanion Function({
   Value<DateTime> modifiedAt,
   Value<int> rowid,
 });
+
+final class $$GroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $GroupsTable, Group> {
+  $$GroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LongTermMemoriesTable, List<LongTermMemoryRow>>
+      _longTermMemoriesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemories,
+              aliasName: $_aliasNameGenerator(
+                  db.groups.id, db.longTermMemories.groupId));
+
+  $$LongTermMemoriesTableProcessedTableManager get longTermMemoriesRefs {
+    final manager =
+        $$LongTermMemoriesTableTableManager($_db, $_db.longTermMemories)
+            .filter((f) => f.groupId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_longTermMemoriesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$GroupsTableFilterComposer
     extends Composer<_$AppDatabase, $GroupsTable> {
@@ -10115,6 +16037,27 @@ class $$GroupsTableFilterComposer
 
   ColumnFilters<DateTime> get modifiedAt => $composableBuilder(
       column: $table.modifiedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> longTermMemoriesRefs(
+      Expression<bool> Function($$LongTermMemoriesTableFilterComposer f) f) {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.groupId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$GroupsTableOrderingComposer
@@ -10184,6 +16127,27 @@ class $$GroupsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get modifiedAt => $composableBuilder(
       column: $table.modifiedAt, builder: (column) => column);
+
+  Expression<T> longTermMemoriesRefs<T extends Object>(
+      Expression<T> Function($$LongTermMemoriesTableAnnotationComposer a) f) {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.groupId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$GroupsTableTableManager extends RootTableManager<
@@ -10195,9 +16159,9 @@ class $$GroupsTableTableManager extends RootTableManager<
     $$GroupsTableAnnotationComposer,
     $$GroupsTableCreateCompanionBuilder,
     $$GroupsTableUpdateCompanionBuilder,
-    (Group, BaseReferences<_$AppDatabase, $GroupsTable, Group>),
+    (Group, $$GroupsTableReferences),
     Group,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool longTermMemoriesRefs})> {
   $$GroupsTableTableManager(_$AppDatabase db, $GroupsTable table)
       : super(TableManagerState(
           db: db,
@@ -10253,9 +16217,35 @@ class $$GroupsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) =>
+                  (e.readTable(table), $$GroupsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({longTermMemoriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (longTermMemoriesRefs) db.longTermMemories
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (longTermMemoriesRefs)
+                    await $_getPrefetchedData<Group, $GroupsTable,
+                            LongTermMemoryRow>(
+                        currentTable: table,
+                        referencedTable: $$GroupsTableReferences
+                            ._longTermMemoriesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$GroupsTableReferences(db, table, p0)
+                                .longTermMemoriesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.groupId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -10268,9 +16258,9 @@ typedef $$GroupsTableProcessedTableManager = ProcessedTableManager<
     $$GroupsTableAnnotationComposer,
     $$GroupsTableCreateCompanionBuilder,
     $$GroupsTableUpdateCompanionBuilder,
-    (Group, BaseReferences<_$AppDatabase, $GroupsTable, Group>),
+    (Group, $$GroupsTableReferences),
     Group,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool longTermMemoriesRefs})>;
 typedef $$BookmarksTableCreateCompanionBuilder = BookmarksCompanion Function({
   required String id,
   required String chatId,
@@ -11273,6 +17263,5135 @@ typedef $$GlobalStatesTableProcessedTableManager = ProcessedTableManager<
     ),
     GlobalState,
     PrefetchHooks Function()>;
+typedef $$LongTermMemoriesTableCreateCompanionBuilder
+    = LongTermMemoriesCompanion Function({
+  required String id,
+  required String kind,
+  required String scopeKind,
+  Value<String?> characterId,
+  Value<String?> personaId,
+  Value<String?> chatId,
+  Value<String?> groupId,
+  required String state,
+  required String content,
+  required String sourceOrigin,
+  Value<String?> sourceChatId,
+  Value<DateTime?> extractedAt,
+  Value<String?> providerId,
+  Value<String?> modelId,
+  required double importance,
+  required double confidence,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> expiresAt,
+  Value<bool> locked,
+  required String normalizedIdentityKey,
+  Value<String?> supersededByMemoryId,
+  Value<int> rowid,
+});
+typedef $$LongTermMemoriesTableUpdateCompanionBuilder
+    = LongTermMemoriesCompanion Function({
+  Value<String> id,
+  Value<String> kind,
+  Value<String> scopeKind,
+  Value<String?> characterId,
+  Value<String?> personaId,
+  Value<String?> chatId,
+  Value<String?> groupId,
+  Value<String> state,
+  Value<String> content,
+  Value<String> sourceOrigin,
+  Value<String?> sourceChatId,
+  Value<DateTime?> extractedAt,
+  Value<String?> providerId,
+  Value<String?> modelId,
+  Value<double> importance,
+  Value<double> confidence,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> expiresAt,
+  Value<bool> locked,
+  Value<String> normalizedIdentityKey,
+  Value<String?> supersededByMemoryId,
+  Value<int> rowid,
+});
+
+final class $$LongTermMemoriesTableReferences extends BaseReferences<
+    _$AppDatabase, $LongTermMemoriesTable, LongTermMemoryRow> {
+  $$LongTermMemoriesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $CharactersTable _characterIdTable(_$AppDatabase db) =>
+      db.characters.createAlias($_aliasNameGenerator(
+          db.longTermMemories.characterId, db.characters.id));
+
+  $$CharactersTableProcessedTableManager? get characterId {
+    final $_column = $_itemColumn<String>('character_id');
+    if ($_column == null) return null;
+    final manager = $$CharactersTableTableManager($_db, $_db.characters)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_characterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $PersonasTable _personaIdTable(_$AppDatabase db) =>
+      db.personas.createAlias(
+          $_aliasNameGenerator(db.longTermMemories.personaId, db.personas.id));
+
+  $$PersonasTableProcessedTableManager? get personaId {
+    final $_column = $_itemColumn<String>('persona_id');
+    if ($_column == null) return null;
+    final manager = $$PersonasTableTableManager($_db, $_db.personas)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_personaIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats.createAlias(
+      $_aliasNameGenerator(db.longTermMemories.chatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager? get chatId {
+    final $_column = $_itemColumn<String>('chat_id');
+    if ($_column == null) return null;
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $GroupsTable _groupIdTable(_$AppDatabase db) => db.groups.createAlias(
+      $_aliasNameGenerator(db.longTermMemories.groupId, db.groups.id));
+
+  $$GroupsTableProcessedTableManager? get groupId {
+    final $_column = $_itemColumn<String>('group_id');
+    if ($_column == null) return null;
+    final manager = $$GroupsTableTableManager($_db, $_db.groups)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ChatsTable _sourceChatIdTable(_$AppDatabase db) =>
+      db.chats.createAlias(
+          $_aliasNameGenerator(db.longTermMemories.sourceChatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager? get sourceChatId {
+    final $_column = $_itemColumn<String>('source_chat_id');
+    if ($_column == null) return null;
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sourceChatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $LongTermMemoriesTable _supersededByMemoryIdTable(_$AppDatabase db) =>
+      db.longTermMemories.createAlias($_aliasNameGenerator(
+          db.longTermMemories.supersededByMemoryId, db.longTermMemories.id));
+
+  $$LongTermMemoriesTableProcessedTableManager? get supersededByMemoryId {
+    final $_column = $_itemColumn<String>('superseded_by_memory_id');
+    if ($_column == null) return null;
+    final manager =
+        $$LongTermMemoriesTableTableManager($_db, $_db.longTermMemories)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item =
+        $_typedResult.readTableOrNull(_supersededByMemoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$LongTermMemorySourceMessagesTable,
+          List<LongTermMemorySourceMessageRow>>
+      _longTermMemorySourceMessagesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.longTermMemorySourceMessages,
+              aliasName: $_aliasNameGenerator(db.longTermMemories.id,
+                  db.longTermMemorySourceMessages.memoryId));
+
+  $$LongTermMemorySourceMessagesTableProcessedTableManager
+      get longTermMemorySourceMessagesRefs {
+    final manager = $$LongTermMemorySourceMessagesTableTableManager(
+            $_db, $_db.longTermMemorySourceMessages)
+        .filter((f) => f.memoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_longTermMemorySourceMessagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$LongTermMemoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $LongTermMemoriesTable> {
+  $$LongTermMemoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scopeKind => $composableBuilder(
+      column: $table.scopeKind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sourceOrigin => $composableBuilder(
+      column: $table.sourceOrigin, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get extractedAt => $composableBuilder(
+      column: $table.extractedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get providerId => $composableBuilder(
+      column: $table.providerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get modelId => $composableBuilder(
+      column: $table.modelId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get importance => $composableBuilder(
+      column: $table.importance, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+      column: $table.confidence, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get locked => $composableBuilder(
+      column: $table.locked, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get normalizedIdentityKey => $composableBuilder(
+      column: $table.normalizedIdentityKey,
+      builder: (column) => ColumnFilters(column));
+
+  $$CharactersTableFilterComposer get characterId {
+    final $$CharactersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableFilterComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PersonasTableFilterComposer get personaId {
+    final $$PersonasTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.personaId,
+        referencedTable: $db.personas,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PersonasTableFilterComposer(
+              $db: $db,
+              $table: $db.personas,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableFilterComposer get chatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$GroupsTableFilterComposer get groupId {
+    final $$GroupsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.groups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$GroupsTableFilterComposer(
+              $db: $db,
+              $table: $db.groups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableFilterComposer get sourceChatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sourceChatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$LongTermMemoriesTableFilterComposer get supersededByMemoryId {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.supersededByMemoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> longTermMemorySourceMessagesRefs(
+      Expression<bool> Function(
+              $$LongTermMemorySourceMessagesTableFilterComposer f)
+          f) {
+    final $$LongTermMemorySourceMessagesTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.longTermMemorySourceMessages,
+            getReferencedColumn: (t) => t.memoryId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LongTermMemorySourceMessagesTableFilterComposer(
+                  $db: $db,
+                  $table: $db.longTermMemorySourceMessages,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LongTermMemoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LongTermMemoriesTable> {
+  $$LongTermMemoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get scopeKind => $composableBuilder(
+      column: $table.scopeKind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sourceOrigin => $composableBuilder(
+      column: $table.sourceOrigin,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get extractedAt => $composableBuilder(
+      column: $table.extractedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get providerId => $composableBuilder(
+      column: $table.providerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get modelId => $composableBuilder(
+      column: $table.modelId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get importance => $composableBuilder(
+      column: $table.importance, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+      column: $table.confidence, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get locked => $composableBuilder(
+      column: $table.locked, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get normalizedIdentityKey => $composableBuilder(
+      column: $table.normalizedIdentityKey,
+      builder: (column) => ColumnOrderings(column));
+
+  $$CharactersTableOrderingComposer get characterId {
+    final $$CharactersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableOrderingComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PersonasTableOrderingComposer get personaId {
+    final $$PersonasTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.personaId,
+        referencedTable: $db.personas,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PersonasTableOrderingComposer(
+              $db: $db,
+              $table: $db.personas,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableOrderingComposer get chatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$GroupsTableOrderingComposer get groupId {
+    final $$GroupsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.groups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$GroupsTableOrderingComposer(
+              $db: $db,
+              $table: $db.groups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableOrderingComposer get sourceChatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sourceChatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$LongTermMemoriesTableOrderingComposer get supersededByMemoryId {
+    final $$LongTermMemoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.supersededByMemoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LongTermMemoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LongTermMemoriesTable> {
+  $$LongTermMemoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeKind =>
+      $composableBuilder(column: $table.scopeKind, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceOrigin => $composableBuilder(
+      column: $table.sourceOrigin, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get extractedAt => $composableBuilder(
+      column: $table.extractedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get providerId => $composableBuilder(
+      column: $table.providerId, builder: (column) => column);
+
+  GeneratedColumn<String> get modelId =>
+      $composableBuilder(column: $table.modelId, builder: (column) => column);
+
+  GeneratedColumn<double> get importance => $composableBuilder(
+      column: $table.importance, builder: (column) => column);
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+      column: $table.confidence, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get locked =>
+      $composableBuilder(column: $table.locked, builder: (column) => column);
+
+  GeneratedColumn<String> get normalizedIdentityKey => $composableBuilder(
+      column: $table.normalizedIdentityKey, builder: (column) => column);
+
+  $$CharactersTableAnnotationComposer get characterId {
+    final $$CharactersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PersonasTableAnnotationComposer get personaId {
+    final $$PersonasTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.personaId,
+        referencedTable: $db.personas,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PersonasTableAnnotationComposer(
+              $db: $db,
+              $table: $db.personas,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableAnnotationComposer get chatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$GroupsTableAnnotationComposer get groupId {
+    final $$GroupsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.groups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$GroupsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.groups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableAnnotationComposer get sourceChatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sourceChatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$LongTermMemoriesTableAnnotationComposer get supersededByMemoryId {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.supersededByMemoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> longTermMemorySourceMessagesRefs<T extends Object>(
+      Expression<T> Function(
+              $$LongTermMemorySourceMessagesTableAnnotationComposer a)
+          f) {
+    final $$LongTermMemorySourceMessagesTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.longTermMemorySourceMessages,
+            getReferencedColumn: (t) => t.memoryId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LongTermMemorySourceMessagesTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.longTermMemorySourceMessages,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LongTermMemoriesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LongTermMemoriesTable,
+    LongTermMemoryRow,
+    $$LongTermMemoriesTableFilterComposer,
+    $$LongTermMemoriesTableOrderingComposer,
+    $$LongTermMemoriesTableAnnotationComposer,
+    $$LongTermMemoriesTableCreateCompanionBuilder,
+    $$LongTermMemoriesTableUpdateCompanionBuilder,
+    (LongTermMemoryRow, $$LongTermMemoriesTableReferences),
+    LongTermMemoryRow,
+    PrefetchHooks Function(
+        {bool characterId,
+        bool personaId,
+        bool chatId,
+        bool groupId,
+        bool sourceChatId,
+        bool supersededByMemoryId,
+        bool longTermMemorySourceMessagesRefs})> {
+  $$LongTermMemoriesTableTableManager(
+      _$AppDatabase db, $LongTermMemoriesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LongTermMemoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LongTermMemoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LongTermMemoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<String> scopeKind = const Value.absent(),
+            Value<String?> characterId = const Value.absent(),
+            Value<String?> personaId = const Value.absent(),
+            Value<String?> chatId = const Value.absent(),
+            Value<String?> groupId = const Value.absent(),
+            Value<String> state = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String> sourceOrigin = const Value.absent(),
+            Value<String?> sourceChatId = const Value.absent(),
+            Value<DateTime?> extractedAt = const Value.absent(),
+            Value<String?> providerId = const Value.absent(),
+            Value<String?> modelId = const Value.absent(),
+            Value<double> importance = const Value.absent(),
+            Value<double> confidence = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> expiresAt = const Value.absent(),
+            Value<bool> locked = const Value.absent(),
+            Value<String> normalizedIdentityKey = const Value.absent(),
+            Value<String?> supersededByMemoryId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LongTermMemoriesCompanion(
+            id: id,
+            kind: kind,
+            scopeKind: scopeKind,
+            characterId: characterId,
+            personaId: personaId,
+            chatId: chatId,
+            groupId: groupId,
+            state: state,
+            content: content,
+            sourceOrigin: sourceOrigin,
+            sourceChatId: sourceChatId,
+            extractedAt: extractedAt,
+            providerId: providerId,
+            modelId: modelId,
+            importance: importance,
+            confidence: confidence,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            expiresAt: expiresAt,
+            locked: locked,
+            normalizedIdentityKey: normalizedIdentityKey,
+            supersededByMemoryId: supersededByMemoryId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String kind,
+            required String scopeKind,
+            Value<String?> characterId = const Value.absent(),
+            Value<String?> personaId = const Value.absent(),
+            Value<String?> chatId = const Value.absent(),
+            Value<String?> groupId = const Value.absent(),
+            required String state,
+            required String content,
+            required String sourceOrigin,
+            Value<String?> sourceChatId = const Value.absent(),
+            Value<DateTime?> extractedAt = const Value.absent(),
+            Value<String?> providerId = const Value.absent(),
+            Value<String?> modelId = const Value.absent(),
+            required double importance,
+            required double confidence,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> expiresAt = const Value.absent(),
+            Value<bool> locked = const Value.absent(),
+            required String normalizedIdentityKey,
+            Value<String?> supersededByMemoryId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LongTermMemoriesCompanion.insert(
+            id: id,
+            kind: kind,
+            scopeKind: scopeKind,
+            characterId: characterId,
+            personaId: personaId,
+            chatId: chatId,
+            groupId: groupId,
+            state: state,
+            content: content,
+            sourceOrigin: sourceOrigin,
+            sourceChatId: sourceChatId,
+            extractedAt: extractedAt,
+            providerId: providerId,
+            modelId: modelId,
+            importance: importance,
+            confidence: confidence,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            expiresAt: expiresAt,
+            locked: locked,
+            normalizedIdentityKey: normalizedIdentityKey,
+            supersededByMemoryId: supersededByMemoryId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LongTermMemoriesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {characterId = false,
+              personaId = false,
+              chatId = false,
+              groupId = false,
+              sourceChatId = false,
+              supersededByMemoryId = false,
+              longTermMemorySourceMessagesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (longTermMemorySourceMessagesRefs)
+                  db.longTermMemorySourceMessages
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (characterId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.characterId,
+                    referencedTable:
+                        $$LongTermMemoriesTableReferences._characterIdTable(db),
+                    referencedColumn: $$LongTermMemoriesTableReferences
+                        ._characterIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (personaId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.personaId,
+                    referencedTable:
+                        $$LongTermMemoriesTableReferences._personaIdTable(db),
+                    referencedColumn: $$LongTermMemoriesTableReferences
+                        ._personaIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (chatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chatId,
+                    referencedTable:
+                        $$LongTermMemoriesTableReferences._chatIdTable(db),
+                    referencedColumn:
+                        $$LongTermMemoriesTableReferences._chatIdTable(db).id,
+                  ) as T;
+                }
+                if (groupId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.groupId,
+                    referencedTable:
+                        $$LongTermMemoriesTableReferences._groupIdTable(db),
+                    referencedColumn:
+                        $$LongTermMemoriesTableReferences._groupIdTable(db).id,
+                  ) as T;
+                }
+                if (sourceChatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.sourceChatId,
+                    referencedTable: $$LongTermMemoriesTableReferences
+                        ._sourceChatIdTable(db),
+                    referencedColumn: $$LongTermMemoriesTableReferences
+                        ._sourceChatIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (supersededByMemoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.supersededByMemoryId,
+                    referencedTable: $$LongTermMemoriesTableReferences
+                        ._supersededByMemoryIdTable(db),
+                    referencedColumn: $$LongTermMemoriesTableReferences
+                        ._supersededByMemoryIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (longTermMemorySourceMessagesRefs)
+                    await $_getPrefetchedData<
+                            LongTermMemoryRow,
+                            $LongTermMemoriesTable,
+                            LongTermMemorySourceMessageRow>(
+                        currentTable: table,
+                        referencedTable: $$LongTermMemoriesTableReferences
+                            ._longTermMemorySourceMessagesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LongTermMemoriesTableReferences(db, table, p0)
+                                .longTermMemorySourceMessagesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.memoryId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LongTermMemoriesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LongTermMemoriesTable,
+    LongTermMemoryRow,
+    $$LongTermMemoriesTableFilterComposer,
+    $$LongTermMemoriesTableOrderingComposer,
+    $$LongTermMemoriesTableAnnotationComposer,
+    $$LongTermMemoriesTableCreateCompanionBuilder,
+    $$LongTermMemoriesTableUpdateCompanionBuilder,
+    (LongTermMemoryRow, $$LongTermMemoriesTableReferences),
+    LongTermMemoryRow,
+    PrefetchHooks Function(
+        {bool characterId,
+        bool personaId,
+        bool chatId,
+        bool groupId,
+        bool sourceChatId,
+        bool supersededByMemoryId,
+        bool longTermMemorySourceMessagesRefs})>;
+typedef $$LongTermMemorySourceMessagesTableCreateCompanionBuilder
+    = LongTermMemorySourceMessagesCompanion Function({
+  required String memoryId,
+  required String messageId,
+  required int ordinal,
+  Value<int> rowid,
+});
+typedef $$LongTermMemorySourceMessagesTableUpdateCompanionBuilder
+    = LongTermMemorySourceMessagesCompanion Function({
+  Value<String> memoryId,
+  Value<String> messageId,
+  Value<int> ordinal,
+  Value<int> rowid,
+});
+
+final class $$LongTermMemorySourceMessagesTableReferences
+    extends BaseReferences<_$AppDatabase, $LongTermMemorySourceMessagesTable,
+        LongTermMemorySourceMessageRow> {
+  $$LongTermMemorySourceMessagesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $LongTermMemoriesTable _memoryIdTable(_$AppDatabase db) =>
+      db.longTermMemories.createAlias($_aliasNameGenerator(
+          db.longTermMemorySourceMessages.memoryId, db.longTermMemories.id));
+
+  $$LongTermMemoriesTableProcessedTableManager get memoryId {
+    final $_column = $_itemColumn<String>('memory_id')!;
+
+    final manager =
+        $$LongTermMemoriesTableTableManager($_db, $_db.longTermMemories)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_memoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $MessagesTable _messageIdTable(_$AppDatabase db) =>
+      db.messages.createAlias($_aliasNameGenerator(
+          db.longTermMemorySourceMessages.messageId, db.messages.id));
+
+  $$MessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LongTermMemorySourceMessagesTableFilterComposer
+    extends Composer<_$AppDatabase, $LongTermMemorySourceMessagesTable> {
+  $$LongTermMemorySourceMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnFilters(column));
+
+  $$LongTermMemoriesTableFilterComposer get memoryId {
+    final $$LongTermMemoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.memoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableFilterComposer get messageId {
+    final $$MessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LongTermMemorySourceMessagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LongTermMemorySourceMessagesTable> {
+  $$LongTermMemorySourceMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnOrderings(column));
+
+  $$LongTermMemoriesTableOrderingComposer get memoryId {
+    final $$LongTermMemoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.memoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableOrderingComposer get messageId {
+    final $$MessagesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableOrderingComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LongTermMemorySourceMessagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LongTermMemorySourceMessagesTable> {
+  $$LongTermMemorySourceMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get ordinal =>
+      $composableBuilder(column: $table.ordinal, builder: (column) => column);
+
+  $$LongTermMemoriesTableAnnotationComposer get memoryId {
+    final $$LongTermMemoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.memoryId,
+        referencedTable: $db.longTermMemories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LongTermMemoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.longTermMemories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableAnnotationComposer get messageId {
+    final $$MessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LongTermMemorySourceMessagesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LongTermMemorySourceMessagesTable,
+    LongTermMemorySourceMessageRow,
+    $$LongTermMemorySourceMessagesTableFilterComposer,
+    $$LongTermMemorySourceMessagesTableOrderingComposer,
+    $$LongTermMemorySourceMessagesTableAnnotationComposer,
+    $$LongTermMemorySourceMessagesTableCreateCompanionBuilder,
+    $$LongTermMemorySourceMessagesTableUpdateCompanionBuilder,
+    (
+      LongTermMemorySourceMessageRow,
+      $$LongTermMemorySourceMessagesTableReferences
+    ),
+    LongTermMemorySourceMessageRow,
+    PrefetchHooks Function({bool memoryId, bool messageId})> {
+  $$LongTermMemorySourceMessagesTableTableManager(
+      _$AppDatabase db, $LongTermMemorySourceMessagesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LongTermMemorySourceMessagesTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LongTermMemorySourceMessagesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LongTermMemorySourceMessagesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> memoryId = const Value.absent(),
+            Value<String> messageId = const Value.absent(),
+            Value<int> ordinal = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LongTermMemorySourceMessagesCompanion(
+            memoryId: memoryId,
+            messageId: messageId,
+            ordinal: ordinal,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String memoryId,
+            required String messageId,
+            required int ordinal,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LongTermMemorySourceMessagesCompanion.insert(
+            memoryId: memoryId,
+            messageId: messageId,
+            ordinal: ordinal,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LongTermMemorySourceMessagesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({memoryId = false, messageId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (memoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.memoryId,
+                    referencedTable:
+                        $$LongTermMemorySourceMessagesTableReferences
+                            ._memoryIdTable(db),
+                    referencedColumn:
+                        $$LongTermMemorySourceMessagesTableReferences
+                            ._memoryIdTable(db)
+                            .id,
+                  ) as T;
+                }
+                if (messageId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.messageId,
+                    referencedTable:
+                        $$LongTermMemorySourceMessagesTableReferences
+                            ._messageIdTable(db),
+                    referencedColumn:
+                        $$LongTermMemorySourceMessagesTableReferences
+                            ._messageIdTable(db)
+                            .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LongTermMemorySourceMessagesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LongTermMemorySourceMessagesTable,
+        LongTermMemorySourceMessageRow,
+        $$LongTermMemorySourceMessagesTableFilterComposer,
+        $$LongTermMemorySourceMessagesTableOrderingComposer,
+        $$LongTermMemorySourceMessagesTableAnnotationComposer,
+        $$LongTermMemorySourceMessagesTableCreateCompanionBuilder,
+        $$LongTermMemorySourceMessagesTableUpdateCompanionBuilder,
+        (
+          LongTermMemorySourceMessageRow,
+          $$LongTermMemorySourceMessagesTableReferences
+        ),
+        LongTermMemorySourceMessageRow,
+        PrefetchHooks Function({bool memoryId, bool messageId})>;
+typedef $$RpgScenariosTableCreateCompanionBuilder = RpgScenariosCompanion
+    Function({
+  required String id,
+  required String version,
+  required int contractSchemaVersion,
+  required String scenarioJson,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$RpgScenariosTableUpdateCompanionBuilder = RpgScenariosCompanion
+    Function({
+  Value<String> id,
+  Value<String> version,
+  Value<int> contractSchemaVersion,
+  Value<String> scenarioJson,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$RpgScenariosTableReferences
+    extends BaseReferences<_$AppDatabase, $RpgScenariosTable, RpgScenarioRow> {
+  $$RpgScenariosTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$RpgStateSnapshotsTable, List<RpgStateSnapshotRow>>
+      _rpgStateSnapshotsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.rpgStateSnapshots,
+              aliasName: $_aliasNameGenerator(
+                  db.rpgScenarios.id, db.rpgStateSnapshots.scenarioId));
+
+  $$RpgStateSnapshotsTableProcessedTableManager get rpgStateSnapshotsRefs {
+    final manager = $$RpgStateSnapshotsTableTableManager(
+            $_db, $_db.rpgStateSnapshots)
+        .filter((f) => f.scenarioId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_rpgStateSnapshotsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RpgChatStatesTable, List<RpgChatStateRow>>
+      _rpgChatStatesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.rpgChatStates,
+              aliasName: $_aliasNameGenerator(
+                  db.rpgScenarios.id, db.rpgChatStates.scenarioId));
+
+  $$RpgChatStatesTableProcessedTableManager get rpgChatStatesRefs {
+    final manager = $$RpgChatStatesTableTableManager($_db, $_db.rpgChatStates)
+        .filter((f) => f.scenarioId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_rpgChatStatesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$RpgScenariosTableFilterComposer
+    extends Composer<_$AppDatabase, $RpgScenariosTable> {
+  $$RpgScenariosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get contractSchemaVersion => $composableBuilder(
+      column: $table.contractSchemaVersion,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scenarioJson => $composableBuilder(
+      column: $table.scenarioJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> rpgStateSnapshotsRefs(
+      Expression<bool> Function($$RpgStateSnapshotsTableFilterComposer f) f) {
+    final $$RpgStateSnapshotsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgStateSnapshots,
+        getReferencedColumn: (t) => t.scenarioId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgStateSnapshotsTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgStateSnapshots,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> rpgChatStatesRefs(
+      Expression<bool> Function($$RpgChatStatesTableFilterComposer f) f) {
+    final $$RpgChatStatesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.scenarioId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RpgScenariosTableOrderingComposer
+    extends Composer<_$AppDatabase, $RpgScenariosTable> {
+  $$RpgScenariosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get contractSchemaVersion => $composableBuilder(
+      column: $table.contractSchemaVersion,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get scenarioJson => $composableBuilder(
+      column: $table.scenarioJson,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RpgScenariosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RpgScenariosTable> {
+  $$RpgScenariosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<int> get contractSchemaVersion => $composableBuilder(
+      column: $table.contractSchemaVersion, builder: (column) => column);
+
+  GeneratedColumn<String> get scenarioJson => $composableBuilder(
+      column: $table.scenarioJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> rpgStateSnapshotsRefs<T extends Object>(
+      Expression<T> Function($$RpgStateSnapshotsTableAnnotationComposer a) f) {
+    final $$RpgStateSnapshotsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.rpgStateSnapshots,
+            getReferencedColumn: (t) => t.scenarioId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$RpgStateSnapshotsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.rpgStateSnapshots,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<T> rpgChatStatesRefs<T extends Object>(
+      Expression<T> Function($$RpgChatStatesTableAnnotationComposer a) f) {
+    final $$RpgChatStatesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.scenarioId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RpgScenariosTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RpgScenariosTable,
+    RpgScenarioRow,
+    $$RpgScenariosTableFilterComposer,
+    $$RpgScenariosTableOrderingComposer,
+    $$RpgScenariosTableAnnotationComposer,
+    $$RpgScenariosTableCreateCompanionBuilder,
+    $$RpgScenariosTableUpdateCompanionBuilder,
+    (RpgScenarioRow, $$RpgScenariosTableReferences),
+    RpgScenarioRow,
+    PrefetchHooks Function(
+        {bool rpgStateSnapshotsRefs, bool rpgChatStatesRefs})> {
+  $$RpgScenariosTableTableManager(_$AppDatabase db, $RpgScenariosTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RpgScenariosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RpgScenariosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RpgScenariosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> version = const Value.absent(),
+            Value<int> contractSchemaVersion = const Value.absent(),
+            Value<String> scenarioJson = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgScenariosCompanion(
+            id: id,
+            version: version,
+            contractSchemaVersion: contractSchemaVersion,
+            scenarioJson: scenarioJson,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String version,
+            required int contractSchemaVersion,
+            required String scenarioJson,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgScenariosCompanion.insert(
+            id: id,
+            version: version,
+            contractSchemaVersion: contractSchemaVersion,
+            scenarioJson: scenarioJson,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RpgScenariosTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {rpgStateSnapshotsRefs = false, rpgChatStatesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (rpgStateSnapshotsRefs) db.rpgStateSnapshots,
+                if (rpgChatStatesRefs) db.rpgChatStates
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (rpgStateSnapshotsRefs)
+                    await $_getPrefetchedData<RpgScenarioRow,
+                            $RpgScenariosTable, RpgStateSnapshotRow>(
+                        currentTable: table,
+                        referencedTable: $$RpgScenariosTableReferences
+                            ._rpgStateSnapshotsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$RpgScenariosTableReferences(db, table, p0)
+                                .rpgStateSnapshotsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.scenarioId == item.id),
+                        typedResults: items),
+                  if (rpgChatStatesRefs)
+                    await $_getPrefetchedData<RpgScenarioRow,
+                            $RpgScenariosTable, RpgChatStateRow>(
+                        currentTable: table,
+                        referencedTable: $$RpgScenariosTableReferences
+                            ._rpgChatStatesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$RpgScenariosTableReferences(db, table, p0)
+                                .rpgChatStatesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.scenarioId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RpgScenariosTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RpgScenariosTable,
+    RpgScenarioRow,
+    $$RpgScenariosTableFilterComposer,
+    $$RpgScenariosTableOrderingComposer,
+    $$RpgScenariosTableAnnotationComposer,
+    $$RpgScenariosTableCreateCompanionBuilder,
+    $$RpgScenariosTableUpdateCompanionBuilder,
+    (RpgScenarioRow, $$RpgScenariosTableReferences),
+    RpgScenarioRow,
+    PrefetchHooks Function(
+        {bool rpgStateSnapshotsRefs, bool rpgChatStatesRefs})>;
+typedef $$RpgStateSnapshotsTableCreateCompanionBuilder
+    = RpgStateSnapshotsCompanion Function({
+  required String id,
+  required String scenarioId,
+  required String scenarioVersion,
+  required String branchId,
+  Value<String?> parentSnapshotId,
+  required int turn,
+  required int randomState,
+  required int rollsConsumed,
+  required DateTime createdAt,
+  Value<String?> stateHash,
+  required String snapshotJson,
+  Value<int> rowid,
+});
+typedef $$RpgStateSnapshotsTableUpdateCompanionBuilder
+    = RpgStateSnapshotsCompanion Function({
+  Value<String> id,
+  Value<String> scenarioId,
+  Value<String> scenarioVersion,
+  Value<String> branchId,
+  Value<String?> parentSnapshotId,
+  Value<int> turn,
+  Value<int> randomState,
+  Value<int> rollsConsumed,
+  Value<DateTime> createdAt,
+  Value<String?> stateHash,
+  Value<String> snapshotJson,
+  Value<int> rowid,
+});
+
+final class $$RpgStateSnapshotsTableReferences extends BaseReferences<
+    _$AppDatabase, $RpgStateSnapshotsTable, RpgStateSnapshotRow> {
+  $$RpgStateSnapshotsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $RpgScenariosTable _scenarioIdTable(_$AppDatabase db) =>
+      db.rpgScenarios.createAlias($_aliasNameGenerator(
+          db.rpgStateSnapshots.scenarioId, db.rpgScenarios.id));
+
+  $$RpgScenariosTableProcessedTableManager get scenarioId {
+    final $_column = $_itemColumn<String>('scenario_id')!;
+
+    final manager = $$RpgScenariosTableTableManager($_db, $_db.rpgScenarios)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scenarioIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $RpgStateSnapshotsTable _parentSnapshotIdTable(_$AppDatabase db) =>
+      db.rpgStateSnapshots.createAlias($_aliasNameGenerator(
+          db.rpgStateSnapshots.parentSnapshotId, db.rpgStateSnapshots.id));
+
+  $$RpgStateSnapshotsTableProcessedTableManager? get parentSnapshotId {
+    final $_column = $_itemColumn<String>('parent_snapshot_id');
+    if ($_column == null) return null;
+    final manager =
+        $$RpgStateSnapshotsTableTableManager($_db, $_db.rpgStateSnapshots)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentSnapshotIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$RpgChatStatesTable, List<RpgChatStateRow>>
+      _rpgChatStatesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.rpgChatStates,
+              aliasName: $_aliasNameGenerator(
+                  db.rpgStateSnapshots.id, db.rpgChatStates.currentSnapshotId));
+
+  $$RpgChatStatesTableProcessedTableManager get rpgChatStatesRefs {
+    final manager = $$RpgChatStatesTableTableManager($_db, $_db.rpgChatStates)
+        .filter((f) =>
+            f.currentSnapshotId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_rpgChatStatesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$RpgStateSnapshotsTableFilterComposer
+    extends Composer<_$AppDatabase, $RpgStateSnapshotsTable> {
+  $$RpgStateSnapshotsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scenarioVersion => $composableBuilder(
+      column: $table.scenarioVersion,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get branchId => $composableBuilder(
+      column: $table.branchId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get turn => $composableBuilder(
+      column: $table.turn, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get randomState => $composableBuilder(
+      column: $table.randomState, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get rollsConsumed => $composableBuilder(
+      column: $table.rollsConsumed, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get stateHash => $composableBuilder(
+      column: $table.stateHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get snapshotJson => $composableBuilder(
+      column: $table.snapshotJson, builder: (column) => ColumnFilters(column));
+
+  $$RpgScenariosTableFilterComposer get scenarioId {
+    final $$RpgScenariosTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableFilterComposer get parentSnapshotId {
+    final $$RpgStateSnapshotsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentSnapshotId,
+        referencedTable: $db.rpgStateSnapshots,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgStateSnapshotsTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgStateSnapshots,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> rpgChatStatesRefs(
+      Expression<bool> Function($$RpgChatStatesTableFilterComposer f) f) {
+    final $$RpgChatStatesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.currentSnapshotId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RpgStateSnapshotsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RpgStateSnapshotsTable> {
+  $$RpgStateSnapshotsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get scenarioVersion => $composableBuilder(
+      column: $table.scenarioVersion,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get branchId => $composableBuilder(
+      column: $table.branchId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get turn => $composableBuilder(
+      column: $table.turn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get randomState => $composableBuilder(
+      column: $table.randomState, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get rollsConsumed => $composableBuilder(
+      column: $table.rollsConsumed,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get stateHash => $composableBuilder(
+      column: $table.stateHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get snapshotJson => $composableBuilder(
+      column: $table.snapshotJson,
+      builder: (column) => ColumnOrderings(column));
+
+  $$RpgScenariosTableOrderingComposer get scenarioId {
+    final $$RpgScenariosTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableOrderingComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableOrderingComposer get parentSnapshotId {
+    final $$RpgStateSnapshotsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentSnapshotId,
+        referencedTable: $db.rpgStateSnapshots,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgStateSnapshotsTableOrderingComposer(
+              $db: $db,
+              $table: $db.rpgStateSnapshots,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RpgStateSnapshotsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RpgStateSnapshotsTable> {
+  $$RpgStateSnapshotsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get scenarioVersion => $composableBuilder(
+      column: $table.scenarioVersion, builder: (column) => column);
+
+  GeneratedColumn<String> get branchId =>
+      $composableBuilder(column: $table.branchId, builder: (column) => column);
+
+  GeneratedColumn<int> get turn =>
+      $composableBuilder(column: $table.turn, builder: (column) => column);
+
+  GeneratedColumn<int> get randomState => $composableBuilder(
+      column: $table.randomState, builder: (column) => column);
+
+  GeneratedColumn<int> get rollsConsumed => $composableBuilder(
+      column: $table.rollsConsumed, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get stateHash =>
+      $composableBuilder(column: $table.stateHash, builder: (column) => column);
+
+  GeneratedColumn<String> get snapshotJson => $composableBuilder(
+      column: $table.snapshotJson, builder: (column) => column);
+
+  $$RpgScenariosTableAnnotationComposer get scenarioId {
+    final $$RpgScenariosTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableAnnotationComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableAnnotationComposer get parentSnapshotId {
+    final $$RpgStateSnapshotsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.parentSnapshotId,
+            referencedTable: $db.rpgStateSnapshots,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$RpgStateSnapshotsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.rpgStateSnapshots,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<T> rpgChatStatesRefs<T extends Object>(
+      Expression<T> Function($$RpgChatStatesTableAnnotationComposer a) f) {
+    final $$RpgChatStatesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.rpgChatStates,
+        getReferencedColumn: (t) => t.currentSnapshotId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgChatStatesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.rpgChatStates,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RpgStateSnapshotsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RpgStateSnapshotsTable,
+    RpgStateSnapshotRow,
+    $$RpgStateSnapshotsTableFilterComposer,
+    $$RpgStateSnapshotsTableOrderingComposer,
+    $$RpgStateSnapshotsTableAnnotationComposer,
+    $$RpgStateSnapshotsTableCreateCompanionBuilder,
+    $$RpgStateSnapshotsTableUpdateCompanionBuilder,
+    (RpgStateSnapshotRow, $$RpgStateSnapshotsTableReferences),
+    RpgStateSnapshotRow,
+    PrefetchHooks Function(
+        {bool scenarioId, bool parentSnapshotId, bool rpgChatStatesRefs})> {
+  $$RpgStateSnapshotsTableTableManager(
+      _$AppDatabase db, $RpgStateSnapshotsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RpgStateSnapshotsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RpgStateSnapshotsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RpgStateSnapshotsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> scenarioId = const Value.absent(),
+            Value<String> scenarioVersion = const Value.absent(),
+            Value<String> branchId = const Value.absent(),
+            Value<String?> parentSnapshotId = const Value.absent(),
+            Value<int> turn = const Value.absent(),
+            Value<int> randomState = const Value.absent(),
+            Value<int> rollsConsumed = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String?> stateHash = const Value.absent(),
+            Value<String> snapshotJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgStateSnapshotsCompanion(
+            id: id,
+            scenarioId: scenarioId,
+            scenarioVersion: scenarioVersion,
+            branchId: branchId,
+            parentSnapshotId: parentSnapshotId,
+            turn: turn,
+            randomState: randomState,
+            rollsConsumed: rollsConsumed,
+            createdAt: createdAt,
+            stateHash: stateHash,
+            snapshotJson: snapshotJson,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String scenarioId,
+            required String scenarioVersion,
+            required String branchId,
+            Value<String?> parentSnapshotId = const Value.absent(),
+            required int turn,
+            required int randomState,
+            required int rollsConsumed,
+            required DateTime createdAt,
+            Value<String?> stateHash = const Value.absent(),
+            required String snapshotJson,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgStateSnapshotsCompanion.insert(
+            id: id,
+            scenarioId: scenarioId,
+            scenarioVersion: scenarioVersion,
+            branchId: branchId,
+            parentSnapshotId: parentSnapshotId,
+            turn: turn,
+            randomState: randomState,
+            rollsConsumed: rollsConsumed,
+            createdAt: createdAt,
+            stateHash: stateHash,
+            snapshotJson: snapshotJson,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RpgStateSnapshotsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {scenarioId = false,
+              parentSnapshotId = false,
+              rpgChatStatesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (rpgChatStatesRefs) db.rpgChatStates
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (scenarioId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.scenarioId,
+                    referencedTable:
+                        $$RpgStateSnapshotsTableReferences._scenarioIdTable(db),
+                    referencedColumn: $$RpgStateSnapshotsTableReferences
+                        ._scenarioIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (parentSnapshotId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.parentSnapshotId,
+                    referencedTable: $$RpgStateSnapshotsTableReferences
+                        ._parentSnapshotIdTable(db),
+                    referencedColumn: $$RpgStateSnapshotsTableReferences
+                        ._parentSnapshotIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (rpgChatStatesRefs)
+                    await $_getPrefetchedData<RpgStateSnapshotRow,
+                            $RpgStateSnapshotsTable, RpgChatStateRow>(
+                        currentTable: table,
+                        referencedTable: $$RpgStateSnapshotsTableReferences
+                            ._rpgChatStatesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$RpgStateSnapshotsTableReferences(db, table, p0)
+                                .rpgChatStatesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.currentSnapshotId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RpgStateSnapshotsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RpgStateSnapshotsTable,
+    RpgStateSnapshotRow,
+    $$RpgStateSnapshotsTableFilterComposer,
+    $$RpgStateSnapshotsTableOrderingComposer,
+    $$RpgStateSnapshotsTableAnnotationComposer,
+    $$RpgStateSnapshotsTableCreateCompanionBuilder,
+    $$RpgStateSnapshotsTableUpdateCompanionBuilder,
+    (RpgStateSnapshotRow, $$RpgStateSnapshotsTableReferences),
+    RpgStateSnapshotRow,
+    PrefetchHooks Function(
+        {bool scenarioId, bool parentSnapshotId, bool rpgChatStatesRefs})>;
+typedef $$RpgChatStatesTableCreateCompanionBuilder = RpgChatStatesCompanion
+    Function({
+  required String chatId,
+  required String scenarioId,
+  Value<String?> currentSnapshotId,
+  required int turn,
+  required String stateJson,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$RpgChatStatesTableUpdateCompanionBuilder = RpgChatStatesCompanion
+    Function({
+  Value<String> chatId,
+  Value<String> scenarioId,
+  Value<String?> currentSnapshotId,
+  Value<int> turn,
+  Value<String> stateJson,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$RpgChatStatesTableReferences extends BaseReferences<_$AppDatabase,
+    $RpgChatStatesTable, RpgChatStateRow> {
+  $$RpgChatStatesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats
+      .createAlias($_aliasNameGenerator(db.rpgChatStates.chatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager get chatId {
+    final $_column = $_itemColumn<String>('chat_id')!;
+
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $RpgScenariosTable _scenarioIdTable(_$AppDatabase db) =>
+      db.rpgScenarios.createAlias($_aliasNameGenerator(
+          db.rpgChatStates.scenarioId, db.rpgScenarios.id));
+
+  $$RpgScenariosTableProcessedTableManager get scenarioId {
+    final $_column = $_itemColumn<String>('scenario_id')!;
+
+    final manager = $$RpgScenariosTableTableManager($_db, $_db.rpgScenarios)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scenarioIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $RpgStateSnapshotsTable _currentSnapshotIdTable(_$AppDatabase db) =>
+      db.rpgStateSnapshots.createAlias($_aliasNameGenerator(
+          db.rpgChatStates.currentSnapshotId, db.rpgStateSnapshots.id));
+
+  $$RpgStateSnapshotsTableProcessedTableManager? get currentSnapshotId {
+    final $_column = $_itemColumn<String>('current_snapshot_id');
+    if ($_column == null) return null;
+    final manager =
+        $$RpgStateSnapshotsTableTableManager($_db, $_db.rpgStateSnapshots)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_currentSnapshotIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$RpgChatStatesTableFilterComposer
+    extends Composer<_$AppDatabase, $RpgChatStatesTable> {
+  $$RpgChatStatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get turn => $composableBuilder(
+      column: $table.turn, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get stateJson => $composableBuilder(
+      column: $table.stateJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$ChatsTableFilterComposer get chatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgScenariosTableFilterComposer get scenarioId {
+    final $$RpgScenariosTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableFilterComposer get currentSnapshotId {
+    final $$RpgStateSnapshotsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.currentSnapshotId,
+        referencedTable: $db.rpgStateSnapshots,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgStateSnapshotsTableFilterComposer(
+              $db: $db,
+              $table: $db.rpgStateSnapshots,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RpgChatStatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RpgChatStatesTable> {
+  $$RpgChatStatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get turn => $composableBuilder(
+      column: $table.turn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get stateJson => $composableBuilder(
+      column: $table.stateJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$ChatsTableOrderingComposer get chatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgScenariosTableOrderingComposer get scenarioId {
+    final $$RpgScenariosTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableOrderingComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableOrderingComposer get currentSnapshotId {
+    final $$RpgStateSnapshotsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.currentSnapshotId,
+        referencedTable: $db.rpgStateSnapshots,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgStateSnapshotsTableOrderingComposer(
+              $db: $db,
+              $table: $db.rpgStateSnapshots,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RpgChatStatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RpgChatStatesTable> {
+  $$RpgChatStatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get turn =>
+      $composableBuilder(column: $table.turn, builder: (column) => column);
+
+  GeneratedColumn<String> get stateJson =>
+      $composableBuilder(column: $table.stateJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$ChatsTableAnnotationComposer get chatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgScenariosTableAnnotationComposer get scenarioId {
+    final $$RpgScenariosTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.scenarioId,
+        referencedTable: $db.rpgScenarios,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RpgScenariosTableAnnotationComposer(
+              $db: $db,
+              $table: $db.rpgScenarios,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RpgStateSnapshotsTableAnnotationComposer get currentSnapshotId {
+    final $$RpgStateSnapshotsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.currentSnapshotId,
+            referencedTable: $db.rpgStateSnapshots,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$RpgStateSnapshotsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.rpgStateSnapshots,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$RpgChatStatesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RpgChatStatesTable,
+    RpgChatStateRow,
+    $$RpgChatStatesTableFilterComposer,
+    $$RpgChatStatesTableOrderingComposer,
+    $$RpgChatStatesTableAnnotationComposer,
+    $$RpgChatStatesTableCreateCompanionBuilder,
+    $$RpgChatStatesTableUpdateCompanionBuilder,
+    (RpgChatStateRow, $$RpgChatStatesTableReferences),
+    RpgChatStateRow,
+    PrefetchHooks Function(
+        {bool chatId, bool scenarioId, bool currentSnapshotId})> {
+  $$RpgChatStatesTableTableManager(_$AppDatabase db, $RpgChatStatesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RpgChatStatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RpgChatStatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RpgChatStatesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> chatId = const Value.absent(),
+            Value<String> scenarioId = const Value.absent(),
+            Value<String?> currentSnapshotId = const Value.absent(),
+            Value<int> turn = const Value.absent(),
+            Value<String> stateJson = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgChatStatesCompanion(
+            chatId: chatId,
+            scenarioId: scenarioId,
+            currentSnapshotId: currentSnapshotId,
+            turn: turn,
+            stateJson: stateJson,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String chatId,
+            required String scenarioId,
+            Value<String?> currentSnapshotId = const Value.absent(),
+            required int turn,
+            required String stateJson,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RpgChatStatesCompanion.insert(
+            chatId: chatId,
+            scenarioId: scenarioId,
+            currentSnapshotId: currentSnapshotId,
+            turn: turn,
+            stateJson: stateJson,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RpgChatStatesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {chatId = false, scenarioId = false, currentSnapshotId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (chatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chatId,
+                    referencedTable:
+                        $$RpgChatStatesTableReferences._chatIdTable(db),
+                    referencedColumn:
+                        $$RpgChatStatesTableReferences._chatIdTable(db).id,
+                  ) as T;
+                }
+                if (scenarioId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.scenarioId,
+                    referencedTable:
+                        $$RpgChatStatesTableReferences._scenarioIdTable(db),
+                    referencedColumn:
+                        $$RpgChatStatesTableReferences._scenarioIdTable(db).id,
+                  ) as T;
+                }
+                if (currentSnapshotId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.currentSnapshotId,
+                    referencedTable: $$RpgChatStatesTableReferences
+                        ._currentSnapshotIdTable(db),
+                    referencedColumn: $$RpgChatStatesTableReferences
+                        ._currentSnapshotIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RpgChatStatesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RpgChatStatesTable,
+    RpgChatStateRow,
+    $$RpgChatStatesTableFilterComposer,
+    $$RpgChatStatesTableOrderingComposer,
+    $$RpgChatStatesTableAnnotationComposer,
+    $$RpgChatStatesTableCreateCompanionBuilder,
+    $$RpgChatStatesTableUpdateCompanionBuilder,
+    (RpgChatStateRow, $$RpgChatStatesTableReferences),
+    RpgChatStateRow,
+    PrefetchHooks Function(
+        {bool chatId, bool scenarioId, bool currentSnapshotId})>;
+typedef $$DataBankDocumentsTableCreateCompanionBuilder
+    = DataBankDocumentsCompanion Function({
+  required String id,
+  Value<String?> currentVersionId,
+  required String processingState,
+  required String indexState,
+  Value<String?> failureJson,
+  required String reprocessingJson,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> isPlaceholder,
+  Value<int> rowid,
+});
+typedef $$DataBankDocumentsTableUpdateCompanionBuilder
+    = DataBankDocumentsCompanion Function({
+  Value<String> id,
+  Value<String?> currentVersionId,
+  Value<String> processingState,
+  Value<String> indexState,
+  Value<String?> failureJson,
+  Value<String> reprocessingJson,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> isPlaceholder,
+  Value<int> rowid,
+});
+
+final class $$DataBankDocumentsTableReferences extends BaseReferences<
+    _$AppDatabase, $DataBankDocumentsTable, DataBankDocumentRow> {
+  $$DataBankDocumentsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$DataBankDocumentVersionsTable,
+      List<DataBankDocumentVersionRow>> _dataBankDocumentVersionsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.dataBankDocumentVersions,
+          aliasName: $_aliasNameGenerator(
+              db.dataBankDocuments.id, db.dataBankDocumentVersions.documentId));
+
+  $$DataBankDocumentVersionsTableProcessedTableManager
+      get dataBankDocumentVersionsRefs {
+    final manager = $$DataBankDocumentVersionsTableTableManager(
+            $_db, $_db.dataBankDocumentVersions)
+        .filter((f) => f.documentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankDocumentVersionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$DataBankBindingsTable, List<DataBankBindingRow>>
+      _dataBankBindingsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.dataBankBindings,
+              aliasName: $_aliasNameGenerator(
+                  db.dataBankDocuments.id, db.dataBankBindings.documentId));
+
+  $$DataBankBindingsTableProcessedTableManager get dataBankBindingsRefs {
+    final manager = $$DataBankBindingsTableTableManager(
+            $_db, $_db.dataBankBindings)
+        .filter((f) => f.documentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankBindingsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$DataBankDocumentsTableFilterComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentsTable> {
+  $$DataBankDocumentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currentVersionId => $composableBuilder(
+      column: $table.currentVersionId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get processingState => $composableBuilder(
+      column: $table.processingState,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPlaceholder => $composableBuilder(
+      column: $table.isPlaceholder, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> dataBankDocumentVersionsRefs(
+      Expression<bool> Function($$DataBankDocumentVersionsTableFilterComposer f)
+          f) {
+    final $$DataBankDocumentVersionsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.documentId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> dataBankBindingsRefs(
+      Expression<bool> Function($$DataBankBindingsTableFilterComposer f) f) {
+    final $$DataBankBindingsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.documentId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$DataBankDocumentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentsTable> {
+  $$DataBankDocumentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currentVersionId => $composableBuilder(
+      column: $table.currentVersionId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get processingState => $composableBuilder(
+      column: $table.processingState,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPlaceholder => $composableBuilder(
+      column: $table.isPlaceholder,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$DataBankDocumentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentsTable> {
+  $$DataBankDocumentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get currentVersionId => $composableBuilder(
+      column: $table.currentVersionId, builder: (column) => column);
+
+  GeneratedColumn<String> get processingState => $composableBuilder(
+      column: $table.processingState, builder: (column) => column);
+
+  GeneratedColumn<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => column);
+
+  GeneratedColumn<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => column);
+
+  GeneratedColumn<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPlaceholder => $composableBuilder(
+      column: $table.isPlaceholder, builder: (column) => column);
+
+  Expression<T> dataBankDocumentVersionsRefs<T extends Object>(
+      Expression<T> Function(
+              $$DataBankDocumentVersionsTableAnnotationComposer a)
+          f) {
+    final $$DataBankDocumentVersionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.documentId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<T> dataBankBindingsRefs<T extends Object>(
+      Expression<T> Function($$DataBankBindingsTableAnnotationComposer a) f) {
+    final $$DataBankBindingsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankBindings,
+        getReferencedColumn: (t) => t.documentId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankBindingsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankBindings,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$DataBankDocumentsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DataBankDocumentsTable,
+    DataBankDocumentRow,
+    $$DataBankDocumentsTableFilterComposer,
+    $$DataBankDocumentsTableOrderingComposer,
+    $$DataBankDocumentsTableAnnotationComposer,
+    $$DataBankDocumentsTableCreateCompanionBuilder,
+    $$DataBankDocumentsTableUpdateCompanionBuilder,
+    (DataBankDocumentRow, $$DataBankDocumentsTableReferences),
+    DataBankDocumentRow,
+    PrefetchHooks Function(
+        {bool dataBankDocumentVersionsRefs, bool dataBankBindingsRefs})> {
+  $$DataBankDocumentsTableTableManager(
+      _$AppDatabase db, $DataBankDocumentsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DataBankDocumentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DataBankDocumentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DataBankDocumentsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String?> currentVersionId = const Value.absent(),
+            Value<String> processingState = const Value.absent(),
+            Value<String> indexState = const Value.absent(),
+            Value<String?> failureJson = const Value.absent(),
+            Value<String> reprocessingJson = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> isPlaceholder = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankDocumentsCompanion(
+            id: id,
+            currentVersionId: currentVersionId,
+            processingState: processingState,
+            indexState: indexState,
+            failureJson: failureJson,
+            reprocessingJson: reprocessingJson,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            isPlaceholder: isPlaceholder,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            Value<String?> currentVersionId = const Value.absent(),
+            required String processingState,
+            required String indexState,
+            Value<String?> failureJson = const Value.absent(),
+            required String reprocessingJson,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> isPlaceholder = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankDocumentsCompanion.insert(
+            id: id,
+            currentVersionId: currentVersionId,
+            processingState: processingState,
+            indexState: indexState,
+            failureJson: failureJson,
+            reprocessingJson: reprocessingJson,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            isPlaceholder: isPlaceholder,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DataBankDocumentsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {dataBankDocumentVersionsRefs = false,
+              dataBankBindingsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (dataBankDocumentVersionsRefs) db.dataBankDocumentVersions,
+                if (dataBankBindingsRefs) db.dataBankBindings
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (dataBankDocumentVersionsRefs)
+                    await $_getPrefetchedData<
+                            DataBankDocumentRow,
+                            $DataBankDocumentsTable,
+                            DataBankDocumentVersionRow>(
+                        currentTable: table,
+                        referencedTable: $$DataBankDocumentsTableReferences
+                            ._dataBankDocumentVersionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DataBankDocumentsTableReferences(db, table, p0)
+                                .dataBankDocumentVersionsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.documentId == item.id),
+                        typedResults: items),
+                  if (dataBankBindingsRefs)
+                    await $_getPrefetchedData<DataBankDocumentRow,
+                            $DataBankDocumentsTable, DataBankBindingRow>(
+                        currentTable: table,
+                        referencedTable: $$DataBankDocumentsTableReferences
+                            ._dataBankBindingsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DataBankDocumentsTableReferences(db, table, p0)
+                                .dataBankBindingsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.documentId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DataBankDocumentsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DataBankDocumentsTable,
+    DataBankDocumentRow,
+    $$DataBankDocumentsTableFilterComposer,
+    $$DataBankDocumentsTableOrderingComposer,
+    $$DataBankDocumentsTableAnnotationComposer,
+    $$DataBankDocumentsTableCreateCompanionBuilder,
+    $$DataBankDocumentsTableUpdateCompanionBuilder,
+    (DataBankDocumentRow, $$DataBankDocumentsTableReferences),
+    DataBankDocumentRow,
+    PrefetchHooks Function(
+        {bool dataBankDocumentVersionsRefs, bool dataBankBindingsRefs})>;
+typedef $$DataBankDocumentVersionsTableCreateCompanionBuilder
+    = DataBankDocumentVersionsCompanion Function({
+  required String id,
+  required String documentId,
+  required int versionNumber,
+  Value<String?> supersedesVersionId,
+  required String originalFileName,
+  required String mediaType,
+  required int byteSize,
+  required String hashAlgorithm,
+  required String hashDigest,
+  required DateTime importedAt,
+  required String processingState,
+  required String indexState,
+  Value<String?> failureJson,
+  required String reprocessingJson,
+  Value<int> rowid,
+});
+typedef $$DataBankDocumentVersionsTableUpdateCompanionBuilder
+    = DataBankDocumentVersionsCompanion Function({
+  Value<String> id,
+  Value<String> documentId,
+  Value<int> versionNumber,
+  Value<String?> supersedesVersionId,
+  Value<String> originalFileName,
+  Value<String> mediaType,
+  Value<int> byteSize,
+  Value<String> hashAlgorithm,
+  Value<String> hashDigest,
+  Value<DateTime> importedAt,
+  Value<String> processingState,
+  Value<String> indexState,
+  Value<String?> failureJson,
+  Value<String> reprocessingJson,
+  Value<int> rowid,
+});
+
+final class $$DataBankDocumentVersionsTableReferences extends BaseReferences<
+    _$AppDatabase, $DataBankDocumentVersionsTable, DataBankDocumentVersionRow> {
+  $$DataBankDocumentVersionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $DataBankDocumentsTable _documentIdTable(_$AppDatabase db) =>
+      db.dataBankDocuments.createAlias($_aliasNameGenerator(
+          db.dataBankDocumentVersions.documentId, db.dataBankDocuments.id));
+
+  $$DataBankDocumentsTableProcessedTableManager get documentId {
+    final $_column = $_itemColumn<String>('document_id')!;
+
+    final manager =
+        $$DataBankDocumentsTableTableManager($_db, $_db.dataBankDocuments)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_documentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $DataBankDocumentVersionsTable _supersedesVersionIdTable(
+          _$AppDatabase db) =>
+      db.dataBankDocumentVersions.createAlias($_aliasNameGenerator(
+          db.dataBankDocumentVersions.supersedesVersionId,
+          db.dataBankDocumentVersions.id));
+
+  $$DataBankDocumentVersionsTableProcessedTableManager?
+      get supersedesVersionId {
+    final $_column = $_itemColumn<String>('supersedes_version_id');
+    if ($_column == null) return null;
+    final manager = $$DataBankDocumentVersionsTableTableManager(
+            $_db, $_db.dataBankDocumentVersions)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_supersedesVersionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$DataBankSectionsTable, List<DataBankSectionRow>>
+      _dataBankSectionsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.dataBankSections,
+              aliasName: $_aliasNameGenerator(db.dataBankDocumentVersions.id,
+                  db.dataBankSections.documentVersionId));
+
+  $$DataBankSectionsTableProcessedTableManager get dataBankSectionsRefs {
+    final manager =
+        $$DataBankSectionsTableTableManager($_db, $_db.dataBankSections).filter(
+            (f) =>
+                f.documentVersionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankSectionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$DataBankTextChunksTable,
+      List<DataBankTextChunkRow>> _dataBankTextChunksRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.dataBankTextChunks,
+          aliasName: $_aliasNameGenerator(db.dataBankDocumentVersions.id,
+              db.dataBankTextChunks.documentVersionId));
+
+  $$DataBankTextChunksTableProcessedTableManager get dataBankTextChunksRefs {
+    final manager =
+        $$DataBankTextChunksTableTableManager($_db, $_db.dataBankTextChunks)
+            .filter((f) =>
+                f.documentVersionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankTextChunksRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$DataBankDocumentVersionsTableFilterComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentVersionsTable> {
+  $$DataBankDocumentVersionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get versionNumber => $composableBuilder(
+      column: $table.versionNumber, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get originalFileName => $composableBuilder(
+      column: $table.originalFileName,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get byteSize => $composableBuilder(
+      column: $table.byteSize, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get hashAlgorithm => $composableBuilder(
+      column: $table.hashAlgorithm, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get hashDigest => $composableBuilder(
+      column: $table.hashDigest, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get importedAt => $composableBuilder(
+      column: $table.importedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get processingState => $composableBuilder(
+      column: $table.processingState,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson,
+      builder: (column) => ColumnFilters(column));
+
+  $$DataBankDocumentsTableFilterComposer get documentId {
+    final $$DataBankDocumentsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.documentId,
+        referencedTable: $db.dataBankDocuments,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankDocumentsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankDocuments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$DataBankDocumentVersionsTableFilterComposer get supersedesVersionId {
+    final $$DataBankDocumentVersionsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.supersedesVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<bool> dataBankSectionsRefs(
+      Expression<bool> Function($$DataBankSectionsTableFilterComposer f) f) {
+    final $$DataBankSectionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.documentVersionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> dataBankTextChunksRefs(
+      Expression<bool> Function($$DataBankTextChunksTableFilterComposer f) f) {
+    final $$DataBankTextChunksTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankTextChunks,
+        getReferencedColumn: (t) => t.documentVersionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankTextChunksTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankTextChunks,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$DataBankDocumentVersionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentVersionsTable> {
+  $$DataBankDocumentVersionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get versionNumber => $composableBuilder(
+      column: $table.versionNumber,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get originalFileName => $composableBuilder(
+      column: $table.originalFileName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get byteSize => $composableBuilder(
+      column: $table.byteSize, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get hashAlgorithm => $composableBuilder(
+      column: $table.hashAlgorithm,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get hashDigest => $composableBuilder(
+      column: $table.hashDigest, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get importedAt => $composableBuilder(
+      column: $table.importedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get processingState => $composableBuilder(
+      column: $table.processingState,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson,
+      builder: (column) => ColumnOrderings(column));
+
+  $$DataBankDocumentsTableOrderingComposer get documentId {
+    final $$DataBankDocumentsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.documentId,
+        referencedTable: $db.dataBankDocuments,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankDocumentsTableOrderingComposer(
+              $db: $db,
+              $table: $db.dataBankDocuments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$DataBankDocumentVersionsTableOrderingComposer get supersedesVersionId {
+    final $$DataBankDocumentVersionsTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.supersedesVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$DataBankDocumentVersionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DataBankDocumentVersionsTable> {
+  $$DataBankDocumentVersionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get versionNumber => $composableBuilder(
+      column: $table.versionNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get originalFileName => $composableBuilder(
+      column: $table.originalFileName, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaType =>
+      $composableBuilder(column: $table.mediaType, builder: (column) => column);
+
+  GeneratedColumn<int> get byteSize =>
+      $composableBuilder(column: $table.byteSize, builder: (column) => column);
+
+  GeneratedColumn<String> get hashAlgorithm => $composableBuilder(
+      column: $table.hashAlgorithm, builder: (column) => column);
+
+  GeneratedColumn<String> get hashDigest => $composableBuilder(
+      column: $table.hashDigest, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get importedAt => $composableBuilder(
+      column: $table.importedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get processingState => $composableBuilder(
+      column: $table.processingState, builder: (column) => column);
+
+  GeneratedColumn<String> get indexState => $composableBuilder(
+      column: $table.indexState, builder: (column) => column);
+
+  GeneratedColumn<String> get failureJson => $composableBuilder(
+      column: $table.failureJson, builder: (column) => column);
+
+  GeneratedColumn<String> get reprocessingJson => $composableBuilder(
+      column: $table.reprocessingJson, builder: (column) => column);
+
+  $$DataBankDocumentsTableAnnotationComposer get documentId {
+    final $$DataBankDocumentsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentId,
+            referencedTable: $db.dataBankDocuments,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocuments,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankDocumentVersionsTableAnnotationComposer get supersedesVersionId {
+    final $$DataBankDocumentVersionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.supersedesVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<T> dataBankSectionsRefs<T extends Object>(
+      Expression<T> Function($$DataBankSectionsTableAnnotationComposer a) f) {
+    final $$DataBankSectionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.documentVersionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> dataBankTextChunksRefs<T extends Object>(
+      Expression<T> Function($$DataBankTextChunksTableAnnotationComposer a) f) {
+    final $$DataBankTextChunksTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.dataBankTextChunks,
+            getReferencedColumn: (t) => t.documentVersionId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankTextChunksTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankTextChunks,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$DataBankDocumentVersionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DataBankDocumentVersionsTable,
+    DataBankDocumentVersionRow,
+    $$DataBankDocumentVersionsTableFilterComposer,
+    $$DataBankDocumentVersionsTableOrderingComposer,
+    $$DataBankDocumentVersionsTableAnnotationComposer,
+    $$DataBankDocumentVersionsTableCreateCompanionBuilder,
+    $$DataBankDocumentVersionsTableUpdateCompanionBuilder,
+    (DataBankDocumentVersionRow, $$DataBankDocumentVersionsTableReferences),
+    DataBankDocumentVersionRow,
+    PrefetchHooks Function(
+        {bool documentId,
+        bool supersedesVersionId,
+        bool dataBankSectionsRefs,
+        bool dataBankTextChunksRefs})> {
+  $$DataBankDocumentVersionsTableTableManager(
+      _$AppDatabase db, $DataBankDocumentVersionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DataBankDocumentVersionsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DataBankDocumentVersionsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DataBankDocumentVersionsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> documentId = const Value.absent(),
+            Value<int> versionNumber = const Value.absent(),
+            Value<String?> supersedesVersionId = const Value.absent(),
+            Value<String> originalFileName = const Value.absent(),
+            Value<String> mediaType = const Value.absent(),
+            Value<int> byteSize = const Value.absent(),
+            Value<String> hashAlgorithm = const Value.absent(),
+            Value<String> hashDigest = const Value.absent(),
+            Value<DateTime> importedAt = const Value.absent(),
+            Value<String> processingState = const Value.absent(),
+            Value<String> indexState = const Value.absent(),
+            Value<String?> failureJson = const Value.absent(),
+            Value<String> reprocessingJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankDocumentVersionsCompanion(
+            id: id,
+            documentId: documentId,
+            versionNumber: versionNumber,
+            supersedesVersionId: supersedesVersionId,
+            originalFileName: originalFileName,
+            mediaType: mediaType,
+            byteSize: byteSize,
+            hashAlgorithm: hashAlgorithm,
+            hashDigest: hashDigest,
+            importedAt: importedAt,
+            processingState: processingState,
+            indexState: indexState,
+            failureJson: failureJson,
+            reprocessingJson: reprocessingJson,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String documentId,
+            required int versionNumber,
+            Value<String?> supersedesVersionId = const Value.absent(),
+            required String originalFileName,
+            required String mediaType,
+            required int byteSize,
+            required String hashAlgorithm,
+            required String hashDigest,
+            required DateTime importedAt,
+            required String processingState,
+            required String indexState,
+            Value<String?> failureJson = const Value.absent(),
+            required String reprocessingJson,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankDocumentVersionsCompanion.insert(
+            id: id,
+            documentId: documentId,
+            versionNumber: versionNumber,
+            supersedesVersionId: supersedesVersionId,
+            originalFileName: originalFileName,
+            mediaType: mediaType,
+            byteSize: byteSize,
+            hashAlgorithm: hashAlgorithm,
+            hashDigest: hashDigest,
+            importedAt: importedAt,
+            processingState: processingState,
+            indexState: indexState,
+            failureJson: failureJson,
+            reprocessingJson: reprocessingJson,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DataBankDocumentVersionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {documentId = false,
+              supersedesVersionId = false,
+              dataBankSectionsRefs = false,
+              dataBankTextChunksRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (dataBankSectionsRefs) db.dataBankSections,
+                if (dataBankTextChunksRefs) db.dataBankTextChunks
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (documentId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.documentId,
+                    referencedTable: $$DataBankDocumentVersionsTableReferences
+                        ._documentIdTable(db),
+                    referencedColumn: $$DataBankDocumentVersionsTableReferences
+                        ._documentIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (supersedesVersionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.supersedesVersionId,
+                    referencedTable: $$DataBankDocumentVersionsTableReferences
+                        ._supersedesVersionIdTable(db),
+                    referencedColumn: $$DataBankDocumentVersionsTableReferences
+                        ._supersedesVersionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (dataBankSectionsRefs)
+                    await $_getPrefetchedData<DataBankDocumentVersionRow,
+                            $DataBankDocumentVersionsTable, DataBankSectionRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$DataBankDocumentVersionsTableReferences
+                                ._dataBankSectionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DataBankDocumentVersionsTableReferences(
+                                    db, table, p0)
+                                .dataBankSectionsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.documentVersionId == item.id),
+                        typedResults: items),
+                  if (dataBankTextChunksRefs)
+                    await $_getPrefetchedData<
+                            DataBankDocumentVersionRow,
+                            $DataBankDocumentVersionsTable,
+                            DataBankTextChunkRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$DataBankDocumentVersionsTableReferences
+                                ._dataBankTextChunksRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DataBankDocumentVersionsTableReferences(
+                                    db, table, p0)
+                                .dataBankTextChunksRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.documentVersionId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DataBankDocumentVersionsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $DataBankDocumentVersionsTable,
+        DataBankDocumentVersionRow,
+        $$DataBankDocumentVersionsTableFilterComposer,
+        $$DataBankDocumentVersionsTableOrderingComposer,
+        $$DataBankDocumentVersionsTableAnnotationComposer,
+        $$DataBankDocumentVersionsTableCreateCompanionBuilder,
+        $$DataBankDocumentVersionsTableUpdateCompanionBuilder,
+        (DataBankDocumentVersionRow, $$DataBankDocumentVersionsTableReferences),
+        DataBankDocumentVersionRow,
+        PrefetchHooks Function(
+            {bool documentId,
+            bool supersedesVersionId,
+            bool dataBankSectionsRefs,
+            bool dataBankTextChunksRefs})>;
+typedef $$DataBankSectionsTableCreateCompanionBuilder
+    = DataBankSectionsCompanion Function({
+  required String id,
+  required String documentVersionId,
+  required String kind,
+  Value<String?> title,
+  required int ordinal,
+  Value<String?> parentSectionId,
+  required String locatorJson,
+  Value<int> rowid,
+});
+typedef $$DataBankSectionsTableUpdateCompanionBuilder
+    = DataBankSectionsCompanion Function({
+  Value<String> id,
+  Value<String> documentVersionId,
+  Value<String> kind,
+  Value<String?> title,
+  Value<int> ordinal,
+  Value<String?> parentSectionId,
+  Value<String> locatorJson,
+  Value<int> rowid,
+});
+
+final class $$DataBankSectionsTableReferences extends BaseReferences<
+    _$AppDatabase, $DataBankSectionsTable, DataBankSectionRow> {
+  $$DataBankSectionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $DataBankDocumentVersionsTable _documentVersionIdTable(
+          _$AppDatabase db) =>
+      db.dataBankDocumentVersions.createAlias($_aliasNameGenerator(
+          db.dataBankSections.documentVersionId,
+          db.dataBankDocumentVersions.id));
+
+  $$DataBankDocumentVersionsTableProcessedTableManager get documentVersionId {
+    final $_column = $_itemColumn<String>('document_version_id')!;
+
+    final manager = $$DataBankDocumentVersionsTableTableManager(
+            $_db, $_db.dataBankDocumentVersions)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_documentVersionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $DataBankSectionsTable _parentSectionIdTable(_$AppDatabase db) =>
+      db.dataBankSections.createAlias($_aliasNameGenerator(
+          db.dataBankSections.parentSectionId, db.dataBankSections.id));
+
+  $$DataBankSectionsTableProcessedTableManager? get parentSectionId {
+    final $_column = $_itemColumn<String>('parent_section_id');
+    if ($_column == null) return null;
+    final manager =
+        $$DataBankSectionsTableTableManager($_db, $_db.dataBankSections)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentSectionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$DataBankTextChunksTable,
+      List<DataBankTextChunkRow>> _dataBankTextChunksRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.dataBankTextChunks,
+          aliasName: $_aliasNameGenerator(
+              db.dataBankSections.id, db.dataBankTextChunks.sectionId));
+
+  $$DataBankTextChunksTableProcessedTableManager get dataBankTextChunksRefs {
+    final manager = $$DataBankTextChunksTableTableManager(
+            $_db, $_db.dataBankTextChunks)
+        .filter((f) => f.sectionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_dataBankTextChunksRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$DataBankSectionsTableFilterComposer
+    extends Composer<_$AppDatabase, $DataBankSectionsTable> {
+  $$DataBankSectionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => ColumnFilters(column));
+
+  $$DataBankDocumentVersionsTableFilterComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableFilterComposer get parentSectionId {
+    final $$DataBankSectionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentSectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> dataBankTextChunksRefs(
+      Expression<bool> Function($$DataBankTextChunksTableFilterComposer f) f) {
+    final $$DataBankTextChunksTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.dataBankTextChunks,
+        getReferencedColumn: (t) => t.sectionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankTextChunksTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankTextChunks,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$DataBankSectionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DataBankSectionsTable> {
+  $$DataBankSectionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => ColumnOrderings(column));
+
+  $$DataBankDocumentVersionsTableOrderingComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableOrderingComposer get parentSectionId {
+    final $$DataBankSectionsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentSectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableOrderingComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankSectionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DataBankSectionsTable> {
+  $$DataBankSectionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get ordinal =>
+      $composableBuilder(column: $table.ordinal, builder: (column) => column);
+
+  GeneratedColumn<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => column);
+
+  $$DataBankDocumentVersionsTableAnnotationComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableAnnotationComposer get parentSectionId {
+    final $$DataBankSectionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentSectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> dataBankTextChunksRefs<T extends Object>(
+      Expression<T> Function($$DataBankTextChunksTableAnnotationComposer a) f) {
+    final $$DataBankTextChunksTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.dataBankTextChunks,
+            getReferencedColumn: (t) => t.sectionId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankTextChunksTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankTextChunks,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$DataBankSectionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DataBankSectionsTable,
+    DataBankSectionRow,
+    $$DataBankSectionsTableFilterComposer,
+    $$DataBankSectionsTableOrderingComposer,
+    $$DataBankSectionsTableAnnotationComposer,
+    $$DataBankSectionsTableCreateCompanionBuilder,
+    $$DataBankSectionsTableUpdateCompanionBuilder,
+    (DataBankSectionRow, $$DataBankSectionsTableReferences),
+    DataBankSectionRow,
+    PrefetchHooks Function(
+        {bool documentVersionId,
+        bool parentSectionId,
+        bool dataBankTextChunksRefs})> {
+  $$DataBankSectionsTableTableManager(
+      _$AppDatabase db, $DataBankSectionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DataBankSectionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DataBankSectionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DataBankSectionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> documentVersionId = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<String?> title = const Value.absent(),
+            Value<int> ordinal = const Value.absent(),
+            Value<String?> parentSectionId = const Value.absent(),
+            Value<String> locatorJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankSectionsCompanion(
+            id: id,
+            documentVersionId: documentVersionId,
+            kind: kind,
+            title: title,
+            ordinal: ordinal,
+            parentSectionId: parentSectionId,
+            locatorJson: locatorJson,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String documentVersionId,
+            required String kind,
+            Value<String?> title = const Value.absent(),
+            required int ordinal,
+            Value<String?> parentSectionId = const Value.absent(),
+            required String locatorJson,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankSectionsCompanion.insert(
+            id: id,
+            documentVersionId: documentVersionId,
+            kind: kind,
+            title: title,
+            ordinal: ordinal,
+            parentSectionId: parentSectionId,
+            locatorJson: locatorJson,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DataBankSectionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {documentVersionId = false,
+              parentSectionId = false,
+              dataBankTextChunksRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (dataBankTextChunksRefs) db.dataBankTextChunks
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (documentVersionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.documentVersionId,
+                    referencedTable: $$DataBankSectionsTableReferences
+                        ._documentVersionIdTable(db),
+                    referencedColumn: $$DataBankSectionsTableReferences
+                        ._documentVersionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (parentSectionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.parentSectionId,
+                    referencedTable: $$DataBankSectionsTableReferences
+                        ._parentSectionIdTable(db),
+                    referencedColumn: $$DataBankSectionsTableReferences
+                        ._parentSectionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (dataBankTextChunksRefs)
+                    await $_getPrefetchedData<DataBankSectionRow,
+                            $DataBankSectionsTable, DataBankTextChunkRow>(
+                        currentTable: table,
+                        referencedTable: $$DataBankSectionsTableReferences
+                            ._dataBankTextChunksRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DataBankSectionsTableReferences(db, table, p0)
+                                .dataBankTextChunksRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.sectionId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DataBankSectionsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DataBankSectionsTable,
+    DataBankSectionRow,
+    $$DataBankSectionsTableFilterComposer,
+    $$DataBankSectionsTableOrderingComposer,
+    $$DataBankSectionsTableAnnotationComposer,
+    $$DataBankSectionsTableCreateCompanionBuilder,
+    $$DataBankSectionsTableUpdateCompanionBuilder,
+    (DataBankSectionRow, $$DataBankSectionsTableReferences),
+    DataBankSectionRow,
+    PrefetchHooks Function(
+        {bool documentVersionId,
+        bool parentSectionId,
+        bool dataBankTextChunksRefs})>;
+typedef $$DataBankTextChunksTableCreateCompanionBuilder
+    = DataBankTextChunksCompanion Function({
+  required String id,
+  required String documentVersionId,
+  Value<String?> sectionId,
+  required int ordinal,
+  required String textContent,
+  required String locatorJson,
+  Value<int> rowid,
+});
+typedef $$DataBankTextChunksTableUpdateCompanionBuilder
+    = DataBankTextChunksCompanion Function({
+  Value<String> id,
+  Value<String> documentVersionId,
+  Value<String?> sectionId,
+  Value<int> ordinal,
+  Value<String> textContent,
+  Value<String> locatorJson,
+  Value<int> rowid,
+});
+
+final class $$DataBankTextChunksTableReferences extends BaseReferences<
+    _$AppDatabase, $DataBankTextChunksTable, DataBankTextChunkRow> {
+  $$DataBankTextChunksTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $DataBankDocumentVersionsTable _documentVersionIdTable(
+          _$AppDatabase db) =>
+      db.dataBankDocumentVersions.createAlias($_aliasNameGenerator(
+          db.dataBankTextChunks.documentVersionId,
+          db.dataBankDocumentVersions.id));
+
+  $$DataBankDocumentVersionsTableProcessedTableManager get documentVersionId {
+    final $_column = $_itemColumn<String>('document_version_id')!;
+
+    final manager = $$DataBankDocumentVersionsTableTableManager(
+            $_db, $_db.dataBankDocumentVersions)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_documentVersionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $DataBankSectionsTable _sectionIdTable(_$AppDatabase db) =>
+      db.dataBankSections.createAlias($_aliasNameGenerator(
+          db.dataBankTextChunks.sectionId, db.dataBankSections.id));
+
+  $$DataBankSectionsTableProcessedTableManager? get sectionId {
+    final $_column = $_itemColumn<String>('section_id');
+    if ($_column == null) return null;
+    final manager =
+        $$DataBankSectionsTableTableManager($_db, $_db.dataBankSections)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sectionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$DataBankTextChunksTableFilterComposer
+    extends Composer<_$AppDatabase, $DataBankTextChunksTable> {
+  $$DataBankTextChunksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get textContent => $composableBuilder(
+      column: $table.textContent, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => ColumnFilters(column));
+
+  $$DataBankDocumentVersionsTableFilterComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableFilterComposer get sectionId {
+    final $$DataBankSectionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankTextChunksTableOrderingComposer
+    extends Composer<_$AppDatabase, $DataBankTextChunksTable> {
+  $$DataBankTextChunksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get ordinal => $composableBuilder(
+      column: $table.ordinal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get textContent => $composableBuilder(
+      column: $table.textContent, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => ColumnOrderings(column));
+
+  $$DataBankDocumentVersionsTableOrderingComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableOrderingComposer get sectionId {
+    final $$DataBankSectionsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableOrderingComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankTextChunksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DataBankTextChunksTable> {
+  $$DataBankTextChunksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get ordinal =>
+      $composableBuilder(column: $table.ordinal, builder: (column) => column);
+
+  GeneratedColumn<String> get textContent => $composableBuilder(
+      column: $table.textContent, builder: (column) => column);
+
+  GeneratedColumn<String> get locatorJson => $composableBuilder(
+      column: $table.locatorJson, builder: (column) => column);
+
+  $$DataBankDocumentVersionsTableAnnotationComposer get documentVersionId {
+    final $$DataBankDocumentVersionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentVersionId,
+            referencedTable: $db.dataBankDocumentVersions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentVersionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocumentVersions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$DataBankSectionsTableAnnotationComposer get sectionId {
+    final $$DataBankSectionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sectionId,
+        referencedTable: $db.dataBankSections,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankSectionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.dataBankSections,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankTextChunksTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DataBankTextChunksTable,
+    DataBankTextChunkRow,
+    $$DataBankTextChunksTableFilterComposer,
+    $$DataBankTextChunksTableOrderingComposer,
+    $$DataBankTextChunksTableAnnotationComposer,
+    $$DataBankTextChunksTableCreateCompanionBuilder,
+    $$DataBankTextChunksTableUpdateCompanionBuilder,
+    (DataBankTextChunkRow, $$DataBankTextChunksTableReferences),
+    DataBankTextChunkRow,
+    PrefetchHooks Function({bool documentVersionId, bool sectionId})> {
+  $$DataBankTextChunksTableTableManager(
+      _$AppDatabase db, $DataBankTextChunksTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DataBankTextChunksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DataBankTextChunksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DataBankTextChunksTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> documentVersionId = const Value.absent(),
+            Value<String?> sectionId = const Value.absent(),
+            Value<int> ordinal = const Value.absent(),
+            Value<String> textContent = const Value.absent(),
+            Value<String> locatorJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankTextChunksCompanion(
+            id: id,
+            documentVersionId: documentVersionId,
+            sectionId: sectionId,
+            ordinal: ordinal,
+            textContent: textContent,
+            locatorJson: locatorJson,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String documentVersionId,
+            Value<String?> sectionId = const Value.absent(),
+            required int ordinal,
+            required String textContent,
+            required String locatorJson,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankTextChunksCompanion.insert(
+            id: id,
+            documentVersionId: documentVersionId,
+            sectionId: sectionId,
+            ordinal: ordinal,
+            textContent: textContent,
+            locatorJson: locatorJson,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DataBankTextChunksTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {documentVersionId = false, sectionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (documentVersionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.documentVersionId,
+                    referencedTable: $$DataBankTextChunksTableReferences
+                        ._documentVersionIdTable(db),
+                    referencedColumn: $$DataBankTextChunksTableReferences
+                        ._documentVersionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (sectionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.sectionId,
+                    referencedTable:
+                        $$DataBankTextChunksTableReferences._sectionIdTable(db),
+                    referencedColumn: $$DataBankTextChunksTableReferences
+                        ._sectionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DataBankTextChunksTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DataBankTextChunksTable,
+    DataBankTextChunkRow,
+    $$DataBankTextChunksTableFilterComposer,
+    $$DataBankTextChunksTableOrderingComposer,
+    $$DataBankTextChunksTableAnnotationComposer,
+    $$DataBankTextChunksTableCreateCompanionBuilder,
+    $$DataBankTextChunksTableUpdateCompanionBuilder,
+    (DataBankTextChunkRow, $$DataBankTextChunksTableReferences),
+    DataBankTextChunkRow,
+    PrefetchHooks Function({bool documentVersionId, bool sectionId})>;
+typedef $$DataBankBindingsTableCreateCompanionBuilder
+    = DataBankBindingsCompanion Function({
+  required String id,
+  required String documentId,
+  required String scope,
+  Value<String?> characterId,
+  Value<String?> chatId,
+  Value<bool> enabled,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$DataBankBindingsTableUpdateCompanionBuilder
+    = DataBankBindingsCompanion Function({
+  Value<String> id,
+  Value<String> documentId,
+  Value<String> scope,
+  Value<String?> characterId,
+  Value<String?> chatId,
+  Value<bool> enabled,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$DataBankBindingsTableReferences extends BaseReferences<
+    _$AppDatabase, $DataBankBindingsTable, DataBankBindingRow> {
+  $$DataBankBindingsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $DataBankDocumentsTable _documentIdTable(_$AppDatabase db) =>
+      db.dataBankDocuments.createAlias($_aliasNameGenerator(
+          db.dataBankBindings.documentId, db.dataBankDocuments.id));
+
+  $$DataBankDocumentsTableProcessedTableManager get documentId {
+    final $_column = $_itemColumn<String>('document_id')!;
+
+    final manager =
+        $$DataBankDocumentsTableTableManager($_db, $_db.dataBankDocuments)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_documentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $CharactersTable _characterIdTable(_$AppDatabase db) =>
+      db.characters.createAlias($_aliasNameGenerator(
+          db.dataBankBindings.characterId, db.characters.id));
+
+  $$CharactersTableProcessedTableManager? get characterId {
+    final $_column = $_itemColumn<String>('character_id');
+    if ($_column == null) return null;
+    final manager = $$CharactersTableTableManager($_db, $_db.characters)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_characterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats.createAlias(
+      $_aliasNameGenerator(db.dataBankBindings.chatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager? get chatId {
+    final $_column = $_itemColumn<String>('chat_id');
+    if ($_column == null) return null;
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$DataBankBindingsTableFilterComposer
+    extends Composer<_$AppDatabase, $DataBankBindingsTable> {
+  $$DataBankBindingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+      column: $table.enabled, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$DataBankDocumentsTableFilterComposer get documentId {
+    final $$DataBankDocumentsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.documentId,
+        referencedTable: $db.dataBankDocuments,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankDocumentsTableFilterComposer(
+              $db: $db,
+              $table: $db.dataBankDocuments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CharactersTableFilterComposer get characterId {
+    final $$CharactersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableFilterComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableFilterComposer get chatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankBindingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DataBankBindingsTable> {
+  $$DataBankBindingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+      column: $table.enabled, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$DataBankDocumentsTableOrderingComposer get documentId {
+    final $$DataBankDocumentsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.documentId,
+        referencedTable: $db.dataBankDocuments,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DataBankDocumentsTableOrderingComposer(
+              $db: $db,
+              $table: $db.dataBankDocuments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CharactersTableOrderingComposer get characterId {
+    final $$CharactersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableOrderingComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableOrderingComposer get chatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankBindingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DataBankBindingsTable> {
+  $$DataBankBindingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$DataBankDocumentsTableAnnotationComposer get documentId {
+    final $$DataBankDocumentsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.documentId,
+            referencedTable: $db.dataBankDocuments,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$DataBankDocumentsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.dataBankDocuments,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$CharactersTableAnnotationComposer get characterId {
+    final $$CharactersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.characterId,
+        referencedTable: $db.characters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CharactersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.characters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChatsTableAnnotationComposer get chatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DataBankBindingsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DataBankBindingsTable,
+    DataBankBindingRow,
+    $$DataBankBindingsTableFilterComposer,
+    $$DataBankBindingsTableOrderingComposer,
+    $$DataBankBindingsTableAnnotationComposer,
+    $$DataBankBindingsTableCreateCompanionBuilder,
+    $$DataBankBindingsTableUpdateCompanionBuilder,
+    (DataBankBindingRow, $$DataBankBindingsTableReferences),
+    DataBankBindingRow,
+    PrefetchHooks Function({bool documentId, bool characterId, bool chatId})> {
+  $$DataBankBindingsTableTableManager(
+      _$AppDatabase db, $DataBankBindingsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DataBankBindingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DataBankBindingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DataBankBindingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> documentId = const Value.absent(),
+            Value<String> scope = const Value.absent(),
+            Value<String?> characterId = const Value.absent(),
+            Value<String?> chatId = const Value.absent(),
+            Value<bool> enabled = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankBindingsCompanion(
+            id: id,
+            documentId: documentId,
+            scope: scope,
+            characterId: characterId,
+            chatId: chatId,
+            enabled: enabled,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String documentId,
+            required String scope,
+            Value<String?> characterId = const Value.absent(),
+            Value<String?> chatId = const Value.absent(),
+            Value<bool> enabled = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DataBankBindingsCompanion.insert(
+            id: id,
+            documentId: documentId,
+            scope: scope,
+            characterId: characterId,
+            chatId: chatId,
+            enabled: enabled,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DataBankBindingsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {documentId = false, characterId = false, chatId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (documentId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.documentId,
+                    referencedTable:
+                        $$DataBankBindingsTableReferences._documentIdTable(db),
+                    referencedColumn: $$DataBankBindingsTableReferences
+                        ._documentIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (characterId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.characterId,
+                    referencedTable:
+                        $$DataBankBindingsTableReferences._characterIdTable(db),
+                    referencedColumn: $$DataBankBindingsTableReferences
+                        ._characterIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (chatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chatId,
+                    referencedTable:
+                        $$DataBankBindingsTableReferences._chatIdTable(db),
+                    referencedColumn:
+                        $$DataBankBindingsTableReferences._chatIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DataBankBindingsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DataBankBindingsTable,
+    DataBankBindingRow,
+    $$DataBankBindingsTableFilterComposer,
+    $$DataBankBindingsTableOrderingComposer,
+    $$DataBankBindingsTableAnnotationComposer,
+    $$DataBankBindingsTableCreateCompanionBuilder,
+    $$DataBankBindingsTableUpdateCompanionBuilder,
+    (DataBankBindingRow, $$DataBankBindingsTableReferences),
+    DataBankBindingRow,
+    PrefetchHooks Function({bool documentId, bool characterId, bool chatId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11300,4 +22419,27 @@ class $AppDatabaseManager {
       $$CharacterTagsTableTableManager(_db, _db.characterTags);
   $$GlobalStatesTableTableManager get globalStates =>
       $$GlobalStatesTableTableManager(_db, _db.globalStates);
+  $$LongTermMemoriesTableTableManager get longTermMemories =>
+      $$LongTermMemoriesTableTableManager(_db, _db.longTermMemories);
+  $$LongTermMemorySourceMessagesTableTableManager
+      get longTermMemorySourceMessages =>
+          $$LongTermMemorySourceMessagesTableTableManager(
+              _db, _db.longTermMemorySourceMessages);
+  $$RpgScenariosTableTableManager get rpgScenarios =>
+      $$RpgScenariosTableTableManager(_db, _db.rpgScenarios);
+  $$RpgStateSnapshotsTableTableManager get rpgStateSnapshots =>
+      $$RpgStateSnapshotsTableTableManager(_db, _db.rpgStateSnapshots);
+  $$RpgChatStatesTableTableManager get rpgChatStates =>
+      $$RpgChatStatesTableTableManager(_db, _db.rpgChatStates);
+  $$DataBankDocumentsTableTableManager get dataBankDocuments =>
+      $$DataBankDocumentsTableTableManager(_db, _db.dataBankDocuments);
+  $$DataBankDocumentVersionsTableTableManager get dataBankDocumentVersions =>
+      $$DataBankDocumentVersionsTableTableManager(
+          _db, _db.dataBankDocumentVersions);
+  $$DataBankSectionsTableTableManager get dataBankSections =>
+      $$DataBankSectionsTableTableManager(_db, _db.dataBankSections);
+  $$DataBankTextChunksTableTableManager get dataBankTextChunks =>
+      $$DataBankTextChunksTableTableManager(_db, _db.dataBankTextChunks);
+  $$DataBankBindingsTableTableManager get dataBankBindings =>
+      $$DataBankBindingsTableTableManager(_db, _db.dataBankBindings);
 }

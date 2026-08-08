@@ -59,6 +59,15 @@ abstract final class LegacyDatabaseFixtures {
     ],
   );
 
+  static const v14 = LegacyDatabaseFixture(
+    schemaVersion: 14,
+    schemaStatements: _v14SchemaStatements,
+    seedStatements: [
+      ..._representativeLegacySeedStatements,
+      ..._v14SeedStatements,
+    ],
+  );
+
   /// Models an interrupted v10-to-v11 upgrade: the second v11 column exists,
   /// while the first and third do not. Production migration must fail and
   /// roll back instead of advancing user_version or leaving another column.
@@ -72,6 +81,21 @@ abstract final class LegacyDatabaseFixtures {
       ''',
     ],
     seedStatements: _representativeLegacySeedStatements,
+  );
+
+  /// Models a v14 database where a failed prior attempt left one v15 table.
+  /// The production transaction must roll back tables created before the
+  /// collision and keep the database at v14.
+  static const interruptedV14 = LegacyDatabaseFixture(
+    schemaVersion: 14,
+    schemaStatements: [
+      ..._v14SchemaStatements,
+      'CREATE TABLE rpg_scenarios (id TEXT NOT NULL PRIMARY KEY)',
+    ],
+    seedStatements: [
+      ..._representativeLegacySeedStatements,
+      ..._v14SeedStatements,
+    ],
   );
 }
 
@@ -220,6 +244,19 @@ Set<String> readRawTableColumns(File file, String tableName) {
   }
 }
 
+Set<String> readRawTableNames(File file) {
+  final database =
+      sqlite.sqlite3.open(file.path, mode: sqlite.OpenMode.readOnly);
+  try {
+    return database.select('''
+          SELECT name FROM sqlite_master
+          WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+        ''').map((row) => row['name'] as String).toSet();
+  } finally {
+    database.dispose();
+  }
+}
+
 Future<Set<String>> readTableNames(AppDatabase database) async {
   final rows = await database.customSelect('''
     SELECT name FROM sqlite_master
@@ -263,6 +300,19 @@ const currentSnapshotTables = <SnapshotTable>[
   SnapshotTable('tags', orderBy: ['id']),
   SnapshotTable('character_tags', orderBy: ['character_id', 'tag_id']),
   SnapshotTable('global_states', orderBy: ['key']),
+  SnapshotTable('long_term_memories', orderBy: ['id']),
+  SnapshotTable(
+    'long_term_memory_source_messages',
+    orderBy: ['memory_id', 'ordinal'],
+  ),
+  SnapshotTable('rpg_scenarios', orderBy: ['id']),
+  SnapshotTable('rpg_state_snapshots', orderBy: ['id']),
+  SnapshotTable('rpg_chat_states', orderBy: ['chat_id']),
+  SnapshotTable('data_bank_documents', orderBy: ['id']),
+  SnapshotTable('data_bank_document_versions', orderBy: ['id']),
+  SnapshotTable('data_bank_sections', orderBy: ['id']),
+  SnapshotTable('data_bank_text_chunks', orderBy: ['id']),
+  SnapshotTable('data_bank_bindings', orderBy: ['id']),
 ];
 
 const legacyV10PreservedSnapshotTables = <SnapshotTable>[
@@ -580,6 +630,19 @@ const _v13SchemaStatements = <String>[
   ''',
 ];
 
+const _v14SchemaStatements = <String>[
+  ..._v13SchemaStatements,
+  "ALTER TABLE personas ADD COLUMN connections_json TEXT NOT NULL DEFAULT '[]'",
+  "ALTER TABLE personas ADD COLUMN description_settings_json TEXT NOT NULL DEFAULT '{}'",
+  'ALTER TABLE personas ADD COLUMN lorebook_id TEXT',
+  'ALTER TABLE personas ADD COLUMN system_prompt_override TEXT',
+  'ALTER TABLE personas ADD COLUMN post_history_instructions TEXT',
+  "ALTER TABLE personas ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'",
+  "ALTER TABLE personas ADD COLUMN creator_notes TEXT NOT NULL DEFAULT ''",
+  'ALTER TABLE personas ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0 '
+      'CHECK (is_favorite IN (0, 1))',
+];
+
 const _representativeLegacySeedStatements = <String>[
   '''
     INSERT INTO characters (
@@ -711,7 +774,7 @@ const _v13SeedStatements = <String>[
   ''',
 ];
 
-const _currentOnlySeedStatements = <String>[
+const _v14SeedStatements = <String>[
   ..._v13SeedStatements,
   '''
     UPDATE personas SET
@@ -724,5 +787,102 @@ const _currentOnlySeedStatements = <String>[
       creator_notes = 'Private fixture note',
       is_favorite = 1
     WHERE id = 'persona-1'
+  ''',
+];
+
+const _currentOnlySeedStatements = <String>[
+  ..._v14SeedStatements,
+  '''
+    INSERT INTO long_term_memories (
+      id, kind, scope_kind, character_id, persona_id, state, content,
+      source_origin, source_chat_id, extracted_at, provider_id, model_id,
+      importance, confidence, created_at, updated_at, locked,
+      normalized_identity_key
+    ) VALUES (
+      'memory-1', 'event', 'characterPersona', 'character-1', 'persona-1',
+      'active', 'A representative persisted memory.', 'generated', 'chat-1',
+      1704240100, 'provider-1', 'model-1', 0.8, 0.9, 1704240200,
+      1704240200, 0, 'event:representative'
+    )
+  ''',
+  '''
+    INSERT INTO long_term_memory_source_messages (memory_id, message_id, ordinal)
+    VALUES ('memory-1', 'message-1', 0)
+  ''',
+  '''
+    INSERT INTO rpg_scenarios (
+      id, version, contract_schema_version, scenario_json, created_at, updated_at
+    ) VALUES (
+      'scenario-1', '1.0.0', 1,
+      '{"schemaVersion":1,"metadata":{"id":"scenario-1","name":"Fixture","version":"1.0.0"},"initialSeed":7,"initialState":{"scenarioId":"scenario-1","scenarioVersion":"1.0.0","turn":1,"random":{"initialSeed":7,"state":11,"rollsConsumed":0}}}',
+      1704240200, 1704240200
+    )
+  ''',
+  '''
+    INSERT INTO rpg_state_snapshots (
+      id, scenario_id, scenario_version, branch_id, turn, random_state,
+      rolls_consumed, created_at, snapshot_json
+    ) VALUES (
+      'snapshot-1', 'scenario-1', '1.0.0', 'main', 1, 11, 0, 1704240300,
+      '{"metadata":{"id":"snapshot-1","scenarioId":"scenario-1","scenarioVersion":"1.0.0","branchId":"main","turn":1,"randomState":11,"rollsConsumed":0,"createdAt":"2024-01-03T00:05:00.000Z"},"state":{"scenarioId":"scenario-1","scenarioVersion":"1.0.0","turn":1,"random":{"initialSeed":7,"state":11,"rollsConsumed":0}}}'
+    )
+  ''',
+  '''
+    INSERT INTO rpg_chat_states (
+      chat_id, scenario_id, current_snapshot_id, turn, state_json, updated_at
+    ) VALUES (
+      'chat-1', 'scenario-1', 'snapshot-1', 1,
+      '{"scenarioId":"scenario-1","scenarioVersion":"1.0.0","turn":1,"random":{"initialSeed":7,"state":11,"rollsConsumed":0}}',
+      1704240300
+    )
+  ''',
+  '''
+    INSERT INTO data_bank_documents (
+      id, current_version_id, processing_state, index_state, failure_json,
+      reprocessing_json, created_at, updated_at, is_placeholder
+    ) VALUES (
+      'document-1', NULL, 'ready', 'indexed', NULL,
+      '{"attemptCount":0}', 1704240400, 1704240400, 1
+    )
+  ''',
+  '''
+    INSERT INTO data_bank_document_versions (
+      id, document_id, version_number, original_file_name, media_type,
+      byte_size, hash_algorithm, hash_digest, imported_at, processing_state,
+      index_state, reprocessing_json
+    ) VALUES (
+      'version-1', 'document-1', 1, 'fixture.md', 'text/markdown', 42,
+      'sha256', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      1704240400, 'ready', 'indexed', '{"attemptCount":0}'
+    )
+  ''',
+  '''
+    UPDATE data_bank_documents
+    SET current_version_id = 'version-1', is_placeholder = 0
+    WHERE id = 'document-1'
+  ''',
+  '''
+    INSERT INTO data_bank_sections (
+      id, document_version_id, kind, title, ordinal, locator_json
+    ) VALUES (
+      'section-1', 'version-1', 'chapter', 'Fixture', 0,
+      '{"documentVersionId":"version-1","sectionId":"section-1","chapter":"Fixture"}'
+    )
+  ''',
+  '''
+    INSERT INTO data_bank_text_chunks (
+      id, document_version_id, section_id, ordinal, text_content, locator_json
+    ) VALUES (
+      'chunk-1', 'version-1', 'section-1', 0, 'Fixture source text.',
+      '{"documentVersionId":"version-1","sectionId":"section-1","chapter":"Fixture"}'
+    )
+  ''',
+  '''
+    INSERT INTO data_bank_bindings (
+      id, document_id, scope, character_id, enabled, created_at, updated_at
+    ) VALUES (
+      'binding-1', 'document-1', 'character', 'character-1', 1,
+      1704240400, 1704240400
+    )
   ''',
 ];

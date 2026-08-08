@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:native_tavern/data/database/database.dart';
+import 'package:native_tavern/domain/services/database_backup_v15_adapter.dart';
 
 /// Service for exporting and importing database data for backup purposes
 class DatabaseBackupService {
@@ -36,6 +37,7 @@ class DatabaseBackupService {
       'tags': _listToMap(tags.map((t) => t.toJson()).toList(), 'id'),
       'characterTags': characterTags.map((ct) => {'characterId': ct.characterId, 'tagId': ct.tagId}).toList(),
       'globalStates': _listToMap(globalStates.map((g) => g.toJson()).toList(), 'key'),
+      ...await DatabaseBackupV15Adapter(_db).exportData(),
     };
   }
   
@@ -219,6 +221,10 @@ class DatabaseBackupService {
       // but migration happens successfully.
       debugPrint('[DatabaseBackup] GlobalStates import result: added=${gsResult.added}, updated=${gsResult.updated}, skipped=${gsResult.skipped}');
     }
+    await DatabaseBackupV15Adapter(_db).importData(
+      data,
+      overwriteExisting: mode != ImportMode.addNewOnly,
+    );
     
     return result;
   }
