@@ -33,6 +33,12 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
         title: const Text('Memory inbox'),
         actions: [
           IconButton(
+            key: const Key('memory-context-settings'),
+            tooltip: 'Chat context',
+            onPressed: _showContextSettings,
+            icon: const Icon(Icons.psychology_outlined),
+          ),
+          IconButton(
             tooltip: 'Refresh',
             onPressed: inbox.isLoading
                 ? null
@@ -274,6 +280,74 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
               : () => _openSource(memory),
         );
       },
+    );
+  }
+
+  void _showContextSettings() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final settings = ref.watch(appSettingsProvider);
+          final notifier = ref.read(appSettingsProvider.notifier);
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    key: const Key('memory-context-switch'),
+                    secondary: const Icon(Icons.psychology_outlined),
+                    title: const Text('Use memories in chat'),
+                    value: settings.memoryContextEnabled,
+                    onChanged: notifier.updateMemoryContext,
+                  ),
+                  SwitchListTile(
+                    key: const Key('memory-semantic-search-switch'),
+                    secondary: const Icon(Icons.hub_outlined),
+                    title: const Text('Semantic reranking'),
+                    subtitle: const Text('Configured embedding provider'),
+                    value: settings.memorySemanticSearchEnabled,
+                    onChanged: settings.memoryContextEnabled
+                        ? notifier.updateMemorySemanticSearch
+                        : null,
+                  ),
+                  ListTile(
+                    key: const Key('memory-context-budget'),
+                    leading: const Icon(Icons.data_usage_outlined),
+                    title: const Text('Context budget'),
+                    trailing: DropdownButton<int>(
+                      key: const Key('memory-context-budget-menu'),
+                      value: settings.memoryContextTokenBudget,
+                      items: const [
+                        DropdownMenuItem(value: 256, child: Text('256 tokens')),
+                        DropdownMenuItem(value: 512, child: Text('512 tokens')),
+                        DropdownMenuItem(
+                          value: 1024,
+                          child: Text('1024 tokens'),
+                        ),
+                        DropdownMenuItem(
+                          value: 2048,
+                          child: Text('2048 tokens'),
+                        ),
+                      ],
+                      onChanged: settings.memoryContextEnabled
+                          ? (value) {
+                              if (value != null) {
+                                notifier.updateMemoryContextTokenBudget(value);
+                              }
+                            }
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

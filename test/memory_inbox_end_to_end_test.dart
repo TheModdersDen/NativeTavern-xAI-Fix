@@ -58,6 +58,28 @@ void main() {
 
     await _pumpInbox(tester, database, chatRepository, preferences, llmService);
 
+    await tester.tap(find.byKey(const Key('memory-context-settings')));
+    await tester.pumpAndSettle();
+    final contextSwitch = tester.widget<SwitchListTile>(
+      find.byKey(const Key('memory-context-switch')),
+    );
+    final semanticSwitch = tester.widget<SwitchListTile>(
+      find.byKey(const Key('memory-semantic-search-switch')),
+    );
+    expect(contextSwitch.value, isTrue);
+    expect(semanticSwitch.value, isFalse);
+    expect(
+      tester
+          .widget<DropdownButton<int>>(
+            find.byKey(const Key('memory-context-budget-menu')),
+          )
+          .value,
+      512,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.tapAt(const Offset(8, 8));
+    await tester.pumpAndSettle();
+
     final autoSwitch = tester.widget<SwitchListTile>(
       find.byKey(const Key('memory-auto-extraction-switch')),
     );

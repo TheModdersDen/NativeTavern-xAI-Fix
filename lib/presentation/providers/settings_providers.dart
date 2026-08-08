@@ -674,6 +674,8 @@ final connectionProfilesProvider =
 
 /// App settings state
 class AppSettings {
+  static const memoryContextTokenBudgets = [256, 512, 1024, 2048];
+
   final String theme;
   final String language;
   final bool enableNotifications;
@@ -687,6 +689,9 @@ class AppSettings {
   final double backgroundOpacity;
   final String chatLayoutMode;
   final bool memoryAutoExtractionEnabled;
+  final bool memoryContextEnabled;
+  final bool memorySemanticSearchEnabled;
+  final int memoryContextTokenBudget;
 
   const AppSettings({
     this.theme = 'dark',
@@ -702,6 +707,9 @@ class AppSettings {
     this.backgroundOpacity = 1.0,
     this.chatLayoutMode = 'bubble',
     this.memoryAutoExtractionEnabled = false,
+    this.memoryContextEnabled = true,
+    this.memorySemanticSearchEnabled = false,
+    this.memoryContextTokenBudget = 512,
   });
 
   AppSettings copyWith({
@@ -718,6 +726,9 @@ class AppSettings {
     double? backgroundOpacity,
     String? chatLayoutMode,
     bool? memoryAutoExtractionEnabled,
+    bool? memoryContextEnabled,
+    bool? memorySemanticSearchEnabled,
+    int? memoryContextTokenBudget,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -736,6 +747,11 @@ class AppSettings {
       chatLayoutMode: chatLayoutMode ?? this.chatLayoutMode,
       memoryAutoExtractionEnabled:
           memoryAutoExtractionEnabled ?? this.memoryAutoExtractionEnabled,
+      memoryContextEnabled: memoryContextEnabled ?? this.memoryContextEnabled,
+      memorySemanticSearchEnabled:
+          memorySemanticSearchEnabled ?? this.memorySemanticSearchEnabled,
+      memoryContextTokenBudget:
+          memoryContextTokenBudget ?? this.memoryContextTokenBudget,
     );
   }
 
@@ -753,6 +769,9 @@ class AppSettings {
         'backgroundOpacity': backgroundOpacity,
         'chatLayoutMode': chatLayoutMode,
         'memoryAutoExtractionEnabled': memoryAutoExtractionEnabled,
+        'memoryContextEnabled': memoryContextEnabled,
+        'memorySemanticSearchEnabled': memorySemanticSearchEnabled,
+        'memoryContextTokenBudget': memoryContextTokenBudget,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -773,7 +792,17 @@ class AppSettings {
       chatLayoutMode: json['chatLayoutMode'] as String? ?? 'bubble',
       memoryAutoExtractionEnabled:
           json['memoryAutoExtractionEnabled'] as bool? ?? false,
+      memoryContextEnabled: json['memoryContextEnabled'] as bool? ?? true,
+      memorySemanticSearchEnabled:
+          json['memorySemanticSearchEnabled'] as bool? ?? false,
+      memoryContextTokenBudget: normalizeMemoryContextTokenBudget(
+        (json['memoryContextTokenBudget'] as num?)?.toInt(),
+      ),
     );
+  }
+
+  static int normalizeMemoryContextTokenBudget(int? value) {
+    return memoryContextTokenBudgets.contains(value) ? value! : 512;
   }
 }
 
@@ -900,6 +929,24 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   void updateMemoryAutoExtraction(bool enabled) {
     state = state.copyWith(memoryAutoExtractionEnabled: enabled);
+    _saveSettings();
+  }
+
+  void updateMemoryContext(bool enabled) {
+    state = state.copyWith(memoryContextEnabled: enabled);
+    _saveSettings();
+  }
+
+  void updateMemorySemanticSearch(bool enabled) {
+    state = state.copyWith(memorySemanticSearchEnabled: enabled);
+    _saveSettings();
+  }
+
+  void updateMemoryContextTokenBudget(int tokens) {
+    state = state.copyWith(
+      memoryContextTokenBudget:
+          AppSettings.normalizeMemoryContextTokenBudget(tokens),
+    );
     _saveSettings();
   }
 

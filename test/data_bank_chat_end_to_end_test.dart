@@ -237,7 +237,11 @@ void main() {
     await notifier.sendMessage('navigation marker', _config);
 
     final assembly = container.read(lastContextAssemblyProvider);
-    expect(assembly?.traces.single.status, ContextContributionStatus.disabled);
+    expect(assembly, isNotNull);
+    final dataBankTrace = assembly!.traces.singleWhere(
+      (trace) => trace.contributorId == 'data-bank.retrieval',
+    );
+    expect(dataBankTrace.status, ContextContributionStatus.disabled);
     expect(
       _joinedPrompt(llmService.requests.last),
       isNot(contains('Relevant Data Bank sources')),

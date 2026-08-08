@@ -154,10 +154,16 @@ void main() {
       final registry = ChatExtensionRegistry();
       registry.registerContributor(_Contributor(
         id: 'bounded',
-        maxTokens: 18,
-        onContribute: (_) async => ContextContribution(messages: [
-          {'role': 'system', 'content': 'x' * 500},
-        ]),
+        maxTokens: 30,
+        onContribute: (_) async => ContextContribution(
+          messages: [
+            {'role': 'system', 'content': 'short'},
+            {'role': 'system', 'content': 'x' * 500},
+            {'role': 'system', 'content': 'never reached'},
+          ],
+          itemIds: const ['short', 'long', 'dropped'],
+          metadata: const {'source': 'local'},
+        ),
       ));
       final session = ChatGenerationPipeline(registry: registry).startSession(
         chatId: 'chat-1',
@@ -170,15 +176,62 @@ void main() {
       ]);
       final trace = result.traces.single;
 
-      expect(trace.allocatedTokens, 18);
-      expect(trace.usedTokens, lessThanOrEqualTo(18));
+      expect(trace.allocatedTokens, 30);
+      expect(trace.usedTokens, lessThanOrEqualTo(30));
       expect(trace.originalTokens, greaterThan(trace.usedTokens));
       expect(trace.truncatedMessageCount, 1);
-      expect(trace.injectedMessages.single['content'], contains('[truncated]'));
+      expect(trace.droppedMessageCount, 1);
+      expect(trace.injectedMessages.last['content'], contains('[truncated]'));
+      expect(
+        trace.itemTraces.map((item) => item.status),
+        [
+          ContextContributionItemStatus.included,
+          ContextContributionItemStatus.truncated,
+          ContextContributionItemStatus.dropped,
+        ],
+      );
+      expect(trace.metadata, {'source': 'local'});
       expect(result.wasTrimmed, isTrue);
       expect(
         result.estimatedTokens,
-        lessThanOrEqualTo(result.baseEstimatedTokens + 18),
+        lessThanOrEqualTo(result.baseEstimatedTokens + 30),
+      );
+      session.close();
+    });
+
+    test('honors an explicit conversation boundary after summary and RAG',
+        () async {
+      final registry = ChatExtensionRegistry();
+      registry.registerContributor(
+        _Contributor(
+          id: 'memory',
+          onContribute: (request) async {
+            expect(request.conversationStartIndex, 3);
+            return ContextContribution(messages: const [
+              {'role': 'system', 'content': 'Memory'},
+            ]);
+          },
+        ),
+      );
+      final session = ChatGenerationPipeline(registry: registry).startSession(
+        chatId: 'chat-1',
+        mode: ChatGenerationMode.send,
+        config: _config,
+      );
+
+      final result = await session.assemble(
+        const [
+          {'role': 'system', 'content': 'World info'},
+          {'role': 'assistant', 'content': 'Summary'},
+          {'role': 'system', 'content': 'RAG'},
+          {'role': 'user', 'content': 'Current message'},
+        ],
+        conversationStartIndex: 3,
+      );
+
+      expect(
+        result.messages.map((message) => message['content']),
+        ['World info', 'Summary', 'RAG', 'Memory', 'Current message'],
       );
       session.close();
     });

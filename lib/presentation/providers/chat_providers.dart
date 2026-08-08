@@ -22,6 +22,7 @@ import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
+import 'package:native_tavern/presentation/providers/memory_context_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
@@ -211,11 +212,15 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   }
 
   Future<List<Map<String, dynamic>>> _applyContextContributors(
-    List<Map<String, dynamic>> messages,
-  ) async {
+    List<Map<String, dynamic>> messages, {
+    int? conversationStartIndex,
+  }) async {
     final session = _activeGenerationSession;
     if (session == null) return messages;
-    final result = await session.assemble(messages);
+    final result = await session.assemble(
+      messages,
+      conversationStartIndex: conversationStartIndex,
+    );
     final dataBankContext = _ref.read(lastDataBankContextProvider);
     if (dataBankContext?.sessionId == session.sessionId) {
       _pendingDataBankContext = dataBankContext!.sources.isEmpty
@@ -1591,6 +1596,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         messages.add({'role': 'system', 'content': ragContext});
       }
     }
+    final conversationStartIndex = messages.length;
 
     // Prepare character depth prompt (ST extensions.depth_prompt)
     final depthPrompt = character?.depthPrompt;
@@ -1750,7 +1756,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     }
     print('=== End Context Messages ===');
 
-    return _applyContextContributors(messages);
+    return _applyContextContributors(
+      messages,
+      conversationStartIndex: conversationStartIndex,
+    );
   }
 
   /// Build messages for a single prompt section
@@ -2195,6 +2204,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         messages.add({'role': 'system', 'content': ragContext});
       }
     }
+    final conversationStartIndex = messages.length;
 
     // Prepare character depth prompt (ST extensions.depth_prompt)
     final depthPrompt = character?.depthPrompt;
@@ -2291,7 +2301,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       messages.addAll(sectionMessages);
     }
 
-    return _applyContextContributors(messages);
+    return _applyContextContributors(
+      messages,
+      conversationStartIndex: conversationStartIndex,
+    );
   }
 
   /// Find matching World Info entries based on chat context
@@ -3042,6 +3055,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     // Build system prompt for group chat
     final systemPrompt = await _buildGroupSystemPrompt(respondingCharacter);
     messages.add({'role': 'system', 'content': systemPrompt});
+    final conversationStartIndex = messages.length;
 
     // Add chat messages
     for (final msg in state.messages) {
@@ -3057,7 +3071,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       }
     }
 
-    return _applyContextContributors(messages);
+    return _applyContextContributors(
+      messages,
+      conversationStartIndex: conversationStartIndex,
+    );
   }
 
   /// Build system prompt for group chat
@@ -3193,6 +3210,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 final activeChatProvider =
     StateNotifierProvider<ActiveChatNotifier, ActiveChatState>((ref) {
       ref.watch(dataBankContextRegistrationProvider);
+      ref.watch(longTermMemoryContextRegistrationProvider);
       final chatRepo = ref.watch(chatRepositoryProvider);
       final characterRepo = ref.watch(characterRepositoryProvider);
       final personaRepo = ref.watch(personaRepositoryProvider);
