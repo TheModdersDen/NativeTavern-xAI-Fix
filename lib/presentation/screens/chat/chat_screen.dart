@@ -93,6 +93,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   final ChatTTSAutoPlayController _ttsAutoPlayController =
       ChatTTSAutoPlayController();
+  late final TTSStopAction _stopTts;
   final Map<String, GlobalKey<_MessageBubbleState>> _messageKeys = {};
   bool _initialMessageJumpScheduled = false;
   String? _highlightedMessageId;
@@ -100,8 +101,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _stopTts = ref.read(ttsStopProvider);
     // Load chat and bookmarks when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(activeChatProvider.notifier).loadChat(widget.chatId);
       ref.read(bookmarkNotifierProvider.notifier).loadBookmarks(widget.chatId);
       ref.read(rpgChatProvider(widget.chatId).notifier).load();
@@ -208,7 +211,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
-    unawaited(ref.read(ttsStopProvider)(ownerId: widget.chatId));
+    unawaited(_stopTts(ownerId: widget.chatId));
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _scrollController.dispose();
@@ -986,6 +989,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _handleChatTTSChange(ActiveChatState? previous, ActiveChatState next) {
+    if (!mounted) return;
     final action = _ttsAutoPlayController.evaluate(
       previous: previous,
       next: next,
@@ -1017,6 +1021,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     // Scroll to bottom when new messages arrive or when chat finishes loading
     ref.listen(activeChatProvider, (previous, next) {
+      if (!mounted) return;
       // Scroll to bottom when:
       // 1. New messages are added during conversation
       // 2. Chat finishes loading (transitions from loading to loaded with messages)
