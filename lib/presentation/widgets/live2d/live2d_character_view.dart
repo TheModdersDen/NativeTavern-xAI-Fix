@@ -12,6 +12,8 @@ import 'package:native_tavern/domain/services/emotion_detection_service.dart';
 import 'package:native_tavern/domain/services/live2d_action_orchestrator.dart';
 import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
 import 'package:native_tavern/domain/services/live2d_service.dart';
+import 'package:native_tavern/domain/services/live2d_tts_playback_coordinator.dart';
+import 'package:native_tavern/domain/services/tts_service.dart';
 import 'package:native_tavern/presentation/widgets/live2d/macos_live2d_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
 
@@ -213,6 +215,7 @@ class Live2DCharacterView extends StatefulWidget {
   final Live2DConfig config;
   final bool isSpeaking;
   final String responseText;
+  final TTSPlaybackState? ttsPlayback;
   final Live2DCharacterController? controller;
   final Widget? fallback;
   final bool showStatus;
@@ -224,6 +227,7 @@ class Live2DCharacterView extends StatefulWidget {
     required this.config,
     this.isSpeaking = false,
     this.responseText = '',
+    this.ttsPlayback,
     this.controller,
     this.fallback,
     this.showStatus = false,
@@ -246,6 +250,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   final Live2DHitTestService _hitTestService = const Live2DHitTestService();
   final Live2DSentenceBoundaryTracker _sentenceTracker =
       Live2DSentenceBoundaryTracker();
+  final Live2DTTSPlaybackCoordinator _ttsPlaybackCoordinator =
+      Live2DTTSPlaybackCoordinator();
   final EmotionDetectionService _emotionDetectionService =
       EmotionDetectionService();
   Timer? _scrollSaveTimer;
@@ -257,6 +263,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   Live2DStageTransform? _gestureStartTransform;
   Offset? _gestureStartFocalPoint;
   bool _transformDirty = false;
+  Future<void> _mouthWrites = Future<void>.value();
+  Future<void> _actionWrites = Future<void>.value();
 
   @override
   void initState() {
@@ -293,7 +301,12 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         _nativeController.value.isLoaded) {
       unawaited(_nativeController.setMotionSpeed(config.motionSpeed));
     }
-    if (oldWidget.isSpeaking != widget.isSpeaking) {
+    final playback = widget.ttsPlayback;
+    if (playback != null) {
+      if (oldWidget.ttsPlayback?.sequence != playback.sequence) {
+        _handleTTSPlaybackChanged(oldWidget.ttsPlayback, playback);
+      }
+    } else if (oldWidget.isSpeaking != widget.isSpeaking) {
       _handleSpeakingChanged();
     } else if (widget.isSpeaking &&
         oldWidget.responseText != widget.responseText) {
@@ -321,6 +334,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     final generation = ++_loadGeneration;
     _orchestrator.reset();
     _sentenceTracker.reset(text: widget.responseText);
+    _ttsPlaybackCoordinator.reset();
     if (mounted) setState(() => _loadError = null);
 
     try {
@@ -348,9 +362,17 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         actionConfig.lipSyncParameter,
         _orchestrator,
       );
-      if (widget.isSpeaking) {
+      final playback = widget.ttsPlayback;
+      if (playback?.phase == TTSPlaybackPhase.playing) {
+        await _orchestrator.onMessageStarted();
+        await _setMouthOpen(playback!.mouthOpen);
+      } else if (playback?.phase == TTSPlaybackPhase.paused) {
+        await _setMouthOpen(0);
+        await _orchestrator.onPlaybackPaused();
+      } else if (playback == null && widget.isSpeaking) {
         await _orchestrator.onMessageStarted();
       } else {
+        await _setMouthOpen(0);
         await _orchestrator.onIdleTimeout();
       }
     } catch (error) {
@@ -423,6 +445,47 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     for (var index = 0; index < count; index++) {
       unawaited(_orchestrator.onSentenceBoundary());
     }
+  }
+
+  void _handleTTSPlaybackChanged(
+    TTSPlaybackState? previous,
+    TTSPlaybackState next,
+  ) {
+    final update = _ttsPlaybackCoordinator.evaluate(previous, next);
+    unawaited(_setMouthOpen(update.mouthOpen));
+    _actionWrites = _actionWrites.then((_) async {
+      switch (update.lifecycle) {
+        case Live2DTTSLifecycleEvent.none:
+          break;
+        case Live2DTTSLifecycleEvent.started:
+          await _orchestrator.onMessageStarted();
+        case Live2DTTSLifecycleEvent.paused:
+          await _orchestrator.onPlaybackPaused();
+        case Live2DTTSLifecycleEvent.completed:
+          final emotion = _emotionDetectionService.detectEmotion(next.text);
+          await _orchestrator.onResponseCompleted(emotion: emotion.id);
+        case Live2DTTSLifecycleEvent.stopped:
+          await _orchestrator.onPlaybackStopped();
+      }
+      for (var index = 0; index < update.sentenceBoundaries; index++) {
+        await _orchestrator.onSentenceBoundary();
+      }
+    }).catchError((_) {});
+  }
+
+  Future<void> _setMouthOpen(double value) {
+    _mouthWrites = _mouthWrites.then((_) async {
+      if (!_nativeController.value.isLoaded) return;
+      try {
+        await _nativeController.setParameter(
+          _actionConfig.lipSyncParameter,
+          value.clamp(0, 1),
+        );
+      } catch (_) {
+        // Missing LipSync parameters degrade without affecting playback.
+      }
+    });
+    return _mouthWrites;
   }
 
   Future<bool> _playMotion(Live2DMotionRef motion, int priority) async {
@@ -583,7 +646,9 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     WidgetsBinding.instance.removeObserver(this);
     widget.controller?._detach(_nativeController);
     _orchestrator.dispose();
-    _nativeController.dispose();
+    unawaited(
+      _setMouthOpen(0).whenComplete(_nativeController.dispose),
+    );
     super.dispose();
   }
 

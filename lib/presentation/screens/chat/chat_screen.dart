@@ -17,7 +17,9 @@ import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
 import 'package:native_tavern/domain/services/slash_command_service.dart';
+import 'package:native_tavern/domain/services/tts_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/controllers/chat_tts_autoplay_controller.dart';
 import 'package:native_tavern/presentation/providers/bookmark_providers.dart';
 import 'package:native_tavern/presentation/providers/background_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
@@ -25,6 +27,7 @@ import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/providers/tts_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
@@ -44,6 +47,7 @@ import 'package:native_tavern/presentation/widgets/chat/image_generation_dialog.
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
 import 'package:native_tavern/presentation/widgets/chat/visual_novel_message_view.dart';
+import 'package:native_tavern/presentation/widgets/chat/tts_playback_controls.dart';
 import 'package:native_tavern/presentation/widgets/chat/sprite_display.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_character_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
@@ -76,6 +80,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final LayerLink _inputMenuLayerLink = LayerLink();
   final List<ChatAttachment> _pendingAttachments = [];
   final ImagePicker _imagePicker = ImagePicker();
+  final ChatTTSAutoPlayController _ttsAutoPlayController =
+      ChatTTSAutoPlayController();
 
   @override
   void initState() {
@@ -124,6 +130,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
+    unawaited(ref.read(ttsStopProvider)(ownerId: widget.chatId));
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _scrollController.dispose();
@@ -765,8 +772,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
+    await ref.read(ttsStopProvider)(ownerId: widget.chatId);
     await ref.read(activeChatProvider.notifier).regenerateLastMessage(config);
     _scrollToBottom();
+  }
+
+  void _handleChatTTSChange(
+    ActiveChatState? previous,
+    ActiveChatState next,
+  ) {
+    final action = _ttsAutoPlayController.evaluate(
+      previous: previous,
+      next: next,
+      settings: ref.read(ttsSettingsProvider),
+    );
+    switch (action.kind) {
+      case ChatTTSActionKind.none:
+        return;
+      case ChatTTSActionKind.stop:
+        unawaited(ref.read(ttsStopProvider)(ownerId: widget.chatId));
+      case ChatTTSActionKind.speak:
+        unawaited(
+          ref.read(ttsSpeakProvider)(
+            action.text!,
+            characterId: action.characterId,
+            ownerId: widget.chatId,
+            sourceId: action.sourceId,
+          ),
+        );
+    }
   }
 
   @override
@@ -789,6 +823,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (messageCountChanged || loadingFinished) {
         _scrollToBottomImmediate();
       }
+      _handleChatTTSChange(previous, next);
     });
 
     return Scaffold(
@@ -942,6 +977,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
       actions: [
+        ChatTTSPlaybackControls(ownerId: widget.chatId),
         // Author's Note button
         IconButton(
           icon: Icon(
@@ -1310,26 +1346,44 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     }
 
-    return Live2DCharacterView(
-      config: live2d!,
-      isSpeaking: chatState.isGenerating,
-      responseText: latestAssistantMessage?.content ?? '',
-      interactive: interactive,
-      onTransformChanged: persistTransform
-          ? (transform) {
-              unawaited(_saveLive2DTransform(character.id, transform));
-            }
-          : null,
-      fallback: latestAssistantMessage == null
-          ? const SizedBox.shrink()
-          : Align(
-              alignment: Alignment.center,
-              child: SpriteDisplay(
-                characterId: character.id,
-                messageContent: latestAssistantMessage.content,
-                isStreaming: chatState.isGenerating,
-              ),
-            ),
+    return Consumer(
+      builder: (context, ttsRef, _) {
+        final ttsEnabled = ttsRef.watch(
+          ttsSettingsProvider.select((settings) => settings.enabled),
+        );
+        final playback = ttsRef.watch(ttsPlaybackStateProvider);
+        final matchesStage = playback.ownerId == widget.chatId &&
+            (playback.characterId == null ||
+                playback.characterId == character.id);
+        final stagePlayback = !ttsEnabled
+            ? null
+            : matchesStage
+                ? playback
+                : TTSPlaybackState(sequence: playback.sequence);
+
+        return Live2DCharacterView(
+          config: live2d!,
+          isSpeaking: chatState.isGenerating,
+          responseText: latestAssistantMessage?.content ?? '',
+          ttsPlayback: stagePlayback,
+          interactive: interactive,
+          onTransformChanged: persistTransform
+              ? (transform) {
+                  unawaited(_saveLive2DTransform(character.id, transform));
+                }
+              : null,
+          fallback: latestAssistantMessage == null
+              ? const SizedBox.shrink()
+              : Align(
+                  alignment: Alignment.center,
+                  child: SpriteDisplay(
+                    characterId: character.id,
+                    messageContent: latestAssistantMessage.content,
+                    isStreaming: chatState.isGenerating,
+                  ),
+                ),
+        );
+      },
     );
   }
 
@@ -1369,6 +1423,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 _showEditMessageDialog(message);
               },
             ),
+            if (isAssistant)
+              ListTile(
+                leading: const Icon(Icons.volume_up_outlined),
+                title: const Text('Read aloud'),
+                onTap: () {
+                  Navigator.pop(context);
+                  unawaited(
+                    ref.read(ttsSpeakProvider)(
+                      message.content,
+                      characterId:
+                          message.characterId ?? chatState.character?.id,
+                      ownerId: widget.chatId,
+                      sourceId: message.id,
+                    ),
+                  );
+                },
+              ),
             if (isAssistant)
               ListTile(
                 leading: const Icon(Icons.refresh),
@@ -2724,6 +2795,14 @@ class _MessageBubbleState extends State<_MessageBubble> {
                         ),
                       ],
                     ),
+                  ),
+                if (!isUser && !widget.isGenerating)
+                  ChatTTSMessageButton(
+                    text: widget.message.content,
+                    ownerId: widget.chatId,
+                    sourceId: widget.message.id,
+                    characterId:
+                        widget.message.characterId ?? widget.character?.id,
                   ),
                 if (isUser && !_isEditing && !widget.isGenerating)
                   IconButton(

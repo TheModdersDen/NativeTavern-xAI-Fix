@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
@@ -14,7 +15,8 @@ final ttsServiceProvider = Provider<TTSService>((ref) {
 });
 
 /// Provider for TTS settings
-final ttsSettingsProvider = StateNotifierProvider<TTSSettingsNotifier, TTSSettings>((ref) {
+final ttsSettingsProvider =
+    StateNotifierProvider<TTSSettingsNotifier, TTSSettings>((ref) {
   return TTSSettingsNotifier(ref.watch(ttsServiceProvider));
 });
 
@@ -42,11 +44,11 @@ class TTSSettingsNotifier extends StateNotifier<TTSSettings> {
   }
 
   Future<void> _saveSettings() async {
+    _service.updateSettings(state);
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonStr = jsonEncode(state.toJson());
       await prefs.setString(_prefsKey, jsonStr);
-      _service.updateSettings(state);
     } catch (e) {
       // Ignore save errors
     }
@@ -110,19 +112,23 @@ class TTSSettingsNotifier extends StateNotifier<TTSSettings> {
 
 /// Provider for character voice settings
 final characterVoiceSettingsProvider = StateNotifierProvider.family<
-    CharacterVoiceSettingsNotifier, CharacterVoiceSettings?, String>((ref, characterId) {
+    CharacterVoiceSettingsNotifier,
+    CharacterVoiceSettings?,
+    String>((ref, characterId) {
   final service = ref.watch(ttsServiceProvider);
   return CharacterVoiceSettingsNotifier(service, characterId);
 });
 
 /// Notifier for character voice settings
-class CharacterVoiceSettingsNotifier extends StateNotifier<CharacterVoiceSettings?> {
+class CharacterVoiceSettingsNotifier
+    extends StateNotifier<CharacterVoiceSettings?> {
   final TTSService _service;
   final String characterId;
+  late final Future<void> initialized;
 
   CharacterVoiceSettingsNotifier(this._service, this.characterId)
       : super(null) {
-    _loadSettings();
+    initialized = _loadSettings();
   }
 
   Future<void> _loadSettings() async {
@@ -205,8 +211,30 @@ class CharacterVoiceSettingsNotifier extends StateNotifier<CharacterVoiceSetting
   }
 }
 
-/// Provider for TTS speaking state
-final ttsSpeakingProvider = StateProvider<bool>((ref) => false);
+final ttsPlaybackStateProvider =
+    StateNotifierProvider<TTSPlaybackNotifier, TTSPlaybackState>((ref) {
+  return TTSPlaybackNotifier(ref.watch(ttsServiceProvider));
+});
+
+class TTSPlaybackNotifier extends StateNotifier<TTSPlaybackState> {
+  TTSPlaybackNotifier(TTSService service) : super(service.playbackState) {
+    _subscription = service.playbackStates.listen((next) => state = next);
+  }
+
+  late final StreamSubscription<TTSPlaybackState> _subscription;
+
+  @override
+  void dispose() {
+    unawaited(_subscription.cancel());
+    super.dispose();
+  }
+}
+
+final ttsSpeakingProvider = Provider<bool>((ref) {
+  return ref.watch(
+    ttsPlaybackStateProvider.select((state) => state.isPlaying),
+  );
+});
 
 /// Provider for available voices
 final availableVoicesProvider = FutureProvider<List<TTSVoice>>((ref) async {
@@ -215,37 +243,56 @@ final availableVoicesProvider = FutureProvider<List<TTSVoice>>((ref) async {
   return service.availableVoices;
 });
 
-/// TTS action provider for speaking text
-final ttsSpeakProvider = Provider<Future<void> Function(String, {String? characterId})>((ref) {
+typedef TTSSpeakAction = Future<void> Function(
+  String text, {
+  String? characterId,
+  String? ownerId,
+  String? sourceId,
+});
+
+/// TTS action provider for speaking text.
+final ttsSpeakProvider = Provider<TTSSpeakAction>((ref) {
   final service = ref.watch(ttsServiceProvider);
   final settings = ref.watch(ttsSettingsProvider);
-  
-  return (String text, {String? characterId}) async {
+
+  return (
+    String text, {
+    String? characterId,
+    String? ownerId,
+    String? sourceId,
+  }) async {
     if (!settings.enabled) return;
-    
+
+    if (characterId != null) {
+      await ref
+          .read(characterVoiceSettingsProvider(characterId).notifier)
+          .initialized;
+    }
     await service.initialize();
-    ref.read(ttsSpeakingProvider.notifier).state = true;
-    
-    service.onComplete = () {
-      ref.read(ttsSpeakingProvider.notifier).state = false;
-    };
-    service.onCancel = () {
-      ref.read(ttsSpeakingProvider.notifier).state = false;
-    };
-    service.onError = (error) {
-      ref.read(ttsSpeakingProvider.notifier).state = false;
-    };
-    
-    await service.speak(text, characterId: characterId);
+    await service.speak(
+      text,
+      characterId: characterId,
+      ownerId: ownerId,
+      sourceId: sourceId,
+    );
   };
 });
 
-/// TTS stop provider
-final ttsStopProvider = Provider<Future<void> Function()>((ref) {
+typedef TTSStopAction = Future<void> Function({String? ownerId});
+
+/// TTS stop provider.
+final ttsStopProvider = Provider<TTSStopAction>((ref) {
   final service = ref.watch(ttsServiceProvider);
-  
-  return () async {
-    await service.stop();
-    ref.read(ttsSpeakingProvider.notifier).state = false;
-  };
+
+  return ({String? ownerId}) => service.stop(ownerId: ownerId);
+});
+
+final ttsPauseProvider = Provider<Future<void> Function()>((ref) {
+  final service = ref.watch(ttsServiceProvider);
+  return service.pause;
+});
+
+final ttsResumeProvider = Provider<Future<void> Function()>((ref) {
+  final service = ref.watch(ttsServiceProvider);
+  return service.resume;
 });
