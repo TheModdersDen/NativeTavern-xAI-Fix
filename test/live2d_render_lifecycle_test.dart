@@ -1,0 +1,76 @@
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:native_tavern/domain/services/live2d_render_lifecycle.dart';
+
+void main() {
+  test('applies a background state that arrived before native attachment',
+      () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      initialPaused: true,
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    expect(applied, isEmpty);
+    await lifecycle.setAttached(true);
+
+    expect(applied, [true]);
+    expect(lifecycle.appliedPaused, isTrue);
+  });
+
+  test('serializes rapid lifecycle changes and preserves the latest state',
+      () async {
+    final firstCall = Completer<void>();
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async {
+        applied.add(paused);
+        if (applied.length == 1) await firstCall.future;
+      },
+    );
+
+    final attach = lifecycle.setAttached(true);
+    final pause = lifecycle.setAppActive(false);
+    final resume = lifecycle.setAppActive(true);
+    firstCall.complete();
+    await Future.wait([attach, pause, resume]);
+
+    expect(applied.last, isFalse);
+    expect(lifecycle.desiredPaused, isFalse);
+    expect(lifecycle.appliedPaused, isFalse);
+  });
+
+  test('detachment invalidates an in-flight native result', () async {
+    final call = Completer<void>();
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (_) => call.future,
+    );
+
+    final attach = lifecycle.setAttached(true);
+    await lifecycle.setAttached(false);
+    call.complete();
+    await attach;
+
+    expect(lifecycle.isAttached, isFalse);
+    expect(lifecycle.appliedPaused, isNull);
+  });
+
+  test('a failed native call can be retried', () async {
+    var attempts = 0;
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (_) async {
+        attempts++;
+        if (attempts == 1) throw StateError('native view unavailable');
+      },
+    );
+
+    await expectLater(lifecycle.setAttached(true), throwsStateError);
+    expect(lifecycle.lastError, isA<StateError>());
+
+    await lifecycle.setAppActive(false);
+    expect(attempts, 2);
+    expect(lifecycle.appliedPaused, isTrue);
+    expect(lifecycle.lastError, isNull);
+  });
+}
