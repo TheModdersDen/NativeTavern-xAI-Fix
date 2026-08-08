@@ -6,6 +6,7 @@ import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/chat/message_content_widget.dart';
+import 'package:native_tavern/presentation/widgets/chat/data_bank_citation_preview.dart';
 import 'package:native_tavern/presentation/widgets/chat/reasoning_widget.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 
@@ -164,10 +165,7 @@ class _VisualNovelMessageViewState
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
         ),
       ),
       child: PageView.builder(
@@ -226,6 +224,8 @@ class _VisualNovelMessageViewState
                 isStreaming: isGenerating,
                 messageId: message.id,
               ),
+            if (!isUser && !isGenerating)
+              DataBankCitationPreview(message: message),
             // Swipe controls
             if (hasSwipes && !isGenerating) _buildSwipeControls(message),
           ],
@@ -381,10 +381,7 @@ class _VisualNovelMessageViewState
             ),
             child: Text(
               '${currentSwipeIndex + 1} / $totalSwipes',
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ),
           IconButton(

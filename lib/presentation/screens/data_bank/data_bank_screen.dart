@@ -7,12 +7,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/data_bank.dart';
+import 'package:native_tavern/data/models/data_bank_context.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/services/data_bank_library_service.dart';
 import 'package:native_tavern/presentation/controllers/data_bank_library_controller.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
+import 'package:native_tavern/presentation/widgets/chat/data_bank_citation_preview.dart';
 
 abstract interface class DataBankFileGateway {
   Future<File?> pickDocument();
@@ -41,7 +43,8 @@ final class PlatformDataBankFileGateway implements DataBankFileGateway {
     final selectedPath = result.files.single.path;
     if (selectedPath == null) {
       throw const FileSystemException(
-          'The selected document could not be read.');
+        'The selected document could not be read.',
+      );
     }
     return File(selectedPath);
   }
@@ -65,19 +68,14 @@ final class RepositoryDataBankBindingTargetGateway
   final CharacterRepository _characters;
   final ChatRepository _chats;
 
-  const RepositoryDataBankBindingTargetGateway(
-    this._characters,
-    this._chats,
-  );
+  const RepositoryDataBankBindingTargetGateway(this._characters, this._chats);
 
   @override
   Future<List<DataBankBindingTarget>> listCharacters() async {
     final targets = (await _characters.getAllCharacters())
         .map(
-          (character) => DataBankBindingTarget(
-            id: character.id,
-            label: character.name,
-          ),
+          (character) =>
+              DataBankBindingTarget(id: character.id, label: character.name),
         )
         .toList();
     targets.sort((left, right) => left.label.compareTo(right.label));
@@ -87,9 +85,7 @@ final class RepositoryDataBankBindingTargetGateway
   @override
   Future<List<DataBankBindingTarget>> listChats() async {
     return (await _chats.getAllChats())
-        .map(
-          (chat) => DataBankBindingTarget(id: chat.id, label: chat.title),
-        )
+        .map((chat) => DataBankBindingTarget(id: chat.id, label: chat.title))
         .toList(growable: false);
   }
 }
@@ -119,7 +115,8 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
   void initState() {
     super.initState();
     _ownsController = widget.controller == null;
-    _controller = widget.controller ??
+    _controller =
+        widget.controller ??
         DataBankLibraryController(ref.read(dataBankLibraryServiceProvider));
     _controller.addListener(_refresh);
     _controller.initialize();
@@ -143,6 +140,12 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
       appBar: AppBar(
         title: const Text('Data Bank'),
         actions: [
+          IconButton(
+            key: const Key('data-bank-context-settings'),
+            tooltip: 'Chat retrieval settings',
+            onPressed: _showContextSettings,
+            icon: const Icon(Icons.tune),
+          ),
           IconButton(
             key: const Key('data-bank-rebuild-index'),
             tooltip: 'Rebuild search index',
@@ -246,10 +249,7 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
             entry: entry,
             busy: _controller.working,
             onToggle: (enabled) => _run(
-              () => _controller.setDocumentEnabled(
-                entry.document.id,
-                enabled,
-              ),
+              () => _controller.setDocumentEnabled(entry.document.id, enabled),
             ),
             onPreview: () => _showPreview(entry.document.id),
             onBindings: () => _showBindings(entry),
@@ -267,6 +267,15 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
       final file = await widget.fileGateway.pickDocument();
       if (file != null) await _controller.importDocument(file);
     });
+  }
+
+  Future<void> _showContextSettings() {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => const _DataBankContextSettingsSheet(),
+    );
   }
 
   Future<void> _rebuildIndex() async {
@@ -291,7 +300,8 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
 
   Future<void> _showBindings(DataBankLibraryEntry entry) async {
     await _run(() async {
-      final gateway = widget.bindingTargetGateway ??
+      final gateway =
+          widget.bindingTargetGateway ??
           RepositoryDataBankBindingTargetGateway(
             ref.read(characterRepositoryProvider),
             ref.read(chatRepositoryProvider),
@@ -366,6 +376,236 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
   }
 }
 
+class _DataBankContextSettingsSheet extends ConsumerWidget {
+  const _DataBankContextSettingsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(dataBankContextSettingsProvider);
+    final notifier = ref.read(dataBankContextSettingsProvider.notifier);
+    final diagnostics = ref.watch(lastDataBankContextProvider);
+    return SafeArea(
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * 0.88,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 12, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Chat retrieval',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                children: [
+                  SwitchListTile(
+                    key: const Key('data-bank-context-enabled'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Use Data Bank in chat'),
+                    value: settings.enabled,
+                    onChanged: notifier.setEnabled,
+                  ),
+                  SwitchListTile(
+                    key: const Key('data-bank-query-rewrite'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Conversation-aware query expansion'),
+                    value: settings.queryRewriteEnabled,
+                    onChanged: settings.enabled
+                        ? notifier.setQueryRewriteEnabled
+                        : null,
+                  ),
+                  SwitchListTile(
+                    key: const Key('data-bank-semantic-reranking'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Semantic reranking'),
+                    subtitle: const Text(
+                      'Uses the configured Embedding provider',
+                    ),
+                    value: settings.semanticRerankingEnabled,
+                    onChanged: settings.enabled
+                        ? notifier.setSemanticRerankingEnabled
+                        : null,
+                  ),
+                  const Divider(height: 28),
+                  _SettingsSlider(
+                    key: const Key('data-bank-top-k'),
+                    title: 'Sources per response',
+                    valueLabel: '${settings.topK}',
+                    value: settings.topK.toDouble(),
+                    min: 1,
+                    max: 20,
+                    divisions: 19,
+                    enabled: settings.enabled,
+                    onChanged: (value) => notifier.setTopK(value.round()),
+                  ),
+                  _SettingsSlider(
+                    key: const Key('data-bank-token-budget'),
+                    title: 'Token budget',
+                    valueLabel: '${settings.maxTokens}',
+                    value: settings.maxTokens.clamp(256, 4096).toDouble(),
+                    min: 256,
+                    max: 4096,
+                    divisions: 30,
+                    enabled: settings.enabled,
+                    onChanged: (value) =>
+                        notifier.setMaxTokens((value / 128).round() * 128),
+                  ),
+                  _SettingsSlider(
+                    key: const Key('data-bank-source-diversity'),
+                    title: 'Chunks per document',
+                    valueLabel: '${settings.maxChunksPerDocument}',
+                    value: settings.maxChunksPerDocument.clamp(1, 5).toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    enabled: settings.enabled,
+                    onChanged: (value) =>
+                        notifier.setMaxChunksPerDocument(value.round()),
+                  ),
+                  const Divider(height: 32),
+                  Text(
+                    'Last retrieval',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 10),
+                  if (diagnostics == null)
+                    const Text('No chat retrieval has run yet.')
+                  else
+                    _DataBankDiagnostics(snapshot: diagnostics),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSlider extends StatelessWidget {
+  final String title;
+  final String valueLabel;
+  final double value;
+  final double min;
+  final double max;
+  final int divisions;
+  final bool enabled;
+  final ValueChanged<double> onChanged;
+
+  const _SettingsSlider({
+    super.key,
+    required this.title,
+    required this.valueLabel,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(title)),
+            Text(valueLabel, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          label: valueLabel,
+          onChanged: enabled ? onChanged : null,
+        ),
+      ],
+    );
+  }
+}
+
+class _DataBankDiagnostics extends StatelessWidget {
+  final DataBankContextSnapshot snapshot;
+
+  const _DataBankDiagnostics({required this.snapshot});
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = switch (snapshot.mode) {
+      DataBankRetrievalMode.localFts => 'Local full-text search',
+      DataBankRetrievalMode.semanticReranked => 'Hybrid semantic reranking',
+      DataBankRetrievalMode.semanticFallback => 'Local fallback',
+    };
+    return Column(
+      key: const Key('data-bank-retrieval-diagnostics'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          snapshot.originalQuery,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        Text('$mode | ${snapshot.sources.length} source(s)'),
+        if (snapshot.fallbackReason != null)
+          Text(
+            snapshot.fallbackReason!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        for (final source in snapshot.sources.take(3)) ...[
+          const SizedBox(height: 12),
+          Text(
+            '[${source.label}] ${source.documentName}',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          if (source.locationLabel.isNotEmpty)
+            Text(
+              source.locationLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          Text(
+            source.snippet.isEmpty ? source.injectedText : source.snippet,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+        if (snapshot.sources.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('data-bank-open-diagnostics'),
+              onPressed: () => showDataBankCitationSheet(context, snapshot),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: const Text('Inspect all sources'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _DocumentCard extends StatelessWidget {
   final DataBankLibraryEntry entry;
   final bool busy;
@@ -391,7 +631,7 @@ class _DocumentCard extends StatelessWidget {
     final document = entry.document;
     final processing =
         document.processingState == DataBankProcessingState.pending ||
-            document.processingState == DataBankProcessingState.processing;
+        document.processingState == DataBankProcessingState.processing;
     final failed = document.processingState == DataBankProcessingState.failed;
     final disabled =
         document.processingState == DataBankProcessingState.disabled;
@@ -520,8 +760,11 @@ class _SearchResultTile extends StatelessWidget {
       margin: EdgeInsets.zero,
       child: ListTile(
         leading: const Icon(Icons.find_in_page_outlined),
-        title:
-            Text(result.snippet, maxLines: 4, overflow: TextOverflow.ellipsis),
+        title: Text(
+          result.snippet,
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text(source, maxLines: 2, overflow: TextOverflow.ellipsis),
       ),
     );
@@ -592,10 +835,11 @@ class _PreviewSheet extends StatelessWidget {
   }
 }
 
-typedef _SaveBinding = Future<void> Function({
-  required DataBankBindingScope scope,
-  String? targetId,
-});
+typedef _SaveBinding =
+    Future<void> Function({
+      required DataBankBindingScope scope,
+      String? targetId,
+    });
 
 class _BindingsDialog extends StatefulWidget {
   final DataBankLibraryEntry entry;
@@ -672,9 +916,9 @@ class _BindingsDialogState extends State<_BindingsDialog> {
                 onChanged: _working
                     ? null
                     : (scope) => setState(() {
-                          _scope = scope ?? DataBankBindingScope.global;
-                          _targetId = null;
-                        }),
+                        _scope = scope ?? DataBankBindingScope.global;
+                        _targetId = null;
+                      }),
               ),
               if (needsTarget) ...[
                 const SizedBox(height: 12),
@@ -761,8 +1005,7 @@ class _StatusBadge extends StatelessWidget {
       DataBankProcessingState.ready => Colors.green,
       DataBankProcessingState.failed => Theme.of(context).colorScheme.error,
       DataBankProcessingState.disabled => Colors.grey,
-      DataBankProcessingState.pending ||
-      DataBankProcessingState.processing =>
+      DataBankProcessingState.pending || DataBankProcessingState.processing =>
         Theme.of(context).colorScheme.primary,
       DataBankProcessingState.deleted => Colors.grey,
     };
@@ -831,10 +1074,7 @@ class _EmptyState extends StatelessWidget {
             Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 12),
             Text(title, style: Theme.of(context).textTheme.titleMedium),
-            if (action != null) ...[
-              const SizedBox(height: 16),
-              action!,
-            ],
+            if (action != null) ...[const SizedBox(height: 16), action!],
           ],
         ),
       ),
@@ -843,25 +1083,25 @@ class _EmptyState extends StatelessWidget {
 }
 
 String _stateLabel(DataBankProcessingState state) => switch (state) {
-      DataBankProcessingState.pending => 'Pending',
-      DataBankProcessingState.processing => 'Processing',
-      DataBankProcessingState.ready => 'Ready',
-      DataBankProcessingState.failed => 'Failed',
-      DataBankProcessingState.disabled => 'Disabled',
-      DataBankProcessingState.deleted => 'Deleted',
-    };
+  DataBankProcessingState.pending => 'Pending',
+  DataBankProcessingState.processing => 'Processing',
+  DataBankProcessingState.ready => 'Ready',
+  DataBankProcessingState.failed => 'Failed',
+  DataBankProcessingState.disabled => 'Disabled',
+  DataBankProcessingState.deleted => 'Deleted',
+};
 
 IconData _bindingIcon(DataBankBindingScope scope) => switch (scope) {
-      DataBankBindingScope.global => Icons.public,
-      DataBankBindingScope.character => Icons.person_outline,
-      DataBankBindingScope.chat => Icons.chat_bubble_outline,
-    };
+  DataBankBindingScope.global => Icons.public,
+  DataBankBindingScope.character => Icons.person_outline,
+  DataBankBindingScope.chat => Icons.chat_bubble_outline,
+};
 
 String _scopeLabel(DataBankBindingScope scope) => switch (scope) {
-      DataBankBindingScope.global => 'Global',
-      DataBankBindingScope.character => 'Character',
-      DataBankBindingScope.chat => 'Chat',
-    };
+  DataBankBindingScope.global => 'Global',
+  DataBankBindingScope.character => 'Character',
+  DataBankBindingScope.chat => 'Chat',
+};
 
 String _bindingLabel(DataBankBinding binding) {
   final scope = _scopeLabel(binding.scope);

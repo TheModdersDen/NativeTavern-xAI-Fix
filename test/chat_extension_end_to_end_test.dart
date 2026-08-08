@@ -97,9 +97,11 @@ void main() {
 
     final assembly = container.read(lastContextAssemblyProvider);
     expect(assembly, isNotNull);
-    expect(assembly!.traces.single.contributorId, 'test.memory');
+    final memoryTrace = assembly!.traces.singleWhere(
+      (trace) => trace.contributorId == 'test.memory',
+    );
     expect(
-      assembly.traces.single.status,
+      memoryTrace.status,
       ContextContributionStatus.applied,
     );
     final generation = container.read(lastChatGenerationTraceProvider);
@@ -107,7 +109,7 @@ void main() {
     expect(generation?.middlewareTraces, hasLength(2));
   });
 
-  test('empty registry sends the assembled baseline without pipeline changes',
+  test('Data Bank with no matches sends the baseline without prompt changes',
       () async {
     final notifier = container.read(activeChatProvider.notifier);
     await notifier.createChat('character-1');
@@ -116,7 +118,12 @@ void main() {
 
     final assembly = container.read(lastContextAssemblyProvider);
     expect(assembly, isNotNull);
-    expect(assembly!.traces, isEmpty);
+    expect(assembly!.traces, hasLength(1));
+    expect(
+      assembly.traces.single.contributorId,
+      'data-bank.retrieval',
+    );
+    expect(assembly.traces.single.injectedMessages, isEmpty);
     expect(llmService.requests.single, assembly.messages);
     expect(
       llmService.requests.single
