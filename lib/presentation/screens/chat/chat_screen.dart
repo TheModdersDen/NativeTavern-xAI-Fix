@@ -12,10 +12,12 @@ import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/chat_background.dart';
 import 'package:native_tavern/data/models/live2d.dart';
+import 'package:native_tavern/data/models/rpg/rpg.dart';
 import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
+import 'package:native_tavern/domain/services/rpg_scenario_package_service.dart';
 import 'package:native_tavern/domain/services/slash_command_service.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
@@ -23,9 +25,11 @@ import 'package:native_tavern/presentation/controllers/chat_tts_autoplay_control
 import 'package:native_tavern/presentation/providers/bookmark_providers.dart';
 import 'package:native_tavern/presentation/providers/background_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
+import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
+import 'package:native_tavern/presentation/providers/rpg_chat_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/tts_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
@@ -51,6 +55,7 @@ import 'package:native_tavern/presentation/widgets/chat/tts_playback_controls.da
 import 'package:native_tavern/presentation/widgets/chat/sprite_display.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_character_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
+import 'package:native_tavern/presentation/widgets/rpg/rpg_game_panel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
@@ -77,6 +82,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
+  static final Object _importRpg = Object();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
@@ -98,6 +104,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(activeChatProvider.notifier).loadChat(widget.chatId);
       ref.read(bookmarkNotifierProvider.notifier).loadBookmarks(widget.chatId);
+      ref.read(rpgChatProvider(widget.chatId).notifier).load();
       // Refresh context usage to ensure fresh calculation
       // This handles cases where world info was updated while not in chat
       refreshContextUsageProviders(ref);
@@ -391,6 +398,124 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           attachments: attachments,
         );
     _scrollToBottom();
+  }
+
+  Future<void> _toggleRpgMode() async {
+    final controller = ref.read(rpgChatProvider(widget.chatId).notifier);
+    final rpgState = ref.read(rpgChatProvider(widget.chatId));
+    try {
+      if (rpgState.enabled) {
+        await controller.setEnabled(false);
+      } else if (rpgState.hasSession) {
+        await controller.setEnabled(true);
+      } else {
+        await _showRpgScenarioPicker();
+      }
+    } catch (error) {
+      if (mounted) _showSnackBar(error.toString());
+    }
+  }
+
+  Future<void> _showRpgScenarioPicker() async {
+    final controller = ref.read(rpgChatProvider(widget.chatId).notifier);
+    final scenarios = await controller.listScenarios();
+    if (!mounted) return;
+    final selected = await showModalBottomSheet<Object>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 440),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 8, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Choose RPG scenario',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(sheetContext, _importRpg),
+                      icon: const Icon(Icons.file_open_outlined),
+                      tooltip: 'Import scenario',
+                    ),
+                  ],
+                ),
+              ),
+              if (scenarios.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                      'No saved scenarios. Import a JSON or YAML package.'),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: scenarios.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (_, index) {
+                      final scenario = scenarios[index];
+                      return ListTile(
+                        leading: const Icon(Icons.sports_esports_outlined),
+                        title: Text(scenario.metadata.name),
+                        subtitle: Text(
+                          '${scenario.metadata.id} · ${scenario.metadata.version}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => Navigator.pop(sheetContext, scenario),
+                      );
+                    },
+                  ),
+                ),
+              ListTile(
+                key: const Key('rpg-import-scenario'),
+                leading: const Icon(Icons.file_open_outlined),
+                title: const Text('Import scenario package'),
+                onTap: () => Navigator.pop(sheetContext, _importRpg),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selected is RpgScenario) {
+      await controller.enable(selected);
+    } else if (selected == _importRpg) {
+      await _importRpgScenario();
+    }
+  }
+
+  Future<void> _importRpgScenario() async {
+    final selection = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: RpgScenarioPackageService.supportedExtensions,
+      withData: true,
+    );
+    if (selection == null || selection.files.isEmpty) return;
+    final file = selection.files.single;
+    final bytes = file.bytes ??
+        (file.path == null ? null : await File(file.path!).readAsBytes());
+    if (bytes == null) {
+      throw StateError('The selected scenario could not be read.');
+    }
+    final result = await const RpgScenarioPackageService().importBytesAsync(
+      bytes,
+      fileName: file.name,
+    );
+    if (!result.isValid) {
+      throw StateError(
+          result.issues.map((issue) => issue.toString()).join('\n'));
+    }
+    await ref
+        .read(rpgChatProvider(widget.chatId).notifier)
+        .enable(result.scenario!);
   }
 
   Future<void> _handleSlashCommand(String input) async {
@@ -872,6 +997,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(rpgChatExtensionsProvider);
     final chatState = ref.watch(activeChatProvider);
     final llmConfig = ref.watch(llmConfigProvider);
     final isConfigured = _isApiConfigured(llmConfig);
@@ -935,6 +1061,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: chatState.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : _buildMessagesArea(chatState),
+                ),
+
+                RpgGamePanel(
+                  chatId: widget.chatId,
+                  onDisable: _toggleRpgMode,
                 ),
 
                 // Slash command suggestions
@@ -1006,6 +1137,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasAuthorNote = chatState.chat?.authorNoteEnabled == true &&
         (chatState.chat?.authorNote.isNotEmpty ?? false);
     final llmConfig = ref.watch(llmConfigProvider);
+    final rpgState = ref.watch(rpgChatProvider(widget.chatId));
 
     return AppBar(
       title: Column(
@@ -1045,6 +1177,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       actions: [
         ChatTTSPlaybackControls(ownerId: widget.chatId),
+        IconButton(
+          key: const Key('rpg-mode-toggle'),
+          icon: Icon(
+            rpgState.enabled
+                ? Icons.sports_esports
+                : Icons.sports_esports_outlined,
+            color: rpgState.enabled ? AppTheme.accentColor : null,
+          ),
+          tooltip: rpgState.enabled ? 'Disable RPG mode' : 'Enable RPG mode',
+          onPressed: rpgState.isLoading ? null : _toggleRpgMode,
+        ),
         // Author's Note button
         IconButton(
           icon: Icon(
