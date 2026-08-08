@@ -15,6 +15,7 @@ import 'package:native_tavern/data/models/world_info.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/persona_repository.dart';
+import 'package:native_tavern/domain/models/tool_calling.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/macro_service.dart';
 import 'package:native_tavern/domain/services/chat_summarization_service.dart';
@@ -27,6 +28,7 @@ import 'package:native_tavern/presentation/providers/memory_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/providers/tool_calling_providers.dart';
 import 'package:native_tavern/presentation/providers/vector_storage_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 
@@ -271,6 +273,75 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     state = state.copyWith(messages: messages.sublist(0, messages.length - 1));
   }
 
+  Future<LLMResponse?> _generateWithTools(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
+  ) async {
+    final settings = _ref.read(toolCallingSettingsProvider);
+    final chatId = state.chat?.id;
+    if (!settings.enabled || chatId == null) return null;
+
+    final runtime = _ref.read(toolRuntimeProvider.notifier);
+    final handle = runtime.beginGeneration(chatId);
+    try {
+      final result = await _ref.read(toolGenerationLoopProvider).run(
+            chatId: chatId,
+            messages: messages,
+            config: config,
+            settings: settings,
+            capabilities: _ref.read(toolCapabilitySnapshotProvider),
+            cancellationToken: handle.token,
+            requestBuiltInApproval: (preview) =>
+                runtime.requestBuiltIn(chatId, preview),
+            requestMcpApproval: (preview) =>
+                runtime.requestMcp(chatId, preview),
+            onProgress: runtime.report,
+          );
+      if (result == null) return null;
+      return LLMResponse(
+        content: result.content,
+        reasoning: result.reasoning,
+      );
+    } on ToolProtocolException catch (error) {
+      if (error.code == 'cancelled') {
+        throw ChatGenerationCancelledException(error.message);
+      }
+      rethrow;
+    } finally {
+      runtime.finishGeneration(handle);
+    }
+  }
+
+  Stream<LLMStreamChunk> _toolAwareStream(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
+  ) async* {
+    final toolResponse = await _generateWithTools(
+      _withPrefill(messages),
+      config,
+    );
+    final prefill = state.chat?.startReplyWith ?? '';
+    if (toolResponse != null) {
+      if (prefill.isNotEmpty) yield LLMStreamChunk(content: prefill);
+      if (toolResponse.reasoning?.isNotEmpty == true) {
+        yield LLMStreamChunk(
+          reasoning: toolResponse.reasoning,
+          isReasoningChunk: true,
+        );
+      }
+      if (toolResponse.content.isNotEmpty) {
+        yield LLMStreamChunk(content: toolResponse.content);
+      }
+      return;
+    }
+
+    if (prefill.isNotEmpty) yield LLMStreamChunk(content: prefill);
+    yield* _llmService.generateStreamWithReasoning(
+      _withPrefill(messages),
+      config,
+    );
+  }
+
   /// Stream generation with assistant prefill: the prefill text is sent as
   /// a trailing assistant message (native prefill on Claude, continuation
   /// on OpenAI-compatible APIs) and emitted first so it becomes part of
@@ -281,22 +352,12 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   ) async* {
     final session = _activeGenerationSession;
     if (session == null) {
-      final prefill = state.chat?.startReplyWith ?? '';
-      if (prefill.isNotEmpty) yield LLMStreamChunk(content: prefill);
-      yield* _llmService.generateStreamWithReasoning(
-        _withPrefill(context),
-        config,
-      );
+      yield* _toolAwareStream(context, config);
       return;
     }
 
     Stream<LLMStreamChunk> transport(ChatGenerationRequest request) async* {
-      final prefill = state.chat?.startReplyWith ?? '';
-      if (prefill.isNotEmpty) yield LLMStreamChunk(content: prefill);
-      yield* _llmService.generateStreamWithReasoning(
-        _withPrefill(request.messages),
-        request.config,
-      );
+      yield* _toolAwareStream(request.messages, request.config);
     }
 
     try {
@@ -315,10 +376,12 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final prefill = state.chat?.startReplyWith ?? '';
     try {
       if (session == null) {
-        final response = await _llmService.generateWithReasoning(
-          _withPrefill(context),
-          config,
-        );
+        final response =
+            await _generateWithTools(_withPrefill(context), config) ??
+                await _llmService.generateWithReasoning(
+                  _withPrefill(context),
+                  config,
+                );
         if (prefill.isEmpty) return response;
         return LLMResponse(
           content: prefill + response.content,
@@ -326,10 +389,14 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         );
       }
       return await session.generate(context, (request) async {
-        final response = await _llmService.generateWithReasoning(
-          _withPrefill(request.messages),
-          request.config,
-        );
+        final response = await _generateWithTools(
+              _withPrefill(request.messages),
+              request.config,
+            ) ??
+            await _llmService.generateWithReasoning(
+              _withPrefill(request.messages),
+              request.config,
+            );
         if (prefill.isEmpty) return response;
         return LLMResponse(
           content: prefill + response.content,
@@ -363,6 +430,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// Cancel current generation
   Future<void> cancelGeneration() async {
     _isCancelling = true;
+    _ref.read(toolRuntimeProvider.notifier).cancelGeneration();
     final pipelineCancellation = _generationPipeline.cancelActiveSessions();
     // Abort the HTTP request so server-side generation actually stops
     _llmService.cancelActiveRequest();
