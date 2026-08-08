@@ -20,10 +20,7 @@ import 'package:url_launcher/url_launcher.dart';
 class Live2DSettingsScreen extends ConsumerWidget {
   final String characterId;
 
-  const Live2DSettingsScreen({
-    super.key,
-    required this.characterId,
-  });
+  const Live2DSettingsScreen({super.key, required this.characterId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,10 +53,7 @@ class Live2DSettingsScreen extends ConsumerWidget {
 class _Live2DSettingsEditor extends ConsumerStatefulWidget {
   final Character character;
 
-  const _Live2DSettingsEditor({
-    super.key,
-    required this.character,
-  });
+  const _Live2DSettingsEditor({super.key, required this.character});
 
   @override
   ConsumerState<_Live2DSettingsEditor> createState() =>
@@ -68,13 +62,20 @@ class _Live2DSettingsEditor extends ConsumerStatefulWidget {
 
 class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
   static const _noneModel = '__none__';
+  static const _unavailableModelMessage =
+      'The assigned Live2D model is unavailable. Choose another model or '
+      'import it again.';
+  static const _selectionExpiredMessage =
+      'That Live2D model is no longer available. Choose another model or '
+      'import it again.';
   late final Live2DService _service;
   late final Live2DImportService _importService;
   final Live2DCharacterController _previewController =
       Live2DCharacterController();
 
-  List<Live2DModelDefinition> _availableModels =
-      List.of(Live2DService.bundledModels);
+  List<Live2DModelDefinition> _availableModels = List.of(
+    Live2DService.bundledModels,
+  );
   Live2DConfig? _config;
   Live2DModelManifest? _manifest;
   Live2DMotionRef? _selectedMotion;
@@ -83,6 +84,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
   bool _isDeleting = false;
   bool _isSaving = false;
   String? _error;
+  int _modelLoadGeneration = 0;
 
   @override
   void initState() {
@@ -90,60 +92,71 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     _service = ref.read(live2DServiceProvider);
     _importService = ref.read(live2DImportServiceProvider);
     _config = widget.character.assets?.live2d;
+    _isLoadingModel = true;
     _loadImportedModels();
-    if (_config != null) _loadCurrentManifest();
   }
 
   Future<void> _loadImportedModels() async {
+    List<Live2DModelDefinition> imported;
     try {
-      final imported = await _importService.listImportedModels();
+      imported = await _importService.listImportedModels();
+    } catch (error) {
       if (!mounted) return;
       setState(() {
-        _availableModels = [
-          ...Live2DService.bundledModels,
-          ...imported,
-        ];
+        _isLoadingModel = false;
+        _error = error.toString();
       });
-    } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
+      return;
     }
-  }
-
-  Live2DModelDefinition? _definitionForConfig(Live2DConfig config) {
-    for (final definition in Live2DService.bundledModels) {
-      if (definition.id == config.modelId) return definition;
-    }
-    if (config.modelDirectory.isEmpty || config.modelFileName.isEmpty) {
-      return null;
-    }
-    return Live2DModelDefinition(
-      id: config.modelId,
-      displayName: config.displayName,
-      modelDirectory: config.modelDirectory,
-      modelFileName: config.modelFileName,
-      source: config.source,
-    );
-  }
-
-  Future<void> _loadCurrentManifest() async {
+    if (!mounted) return;
+    final models = [...Live2DService.bundledModels, ...imported];
+    setState(() => _availableModels = models);
     final config = _config;
-    if (config == null) return;
-    final definition = _definitionForConfig(config);
-    if (definition == null) return;
+    if (config == null) {
+      setState(() => _isLoadingModel = false);
+      return;
+    }
+    final definition = Live2DService.resolveDefinitionForConfig(config, models);
+    if (definition == null) {
+      _modelLoadGeneration++;
+      setState(() {
+        _isLoadingModel = false;
+        _manifest = null;
+        _selectedMotion = null;
+        _error = _unavailableModelMessage;
+      });
+      return;
+    }
     await _loadManifest(definition, replaceConfig: false);
   }
 
   Future<void> _selectModel(String id) async {
     if (id == _noneModel) {
+      _modelLoadGeneration++;
       setState(() {
         _config = null;
         _manifest = null;
         _selectedMotion = null;
+        _isLoadingModel = false;
         _error = null;
       });
       return;
     }
-    final definition = _availableModels.firstWhere((model) => model.id == id);
+    Live2DModelDefinition? definition;
+    for (final model in _availableModels) {
+      if (model.id == id) {
+        definition = model;
+        break;
+      }
+    }
+    if (definition == null) {
+      _modelLoadGeneration++;
+      setState(() {
+        _isLoadingModel = false;
+        _error = _selectionExpiredMessage;
+      });
+      return;
+    }
     await _loadManifest(definition, replaceConfig: true);
   }
 
@@ -165,10 +178,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       final allImported = await _importService.listImportedModels();
       if (!mounted) return;
       setState(() {
-        _availableModels = [
-          ...Live2DService.bundledModels,
-          ...allImported,
-        ];
+        _availableModels = [...Live2DService.bundledModels, ...allImported];
       });
       if (imported.isNotEmpty) {
         await _loadManifest(imported.first, replaceConfig: true);
@@ -191,9 +201,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     }
   }
 
-  Future<void> _deleteImportedModel(
-    Live2DModelDefinition definition,
-  ) async {
+  Future<void> _deleteImportedModel(Live2DModelDefinition definition) async {
     if (_isDeleting) return;
     final lifecycle = ref.read(live2DModelLifecycleServiceProvider);
     try {
@@ -207,9 +215,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       });
 
       final confirmation = lifecycle.confirmDeletion(plan);
-      final result = await lifecycle.deleteImportedModel(
-        confirmation,
-      );
+      final result = await lifecycle.deleteImportedModel(confirmation);
       if (!mounted) return;
       final deletedModels = result.plan.packageModels;
       final currentConfig = _config;
@@ -218,14 +224,14 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       final imported = await _importService.listImportedModels();
       if (!mounted) return;
       setState(() {
-        _availableModels = [
-          ...Live2DService.bundledModels,
-          ...imported,
-        ];
+        _availableModels = [...Live2DService.bundledModels, ...imported];
         if (clearsCurrent) {
+          _modelLoadGeneration++;
           _config = null;
           _manifest = null;
           _selectedMotion = null;
+          _isLoadingModel = false;
+          _error = null;
         }
       });
 
@@ -234,8 +240,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       }
       await ref.read(characterListProvider.notifier).refresh();
       final activeChat = ref.read(activeChatProvider);
-      final affectedIds =
-          result.plan.affectedCharacters.map((character) => character.id).toSet();
+      final affectedIds = result.plan.affectedCharacters
+          .map((character) => character.id)
+          .toSet();
       if (activeChat.chat != null &&
           affectedIds.contains(activeChat.character?.id)) {
         await ref
@@ -316,6 +323,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     Live2DModelDefinition definition, {
     required bool replaceConfig,
   }) async {
+    final generation = ++_modelLoadGeneration;
     setState(() {
       _isLoadingModel = true;
       _error = null;
@@ -326,12 +334,16 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       if (missing.isNotEmpty) {
         throw FormatException('Missing model file: ${missing.first}');
       }
-      if (!mounted) return;
+      if (!mounted || generation != _modelLoadGeneration) return;
       final previous = _config;
       final discovered = Live2DConfig.fromDefinition(definition, manifest);
       var config = replaceConfig
           ? discovered
-          : previous!.withActionDefaults(discovered);
+          : Live2DService.rebindConfigToDefinition(
+              previous!,
+              definition,
+              manifest,
+            );
       if (replaceConfig && previous != null) {
         config = config.copyWith(
           enabled: previous.enabled,
@@ -346,11 +358,22 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         _config = config;
         _manifest = manifest;
         _selectedMotion = manifest.motions.firstOrNull;
+        _error = null;
       });
     } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
+      if (mounted && generation == _modelLoadGeneration) {
+        setState(() {
+          if (!replaceConfig) {
+            _manifest = null;
+            _selectedMotion = null;
+          }
+          _error = error.toString();
+        });
+      }
     } finally {
-      if (mounted) setState(() => _isLoadingModel = false);
+      if (mounted && generation == _modelLoadGeneration) {
+        setState(() => _isLoadingModel = false);
+      }
     }
   }
 
@@ -384,9 +407,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -434,7 +457,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     final config = _config;
     final selectedModelId = config == null ? _noneModel : config.modelId;
     final availableIds = _availableModels.map((m) => m.id).toSet();
-    final hasCustomModel =
+    final hasUnavailableModel =
         config != null && !availableIds.contains(config.modelId);
     final importedModels = _availableModels
         .where((model) => model.source == Live2DModelSource.appData)
@@ -478,20 +501,23 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: DropdownButtonFormField<String>(
+              key: const Key('live2d-model-selector'),
               initialValue: selectedModelId,
+              isExpanded: true,
+              menuMaxHeight: math.min(
+                MediaQuery.sizeOf(context).height * 0.6,
+                480,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Model',
                 border: OutlineInputBorder(),
               ),
               items: [
-                DropdownMenuItem(
-                  value: _noneModel,
-                  child: Text(l10n.none),
-                ),
-                if (hasCustomModel)
+                DropdownMenuItem(value: _noneModel, child: Text(l10n.none)),
+                if (hasUnavailableModel)
                   DropdownMenuItem(
                     value: config.modelId,
-                    child: Text(config.displayName),
+                    child: Text('${config.displayName} (Unavailable)'),
                   ),
                 ..._availableModels.map(
                   (model) => DropdownMenuItem(
@@ -500,6 +526,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                       model.source == Live2DModelSource.asset
                           ? model.displayName
                           : '${model.displayName} (Imported)',
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -528,28 +555,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
               ),
             ),
           ),
-          if (importedModels.isNotEmpty) ...[
-            const Divider(),
-            ...importedModels.map(
-              (model) => ListTile(
-                leading: const Icon(Icons.view_in_ar),
-                title: Text(model.displayName),
-                subtitle: Text(
-                  model.modelFileName,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Delete imported model',
-                  onPressed: _isDeleting || _isImporting
-                      ? null
-                      : () => _deleteImportedModel(model),
-                ),
-              ),
-            ),
-          ],
           if (_error != null)
             Padding(
+              key: const Key('live2d-model-error'),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 _error!,
@@ -561,7 +569,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
               padding: EdgeInsets.all(24),
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (config != null) ...[
+          else if (config != null && _manifest != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
@@ -569,9 +577,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: AppTheme.darkCard,
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor,
-                  ),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Live2DCharacterView(
@@ -642,9 +648,8 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                   value: config.opacity,
                   min: 0.3,
                   max: 1,
-                  onChanged: (value) => setState(
-                    () => _config = config.copyWith(opacity: value),
-                  ),
+                  onChanged: (value) =>
+                      setState(() => _config = config.copyWith(opacity: value)),
                 ),
                 _SliderTile(
                   label: 'Motion speed',
@@ -656,6 +661,39 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                   ),
                 ),
               ],
+            ),
+          ],
+          if (importedModels.isNotEmpty) ...[
+            const Divider(height: 32),
+            ExpansionTile(
+              key: const PageStorageKey('live2d-imported-models'),
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: const Text('Imported models'),
+              subtitle: Text(
+                importedModels.length == 1
+                    ? '1 model'
+                    : '${importedModels.length} models',
+              ),
+              initiallyExpanded: false,
+              children: importedModels
+                  .map(
+                    (model) => ListTile(
+                      leading: const Icon(Icons.view_in_ar),
+                      title: Text(model.displayName),
+                      subtitle: Text(
+                        model.modelFileName,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        tooltip: 'Delete imported model',
+                        onPressed: _isDeleting || _isImporting
+                            ? null
+                            : () => _deleteImportedModel(model),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ],

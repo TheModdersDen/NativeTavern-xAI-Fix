@@ -40,7 +40,7 @@ void main() {
     }
 
     test('bundled model identifiers and paths are unique', () {
-      final models = Live2DService.bundledModels;
+      const models = Live2DService.bundledModels;
       expect(models.map((model) => model.id).toSet(), hasLength(models.length));
       expect(
         models.map((model) => model.modelDirectory).toSet(),
@@ -80,6 +80,112 @@ void main() {
     expect(restored.headTapMotion?.index, 3);
     expect(restored.emotionMotions['happy']?.file, motion.file);
     expect(restored.hitAreas.single.kind, Live2DHitAreaKind.head);
+  });
+
+  test('legacy asset assignment resolves to a uniquely reimported model', () {
+    const config = Live2DConfig(
+      modelId: 'zhaohe_3',
+      displayName: 'Zhaohe 3',
+      modelDirectory: 'assets/live2d/zhaohe_3.zip/',
+      modelFileName: 'zhaohe_3.model3.json',
+    );
+    const imported = Live2DModelDefinition(
+      id: 'imported:new-id:0',
+      displayName: 'Zhaohe 3',
+      modelDirectory: 'live2d_models/zhaohe-new',
+      modelFileName: 'zhaohe_3.model3.json',
+      source: Live2DModelSource.appData,
+    );
+
+    final resolved = Live2DService.resolveDefinitionForConfig(
+      config,
+      const [imported],
+    );
+
+    expect(resolved, same(imported));
+  });
+
+  test('unknown asset assignment is not treated as a loadable asset', () {
+    const config = Live2DConfig(
+      modelId: 'removed',
+      displayName: 'Removed model',
+      modelDirectory: 'assets/live2d/removed/',
+      modelFileName: 'removed.model3.json',
+    );
+
+    final resolved = Live2DService.resolveDefinitionForConfig(
+      config,
+      Live2DService.bundledModels,
+    );
+
+    expect(resolved, isNull);
+  });
+
+  test('legacy assignment does not bind a different model with the same file',
+      () {
+    const config = Live2DConfig(
+      modelId: 'legacy-model',
+      displayName: 'Expected model',
+      modelDirectory: 'assets/live2d/legacy/',
+      modelFileName: 'model.model3.json',
+    );
+    const unrelated = Live2DModelDefinition(
+      id: 'imported:other:0',
+      displayName: 'Different model',
+      modelDirectory: 'live2d_models/other',
+      modelFileName: 'model.model3.json',
+      source: Live2DModelSource.appData,
+    );
+
+    final resolved = Live2DService.resolveDefinitionForConfig(
+      config,
+      const [unrelated],
+    );
+
+    expect(resolved, isNull);
+  });
+
+  test('rebinding corrects source identity and preserves stage choices', () {
+    const idle = Live2DMotionRef(
+      group: 'Idle',
+      index: 0,
+      file: 'idle.motion3.json',
+      name: 'idle',
+    );
+    const config = Live2DConfig(
+      modelId: 'legacy-id',
+      displayName: 'Legacy',
+      modelDirectory: 'assets/live2d/legacy.zip/',
+      modelFileName: 'model.model3.json',
+      scale: 1.8,
+      offsetY: -0.4,
+      idleMotion: idle,
+    );
+    const imported = Live2DModelDefinition(
+      id: 'imported:new-id:0',
+      displayName: 'Recovered',
+      modelDirectory: 'live2d_models/recovered',
+      modelFileName: 'model.model3.json',
+      source: Live2DModelSource.appData,
+    );
+    const manifest = Live2DModelManifest(
+      version: 3,
+      mocFile: 'model.moc3',
+      textures: ['texture.png'],
+    );
+
+    final rebound = Live2DService.rebindConfigToDefinition(
+      config,
+      imported,
+      manifest,
+    );
+
+    expect(rebound.modelId, imported.id);
+    expect(rebound.modelDirectory, imported.modelDirectory);
+    expect(rebound.source, Live2DModelSource.appData);
+    expect(rebound.scale, 1.8);
+    expect(rebound.offsetY, -0.4);
+    expect(rebound.idleMotion, same(idle));
   });
 
   testWidgets('unsupported platforms use the supplied fallback',

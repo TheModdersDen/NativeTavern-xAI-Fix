@@ -22,6 +22,79 @@ class Live2DService {
     ),
   ];
 
+  /// Resolves persisted assignments against the current model catalog.
+  ///
+  /// Imported model IDs change when the same ZIP is imported again, so a
+  /// unique model-file match provides a recovery path for legacy assignments.
+  /// Unknown asset assignments are not returned because Flutter cannot load
+  /// assets that are no longer declared by the application bundle.
+  static Live2DModelDefinition? resolveDefinitionForConfig(
+    Live2DConfig config,
+    Iterable<Live2DModelDefinition> availableModels,
+  ) {
+    final models = availableModels.toList();
+    for (final model in models) {
+      if (model.id == config.modelId) return model;
+    }
+
+    for (final model in models) {
+      if (p.equals(
+            p.normalize(model.modelDirectory),
+            p.normalize(config.modelDirectory),
+          ) &&
+          model.modelFileName == config.modelFileName) {
+        return model;
+      }
+    }
+
+    final fileMatches = models
+        .where(
+          (model) =>
+              model.modelFileName.toLowerCase() ==
+              config.modelFileName.toLowerCase(),
+        )
+        .toList();
+    if (fileMatches.length == 1 &&
+        (config.displayName.trim().isEmpty ||
+            _identityKey(fileMatches.single.displayName) ==
+                _identityKey(config.displayName))) {
+      return fileMatches.single;
+    }
+
+    if (config.source == Live2DModelSource.asset ||
+        config.modelDirectory.isEmpty ||
+        config.modelFileName.isEmpty) {
+      return null;
+    }
+    return Live2DModelDefinition(
+      id: config.modelId,
+      displayName: config.displayName,
+      modelDirectory: config.modelDirectory,
+      modelFileName: config.modelFileName,
+      source: config.source,
+    );
+  }
+
+  static String _identityKey(String value) =>
+      value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+
+  /// Updates storage identity while retaining character-specific staging and
+  /// motion choices from an existing assignment.
+  static Live2DConfig rebindConfigToDefinition(
+    Live2DConfig config,
+    Live2DModelDefinition definition,
+    Live2DModelManifest manifest,
+  ) {
+    final discovered = Live2DConfig.fromDefinition(definition, manifest);
+    return config.withActionDefaults(discovered).copyWith(
+          modelId: definition.id,
+          displayName: definition.displayName,
+          modelDirectory: definition.modelDirectory,
+          modelFileName: definition.modelFileName,
+          source: definition.source,
+        );
+  }
+
   Future<Live2DModelManifest> loadManifest(
     Live2DModelDefinition definition,
   ) async {
@@ -50,12 +123,14 @@ class Live2DService {
       for (var index = 0; index < items.length; index++) {
         final item = items[index] as Map<String, dynamic>? ?? const {};
         final file = item['File'] as String? ?? '';
-        motions.add(Live2DMotionRef(
-          group: entry.key,
-          index: index,
-          file: file,
-          name: _motionName(file, entry.key, index),
-        ));
+        motions.add(
+          Live2DMotionRef(
+            group: entry.key,
+            index: index,
+            file: file,
+            name: _motionName(file, entry.key, index),
+          ),
+        );
       }
     }
 
