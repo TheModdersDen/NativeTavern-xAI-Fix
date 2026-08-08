@@ -741,7 +741,11 @@ class ImageGenerationService {
 
   /// Extract images from arbitrary response data (text containing URLs, base64, etc.)
   /// This is used as a fallback when the response doesn't contain images in standard format
-  Future<List<Uint8List>> _extractImagesFromResponse(dynamic responseData, {String debugPrefix = ''}) async {
+  Future<List<Uint8List>> _extractImagesFromResponse(
+    dynamic responseData, {
+    String debugPrefix = '',
+    CancelToken? cancelToken,
+  }) async {
     final images = <Uint8List>[];
     
     // Convert response to string for URL extraction
@@ -788,7 +792,7 @@ class ImageGenerationService {
     if (textContent.isNotEmpty) {
       final urls = extractImageUrls(textContent);
       for (final url in urls) {
-        debugPrint('$debugPrefix Found URL: $url');
+        debugPrint('$debugPrefix Found image URL');
         try {
           if (url.startsWith('data:image')) {
             // Base64 data URL
@@ -796,13 +800,13 @@ class ImageGenerationService {
             images.add(base64Decode(base64Data));
           } else {
             // Regular URL - download it
-            final imgData = await downloadImage(url);
+            final imgData = await downloadImage(url, cancelToken: cancelToken);
             if (imgData != null) {
               images.add(imgData);
             }
           }
-        } catch (e) {
-          debugPrint('$debugPrefix Failed to process URL $url: $e');
+        } catch (_) {
+          debugPrint('$debugPrefix Failed to process image URL');
         }
       }
     }
@@ -811,44 +815,58 @@ class ImageGenerationService {
   }
 
   /// Generate images based on current provider
-  Future<ImageGenResult?> generate(ImageGenRequest request) async {
+  Future<ImageGenResult?> generate(
+    ImageGenRequest request, {
+    CancelToken? cancelToken,
+  }) async {
     if (!_settings.enabled) return null;
 
     final model = request.model ?? _settings.model;
     
     try {
       debugPrint('Image Generation [${_settings.provider.displayName}]');
-      debugPrint('  Model: $model');
-      debugPrint('  Prompt: "${request.prompt}"');
+      debugPrint('  Model configured: ${model.isNotEmpty}');
+      debugPrint('  Prompt length: ${request.prompt.length}');
       debugPrint('  Size: ${request.width}x${request.height}');
-      debugPrint('  Endpoint: ${_settings.effectiveEndpoint}');
+      debugPrint('  Endpoint provider: ${_settings.provider.id}');
 
       switch (_settings.provider) {
         case ImageGenProvider.openai:
-          return await _generateOpenAI(request, model);
+          return await _generateOpenAI(request, model, cancelToken: cancelToken);
         case ImageGenProvider.openaiChat:
-          return await _generateOpenAIChat(request, model);
+          return await _generateOpenAIChat(
+            request,
+            model,
+            cancelToken: cancelToken,
+          );
         case ImageGenProvider.gemini:
-          return await _generateGemini(request, model);
+          return await _generateGemini(request, model, cancelToken: cancelToken);
         case ImageGenProvider.novelai:
-          return await _generateNovelAI(request, model);
+          return await _generateNovelAI(request, model, cancelToken: cancelToken);
         case ImageGenProvider.pollinations:
-          return await _generatePollinations(request, model);
+          return await _generatePollinations(
+            request,
+            model,
+            cancelToken: cancelToken,
+          );
         case ImageGenProvider.automatic1111:
-          return await _generateAutomatic1111(request);
+          return await _generateAutomatic1111(request, cancelToken: cancelToken);
         case ImageGenProvider.comfyui:
-          return await _generateComfyUI(request);
+          return await _generateComfyUI(request, cancelToken: cancelToken);
       }
-    } catch (e, stack) {
-      debugPrint('Image generation error: $e\n$stack');
-      onError?.call('Image generation error: $e');
+    } catch (error) {
+      debugPrint('Image generation error: ${error.runtimeType}');
+      onError?.call('Image generation failed');
       return null;
     }
   }
 
   /// Generate image using Pollinations (free, no API key)
   Future<ImageGenResult?> _generatePollinations(
-      ImageGenRequest request, String model) async {
+    ImageGenRequest request,
+    String model, {
+    CancelToken? cancelToken,
+  }) async {
     onProgress?.call(0.1);
 
     final requestSeed = request.seed;
@@ -866,6 +884,7 @@ class ImageGenerationService {
 
     final response = await _dio.get<List<int>>(
       url,
+      cancelToken: cancelToken,
       options: Options(
         responseType: ResponseType.bytes,
         receiveTimeout: const Duration(minutes: 3),
@@ -887,7 +906,11 @@ class ImageGenerationService {
   }
 
   /// Generate image using OpenAI (DALL-E 2/3 or GPT-Image-1)
-  Future<ImageGenResult?> _generateOpenAI(ImageGenRequest request, String model) async {
+  Future<ImageGenResult?> _generateOpenAI(
+    ImageGenRequest request,
+    String model, {
+    CancelToken? cancelToken,
+  }) async {
     final apiKey = _settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('OpenAI API key is required');
@@ -927,6 +950,7 @@ class ImageGenerationService {
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.post<Map<String, dynamic>>(
       '$endpoint/images/generations',
+      cancelToken: cancelToken,
       options: Options(headers: {
         'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
@@ -948,7 +972,10 @@ class ImageGenerationService {
         images.add(base64Decode(item['b64_json'] as String));
       } else if (item['url'] != null) {
         // Some responses return URL instead of base64
-        final imgData = await downloadImage(item['url'] as String);
+        final imgData = await downloadImage(
+          item['url'] as String,
+          cancelToken: cancelToken,
+        );
         if (imgData != null) {
           images.add(imgData);
         }
@@ -958,7 +985,11 @@ class ImageGenerationService {
     // Fallback: try to extract images from the raw response
     if (images.isEmpty) {
       debugPrint('OpenAI: No images in standard format, trying fallback extraction...');
-      final fallbackImages = await _extractImagesFromResponse(data, debugPrefix: 'OpenAI: ');
+      final fallbackImages = await _extractImagesFromResponse(
+        data,
+        debugPrefix: 'OpenAI: ',
+        cancelToken: cancelToken,
+      );
       images.addAll(fallbackImages);
     }
 
@@ -975,7 +1006,11 @@ class ImageGenerationService {
 
   /// Generate image using OpenAI Chat API (chat/completions)
   /// This is for APIs that use chat format for image generation (like some compatible APIs)
-  Future<ImageGenResult?> _generateOpenAIChat(ImageGenRequest request, String model) async {
+  Future<ImageGenResult?> _generateOpenAIChat(
+    ImageGenRequest request,
+    String model, {
+    CancelToken? cancelToken,
+  }) async {
     final apiKey = _settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('API key is required');
@@ -999,13 +1034,14 @@ class ImageGenerationService {
 
     debugPrint('OpenAI-Chat: Sending request to chat/completions');
     debugPrint('OpenAI-Chat: Model: $model');
-    debugPrint('OpenAI-Chat: Prompt: $prompt');
+    debugPrint('OpenAI-Chat: Prompt length: ${prompt.length}');
 
     onProgress?.call(0.3);
 
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.post<Map<String, dynamic>>(
       '$endpoint/chat/completions',
+      cancelToken: cancelToken,
       options: Options(headers: {
         'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
@@ -1048,8 +1084,11 @@ class ImageGenerationService {
                 final url = imageData['url'];
                 if (url != null && url is String) {
                   // Download the image from URL
-                  debugPrint('OpenAI-Chat: Downloading image from URL: $url');
-                  final imgData = await downloadImage(url);
+                  debugPrint('OpenAI-Chat: Downloading image from URL');
+                  final imgData = await downloadImage(
+                    url,
+                    cancelToken: cancelToken,
+                  );
                   if (imgData != null) {
                     images.add(imgData);
                   }
@@ -1064,14 +1103,17 @@ class ImageGenerationService {
         // Try to extract image URLs from the text response
         final urls = extractImageUrls(content);
         for (final url in urls) {
-          debugPrint('OpenAI-Chat: Found URL in response: $url');
+          debugPrint('OpenAI-Chat: Found image URL in response');
           if (url.startsWith('data:image')) {
             // Base64 data URL
             final base64Data = url.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
             images.add(base64Decode(base64Data));
           } else {
             // Regular URL - download it
-            final imgData = await downloadImage(url);
+            final imgData = await downloadImage(
+              url,
+              cancelToken: cancelToken,
+            );
             if (imgData != null) {
               images.add(imgData);
             }
@@ -1084,7 +1126,7 @@ class ImageGenerationService {
 
     if (images.isEmpty) {
       debugPrint('OpenAI-Chat: No images found in response');
-      debugPrint('OpenAI-Chat: Response data: $data');
+      debugPrint('OpenAI-Chat: Response contained no usable image data');
       throw Exception('No images generated - response did not contain image data');
     }
 
@@ -1100,7 +1142,11 @@ class ImageGenerationService {
   }
 
   /// Generate image using Gemini (Imagen / Nano-Banana models)
-  Future<ImageGenResult?> _generateGemini(ImageGenRequest request, String model) async {
+  Future<ImageGenResult?> _generateGemini(
+    ImageGenRequest request,
+    String model, {
+    CancelToken? cancelToken,
+  }) async {
     final apiKey = _settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('Gemini API key is required');
@@ -1148,6 +1194,7 @@ class ImageGenerationService {
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.post<Map<String, dynamic>>(
       '$endpoint/models/$model:generateContent?key=$apiKey',
+      cancelToken: cancelToken,
       options: Options(headers: {
         'Content-Type': 'application/json',
       }),
@@ -1180,7 +1227,11 @@ class ImageGenerationService {
           }
           // Also check for text content that may contain image URLs
           if (part['text'] != null && images.isEmpty) {
-            final textImages = await _extractImagesFromResponse(part['text'], debugPrefix: 'Gemini: ');
+            final textImages = await _extractImagesFromResponse(
+              part['text'],
+              debugPrefix: 'Gemini: ',
+              cancelToken: cancelToken,
+            );
             images.addAll(textImages);
           }
         }
@@ -1190,7 +1241,11 @@ class ImageGenerationService {
     // Fallback: try to extract images from the raw response
     if (images.isEmpty) {
       debugPrint('Gemini: No images in standard format, trying fallback extraction...');
-      final fallbackImages = await _extractImagesFromResponse(data, debugPrefix: 'Gemini: ');
+      final fallbackImages = await _extractImagesFromResponse(
+        data,
+        debugPrefix: 'Gemini: ',
+        cancelToken: cancelToken,
+      );
       images.addAll(fallbackImages);
     }
 
@@ -1210,7 +1265,11 @@ class ImageGenerationService {
   }
 
   /// Generate image using NovelAI
-  Future<ImageGenResult?> _generateNovelAI(ImageGenRequest request, String model) async {
+  Future<ImageGenResult?> _generateNovelAI(
+    ImageGenRequest request,
+    String model, {
+    CancelToken? cancelToken,
+  }) async {
     final apiKey = _settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('NovelAI API key is required');
@@ -1311,15 +1370,16 @@ class ImageGenerationService {
 
     onProgress?.call(0.2);
     
-    // Debug: print the request body
-    debugPrint('NovelAI: Request body:');
-    debugPrint(const JsonEncoder.withIndent('  ').convert(requestBody));
+    debugPrint(
+      'NovelAI: Request prepared (${request.prompt.length} prompt characters)',
+    );
 
     final endpoint = _settings.effectiveEndpoint;
     
     try {
       final response = await _dio.post<List<int>>(
         '$endpoint/ai/generate-image',
+        cancelToken: cancelToken,
         options: Options(
           headers: {
             'Authorization': 'Bearer $apiKey',
@@ -1338,7 +1398,6 @@ class ImageGenerationService {
         String errorMsg = 'NovelAI error: ${response.statusCode}';
         try {
           final errorBody = utf8.decode(response.data as List<int>);
-          debugPrint('NovelAI: Error response: $errorBody');
           errorMsg = 'NovelAI error: ${response.statusCode} - $errorBody';
         } catch (_) {
           debugPrint('NovelAI: Could not decode error body');
@@ -1374,7 +1433,6 @@ class ImageGenerationService {
       if (e is DioException && e.response != null) {
         try {
           final errorBody = utf8.decode(e.response!.data as List<int>);
-          debugPrint('NovelAI: DioException response: $errorBody');
           throw Exception('NovelAI error: ${e.response!.statusCode} - $errorBody');
         } catch (_) {}
       }
@@ -1399,7 +1457,10 @@ class ImageGenerationService {
   }
 
   /// Generate image using Automatic1111 WebUI
-  Future<ImageGenResult?> _generateAutomatic1111(ImageGenRequest request) async {
+  Future<ImageGenResult?> _generateAutomatic1111(
+    ImageGenRequest request, {
+    CancelToken? cancelToken,
+  }) async {
     onProgress?.call(0.1);
 
     final requestBody = {
@@ -1419,6 +1480,7 @@ class ImageGenerationService {
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.post<Map<String, dynamic>>(
       '$endpoint/sdapi/v1/txt2img',
+      cancelToken: cancelToken,
       options: Options(headers: {
         'Content-Type': 'application/json',
       }),
@@ -1453,7 +1515,10 @@ class ImageGenerationService {
   }
 
   /// Generate image using ComfyUI (placeholder)
-  Future<ImageGenResult?> _generateComfyUI(ImageGenRequest request) async {
+  Future<ImageGenResult?> _generateComfyUI(
+    ImageGenRequest request, {
+    CancelToken? cancelToken,
+  }) async {
     // ComfyUI requires workflow-based generation
     throw UnimplementedError('ComfyUI generation requires workflow configuration');
   }
@@ -1489,7 +1554,10 @@ class ImageGenerationService {
   }
 
   /// Download image from URL
-  Future<Uint8List?> downloadImage(String url) async {
+  Future<Uint8List?> downloadImage(
+    String url, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       if (url.startsWith('data:image')) {
         // Handle base64 data URL
@@ -1499,13 +1567,14 @@ class ImageGenerationService {
       
       final response = await _dio.get<List<int>>(
         url,
+        cancelToken: cancelToken,
         options: Options(responseType: ResponseType.bytes),
       );
       if (response.statusCode == 200) {
         return Uint8List.fromList(response.data as List<int>);
       }
-    } catch (e) {
-      debugPrint('Failed to download image: $e');
+    } catch (_) {
+      debugPrint('Failed to download image');
     }
     return null;
   }
