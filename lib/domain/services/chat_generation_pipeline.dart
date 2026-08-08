@@ -37,6 +37,7 @@ enum ContextContributionStatus {
 
 enum GenerationMiddlewarePhase {
   before,
+  transform,
   after,
   error,
   cancelled,
@@ -289,6 +290,19 @@ abstract class ChatGenerationMiddleware {
       null;
 
   FutureOr<void> onCancelled(ChatGenerationRequest request) {}
+}
+
+/// Optional middleware capability for consumers that need to validate or
+/// replace a complete model response before chat persistence.
+///
+/// Streaming is buffered whenever an enabled middleware implements this
+/// interface, preventing structured control payloads from being exposed as
+/// partial assistant text before they have been validated.
+abstract interface class ChatGenerationResponseTransformer {
+  FutureOr<LLMResponse> transformResponse(
+    ChatGenerationRequest request,
+    LLMResponse response,
+  );
 }
 
 class GenerationMiddlewareTrace {
@@ -796,6 +810,15 @@ class ChatGenerationSession {
       }
     }
 
+    if (terminalError == null && !cancellationToken.isCancelled) {
+      response = await _runTransforms(
+        active.middlewares,
+        request,
+        response,
+        middlewareTraces,
+      );
+    }
+
     final outcome = ChatGenerationOutcome(
       response: response,
       streaming: false,
@@ -840,6 +863,8 @@ class ChatGenerationSession {
     _lastGenerationRequest = request;
     final content = StringBuffer();
     final reasoning = StringBuffer();
+    final buffersResponse = active.middlewares
+        .any((middleware) => middleware is ChatGenerationResponseTransformer);
     var recovered = false;
     Object? terminalError;
     StackTrace? terminalStackTrace;
@@ -850,7 +875,7 @@ class ChatGenerationSession {
           if (cancellationToken.isCancelled) break;
           if (chunk.content != null) content.write(chunk.content);
           if (chunk.reasoning != null) reasoning.write(chunk.reasoning);
-          yield chunk;
+          if (!buffersResponse) yield chunk;
         }
       }
     } catch (error, stackTrace) {
@@ -866,14 +891,18 @@ class ChatGenerationSession {
           recovered = true;
           if (recovery.reasoning?.isNotEmpty == true) {
             reasoning.write(recovery.reasoning);
-            yield LLMStreamChunk(
-              reasoning: recovery.reasoning,
-              isReasoningChunk: true,
-            );
+            if (!buffersResponse) {
+              yield LLMStreamChunk(
+                reasoning: recovery.reasoning,
+                isReasoningChunk: true,
+              );
+            }
           }
           if (recovery.content.isNotEmpty) {
             content.write(recovery.content);
-            yield LLMStreamChunk(content: recovery.content);
+            if (!buffersResponse) {
+              yield LLMStreamChunk(content: recovery.content);
+            }
           }
         } else {
           terminalError = error;
@@ -882,10 +911,18 @@ class ChatGenerationSession {
       }
     }
 
-    final response = LLMResponse(
+    var response = LLMResponse(
       content: content.toString(),
       reasoning: reasoning.isEmpty ? null : reasoning.toString(),
     );
+    if (terminalError == null && !cancellationToken.isCancelled) {
+      response = await _runTransforms(
+        active.middlewares,
+        request,
+        response,
+        middlewareTraces,
+      );
+    }
     final outcome = ChatGenerationOutcome(
       response: response,
       streaming: true,
@@ -909,10 +946,22 @@ class ChatGenerationSession {
     if (terminalError != null) {
       Error.throwWithStackTrace(terminalError, terminalStackTrace!);
     }
-    if (cancellationToken.isCancelled && content.isEmpty && reasoning.isEmpty) {
+    if (cancellationToken.isCancelled &&
+        (buffersResponse || (content.isEmpty && reasoning.isEmpty))) {
       throw ChatGenerationCancelledException(
         cancellationToken.reason ?? 'Cancelled',
       );
+    }
+    if (buffersResponse) {
+      if (response.reasoning?.isNotEmpty == true) {
+        yield LLMStreamChunk(
+          reasoning: response.reasoning,
+          isReasoningChunk: true,
+        );
+      }
+      if (response.content.isNotEmpty) {
+        yield LLMStreamChunk(content: response.content);
+      }
     }
   }
 
@@ -1041,6 +1090,38 @@ class ChatGenerationSession {
         ));
       }
     }
+  }
+
+  Future<LLMResponse> _runTransforms(
+    List<ChatGenerationMiddleware> middlewares,
+    ChatGenerationRequest request,
+    LLMResponse initialResponse,
+    List<GenerationMiddlewareTrace> traces,
+  ) async {
+    var response = initialResponse;
+    for (final middleware in middlewares.reversed) {
+      if (middleware is! ChatGenerationResponseTransformer) continue;
+      final transformer = middleware as ChatGenerationResponseTransformer;
+      final stopwatch = Stopwatch()..start();
+      try {
+        response = await transformer.transformResponse(request, response);
+        traces.add(GenerationMiddlewareTrace(
+          middlewareId: middleware.id,
+          order: middleware.order,
+          phase: GenerationMiddlewarePhase.transform,
+          elapsed: stopwatch.elapsed,
+        ));
+      } catch (error) {
+        traces.add(GenerationMiddlewareTrace(
+          middlewareId: middleware.id,
+          order: middleware.order,
+          phase: GenerationMiddlewarePhase.transform,
+          elapsed: stopwatch.elapsed,
+          error: error.toString(),
+        ));
+      }
+    }
+    return response;
   }
 
   Future<LLMResponse?> _recover(

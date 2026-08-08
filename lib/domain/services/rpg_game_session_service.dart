@@ -231,6 +231,27 @@ class RpgGameSessionService {
     return List.unmodifiable(session.state.eventHistory);
   }
 
+  Future<List<RpgStateSnapshot>> listSessionSnapshots(String chatId) async {
+    final session = await _requireSession(chatId);
+    final rootId = await _rootSnapshotId(session.snapshot);
+    final scenarioSnapshots = await _repository.listSnapshots(
+      scenarioId: session.scenario.metadata.id,
+    );
+    final snapshots = <RpgStateSnapshot>[];
+    for (final snapshot in scenarioSnapshots) {
+      if (await _rootSnapshotId(snapshot) == rootId) snapshots.add(snapshot);
+    }
+    snapshots.sort((left, right) {
+      final byTime = left.metadata.createdAt.compareTo(
+        right.metadata.createdAt,
+      );
+      return byTime != 0
+          ? byTime
+          : left.metadata.id.compareTo(right.metadata.id);
+    });
+    return List.unmodifiable(snapshots);
+  }
+
   Future<RpgGameSession> _requireSession(String chatId) async {
     final session = await load(chatId);
     if (session == null) {
