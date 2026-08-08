@@ -3942,4 +3942,248 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get chatConnectionAppliedToEmbeddings =>
       'Chat endpoint and API key applied to embeddings';
+
+  @override
+  String get localFeatures => 'Local features';
+
+  @override
+  String get memoryInbox => 'Memory inbox';
+
+  @override
+  String get memoryInboxSubtitle => 'Review and maintain long-term memories';
+
+  @override
+  String get dataBank => 'Data Bank';
+
+  @override
+  String get dataBankSubtitle => 'Import, search, and bind local documents';
+
+  @override
+  String get rpgScenarioEditor => 'RPG scenario editor';
+
+  @override
+  String get rpgScenarioEditorSubtitle =>
+      'Create and validate local scenario packages';
+
+  @override
+  String get capabilityCheck => 'Capability check';
+
+  @override
+  String get capabilityCheckSubtitle =>
+      'Availability, permissions, and configuration';
+
+  @override
+  String get mcpServers => 'MCP servers';
+
+  @override
+  String get mcpServersSubtitle =>
+      'Connections, tools, permissions, and activity';
+
+  @override
+  String get toolCalling => 'Tool calling';
+
+  @override
+  String get toolCallingSubtitle => 'Built-in tools, approvals, and limits';
+
+  @override
+  String get toolCallingAllow => 'Allow tool calling';
+
+  @override
+  String get toolCallingAllowSubtitle =>
+      'Providers may request only the tools enabled below';
+
+  @override
+  String get toolBuiltInTools => 'Built-in tools';
+
+  @override
+  String get toolMcpTools => 'MCP tools';
+
+  @override
+  String get toolMcpPermissionsSubtitle =>
+      'Connected MCP servers use their individual permissions';
+
+  @override
+  String get toolSafetyLimits => 'Safety limits';
+
+  @override
+  String get toolRounds => 'Tool rounds';
+
+  @override
+  String get toolCallsPerResponse => 'Calls per response';
+
+  @override
+  String get toolTimeLimit => 'Time limit';
+
+  @override
+  String get toolTokenBudget => 'Tool token budget';
+
+  @override
+  String get toolSeconds => 'seconds';
+
+  @override
+  String get toolTokens => 'tokens';
+
+  @override
+  String toolDecrease(String control) {
+    return 'Decrease $control';
+  }
+
+  @override
+  String toolIncrease(String control) {
+    return 'Increase $control';
+  }
+
+  @override
+  String get toolActivity => 'Tool activity';
+
+  @override
+  String get toolApprovalRequired => 'Approval required';
+
+  @override
+  String get toolAllowOnce => 'Allow once';
+
+  @override
+  String get toolAlwaysAllow => 'Always allow';
+
+  @override
+  String get toolDeny => 'Deny';
+
+  @override
+  String get toolCancelCall => 'Cancel tool call';
+
+  @override
+  String get toolStatusWaitingApproval => 'Waiting for approval';
+
+  @override
+  String get toolStatusRunning => 'Running';
+
+  @override
+  String get toolStatusSucceeded => 'Succeeded';
+
+  @override
+  String get toolStatusFailed => 'Failed';
+
+  @override
+  String get toolStatusDenied => 'Denied';
+
+  @override
+  String get toolStatusCancelled => 'Cancelled';
+
+  @override
+  String get storageManagement => 'Storage management';
+
+  @override
+  String get storageManagementSubtitle =>
+      'Usage, orphan scanning, and safe cleanup';
+
+  @override
+  String storageUsedOfQuota(String used, String quota) {
+    return '$used used of $quota';
+  }
+
+  @override
+  String get storageQuotaWarning =>
+      'Storage usage is above the warning threshold';
+
+  @override
+  String get storageWithinQuota =>
+      'Storage usage is within the warning threshold';
+
+  @override
+  String storageScanIncomplete(int count) {
+    return '$count path(s) could not be inspected';
+  }
+
+  @override
+  String get storageCategoryLive2d => 'Live2D models';
+
+  @override
+  String get storageCategoryAttachments => 'Attachments and media';
+
+  @override
+  String get storageCategoryDataBank => 'Data Bank documents';
+
+  @override
+  String get storageCategoryAudio => 'Audio';
+
+  @override
+  String get storageCategoryCache => 'Cache';
+
+  @override
+  String storageFilesCount(int count) {
+    return '$count file(s)';
+  }
+
+  @override
+  String storageReclaimable(String size) {
+    return '$size reclaimable';
+  }
+
+  @override
+  String get storageCleanupCandidates => 'Safe cleanup';
+
+  @override
+  String get storageNoCleanupCandidates =>
+      'No unreferenced or expired files found';
+
+  @override
+  String get storageSelectAll => 'Select all';
+
+  @override
+  String get storageClearSelection => 'Clear selection';
+
+  @override
+  String get storageUndo => 'Undo';
+
+  @override
+  String get storageCleanSelected => 'Clean selected';
+
+  @override
+  String get storageCleanupReviewTitle => 'Review cleanup';
+
+  @override
+  String storageCleanupReviewBody(int items, int files, String size) {
+    return 'Move $items item(s), containing $files file(s) and using $size, to recoverable trash?';
+  }
+
+  @override
+  String get storageCleanupRecoverableHint =>
+      'Referenced files are protected. You can undo until staged files are permanently removed.';
+
+  @override
+  String storageCleanupMoved(int count) {
+    return '$count item(s) moved to recoverable trash';
+  }
+
+  @override
+  String get storageCleanupRestored => 'Cleanup undone';
+
+  @override
+  String get storageCleanupCompleted => 'Cleanup completed';
+
+  @override
+  String storageCleanupFailed(String error) {
+    return 'Cleanup failed: $error';
+  }
+
+  @override
+  String get storageReasonInterruptedTemporary => 'Interrupted temporary data';
+
+  @override
+  String get storageReasonMissingDatabaseReference =>
+      'No database document references this data';
+
+  @override
+  String get storageReasonInterruptedDocumentCleanup =>
+      'Interrupted document cleanup';
+
+  @override
+  String get storageReasonMissingFileReference =>
+      'No database record references this file';
+
+  @override
+  String get storageReasonExpiredTransient => 'Expired transient data';
+
+  @override
+  String get storageReasonExpiredAudio => 'Expired synthesized audio';
 }

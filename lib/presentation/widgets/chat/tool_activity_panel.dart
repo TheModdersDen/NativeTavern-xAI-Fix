@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/models/tool_generation.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/tool_calling_providers.dart';
 
 class ToolActivityPanel extends ConsumerWidget {
@@ -12,6 +13,7 @@ class ToolActivityPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(toolRuntimeProvider);
     if (state.chatId != chatId ||
         (state.activities.isEmpty && state.pendingApproval == null)) {
@@ -35,7 +37,7 @@ class ToolActivityPanel extends ConsumerWidget {
                 const Icon(Icons.build_outlined, size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'Tool activity',
+                  l10n.toolActivity,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ],
@@ -60,6 +62,7 @@ class _ActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = _statusColor(activity.status);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -91,8 +94,8 @@ class _ActivityRow extends StatelessWidget {
                 ),
                 Text(
                   activity.message?.trim().isNotEmpty == true
-                      ? '${_statusLabel(activity.status)}: ${activity.message}'
-                      : _statusLabel(activity.status),
+                      ? '${_statusLabel(l10n, activity.status)}: ${activity.message}'
+                      : _statusLabel(l10n, activity.status),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(
@@ -115,6 +118,7 @@ class _ApprovalPrompt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final preview = approval.preview;
     final encoded = jsonEncode(preview.parameters);
     final parameters =
@@ -125,7 +129,7 @@ class _ApprovalPrompt extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Approval required',
+          l10n.toolApprovalRequired,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
@@ -155,7 +159,7 @@ class _ApprovalPrompt extends ConsumerWidget {
                 ToolApprovalAction.allowOnce,
               ),
               icon: const Icon(Icons.play_arrow, size: 18),
-              label: const Text('Allow once'),
+              label: Text(l10n.toolAllowOnce),
             ),
             if (approval.kind == ToolApprovalKind.mcp)
               OutlinedButton.icon(
@@ -164,7 +168,7 @@ class _ApprovalPrompt extends ConsumerWidget {
                   ToolApprovalAction.alwaysAllow,
                 ),
                 icon: const Icon(Icons.verified_user_outlined, size: 18),
-                label: const Text('Always allow'),
+                label: Text(l10n.toolAlwaysAllow),
               ),
             TextButton.icon(
               key: const Key('tool-deny'),
@@ -172,7 +176,7 @@ class _ApprovalPrompt extends ConsumerWidget {
                 ToolApprovalAction.deny,
               ),
               icon: const Icon(Icons.block, size: 18),
-              label: const Text('Deny'),
+              label: Text(l10n.toolDeny),
             ),
             IconButton(
               key: const Key('tool-cancel'),
@@ -180,7 +184,7 @@ class _ApprovalPrompt extends ConsumerWidget {
                 ToolApprovalAction.cancel,
               ),
               icon: const Icon(Icons.close),
-              tooltip: 'Cancel tool call',
+              tooltip: l10n.toolCancelCall,
             ),
           ],
         ),
@@ -189,13 +193,17 @@ class _ApprovalPrompt extends ConsumerWidget {
   }
 }
 
-String _statusLabel(ToolCallProgressStatus status) => switch (status) {
-      ToolCallProgressStatus.waitingApproval => 'Waiting for approval',
-      ToolCallProgressStatus.running => 'Running',
-      ToolCallProgressStatus.succeeded => 'Succeeded',
-      ToolCallProgressStatus.failed => 'Failed',
-      ToolCallProgressStatus.denied => 'Denied',
-      ToolCallProgressStatus.cancelled => 'Cancelled',
+String _statusLabel(
+  AppLocalizations l10n,
+  ToolCallProgressStatus status,
+) =>
+    switch (status) {
+      ToolCallProgressStatus.waitingApproval => l10n.toolStatusWaitingApproval,
+      ToolCallProgressStatus.running => l10n.toolStatusRunning,
+      ToolCallProgressStatus.succeeded => l10n.toolStatusSucceeded,
+      ToolCallProgressStatus.failed => l10n.toolStatusFailed,
+      ToolCallProgressStatus.denied => l10n.toolStatusDenied,
+      ToolCallProgressStatus.cancelled => l10n.toolStatusCancelled,
     };
 
 IconData _statusIcon(ToolCallProgressStatus status) => switch (status) {
