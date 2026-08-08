@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:native_tavern/data/models/rpg/rpg.dart';
 import 'package:native_tavern/domain/services/rpg_scenario_draft_store.dart';
 import 'package:native_tavern/domain/services/rpg_scenario_package_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/controllers/rpg_scenario_editor_controller.dart';
 
 class RpgScenarioFileData {
@@ -128,30 +129,35 @@ class _RpgScenarioEditorScreenState extends State<RpgScenarioEditorScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_controller.isDirty ? 'RPG Scenario *' : 'RPG Scenario'),
+        title: Text(
+          _controller.isDirty
+              ? '${l10n.rpgScenarioTitle} *'
+              : l10n.rpgScenarioTitle,
+        ),
         actions: [
           IconButton(
             key: const Key('rpg-import'),
-            tooltip: 'Import scenario',
+            tooltip: l10n.rpgImportScenario,
             onPressed: _working ? null : _import,
             icon: const Icon(Icons.file_open_outlined),
           ),
           IconButton(
             key: const Key('rpg-save-draft'),
-            tooltip: 'Save draft',
+            tooltip: l10n.rpgSaveDraft,
             onPressed: _working ? null : _saveDraft,
             icon: const Icon(Icons.save_outlined),
           ),
           IconButton(
             key: const Key('rpg-load-draft'),
-            tooltip: 'Restore draft',
+            tooltip: l10n.rpgRestoreDraft,
             onPressed: _working ? null : _loadDraft,
             icon: const Icon(Icons.history),
           ),
           PopupMenuButton<RpgScenarioPackageFormat>(
-            tooltip: 'Export scenario',
+            tooltip: l10n.rpgExportScenario,
             icon: const Icon(Icons.file_upload_outlined),
             enabled: !_working && _controller.isValid,
             onSelected: _export,
@@ -172,13 +178,13 @@ class _RpgScenarioEditorScreenState extends State<RpgScenarioEditorScreen>
         bottom: TabBar(
           controller: _tabs,
           tabs: [
-            const Tab(key: Key('rpg-tab-edit'), text: 'Edit'),
-            const Tab(key: Key('rpg-tab-preview'), text: 'Preview'),
+            Tab(key: const Key('rpg-tab-edit'), text: l10n.edit),
+            Tab(key: const Key('rpg-tab-preview'), text: l10n.preview),
             Tab(
               key: const Key('rpg-tab-issues'),
               text: _controller.issues.isEmpty
-                  ? 'Issues'
-                  : 'Issues (${_controller.issues.length})',
+                  ? l10n.rpgIssues
+                  : l10n.rpgIssuesCount(_controller.issues.length),
             ),
           ],
         ),
@@ -206,6 +212,7 @@ class _RpgScenarioEditorScreenState extends State<RpgScenarioEditorScreen>
   }
 
   Future<void> _import() async {
+    final l10n = AppLocalizations.of(context);
     await _run(() async {
       final selected = await widget.fileGateway.pickScenario();
       if (selected == null) return;
@@ -215,32 +222,39 @@ class _RpgScenarioEditorScreenState extends State<RpgScenarioEditorScreen>
       );
       if (!result.isValid) {
         _tabs.animateTo(2);
-        _showMessage('Scenario import failed');
+        _showMessage(l10n.rpgScenarioImportFailed);
       } else {
         _tabs.animateTo(0);
-        _showMessage('Imported ${result.scenario!.metadata.name}');
+        _showMessage(
+          l10n.rpgScenarioImported(
+            result.scenario!.metadata.name,
+          ),
+        );
       }
     });
   }
 
   Future<void> _saveDraft() async {
+    final message = AppLocalizations.of(context).rpgDraftSaved;
     await _run(() async {
       await _ensureDraftStore();
       await _controller.saveDraft();
-      _showMessage('Draft saved');
+      _showMessage(message);
     });
   }
 
   Future<void> _loadDraft() async {
+    final l10n = AppLocalizations.of(context);
     await _run(() async {
       await _ensureDraftStore();
       final restored = await _controller.loadDraft();
-      _showMessage(restored ? 'Draft restored' : 'No saved draft');
+      _showMessage(restored ? l10n.rpgDraftRestored : l10n.rpgNoSavedDraft);
       if (restored) _tabs.animateTo(0);
     });
   }
 
   Future<void> _export(RpgScenarioPackageFormat format) async {
+    final message = AppLocalizations.of(context).rpgScenarioExported;
     await _run(() async {
       final scenario = _controller.scenario!;
       final result = await widget.fileGateway.saveScenario(
@@ -248,7 +262,9 @@ class _RpgScenarioEditorScreenState extends State<RpgScenarioEditorScreen>
         content: _controller.export(format: format),
         format: format,
       );
-      if (result != null) _showMessage('Scenario exported');
+      if (result != null) {
+        _showMessage(message);
+      }
     });
   }
 
@@ -286,6 +302,7 @@ class _DocumentEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final entries = controller.document.entries.toList();
     return ListView.separated(
       key: const PageStorageKey('rpg-document-editor'),
@@ -299,7 +316,7 @@ class _DocumentEditor extends StatelessWidget {
           key: ValueKey(path.key),
           controller: controller,
           path: path,
-          label: _labelFor(entry.key),
+          label: _labelFor(l10n, entry.key),
           value: entry.value,
           initiallyExpanded: entry.key == 'metadata',
         );
@@ -328,6 +345,7 @@ class _NodeEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (value is Map<String, dynamic>) {
       if (_isOpenMap(path)) {
         return _OpenMapEditor(
@@ -354,7 +372,7 @@ class _NodeEditor extends StatelessWidget {
               key: ValueKey(childPath.key),
               controller: controller,
               path: childPath,
-              label: _labelFor(entry.key),
+              label: _labelFor(l10n, entry.key),
               value: entry.value,
             ),
           );
@@ -380,7 +398,7 @@ class _NodeEditor extends StatelessWidget {
           children: [
             IconButton(
               key: Key('rpg-set-${path.key}'),
-              tooltip: 'Set value',
+              tooltip: l10n.rpgSetValue,
               onPressed: () => controller.initializeOptional(path),
               icon: const Icon(Icons.add_circle_outline),
             ),
@@ -418,6 +436,7 @@ class _ListEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ExpansionTile(
       key: PageStorageKey(path.key),
       initiallyExpanded: initiallyExpanded,
@@ -428,7 +447,7 @@ class _ListEditor extends StatelessWidget {
         children: [
           IconButton(
             key: Key('rpg-add-${path.key}'),
-            tooltip: 'Add ${label.toLowerCase()}',
+            tooltip: l10n.rpgAddItem(label),
             onPressed: () => controller.addListItem(path),
             icon: const Icon(Icons.add),
           ),
@@ -443,7 +462,7 @@ class _ListEditor extends StatelessWidget {
               key: ValueKey('${path.key}/$index'),
               controller: controller,
               path: path.child(index),
-              label: _itemLabel(value[index], index),
+              label: _itemLabel(l10n, value[index], index),
               value: value[index],
               trailing: _ListItemActions(
                 onMoveUp: index == 0
@@ -474,8 +493,9 @@ class _ListItemActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopupMenuButton<String>(
-      tooltip: 'Item actions',
+      tooltip: l10n.rpgItemActions,
       onSelected: (value) {
         if (value == 'up') onMoveUp?.call();
         if (value == 'down') onMoveDown?.call();
@@ -485,13 +505,13 @@ class _ListItemActions extends StatelessWidget {
         PopupMenuItem(
             value: 'up',
             enabled: onMoveUp != null,
-            child: const Text('Move up')),
+            child: Text(l10n.rpgMoveUp)),
         PopupMenuItem(
             value: 'down',
             enabled: onMoveDown != null,
-            child: const Text('Move down')),
+            child: Text(l10n.rpgMoveDown)),
         const PopupMenuDivider(),
-        const PopupMenuItem(value: 'delete', child: Text('Delete')),
+        PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
       ],
     );
   }
@@ -516,6 +536,7 @@ class _OpenMapEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ExpansionTile(
       key: PageStorageKey(path.key),
       initiallyExpanded: initiallyExpanded,
@@ -526,7 +547,7 @@ class _OpenMapEditor extends StatelessWidget {
         children: [
           IconButton(
             key: Key('rpg-add-map-${path.key}'),
-            tooltip: 'Add entry',
+            tooltip: l10n.rpgAddEntry,
             onPressed: () => _addEntry(context),
             icon: const Icon(Icons.add),
           ),
@@ -544,7 +565,7 @@ class _OpenMapEditor extends StatelessWidget {
             label: entry.key,
             value: entry.value,
             trailing: IconButton(
-              tooltip: 'Delete entry',
+              tooltip: l10n.rpgDeleteEntry,
               onPressed: () => controller.removeMapEntry(path, entry.key),
               icon: const Icon(Icons.delete_outline),
             ),
@@ -555,12 +576,13 @@ class _OpenMapEditor extends StatelessWidget {
   }
 
   Future<void> _addEntry(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final keyController = TextEditingController();
     final valueController = TextEditingController();
     final result = await showDialog<(String, Object?)>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add $label entry'),
+        title: Text(l10n.rpgAddEntryTitle(label)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -568,19 +590,19 @@ class _OpenMapEditor extends StatelessWidget {
               key: const Key('rpg-map-entry-key'),
               controller: keyController,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: l10n.name),
             ),
             TextField(
               key: const Key('rpg-map-entry-value'),
               controller: valueController,
-              decoration: const InputDecoration(labelText: 'Value'),
+              decoration: InputDecoration(labelText: l10n.rpgValue),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -591,7 +613,7 @@ class _OpenMapEditor extends StatelessWidget {
                 (key, _parseLooseValue(valueController.text)),
               );
             },
-            child: const Text('Add'),
+            child: Text(l10n.add),
           ),
         ],
       ),
@@ -707,13 +729,18 @@ class _ScalarEditorState extends State<_ScalarEditor> {
   }
 
   void _updateText(String value) {
+    final l10n = AppLocalizations.of(context);
     if (widget.value is int) {
       final parsed = int.tryParse(value);
-      setState(() => _localError = parsed == null ? 'Enter an integer' : null);
+      setState(
+        () => _localError = parsed == null ? l10n.rpgEnterInteger : null,
+      );
       if (parsed != null) widget.controller.update(widget.path, parsed);
     } else if (widget.value is num) {
       final parsed = num.tryParse(value);
-      setState(() => _localError = parsed == null ? 'Enter a number' : null);
+      setState(
+        () => _localError = parsed == null ? l10n.rpgEnterNumber : null,
+      );
       if (parsed != null) widget.controller.update(widget.path, parsed);
     } else {
       widget.controller.update(widget.path, value);
@@ -807,24 +834,17 @@ Widget? _objectSubtitle(Map<String, dynamic> value) {
   return text is String && text.isNotEmpty ? Text(text) : null;
 }
 
-String _itemLabel(Object? value, int index) {
+String _itemLabel(AppLocalizations l10n, Object? value, int index) {
   if (value is Map<String, dynamic>) {
     final text = value['label'] ?? value['name'] ?? value['id'];
     if (text is String && text.isNotEmpty) return text;
   }
-  return 'Item ${index + 1}';
+  return l10n.rpgItemNumber(index + 1);
 }
 
-String _labelFor(String key) {
-  const overrides = {
-    'metadata': 'Metadata',
-    'compatibility': 'Compatibility',
-    'initialState': 'Initial State',
-    'initialSeed': 'Initial Seed',
-    'schemaVersion': 'Schema Version',
-    'protectedFields': 'Protected Fields',
-  };
-  if (overrides[key] case final value?) return value;
+String _labelFor(AppLocalizations l10n, String key) {
+  final localized = l10n.rpgFieldLabel(key);
+  if (localized != key) return localized;
   final spaced = key.replaceAllMapped(
     RegExp(r'([a-z0-9])([A-Z])'),
     (match) => '${match.group(1)} ${match.group(2)}',

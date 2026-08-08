@@ -10,6 +10,7 @@ import 'package:native_tavern/domain/repositories/mcp_repository.dart';
 import 'package:native_tavern/domain/services/mcp/mcp_client_manager.dart';
 import 'package:native_tavern/domain/services/mcp/mcp_protocol_client.dart';
 import 'package:native_tavern/domain/services/tool_calling/tool_execution_audit_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/mcp_providers.dart';
 import 'package:native_tavern/presentation/screens/settings/mcp_settings_screen.dart';
 
@@ -33,7 +34,11 @@ void main() {
 
     await tester.pumpWidget(ProviderScope(
       overrides: [mcpClientManagerProvider.overrideWithValue(manager)],
-      child: const MaterialApp(home: McpSettingsScreen()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: McpSettingsScreen(),
+      ),
     ));
     await tester.pumpAndSettle();
 
@@ -128,7 +133,11 @@ void main() {
     addTearDown(manager.close);
     await tester.pumpWidget(ProviderScope(
       overrides: [mcpClientManagerProvider.overrideWithValue(manager)],
-      child: const MaterialApp(home: McpSettingsScreen()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: McpSettingsScreen(),
+      ),
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Server blocked'));

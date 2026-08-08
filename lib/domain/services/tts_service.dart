@@ -20,7 +20,7 @@ enum TTSProvider {
   azure('azure', 'Azure Speech'),
   volcengine('volcengine', 'Volcengine (火山引擎)'),
   gptSovits('gpt_sovits', 'GPT-SoVITS'),
-  openaiCompatible('openai_compatible', 'OpenAI Compatible');
+  openaiCompatible('openai_compatible', 'OAI Compatible');
 
   final String id;
   final String displayName;

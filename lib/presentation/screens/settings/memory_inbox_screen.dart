@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/long_term_memory.dart';
 import 'package:native_tavern/domain/services/long_term_memory_governance_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 
@@ -20,6 +21,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final inbox = ref.watch(memoryInboxProvider);
     final settings = ref.watch(appSettingsProvider);
     final selectedChatId = inbox.recentChats.any(
@@ -30,16 +32,16 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Memory inbox'),
+        title: Text(l10n.memoryInbox),
         actions: [
           IconButton(
             key: const Key('memory-context-settings'),
-            tooltip: 'Chat context',
+            tooltip: l10n.memoryChatContext,
             onPressed: _showContextSettings,
             icon: const Icon(Icons.psychology_outlined),
           ),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: l10n.refresh,
             onPressed: inbox.isLoading
                 ? null
                 : () => ref.read(memoryInboxProvider.notifier).refresh(),
@@ -52,9 +54,8 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
           SwitchListTile(
             key: const Key('memory-auto-extraction-switch'),
             secondary: const Icon(Icons.auto_awesome_outlined),
-            title: const Text('Automatic extraction'),
-            subtitle:
-                const Text('Uses the current AI connection after new turns'),
+            title: Text(l10n.memoryAutomaticExtraction),
+            subtitle: Text(l10n.memoryAutomaticExtractionSubtitle),
             value: settings.memoryAutoExtractionEnabled,
             onChanged: (value) => ref
                 .read(appSettingsProvider.notifier)
@@ -69,9 +70,9 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                     key: const Key('memory-chat-picker'),
                     initialValue: selectedChatId,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Recent chat',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.memoryRecentChat,
+                      border: const OutlineInputBorder(),
                       isDense: true,
                     ),
                     items: inbox.recentChats
@@ -94,7 +95,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                 if (inbox.isExtracting)
                   IconButton.filledTonal(
                     key: const Key('memory-cancel-extraction'),
-                    tooltip: 'Cancel extraction',
+                    tooltip: l10n.memoryCancelExtraction,
                     onPressed: () => ref
                         .read(memoryInboxProvider.notifier)
                         .cancelExtraction(),
@@ -103,7 +104,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                 else
                   IconButton.filled(
                     key: const Key('memory-extract-chat'),
-                    tooltip: 'Extract from chat',
+                    tooltip: l10n.memoryExtractFromChat,
                     onPressed: selectedChatId == null
                         ? null
                         : () => ref
@@ -125,15 +126,17 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                       onPressed: () => ref
                           .read(memoryInboxProvider.notifier)
                           .extractChat(selectedChatId),
-                      child: const Text('Retry'),
+                      child: Text(l10n.retry),
                     ),
             )
           else if (inbox.lastExtraction case final result?)
             _StatusBanner(
               icon: Icons.check_circle_outline,
-              message: '${result.candidates.length} candidates, '
-                  '${result.duplicateMemoryIds.length} duplicates, '
-                  '${result.rejectedItems} rejected',
+              message: l10n.memoryExtractionResult(
+                result.candidates.length,
+                result.duplicateMemoryIds.length,
+                result.rejectedItems,
+              ),
             ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -144,17 +147,18 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                   ButtonSegment(
                     value: MemoryInboxView.candidates,
                     icon: const Icon(Icons.inbox_outlined),
-                    label: Text('Candidates ${inbox.candidates.length}'),
+                    label: Text(
+                        l10n.memoryCandidatesCount(inbox.candidates.length)),
                   ),
                   ButtonSegment(
                     value: MemoryInboxView.active,
                     icon: const Icon(Icons.memory),
-                    label: Text('Active ${inbox.active.length}'),
+                    label: Text(l10n.memoryActiveCount(inbox.active.length)),
                   ),
                   ButtonSegment(
                     value: MemoryInboxView.history,
                     icon: const Icon(Icons.history),
-                    label: Text('History ${inbox.history.length}'),
+                    label: Text(l10n.memoryHistoryCount(inbox.history.length)),
                   ),
                 ],
                 selected: {_view},
@@ -169,7 +173,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('memory-create-manual'),
-        tooltip: 'Create memory',
+        tooltip: l10n.memoryCreate,
         onPressed: inbox.recentChats.isEmpty ? null : _createManual,
         child: const Icon(Icons.add),
       ),
@@ -181,10 +185,11 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text('${inbox.selectedIds.length} selected'),
+                      child: Text(
+                          l10n.memorySelectedCount(inbox.selectedIds.length)),
                     ),
                     IconButton(
-                      tooltip: 'Clear selection',
+                      tooltip: l10n.memoryClearSelection,
                       onPressed: () => ref
                           .read(memoryInboxProvider.notifier)
                           .clearSelection(),
@@ -192,7 +197,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                     ),
                     IconButton.filledTonal(
                       key: const Key('memory-batch-ignore'),
-                      tooltip: 'Ignore selected',
+                      tooltip: l10n.memoryIgnoreSelected,
                       onPressed: () => _run(
                         () => ref
                             .read(memoryInboxProvider.notifier)
@@ -203,7 +208,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                     const SizedBox(width: 8),
                     IconButton.filled(
                       key: const Key('memory-merge-selected'),
-                      tooltip: 'Merge selected',
+                      tooltip: l10n.memoryMergeSelected,
                       onPressed:
                           inbox.selectedIds.length < 2 ? null : _mergeSelected,
                       icon: const Icon(Icons.merge),
@@ -290,6 +295,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
       showDragHandle: true,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
+          final l10n = AppLocalizations.of(context);
           final settings = ref.watch(appSettingsProvider);
           final notifier = ref.read(appSettingsProvider.notifier);
           return SafeArea(
@@ -300,15 +306,15 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                   SwitchListTile(
                     key: const Key('memory-context-switch'),
                     secondary: const Icon(Icons.psychology_outlined),
-                    title: const Text('Use memories in chat'),
+                    title: Text(l10n.memoryUseInChat),
                     value: settings.memoryContextEnabled,
                     onChanged: notifier.updateMemoryContext,
                   ),
                   SwitchListTile(
                     key: const Key('memory-semantic-search-switch'),
                     secondary: const Icon(Icons.hub_outlined),
-                    title: const Text('Semantic reranking'),
-                    subtitle: const Text('Configured embedding provider'),
+                    title: Text(l10n.memorySemanticReranking),
+                    subtitle: Text(l10n.memoryConfiguredEmbeddingProvider),
                     value: settings.memorySemanticSearchEnabled,
                     onChanged: settings.memoryContextEnabled
                         ? notifier.updateMemorySemanticSearch
@@ -317,20 +323,24 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
                   ListTile(
                     key: const Key('memory-context-budget'),
                     leading: const Icon(Icons.data_usage_outlined),
-                    title: const Text('Context budget'),
+                    title: Text(l10n.memoryContextBudget),
                     trailing: DropdownButton<int>(
                       key: const Key('memory-context-budget-menu'),
                       value: settings.memoryContextTokenBudget,
-                      items: const [
-                        DropdownMenuItem(value: 256, child: Text('256 tokens')),
-                        DropdownMenuItem(value: 512, child: Text('512 tokens')),
+                      items: [
+                        DropdownMenuItem(
+                            value: 256,
+                            child: Text(l10n.memoryTokensCount(256))),
+                        DropdownMenuItem(
+                            value: 512,
+                            child: Text(l10n.memoryTokensCount(512))),
                         DropdownMenuItem(
                           value: 1024,
-                          child: Text('1024 tokens'),
+                          child: Text(l10n.memoryTokensCount(1024)),
                         ),
                         DropdownMenuItem(
                           value: 2048,
-                          child: Text('2048 tokens'),
+                          child: Text(l10n.memoryTokensCount(2048)),
                         ),
                       ],
                       onChanged: settings.memoryContextEnabled
@@ -356,7 +366,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
     final draft = await showDialog<_MemoryDraft>(
       context: context,
       builder: (_) => _MemoryEditorDialog(
-        title: 'Create memory',
+        title: AppLocalizations.of(context).memoryCreate,
         chats: chats,
       ),
     );
@@ -377,7 +387,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
     final draft = await showDialog<_MemoryDraft>(
       context: context,
       builder: (_) => _MemoryEditorDialog(
-        title: 'Edit memory',
+        title: AppLocalizations.of(context).memoryEdit,
         memory: memory,
       ),
     );
@@ -407,7 +417,7 @@ class _MemoryInboxScreenState extends ConsumerState<MemoryInboxScreen> {
     final draft = await showDialog<_MemoryDraft>(
       context: context,
       builder: (_) => _MemoryEditorDialog(
-        title: 'Merge memories',
+        title: AppLocalizations.of(context).memoryMerge,
         memory: candidates.first,
         initialContent: candidates.map((memory) => memory.content).join(' '),
       ),
@@ -500,6 +510,7 @@ class _MemoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     return Card(
       key: Key('memory-item-${memory.id}'),
@@ -531,7 +542,7 @@ class _MemoryItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _kindLabel(memory.kind),
+                          _kindLabel(l10n, memory.kind),
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         const SizedBox(height: 4),
@@ -573,20 +584,24 @@ class _MemoryItem extends StatelessWidget {
                   Text(
                     memory.source.origin == MemoryOrigin.generated
                         ? '${memory.source.providerId} / ${memory.source.modelId}'
-                        : 'Manual',
+                        : l10n.manual,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   Text(
-                    memory.scope.kind.name,
+                    _memoryScopeLabel(l10n, memory.scope.kind),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   Text(
-                    '${(memory.importance * 100).round()}% importance',
+                    l10n.memoryImportancePercent(
+                      (memory.importance * 100).round(),
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (memory.expiresAt != null)
                     Text(
-                      'Expires ${memory.expiresAt!.toLocal().toString().split(' ').first}',
+                      l10n.memoryExpires(
+                        memory.expiresAt!.toLocal().toString().split(' ').first,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -598,21 +613,22 @@ class _MemoryItem extends StatelessWidget {
                 if (onApprove != null)
                   IconButton(
                     key: Key('memory-approve-${memory.id}'),
-                    tooltip: 'Approve',
+                    tooltip: l10n.memoryApprove,
                     onPressed: onApprove,
                     icon: const Icon(Icons.check_circle_outline),
                   ),
                 if (onEdit != null)
                   IconButton(
                     key: Key('memory-edit-${memory.id}'),
-                    tooltip: 'Edit',
+                    tooltip: l10n.edit,
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_outlined),
                   ),
                 if (onLock != null)
                   IconButton(
                     key: Key('memory-lock-${memory.id}'),
-                    tooltip: memory.locked ? 'Unlock' : 'Lock',
+                    tooltip:
+                        memory.locked ? l10n.memoryUnlock : l10n.memoryLock,
                     onPressed: onLock,
                     icon: Icon(
                         memory.locked ? Icons.lock_open : Icons.lock_outline),
@@ -620,14 +636,14 @@ class _MemoryItem extends StatelessWidget {
                 if (onSource != null)
                   IconButton(
                     key: Key('memory-source-${memory.id}'),
-                    tooltip: 'Open source',
+                    tooltip: l10n.memoryOpenSource,
                     onPressed: onSource,
                     icon: const Icon(Icons.open_in_new),
                   ),
                 if (onIgnore != null)
                   IconButton(
                     key: Key('memory-ignore-${memory.id}'),
-                    tooltip: 'Ignore',
+                    tooltip: l10n.memoryIgnore,
                     onPressed: onIgnore,
                     icon: const Icon(Icons.visibility_off_outlined),
                   ),
@@ -707,6 +723,7 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(widget.title),
       content: ConstrainedBox(
@@ -720,7 +737,7 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
                   key: const Key('memory-editor-chat'),
                   initialValue: _chatId,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Chat scope'),
+                  decoration: InputDecoration(labelText: l10n.memoryChatScope),
                   items: widget.chats
                       .map(
                         (chat) => DropdownMenuItem(
@@ -740,12 +757,12 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
                 key: const Key('memory-editor-kind'),
                 initialValue: _kind,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Kind'),
+                decoration: InputDecoration(labelText: l10n.memoryKind),
                 items: MemoryKind.values
                     .map(
                       (kind) => DropdownMenuItem(
                         value: kind,
-                        child: Text(_kindLabel(kind)),
+                        child: Text(_kindLabel(l10n, kind)),
                       ),
                     )
                     .toList(),
@@ -757,9 +774,9 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
                 controller: _content,
                 minLines: 2,
                 maxLines: 6,
-                decoration: const InputDecoration(
-                  labelText: 'Memory',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.memoryLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
@@ -767,15 +784,15 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
               TextField(
                 key: const Key('memory-editor-identity'),
                 controller: _identity,
-                decoration: const InputDecoration(
-                  labelText: 'Identity key',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.memoryIdentityKey,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text('Importance'),
+                  Text(l10n.memoryImportance),
                   Expanded(
                     child: Slider(
                       value: _importance,
@@ -788,7 +805,7 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Locked'),
+                title: Text(l10n.memoryLocked),
                 value: _locked,
                 onChanged: (value) => setState(() => _locked = value),
               ),
@@ -799,7 +816,7 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           key: const Key('memory-editor-save'),
@@ -817,22 +834,31 @@ class _MemoryEditorDialogState extends State<_MemoryEditorDialog> {
                       chatId: _chatId,
                     ),
                   ),
-          child: const Text('Save'),
+          child: Text(l10n.save),
         ),
       ],
     );
   }
 }
 
-String _kindLabel(MemoryKind kind) {
+String _kindLabel(AppLocalizations l10n, MemoryKind kind) {
   return switch (kind) {
-    MemoryKind.personFact => 'Person fact',
-    MemoryKind.relationship => 'Relationship',
-    MemoryKind.event => 'Event',
-    MemoryKind.commitment => 'Commitment',
-    MemoryKind.preference => 'Preference',
-    MemoryKind.location => 'Location',
-    MemoryKind.other => 'Other',
+    MemoryKind.personFact => l10n.memoryKindPersonFact,
+    MemoryKind.relationship => l10n.memoryKindRelationship,
+    MemoryKind.event => l10n.memoryKindEvent,
+    MemoryKind.commitment => l10n.memoryKindCommitment,
+    MemoryKind.preference => l10n.memoryKindPreference,
+    MemoryKind.location => l10n.memoryKindLocation,
+    MemoryKind.other => l10n.memoryKindOther,
+  };
+}
+
+String _memoryScopeLabel(AppLocalizations l10n, MemoryScopeKind kind) {
+  return switch (kind) {
+    MemoryScopeKind.character => l10n.character,
+    MemoryScopeKind.characterPersona => l10n.memoryScopeCharacterPersona,
+    MemoryScopeKind.chat => l10n.chat,
+    MemoryScopeKind.group => l10n.memoryScopeGroup,
   };
 }
 

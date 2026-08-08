@@ -12,6 +12,7 @@ import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/services/data_bank_library_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/controllers/data_bank_library_controller.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/widgets/chat/data_bank_citation_preview.dart';
@@ -115,8 +116,7 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
   void initState() {
     super.initState();
     _ownsController = widget.controller == null;
-    _controller =
-        widget.controller ??
+    _controller = widget.controller ??
         DataBankLibraryController(ref.read(dataBankLibraryServiceProvider));
     _controller.addListener(_refresh);
     _controller.initialize();
@@ -136,25 +136,26 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Bank'),
+        title: Text(l10n.dataBank),
         actions: [
           IconButton(
             key: const Key('data-bank-context-settings'),
-            tooltip: 'Chat retrieval settings',
+            tooltip: l10n.dataBankChatRetrievalSettings,
             onPressed: _showContextSettings,
             icon: const Icon(Icons.tune),
           ),
           IconButton(
             key: const Key('data-bank-rebuild-index'),
-            tooltip: 'Rebuild search index',
+            tooltip: l10n.dataBankRebuildSearchIndex,
             onPressed: _controller.working ? null : _rebuildIndex,
             icon: const Icon(Icons.manage_search_outlined),
           ),
           IconButton(
             key: const Key('data-bank-import'),
-            tooltip: 'Import document',
+            tooltip: l10n.dataBankImportDocument,
             onPressed: _controller.working ? null : _importDocument,
             icon: const Icon(Icons.note_add_outlined),
           ),
@@ -167,12 +168,12 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
             child: SearchBar(
               key: const Key('data-bank-search'),
               controller: _searchController,
-              hintText: 'Search documents',
+              hintText: l10n.dataBankSearchDocuments,
               leading: const Icon(Icons.search),
               trailing: [
                 if (_controller.showingSearch)
                   IconButton(
-                    tooltip: 'Clear search',
+                    tooltip: l10n.dataBankClearSearch,
                     onPressed: () {
                       _searchController.clear();
                       _controller.search('');
@@ -190,7 +191,7 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
             ),
           if (_controller.error case final error?)
             _ErrorBanner(
-              message: _friendlyError(error),
+              message: _friendlyError(l10n, error),
               onDismiss: _controller.clearError,
             ),
           Expanded(child: _buildContent()),
@@ -205,10 +206,10 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
     }
     if (_controller.showingSearch) {
       if (_controller.searchResults.isEmpty) {
-        return const _EmptyState(
-          key: Key('data-bank-no-results'),
+        return _EmptyState(
+          key: const Key('data-bank-no-results'),
           icon: Icons.search_off_outlined,
-          title: 'No matches',
+          title: AppLocalizations.of(context).dataBankNoMatches,
         );
       }
       return RefreshIndicator(
@@ -227,11 +228,11 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
       return _EmptyState(
         key: const Key('data-bank-empty'),
         icon: Icons.library_books_outlined,
-        title: 'No documents',
+        title: AppLocalizations.of(context).dataBankNoDocuments,
         action: FilledButton.icon(
           onPressed: _controller.working ? null : _importDocument,
           icon: const Icon(Icons.note_add_outlined),
-          label: const Text('Import'),
+          label: Text(AppLocalizations.of(context).import_action),
         ),
       );
     }
@@ -279,9 +280,11 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
   }
 
   Future<void> _rebuildIndex() async {
+    final successMessage =
+        AppLocalizations.of(context).dataBankSearchIndexRebuilt;
     await _run(() async {
       await _controller.rebuildSearchIndex();
-      _showMessage('Search index rebuilt');
+      _showMessage(successMessage);
     });
   }
 
@@ -300,8 +303,7 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
 
   Future<void> _showBindings(DataBankLibraryEntry entry) async {
     await _run(() async {
-      final gateway =
-          widget.bindingTargetGateway ??
+      final gateway = widget.bindingTargetGateway ??
           RepositoryDataBankBindingTargetGateway(
             ref.read(characterRepositoryProvider),
             ref.read(chatRepositoryProvider),
@@ -336,25 +338,30 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
       if (!mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Delete ${preview.documentName}?'),
-          content: Text(
-            '${preview.versionCount} version(s), ${preview.chunkCount} chunk(s), '
-            '${preview.bindingCount} binding(s), and '
-            '${preview.managedPaths.length} managed file(s) will be removed.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              key: const Key('data-bank-confirm-delete'),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
+          return AlertDialog(
+            title:
+                Text(l10n.dataBankDeleteDocumentQuestion(preview.documentName)),
+            content: Text(l10n.dataBankDeleteDocumentBody(
+              preview.versionCount,
+              preview.chunkCount,
+              preview.bindingCount,
+              preview.managedPaths.length,
+            )),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                key: const Key('data-bank-confirm-delete'),
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.delete),
+              ),
+            ],
+          );
+        },
       );
       if (confirmed == true) await _controller.deleteDocument(documentId);
     });
@@ -364,7 +371,8 @@ class _DataBankScreenState extends ConsumerState<DataBankScreen> {
     try {
       await operation();
     } catch (error) {
-      _showMessage(_friendlyError(error));
+      if (!mounted) return;
+      _showMessage(_friendlyError(AppLocalizations.of(context), error));
     }
   }
 
@@ -381,6 +389,7 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(dataBankContextSettingsProvider);
     final notifier = ref.read(dataBankContextSettingsProvider.notifier);
     final diagnostics = ref.watch(lastDataBankContextProvider);
@@ -396,12 +405,12 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Chat retrieval',
+                      l10n.dataBankChatRetrieval,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close',
+                    tooltip: l10n.close,
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
                   ),
@@ -415,14 +424,14 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   SwitchListTile(
                     key: const Key('data-bank-context-enabled'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Use Data Bank in chat'),
+                    title: Text(l10n.dataBankUseInChat),
                     value: settings.enabled,
                     onChanged: notifier.setEnabled,
                   ),
                   SwitchListTile(
                     key: const Key('data-bank-query-rewrite'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Conversation-aware query expansion'),
+                    title: Text(l10n.dataBankQueryExpansion),
                     value: settings.queryRewriteEnabled,
                     onChanged: settings.enabled
                         ? notifier.setQueryRewriteEnabled
@@ -431,10 +440,8 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   SwitchListTile(
                     key: const Key('data-bank-semantic-reranking'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Semantic reranking'),
-                    subtitle: const Text(
-                      'Uses the configured Embedding provider',
-                    ),
+                    title: Text(l10n.dataBankSemanticReranking),
+                    subtitle: Text(l10n.dataBankUsesEmbeddingProvider),
                     value: settings.semanticRerankingEnabled,
                     onChanged: settings.enabled
                         ? notifier.setSemanticRerankingEnabled
@@ -443,7 +450,7 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   const Divider(height: 28),
                   _SettingsSlider(
                     key: const Key('data-bank-top-k'),
-                    title: 'Sources per response',
+                    title: l10n.dataBankSourcesPerResponse,
                     valueLabel: '${settings.topK}',
                     value: settings.topK.toDouble(),
                     min: 1,
@@ -454,7 +461,7 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   ),
                   _SettingsSlider(
                     key: const Key('data-bank-token-budget'),
-                    title: 'Token budget',
+                    title: l10n.dataBankTokenBudget,
                     valueLabel: '${settings.maxTokens}',
                     value: settings.maxTokens.clamp(256, 4096).toDouble(),
                     min: 256,
@@ -466,7 +473,7 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   ),
                   _SettingsSlider(
                     key: const Key('data-bank-source-diversity'),
-                    title: 'Chunks per document',
+                    title: l10n.dataBankChunksPerDocument,
                     valueLabel: '${settings.maxChunksPerDocument}',
                     value: settings.maxChunksPerDocument.clamp(1, 5).toDouble(),
                     min: 1,
@@ -478,12 +485,12 @@ class _DataBankContextSettingsSheet extends ConsumerWidget {
                   ),
                   const Divider(height: 32),
                   Text(
-                    'Last retrieval',
+                    l10n.dataBankLastRetrieval,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 10),
                   if (diagnostics == null)
-                    const Text('No chat retrieval has run yet.')
+                    Text(l10n.dataBankNoRetrievalYet)
                   else
                     _DataBankDiagnostics(snapshot: diagnostics),
                 ],
@@ -549,10 +556,11 @@ class _DataBankDiagnostics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final mode = switch (snapshot.mode) {
-      DataBankRetrievalMode.localFts => 'Local full-text search',
-      DataBankRetrievalMode.semanticReranked => 'Hybrid semantic reranking',
-      DataBankRetrievalMode.semanticFallback => 'Local fallback',
+      DataBankRetrievalMode.localFts => l10n.dataBankModeLocalFts,
+      DataBankRetrievalMode.semanticReranked => l10n.dataBankModeSemantic,
+      DataBankRetrievalMode.semanticFallback => l10n.dataBankModeFallback,
     };
     return Column(
       key: const Key('data-bank-retrieval-diagnostics'),
@@ -564,7 +572,7 @@ class _DataBankDiagnostics extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text('$mode | ${snapshot.sources.length} source(s)'),
+        Text('$mode | ${l10n.dataBankSourcesCount(snapshot.sources.length)}'),
         if (snapshot.fallbackReason != null)
           Text(
             snapshot.fallbackReason!,
@@ -597,7 +605,7 @@ class _DataBankDiagnostics extends StatelessWidget {
               key: const Key('data-bank-open-diagnostics'),
               onPressed: () => showDataBankCitationSheet(context, snapshot),
               icon: const Icon(Icons.fact_check_outlined),
-              label: const Text('Inspect all sources'),
+              label: Text(l10n.dataBankInspectAllSources),
             ),
           ),
         ],
@@ -628,10 +636,11 @@ class _DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final document = entry.document;
     final processing =
         document.processingState == DataBankProcessingState.pending ||
-        document.processingState == DataBankProcessingState.processing;
+            document.processingState == DataBankProcessingState.processing;
     final failed = document.processingState == DataBankProcessingState.failed;
     final disabled =
         document.processingState == DataBankProcessingState.disabled;
@@ -663,8 +672,8 @@ class _DocumentCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         '${_formatBytes(entry.version.byteSize)}  |  '
-                        '${entry.chunkCount} chunks  |  '
-                        '${entry.bindings.length} bindings',
+                        '${l10n.dataBankChunksCount(entry.chunkCount)}  |  '
+                        '${l10n.dataBankBindingsCount(entry.bindings.length)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -686,7 +695,7 @@ class _DocumentCard extends StatelessWidget {
             if (failed) ...[
               const SizedBox(height: 8),
               Text(
-                document.failure?.message ?? 'Processing failed',
+                document.failure?.message ?? l10n.dataBankProcessingFailed,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],
@@ -700,7 +709,7 @@ class _DocumentCard extends StatelessWidget {
                       (binding) => Chip(
                         visualDensity: VisualDensity.compact,
                         avatar: Icon(_bindingIcon(binding.scope), size: 16),
-                        label: Text(_bindingLabel(binding)),
+                        label: Text(_bindingLabel(l10n, binding)),
                       ),
                     )
                     .toList(growable: false),
@@ -710,24 +719,24 @@ class _DocumentCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  tooltip: 'Preview',
+                  tooltip: l10n.preview,
                   onPressed: busy || entry.chunkCount == 0 ? null : onPreview,
                   icon: const Icon(Icons.visibility_outlined),
                 ),
                 IconButton(
-                  tooltip: 'Manage bindings',
+                  tooltip: l10n.dataBankManageBindings,
                   onPressed: busy ? null : onBindings,
                   icon: const Icon(Icons.link_outlined),
                 ),
                 IconButton(
                   key: ValueKey('data-bank-retry-${document.id}'),
-                  tooltip: failed ? 'Retry' : 'Rebuild document',
+                  tooltip: failed ? l10n.retry : l10n.dataBankRebuildDocument,
                   onPressed: busy || disabled || processing ? null : onRetry,
                   icon: Icon(failed ? Icons.refresh : Icons.replay_outlined),
                 ),
                 IconButton(
                   key: ValueKey('data-bank-delete-${document.id}'),
-                  tooltip: 'Delete',
+                  tooltip: l10n.delete,
                   onPressed: busy ? null : onDelete,
                   icon: const Icon(Icons.delete_outline),
                 ),
@@ -778,6 +787,7 @@ class _PreviewSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height * 0.82,
@@ -797,7 +807,7 @@ class _PreviewSheet extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close',
+                    tooltip: l10n.close,
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
                   ),
@@ -835,11 +845,10 @@ class _PreviewSheet extends StatelessWidget {
   }
 }
 
-typedef _SaveBinding =
-    Future<void> Function({
-      required DataBankBindingScope scope,
-      String? targetId,
-    });
+typedef _SaveBinding = Future<void> Function({
+  required DataBankBindingScope scope,
+  String? targetId,
+});
 
 class _BindingsDialog extends StatefulWidget {
   final DataBankLibraryEntry entry;
@@ -874,6 +883,7 @@ class _BindingsDialogState extends State<_BindingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final needsTarget = _scope != DataBankBindingScope.global;
     final availableTargets = switch (_scope) {
       DataBankBindingScope.global => const <DataBankBindingTarget>[],
@@ -881,7 +891,7 @@ class _BindingsDialogState extends State<_BindingsDialog> {
       DataBankBindingScope.chat => widget.chatTargets,
     };
     return AlertDialog(
-      title: const Text('Bindings'),
+      title: Text(l10n.dataBankBindings),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -893,9 +903,9 @@ class _BindingsDialogState extends State<_BindingsDialog> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(_bindingIcon(binding.scope)),
-                  title: Text(_bindingLabel(binding)),
+                  title: Text(_bindingLabel(l10n, binding)),
                   trailing: IconButton(
-                    tooltip: 'Remove binding',
+                    tooltip: l10n.dataBankRemoveBinding,
                     onPressed: _working ? null : () => _remove(binding),
                     icon: const Icon(Icons.delete_outline),
                   ),
@@ -904,21 +914,21 @@ class _BindingsDialogState extends State<_BindingsDialog> {
               DropdownButtonFormField<DataBankBindingScope>(
                 key: const Key('data-bank-binding-scope'),
                 initialValue: _scope,
-                decoration: const InputDecoration(labelText: 'Scope'),
+                decoration: InputDecoration(labelText: l10n.scope),
                 items: DataBankBindingScope.values
                     .map(
                       (scope) => DropdownMenuItem(
                         value: scope,
-                        child: Text(_scopeLabel(scope)),
+                        child: Text(_scopeLabel(l10n, scope)),
                       ),
                     )
                     .toList(growable: false),
                 onChanged: _working
                     ? null
                     : (scope) => setState(() {
-                        _scope = scope ?? DataBankBindingScope.global;
-                        _targetId = null;
-                      }),
+                          _scope = scope ?? DataBankBindingScope.global;
+                          _targetId = null;
+                        }),
               ),
               if (needsTarget) ...[
                 const SizedBox(height: 12),
@@ -927,8 +937,8 @@ class _BindingsDialogState extends State<_BindingsDialog> {
                   initialValue: _targetId,
                   decoration: InputDecoration(
                     labelText: _scope == DataBankBindingScope.character
-                        ? 'Character'
-                        : 'Chat',
+                        ? l10n.character
+                        : l10n.chat,
                   ),
                   items: availableTargets
                       .map(
@@ -953,7 +963,7 @@ class _BindingsDialogState extends State<_BindingsDialog> {
                     ? null
                     : _save,
                 icon: const Icon(Icons.add_link),
-                label: const Text('Add binding'),
+                label: Text(l10n.dataBankAddBinding),
               ),
             ],
           ),
@@ -962,7 +972,7 @@ class _BindingsDialogState extends State<_BindingsDialog> {
       actions: [
         TextButton(
           onPressed: _working ? null : () => Navigator.pop(context),
-          child: const Text('Done'),
+          child: Text(l10n.done),
         ),
       ],
     );
@@ -1001,16 +1011,18 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = switch (state) {
       DataBankProcessingState.ready => Colors.green,
       DataBankProcessingState.failed => Theme.of(context).colorScheme.error,
       DataBankProcessingState.disabled => Colors.grey,
-      DataBankProcessingState.pending || DataBankProcessingState.processing =>
+      DataBankProcessingState.pending ||
+      DataBankProcessingState.processing =>
         Theme.of(context).colorScheme.primary,
       DataBankProcessingState.deleted => Colors.grey,
     };
     return Semantics(
-      label: 'Status: ${state.name}',
+      label: l10n.dataBankStatusSemantics(_stateLabel(l10n, state)),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -1018,7 +1030,7 @@ class _StatusBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
-          _stateLabel(state),
+          _stateLabel(l10n, state),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
         ),
       ),
@@ -1042,7 +1054,7 @@ class _ErrorBanner extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          tooltip: 'Dismiss',
+          tooltip: AppLocalizations.of(context).dataBankDismiss,
           onPressed: onDismiss,
           icon: const Icon(Icons.close),
         ),
@@ -1082,29 +1094,31 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-String _stateLabel(DataBankProcessingState state) => switch (state) {
-  DataBankProcessingState.pending => 'Pending',
-  DataBankProcessingState.processing => 'Processing',
-  DataBankProcessingState.ready => 'Ready',
-  DataBankProcessingState.failed => 'Failed',
-  DataBankProcessingState.disabled => 'Disabled',
-  DataBankProcessingState.deleted => 'Deleted',
-};
+String _stateLabel(AppLocalizations l10n, DataBankProcessingState state) =>
+    switch (state) {
+      DataBankProcessingState.pending => l10n.dataBankStatePending,
+      DataBankProcessingState.processing => l10n.dataBankStateProcessing,
+      DataBankProcessingState.ready => l10n.dataBankStateReady,
+      DataBankProcessingState.failed => l10n.dataBankStateFailed,
+      DataBankProcessingState.disabled => l10n.disabled,
+      DataBankProcessingState.deleted => l10n.dataBankStateDeleted,
+    };
 
 IconData _bindingIcon(DataBankBindingScope scope) => switch (scope) {
-  DataBankBindingScope.global => Icons.public,
-  DataBankBindingScope.character => Icons.person_outline,
-  DataBankBindingScope.chat => Icons.chat_bubble_outline,
-};
+      DataBankBindingScope.global => Icons.public,
+      DataBankBindingScope.character => Icons.person_outline,
+      DataBankBindingScope.chat => Icons.chat_bubble_outline,
+    };
 
-String _scopeLabel(DataBankBindingScope scope) => switch (scope) {
-  DataBankBindingScope.global => 'Global',
-  DataBankBindingScope.character => 'Character',
-  DataBankBindingScope.chat => 'Chat',
-};
+String _scopeLabel(AppLocalizations l10n, DataBankBindingScope scope) =>
+    switch (scope) {
+      DataBankBindingScope.global => l10n.global,
+      DataBankBindingScope.character => l10n.character,
+      DataBankBindingScope.chat => l10n.chat,
+    };
 
-String _bindingLabel(DataBankBinding binding) {
-  final scope = _scopeLabel(binding.scope);
+String _bindingLabel(AppLocalizations l10n, DataBankBinding binding) {
+  final scope = _scopeLabel(l10n, binding.scope);
   final target = binding.targetId;
   return target == null ? scope : '$scope: $target';
 }
@@ -1127,9 +1141,9 @@ String _formatBytes(int bytes) {
   return '${(kib / 1024).toStringAsFixed(1)} MiB';
 }
 
-String _friendlyError(Object error) {
+String _friendlyError(AppLocalizations l10n, Object error) {
   if (error is DataBankDuplicateDocumentException) {
-    return 'This document is already in the Data Bank.';
+    return l10n.dataBankDuplicateDocument;
   }
   return error.toString().replaceFirst(RegExp(r'^[^:]+:\s*'), '');
 }

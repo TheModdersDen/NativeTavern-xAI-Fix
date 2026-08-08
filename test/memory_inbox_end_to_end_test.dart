@@ -14,6 +14,7 @@ import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/drift_long_term_memory_repository.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/long_term_memory_governance_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/screens/settings/memory_inbox_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -313,7 +314,11 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(preferences),
           llmServiceProvider.overrideWithValue(llmService),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -348,7 +353,11 @@ Future<void> _pumpInbox(
         sharedPreferencesProvider.overrideWithValue(preferences),
         llmServiceProvider.overrideWithValue(llmService),
       ],
-      child: const MaterialApp(home: MemoryInboxScreen()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MemoryInboxScreen(),
+      ),
     ),
   );
   await tester.pumpAndSettle();

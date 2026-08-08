@@ -16,7 +16,7 @@ import 'package:speech_to_text/speech_to_text.dart' as speech;
 enum STTProvider {
   system('system', 'System STT'),
   elevenLabs('elevenlabs', 'ElevenLabs'),
-  openAICompatible('openai_compatible', 'OpenAI Compatible'),
+  openAICompatible('openai_compatible', 'OAI Compatible'),
   selfHosted('self_hosted', 'Self-hosted'),
   ;
 

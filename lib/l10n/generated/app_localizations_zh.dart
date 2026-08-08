@@ -496,7 +496,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get openai => 'OpenAI';
+  String get openai => 'OAI Compatible';
 
   @override
   String get claude => 'Claude';
@@ -1388,7 +1388,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'Adaptive sampling for local models';
 
   @override
-  String get off => 'Off';
+  String get off => '关闭';
 
   @override
   String get mirostatTau => 'Mirostat Tau';
@@ -2779,10 +2779,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get variableValue => 'Variable Value';
 
   @override
-  String get scope => 'Scope';
+  String get scope => '范围';
 
   @override
-  String get global => 'Global';
+  String get global => '全局';
 
   @override
   String get vectorStorageRag => 'Vector Storage (RAG)';
@@ -2997,7 +2997,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get allNonMutedCharactersRespond => 'All non-muted characters respond';
 
   @override
-  String get manual => 'Manual';
+  String get manual => '手动';
 
   @override
   String get youSelectWhoResponds => 'You select which character responds';
@@ -3905,248 +3905,1140 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatConnectionAppliedToEmbeddings => '已将聊天接口和 API 密钥用于嵌入';
 
   @override
-  String get localFeatures => 'Local features';
+  String get localFeatures => '本地功能';
 
   @override
-  String get memoryInbox => 'Memory inbox';
+  String get memoryInbox => '记忆收件箱';
 
   @override
-  String get memoryInboxSubtitle => 'Review and maintain long-term memories';
+  String get memoryInboxSubtitle => '审核和维护长期记忆';
 
   @override
-  String get dataBank => 'Data Bank';
+  String get dataBank => '资料库';
 
   @override
-  String get dataBankSubtitle => 'Import, search, and bind local documents';
+  String get dataBankSubtitle => '导入、搜索并绑定本地文档';
 
   @override
-  String get rpgScenarioEditor => 'RPG scenario editor';
+  String get rpgScenarioEditor => 'RPG 剧本编辑器';
 
   @override
-  String get rpgScenarioEditorSubtitle =>
-      'Create and validate local scenario packages';
+  String get rpgScenarioEditorSubtitle => '创建并验证本地剧本包';
 
   @override
-  String get capabilityCheck => 'Capability check';
+  String get capabilityCheck => '功能检查';
 
   @override
-  String get capabilityCheckSubtitle =>
-      'Availability, permissions, and configuration';
+  String get capabilityCheckSubtitle => '可用性、权限和配置';
 
   @override
-  String get mcpServers => 'MCP servers';
+  String get mcpServers => 'MCP 服务器';
 
   @override
-  String get mcpServersSubtitle =>
-      'Connections, tools, permissions, and activity';
+  String get mcpServersSubtitle => '连接、工具、权限和活动';
 
   @override
-  String get toolCalling => 'Tool calling';
+  String get toolCalling => '工具调用';
 
   @override
-  String get toolCallingSubtitle => 'Built-in tools, approvals, and limits';
+  String get toolCallingSubtitle => '内置工具、审批和限制';
 
   @override
-  String get toolCallingAllow => 'Allow tool calling';
+  String get toolCallingAllow => '允许工具调用';
 
   @override
-  String get toolCallingAllowSubtitle =>
-      'Providers may request only the tools enabled below';
+  String get toolCallingAllowSubtitle => '模型提供商只能请求下方启用的工具';
 
   @override
-  String get toolBuiltInTools => 'Built-in tools';
+  String get toolBuiltInTools => '内置工具';
 
   @override
-  String get toolMcpTools => 'MCP tools';
+  String get toolMcpTools => 'MCP 工具';
 
   @override
-  String get toolMcpPermissionsSubtitle =>
-      'Connected MCP servers use their individual permissions';
+  String get toolMcpPermissionsSubtitle => '已连接的 MCP 服务器使用各自的权限设置';
 
   @override
-  String get toolSafetyLimits => 'Safety limits';
+  String get toolSafetyLimits => '安全限制';
 
   @override
-  String get toolRounds => 'Tool rounds';
+  String get toolRounds => '工具轮次';
 
   @override
-  String get toolCallsPerResponse => 'Calls per response';
+  String get toolCallsPerResponse => '每次回复的调用数';
 
   @override
-  String get toolTimeLimit => 'Time limit';
+  String get toolTimeLimit => '时间限制';
 
   @override
-  String get toolTokenBudget => 'Tool token budget';
+  String get toolTokenBudget => '工具 Token 预算';
 
   @override
-  String get toolSeconds => 'seconds';
+  String get toolSeconds => '秒';
 
   @override
-  String get toolTokens => 'tokens';
+  String get toolTokens => 'Token';
 
   @override
   String toolDecrease(String control) {
-    return 'Decrease $control';
+    return '减少$control';
   }
 
   @override
   String toolIncrease(String control) {
-    return 'Increase $control';
+    return '增加$control';
   }
 
   @override
-  String get toolActivity => 'Tool activity';
+  String get toolActivity => '工具活动';
 
   @override
-  String get toolApprovalRequired => 'Approval required';
+  String get toolApprovalRequired => '需要批准';
 
   @override
-  String get toolAllowOnce => 'Allow once';
+  String get toolAllowOnce => '仅允许一次';
 
   @override
-  String get toolAlwaysAllow => 'Always allow';
+  String get toolAlwaysAllow => '始终允许';
 
   @override
-  String get toolDeny => 'Deny';
+  String get toolDeny => '拒绝';
 
   @override
-  String get toolCancelCall => 'Cancel tool call';
+  String get toolCancelCall => '取消工具调用';
 
   @override
-  String get toolStatusWaitingApproval => 'Waiting for approval';
+  String get toolStatusWaitingApproval => '等待批准';
 
   @override
-  String get toolStatusRunning => 'Running';
+  String get toolStatusRunning => '运行中';
 
   @override
-  String get toolStatusSucceeded => 'Succeeded';
+  String get toolStatusSucceeded => '已成功';
 
   @override
-  String get toolStatusFailed => 'Failed';
+  String get toolStatusFailed => '失败';
 
   @override
-  String get toolStatusDenied => 'Denied';
+  String get toolStatusDenied => '已拒绝';
 
   @override
-  String get toolStatusCancelled => 'Cancelled';
+  String get toolStatusCancelled => '已取消';
 
   @override
-  String get storageManagement => 'Storage management';
+  String get storageManagement => '存储管理';
 
   @override
-  String get storageManagementSubtitle =>
-      'Usage, orphan scanning, and safe cleanup';
+  String get storageManagementSubtitle => '空间用量、孤立文件扫描和安全清理';
 
   @override
   String storageUsedOfQuota(String used, String quota) {
-    return '$used used of $quota';
+    return '已使用 $used，配额 $quota';
   }
 
   @override
-  String get storageQuotaWarning =>
-      'Storage usage is above the warning threshold';
+  String get storageQuotaWarning => '存储用量已超过警告阈值';
 
   @override
-  String get storageWithinQuota =>
-      'Storage usage is within the warning threshold';
+  String get storageWithinQuota => '存储用量未超过警告阈值';
 
   @override
   String storageScanIncomplete(int count) {
-    return '$count path(s) could not be inspected';
+    return '有 $count 个路径无法检查';
   }
 
   @override
-  String get storageCategoryLive2d => 'Live2D models';
+  String get storageCategoryLive2d => 'Live2D 模型';
 
   @override
-  String get storageCategoryAttachments => 'Attachments and media';
+  String get storageCategoryAttachments => '附件和媒体';
 
   @override
-  String get storageCategoryDataBank => 'Data Bank documents';
+  String get storageCategoryDataBank => '资料库文档';
 
   @override
-  String get storageCategoryAudio => 'Audio';
+  String get storageCategoryAudio => '音频';
 
   @override
-  String get storageCategoryCache => 'Cache';
+  String get storageCategoryCache => '缓存';
 
   @override
   String storageFilesCount(int count) {
-    return '$count file(s)';
+    return '$count 个文件';
   }
 
   @override
   String storageReclaimable(String size) {
-    return '$size reclaimable';
+    return '可回收 $size';
   }
 
   @override
-  String get storageCleanupCandidates => 'Safe cleanup';
+  String get storageCleanupCandidates => '安全清理';
 
   @override
-  String get storageNoCleanupCandidates =>
-      'No unreferenced or expired files found';
+  String get storageNoCleanupCandidates => '未发现无引用或已过期的文件';
 
   @override
-  String get storageSelectAll => 'Select all';
+  String get storageSelectAll => '全选';
 
   @override
-  String get storageClearSelection => 'Clear selection';
+  String get storageClearSelection => '清除选择';
 
   @override
-  String get storageUndo => 'Undo';
+  String get storageUndo => '撤销';
 
   @override
-  String get storageCleanSelected => 'Clean selected';
+  String get storageCleanSelected => '清理所选项';
 
   @override
-  String get storageCleanupReviewTitle => 'Review cleanup';
+  String get storageCleanupReviewTitle => '确认清理';
 
   @override
   String storageCleanupReviewBody(int items, int files, String size) {
-    return 'Move $items item(s), containing $files file(s) and using $size, to recoverable trash?';
+    return '将 $items 项（共 $files 个文件，占用 $size）移至可恢复的废纸篓？';
   }
 
   @override
-  String get storageCleanupRecoverableHint =>
-      'Referenced files are protected. You can undo until staged files are permanently removed.';
+  String get storageCleanupRecoverableHint => '有引用的文件会受到保护。在暂存文件被永久删除前，可以撤销操作。';
 
   @override
   String storageCleanupMoved(int count) {
-    return '$count item(s) moved to recoverable trash';
+    return '已将 $count 项移至可恢复的废纸篓';
   }
 
   @override
-  String get storageCleanupRestored => 'Cleanup undone';
+  String get storageCleanupRestored => '已撤销清理';
 
   @override
-  String get storageCleanupCompleted => 'Cleanup completed';
+  String get storageCleanupCompleted => '清理完成';
 
   @override
   String storageCleanupFailed(String error) {
-    return 'Cleanup failed: $error';
+    return '清理失败：$error';
   }
 
   @override
-  String get storageReasonInterruptedTemporary => 'Interrupted temporary data';
+  String get storageReasonInterruptedTemporary => '中断操作留下的临时数据';
 
   @override
-  String get storageReasonMissingDatabaseReference =>
-      'No database document references this data';
+  String get storageReasonMissingDatabaseReference => '数据库中没有文档引用此数据';
 
   @override
-  String get storageReasonInterruptedDocumentCleanup =>
-      'Interrupted document cleanup';
+  String get storageReasonInterruptedDocumentCleanup => '文档清理被中断';
 
   @override
-  String get storageReasonMissingFileReference =>
-      'No database record references this file';
+  String get storageReasonMissingFileReference => '数据库中没有记录引用此文件';
 
   @override
-  String get storageReasonExpiredTransient => 'Expired transient data';
+  String get storageReasonExpiredTransient => '已过期的临时数据';
 
   @override
-  String get storageReasonExpiredAudio => 'Expired synthesized audio';
+  String get storageReasonExpiredAudio => '已过期的合成音频';
+
+  @override
+  String get live2dUnavailableModelMessage => '已分配的 Live2D 模型不可用。请选择其他模型或重新导入。';
+
+  @override
+  String get live2dSelectionExpiredMessage => '该 Live2D 模型已不可用。请选择其他模型或重新导入。';
+
+  @override
+  String live2dModelsImported(int count) {
+    return '已导入 $count 个 Live2D 模型';
+  }
+
+  @override
+  String get live2dModelDeleted => '已删除导入的 Live2D 模型。';
+
+  @override
+  String get live2dCleanupPending => ' 文件清理将在下次刷新模型库时重试。';
+
+  @override
+  String get live2dDeleteImportedModelQuestion => '删除导入的模型？';
+
+  @override
+  String live2dDeletePackageBody(int count) {
+    return '此模型包包含 $count 个模型，它们都会被删除。';
+  }
+
+  @override
+  String live2dDeleteModelBody(String name) {
+    return '将从此设备删除“$name”。';
+  }
+
+  @override
+  String get live2dDisabledFor => '以下角色将停用 Live2D：';
+
+  @override
+  String get live2dLicensing => 'Live2D 许可信息';
+
+  @override
+  String get live2dLicenseNotice =>
+      '渲染器包含 Live2D Cubism SDK 和 Core。模型文件及商业发行可能适用其他条款。\n\n内置的 Hiyori Momose 模型是 Live2D Inc. 拥有版权的官方示例数据，并依据 Live2D 免费素材许可协议和示例数据使用条款使用。本应用由作者自行决定制作。\n\n发布应用前，请确认每个导入模型的使用权。';
+
+  @override
+  String get live2dReviewTerms => '查看条款';
+
+  @override
+  String live2dUnavailableLabel(String name) {
+    return '$name（不可用）';
+  }
+
+  @override
+  String live2dImportedLabel(String name) {
+    return '$name（已导入）';
+  }
+
+  @override
+  String get live2dImportZip => '导入 ZIP';
+
+  @override
+  String get live2dMotion => '动作';
+
+  @override
+  String get live2dPlayMotion => '播放动作';
+
+  @override
+  String get live2dStageAdjustment => '舞台调整';
+
+  @override
+  String get live2dMotionSpeed => '动作速度';
+
+  @override
+  String get live2dImportedModels => '已导入模型';
+
+  @override
+  String live2dModelsCount(int count) {
+    return '$count 个模型';
+  }
+
+  @override
+  String get live2dDeleteImportedModel => '删除导入的模型';
+
+  @override
+  String get rpgScenarioTitle => 'RPG 剧本';
+
+  @override
+  String get rpgImportScenario => '导入剧本';
+
+  @override
+  String get rpgSaveDraft => '保存草稿';
+
+  @override
+  String get rpgRestoreDraft => '恢复草稿';
+
+  @override
+  String get rpgExportScenario => '导出剧本';
+
+  @override
+  String get rpgIssues => '问题';
+
+  @override
+  String rpgIssuesCount(int count) {
+    return '问题（$count）';
+  }
+
+  @override
+  String get rpgScenarioImportFailed => '剧本导入失败';
+
+  @override
+  String rpgScenarioImported(String name) {
+    return '已导入 $name';
+  }
+
+  @override
+  String get rpgDraftSaved => '草稿已保存';
+
+  @override
+  String get rpgDraftRestored => '草稿已恢复';
+
+  @override
+  String get rpgNoSavedDraft => '没有已保存的草稿';
+
+  @override
+  String get rpgScenarioExported => '剧本已导出';
+
+  @override
+  String get rpgSetValue => '设置值';
+
+  @override
+  String rpgAddItem(String label) {
+    return '添加$label';
+  }
+
+  @override
+  String get rpgItemActions => '项目操作';
+
+  @override
+  String get rpgMoveUp => '上移';
+
+  @override
+  String get rpgMoveDown => '下移';
+
+  @override
+  String get rpgAddEntry => '添加条目';
+
+  @override
+  String get rpgDeleteEntry => '删除条目';
+
+  @override
+  String rpgAddEntryTitle(String label) {
+    return '添加$label条目';
+  }
+
+  @override
+  String get rpgValue => '值';
+
+  @override
+  String get rpgEnterInteger => '请输入整数';
+
+  @override
+  String get rpgEnterNumber => '请输入数字';
+
+  @override
+  String rpgItemNumber(int number) {
+    return '项目 $number';
+  }
+
+  @override
+  String rpgFieldLabel(String field) {
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': '元数据',
+        'compatibility': '兼容性',
+        'initialState': '初始状态',
+        'initialSeed': '初始种子',
+        'schemaVersion': '结构版本',
+        'protectedFields': '受保护字段',
+        'minimumEngineVersion': '最低引擎版本',
+        'maximumEngineVersion': '最高引擎版本',
+        'requiredCapabilities': '所需功能',
+        'actors': '角色',
+        'attributes': '属性',
+        'author': '作者',
+        'availability': '可用性',
+        'branchId': '分支 ID',
+        'conditions': '条件',
+        'cooldowns': '冷却',
+        'costs': '消耗',
+        'createdAt': '创建时间',
+        'data': '数据',
+        'day': '天数',
+        'description': '描述',
+        'difficulty': '难度',
+        'effects': '效果',
+        'elapsedMinutes': '已过分钟',
+        'eventHistory': '事件历史',
+        'expression': '表达式',
+        'failureEffects': '失败效果',
+        'format': '格式',
+        'id': 'ID',
+        'initialValue': '初始值',
+        'inventory': '物品栏',
+        'items': '物品',
+        'label': '标签',
+        'locations': '地点',
+        'maximum': '最大值',
+        'minimum': '最小值',
+        'minuteOfDay': '当日分钟',
+        'name': '名称',
+        'narrative': '叙事',
+        'objectiveIds': '目标 ID',
+        'objectiveProgress': '目标进度',
+        'operator': '运算符',
+        'quantity': '数量',
+        'quests': '任务',
+        'relationships': '关系',
+        'source': '来源',
+        'stages': '阶段',
+        'status': '状态',
+        'successEffects': '成功效果',
+        'summary': '摘要',
+        'tags': '标签',
+        'target': '目标',
+        'turn': '回合',
+        'type': '类型',
+        'updatedAt': '更新时间',
+        'value': '值',
+        'variables': '变量',
+        'version': '版本',
+        'other': '$field',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankChatRetrievalSettings => '聊天检索设置';
+
+  @override
+  String get dataBankRebuildSearchIndex => '重建搜索索引';
+
+  @override
+  String get dataBankImportDocument => '导入文档';
+
+  @override
+  String get dataBankSearchDocuments => '搜索文档';
+
+  @override
+  String get dataBankClearSearch => '清除搜索';
+
+  @override
+  String get dataBankNoMatches => '没有匹配结果';
+
+  @override
+  String get dataBankNoDocuments => '暂无文档';
+
+  @override
+  String get dataBankSearchIndexRebuilt => '搜索索引已重建';
+
+  @override
+  String dataBankDeleteDocumentQuestion(String name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String dataBankDeleteDocumentBody(
+      int versions, int chunks, int bindings, int files) {
+    return '将删除 $versions 个版本、$chunks 个分块、$bindings 个绑定和 $files 个托管文件。';
+  }
+
+  @override
+  String get dataBankChatRetrieval => '聊天检索';
+
+  @override
+  String get dataBankUseInChat => '在聊天中使用资料库';
+
+  @override
+  String get dataBankQueryExpansion => '基于对话扩展查询';
+
+  @override
+  String get dataBankSemanticReranking => '语义重排';
+
+  @override
+  String get dataBankUsesEmbeddingProvider => '使用已配置的嵌入模型提供商';
+
+  @override
+  String get dataBankSourcesPerResponse => '每次回复的来源数';
+
+  @override
+  String get dataBankTokenBudget => 'Token 预算';
+
+  @override
+  String get dataBankChunksPerDocument => '每篇文档的分块数';
+
+  @override
+  String get dataBankLastRetrieval => '上次检索';
+
+  @override
+  String get dataBankNoRetrievalYet => '尚未执行过聊天检索。';
+
+  @override
+  String get dataBankModeLocalFts => '本地全文搜索';
+
+  @override
+  String get dataBankModeSemantic => '混合语义重排';
+
+  @override
+  String get dataBankModeFallback => '本地回退';
+
+  @override
+  String dataBankSourcesCount(int count) {
+    return '$count 个来源';
+  }
+
+  @override
+  String get dataBankInspectAllSources => '查看所有来源';
+
+  @override
+  String dataBankChunksCount(int count) {
+    return '$count 个分块';
+  }
+
+  @override
+  String dataBankBindingsCount(int count) {
+    return '$count 个绑定';
+  }
+
+  @override
+  String get dataBankProcessingFailed => '处理失败';
+
+  @override
+  String get dataBankManageBindings => '管理绑定';
+
+  @override
+  String get dataBankRebuildDocument => '重建文档';
+
+  @override
+  String get dataBankBindings => '绑定';
+
+  @override
+  String get dataBankRemoveBinding => '移除绑定';
+
+  @override
+  String get dataBankAddBinding => '添加绑定';
+
+  @override
+  String dataBankStatusSemantics(String status) {
+    return '状态：$status';
+  }
+
+  @override
+  String get dataBankDismiss => '关闭提示';
+
+  @override
+  String get dataBankStatePending => '等待处理';
+
+  @override
+  String get dataBankStateProcessing => '处理中';
+
+  @override
+  String get dataBankStateReady => '就绪';
+
+  @override
+  String get dataBankStateFailed => '失败';
+
+  @override
+  String get dataBankStateDeleted => '已删除';
+
+  @override
+  String get dataBankDuplicateDocument => '该文档已存在于资料库中。';
+
+  @override
+  String get memoryChatContext => '聊天上下文';
+
+  @override
+  String get memoryAutomaticExtraction => '自动提取';
+
+  @override
+  String get memoryAutomaticExtractionSubtitle => '在新对话轮次后使用当前 AI 连接';
+
+  @override
+  String get memoryRecentChat => '最近聊天';
+
+  @override
+  String get memoryCancelExtraction => '取消提取';
+
+  @override
+  String get memoryExtractFromChat => '从聊天中提取';
+
+  @override
+  String memoryExtractionResult(int candidates, int duplicates, int rejected) {
+    return '$candidates 个候选，$duplicates 个重复，$rejected 个被拒绝';
+  }
+
+  @override
+  String memoryCandidatesCount(int count) {
+    return '候选 $count';
+  }
+
+  @override
+  String memoryActiveCount(int count) {
+    return '生效中 $count';
+  }
+
+  @override
+  String memoryHistoryCount(int count) {
+    return '历史 $count';
+  }
+
+  @override
+  String get memoryCreate => '创建记忆';
+
+  @override
+  String get memoryClearSelection => '清除选择';
+
+  @override
+  String get memoryIgnoreSelected => '忽略所选项';
+
+  @override
+  String get memoryMergeSelected => '合并所选项';
+
+  @override
+  String memorySelectedCount(int count) {
+    return '已选择 $count 项';
+  }
+
+  @override
+  String get memoryUseInChat => '在聊天中使用记忆';
+
+  @override
+  String get memorySemanticReranking => '语义重排';
+
+  @override
+  String get memoryConfiguredEmbeddingProvider => '已配置的嵌入模型提供商';
+
+  @override
+  String get memoryContextBudget => '上下文预算';
+
+  @override
+  String memoryTokensCount(int count) {
+    return '$count Token';
+  }
+
+  @override
+  String get memoryEdit => '编辑记忆';
+
+  @override
+  String get memoryMerge => '合并记忆';
+
+  @override
+  String memoryImportancePercent(int percent) {
+    return '重要性 $percent%';
+  }
+
+  @override
+  String memoryExpires(String date) {
+    return '到期时间 $date';
+  }
+
+  @override
+  String get memoryApprove => '批准';
+
+  @override
+  String get memoryUnlock => '解锁';
+
+  @override
+  String get memoryLock => '锁定';
+
+  @override
+  String get memoryOpenSource => '打开来源';
+
+  @override
+  String get memoryIgnore => '忽略';
+
+  @override
+  String get memoryChatScope => '聊天范围';
+
+  @override
+  String get memoryKind => '类型';
+
+  @override
+  String get memoryLabel => '记忆';
+
+  @override
+  String get memoryIdentityKey => '标识键';
+
+  @override
+  String get memoryImportance => '重要性';
+
+  @override
+  String get memoryLocked => '已锁定';
+
+  @override
+  String get memoryKindPersonFact => '人物事实';
+
+  @override
+  String get memoryKindRelationship => '关系';
+
+  @override
+  String get memoryKindEvent => '事件';
+
+  @override
+  String get memoryKindCommitment => '承诺';
+
+  @override
+  String get memoryKindPreference => '偏好';
+
+  @override
+  String get memoryKindLocation => '地点';
+
+  @override
+  String get memoryKindOther => '其他';
+
+  @override
+  String get memoryScopeCharacterPersona => '角色和用户设定';
+
+  @override
+  String get memoryScopeGroup => '群组';
+
+  @override
+  String get mcpAddServer => '添加 MCP 服务器';
+
+  @override
+  String get mcpServersTab => '服务器';
+
+  @override
+  String get mcpActivityTab => '活动';
+
+  @override
+  String get mcpProtocolName => '模型上下文协议';
+
+  @override
+  String get mcpNoServers => '暂无 MCP 服务器';
+
+  @override
+  String mcpErrorCode(String code) {
+    return '代码：$code';
+  }
+
+  @override
+  String mcpProtocolVersion(String version) {
+    return '协议 $version';
+  }
+
+  @override
+  String get mcpDisconnect => '断开连接';
+
+  @override
+  String get mcpRefreshTools => '刷新工具';
+
+  @override
+  String get mcpReconnect => '重新连接';
+
+  @override
+  String get mcpConnect => '连接';
+
+  @override
+  String get mcpEditServer => '编辑 MCP 服务器';
+
+  @override
+  String get mcpRemoveServer => '移除 MCP 服务器';
+
+  @override
+  String get mcpNoToolsDiscovered => '未发现工具';
+
+  @override
+  String get mcpRemoveServerQuestion => '移除 MCP 服务器？';
+
+  @override
+  String get mcpRemove => '移除';
+
+  @override
+  String get mcpToolPermission => '工具权限';
+
+  @override
+  String get mcpAskEveryTime => '每次询问';
+
+  @override
+  String get mcpAlwaysAllow => '始终允许';
+
+  @override
+  String get mcpDenied => '已拒绝';
+
+  @override
+  String get mcpNoActivity => '暂无 MCP 活动';
+
+  @override
+  String get mcpEndpoint => 'MCP 端点';
+
+  @override
+  String get mcpTransport => '传输方式';
+
+  @override
+  String get mcpBearerToken => 'Bearer Token';
+
+  @override
+  String get mcpShowToken => '显示 Token';
+
+  @override
+  String get mcpHideToken => '隐藏 Token';
+
+  @override
+  String get mcpRemoveStoredToken => '移除已存储的 Token';
+
+  @override
+  String get mcpAllowInsecureHttp => '允许不安全的 HTTP';
+
+  @override
+  String get mcpServerEnabled => '启用服务器';
+
+  @override
+  String get mcpDisconnected => '已断开';
+
+  @override
+  String get mcpConnecting => '连接中';
+
+  @override
+  String get mcpConnected => '已连接';
+
+  @override
+  String get mcpReconnecting => '重新连接中';
+
+  @override
+  String get mcpReadOnlyHint => '只读提示';
+
+  @override
+  String get mcpWriteCapable => '可写入';
+
+  @override
+  String get mcpExternalSideEffect => '会产生外部影响';
+
+  @override
+  String get capabilityCheckFailed => '功能检查失败';
+
+  @override
+  String get capabilityRecentExternalActivity => '最近的外部活动';
+
+  @override
+  String get capabilityAuditUnavailable => '审计历史不可用';
+
+  @override
+  String get capabilityNoExternalCalls => '没有外部调用记录';
+
+  @override
+  String capabilityReadyCount(int ready, int total) {
+    return '$total 项中有 $ready 项就绪';
+  }
+
+  @override
+  String get capabilityOpenSettings => '打开设置';
+
+  @override
+  String get capabilityRequestPermission => '请求权限';
+
+  @override
+  String get capabilityCurrentAi => '当前 AI';
+
+  @override
+  String get capabilitySystemSpeech => '系统语音';
+
+  @override
+  String get capabilityVoiceInput => '语音输入';
+
+  @override
+  String get capabilitySemanticSearch => '语义搜索';
+
+  @override
+  String get capabilityMcpTools => 'MCP 工具';
+
+  @override
+  String get capabilityChatGenerationConnection => '聊天生成连接';
+
+  @override
+  String get capabilityDeviceTts => '设备文字转语音';
+
+  @override
+  String get capabilityDeviceSpeechRecognition => '设备语音识别';
+
+  @override
+  String get capabilityOptionalEmbeddingConnection => '可选的嵌入模型连接';
+
+  @override
+  String get capabilityOptionalImageConnection => '可选的图像连接';
+
+  @override
+  String get capabilityExternalToolServers => '外部工具服务器';
+
+  @override
+  String get capabilityBundledCharacterRendering => '内置角色渲染';
+
+  @override
+  String get capabilityCompleteAiConnection => '请完善当前 AI 连接';
+
+  @override
+  String get capabilityCompleteEmbeddingConnection => '请完善嵌入模型连接';
+
+  @override
+  String get capabilityCompleteImageConnection => '请完善图像连接';
+
+  @override
+  String get capabilityConfigurationRequired => '需要配置';
+
+  @override
+  String get capabilityConfigured => '已配置';
+
+  @override
+  String get capabilityAvailable => '可用';
+
+  @override
+  String get capabilityPermissionRequired => '需要权限';
+
+  @override
+  String get capabilityPermissionDenied => '权限被拒绝';
+
+  @override
+  String get capabilityDownloadRequired => '需要下载';
+
+  @override
+  String get capabilityUnavailableOffline => '离线时不可用';
+
+  @override
+  String get capabilityUnavailableBuild => '此版本中不可用';
+
+  @override
+  String get capabilityDataMetadata => '元数据';
+
+  @override
+  String get capabilityDataPrompt => '提示词';
+
+  @override
+  String get capabilityDataChatText => '聊天文本';
+
+  @override
+  String get capabilityDataDocumentText => '文档文本';
+
+  @override
+  String get capabilityDataImage => '图像';
+
+  @override
+  String get capabilityDataAudio => '音频';
+
+  @override
+  String get capabilityDataCharacterCard => '角色卡';
+
+  @override
+  String get capabilityDataToolArguments => '工具参数';
+
+  @override
+  String dataBankCitationSourcesCount(int count) {
+    return '$count 个资料库来源';
+  }
+
+  @override
+  String get dataBankCitationSources => '资料库来源';
+
+  @override
+  String dataBankLocalQueriesFused(int count) {
+    return '已合并 $count 个本地查询';
+  }
+
+  @override
+  String get memoryUsed => '已使用的记忆';
+
+  @override
+  String memoryTokenUsage(int used, int allocated) {
+    return '$used/$allocated Token';
+  }
+
+  @override
+  String memoryRelevancePercent(int percent) {
+    return '相关性 $percent%';
+  }
+
+  @override
+  String get memoryModeLocalFts => '本地全文搜索';
+
+  @override
+  String get memoryModeHybrid => '混合检索';
+
+  @override
+  String get memoryModeLocalFallback => '本地全文搜索回退';
+
+  @override
+  String get memoryIncluded => '已纳入';
+
+  @override
+  String get memoryTrimmed => '已裁剪';
+
+  @override
+  String get memoryExcluded => '已排除';
+
+  @override
+  String rpgTurnNumber(int turn) {
+    return '第 $turn 回合';
+  }
+
+  @override
+  String get rpgDisableMode => '关闭 RPG 模式';
+
+  @override
+  String get rpgStatus => '状态';
+
+  @override
+  String get rpgInventory => '物品栏';
+
+  @override
+  String get rpgQuests => '任务';
+
+  @override
+  String get rpgRelations => '关系';
+
+  @override
+  String get rpgActions => '行动';
+
+  @override
+  String get rpgLog => '日志';
+
+  @override
+  String get rpgLocation => '地点';
+
+  @override
+  String get rpgTime => '时间';
+
+  @override
+  String rpgDayTime(int day, String time) {
+    return '第 $day 天，$time';
+  }
+
+  @override
+  String get rpgInventoryEmpty => '物品栏为空';
+
+  @override
+  String get rpgNoQuests => '暂无任务';
+
+  @override
+  String get rpgNoRelationships => '暂无关系';
+
+  @override
+  String get rpgNoActions => '未定义行动';
+
+  @override
+  String rpgCost(String cost) {
+    return '消耗：$cost';
+  }
+
+  @override
+  String rpgCheck(String dice, String attribute, num difficulty) {
+    return '检定：$dice + $attribute 对抗 $difficulty';
+  }
+
+  @override
+  String rpgCooldown(int turns) {
+    return '冷却：$turns 回合';
+  }
+
+  @override
+  String get rpgRequirementsNotMet => '不满足要求或资源不足';
+
+  @override
+  String get rpgNoTurnsRecorded => '暂无回合记录';
+
+  @override
+  String get rpgSnapshots => '快照';
+
+  @override
+  String get rpgSnapshotActions => '快照操作';
+
+  @override
+  String get rpgRestoreSnapshot => '恢复快照';
+
+  @override
+  String get rpgForkNewBranch => '创建新分支';
+
+  @override
+  String get rpgRuleEngineSource => '来源：规则引擎';
+
+  @override
+  String rpgRoll(String total, String expression) {
+    return '掷骰：$total（$expression）';
+  }
+
+  @override
+  String rpgChanges(String changes) {
+    return '变更：$changes';
+  }
+
+  @override
+  String get rpgForkBranch => '创建分支';
+
+  @override
+  String get rpgBranchId => '分支 ID';
+
+  @override
+  String get rpgFork => '创建';
+
+  @override
+  String get rpgQuestInactive => '未激活';
+
+  @override
+  String get rpgQuestActive => '进行中';
+
+  @override
+  String get rpgQuestCompleted => '已完成';
+
+  @override
+  String get rpgQuestFailed => '失败';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -4625,7 +5517,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get openai => 'OpenAI';
+  String get openai => 'OAI Compatible';
 
   @override
   String get claude => 'Claude';
@@ -5033,6 +5925,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get commandHelp => '輸入 / 檢視可用指令';
 
   @override
+  String get off => '關閉';
+
+  @override
+  String get scope => '範圍';
+
+  @override
+  String get global => '全域';
+
+  @override
+  String get manual => '手動';
+
+  @override
   String get swipes => '備選回覆';
 
   @override
@@ -5187,4 +6091,1141 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get chatLorebooksHint => '僅在本聊天中生效的世界書';
+
+  @override
+  String get localFeatures => '本機功能';
+
+  @override
+  String get memoryInbox => '記憶收件匣';
+
+  @override
+  String get memoryInboxSubtitle => '審核及維護長期記憶';
+
+  @override
+  String get dataBank => '資料庫';
+
+  @override
+  String get dataBankSubtitle => '匯入、搜尋並綁定本機文件';
+
+  @override
+  String get rpgScenarioEditor => 'RPG 劇本編輯器';
+
+  @override
+  String get rpgScenarioEditorSubtitle => '建立並驗證本機劇本套件';
+
+  @override
+  String get capabilityCheck => '功能檢查';
+
+  @override
+  String get capabilityCheckSubtitle => '可用性、權限與設定';
+
+  @override
+  String get mcpServers => 'MCP 伺服器';
+
+  @override
+  String get mcpServersSubtitle => '連線、工具、權限與活動';
+
+  @override
+  String get toolCalling => '工具呼叫';
+
+  @override
+  String get toolCallingSubtitle => '內建工具、核准與限制';
+
+  @override
+  String get toolCallingAllow => '允許工具呼叫';
+
+  @override
+  String get toolCallingAllowSubtitle => '模型供應商只能要求下方啟用的工具';
+
+  @override
+  String get toolBuiltInTools => '內建工具';
+
+  @override
+  String get toolMcpTools => 'MCP 工具';
+
+  @override
+  String get toolMcpPermissionsSubtitle => '已連線的 MCP 伺服器使用各自的權限設定';
+
+  @override
+  String get toolSafetyLimits => '安全限制';
+
+  @override
+  String get toolRounds => '工具輪次';
+
+  @override
+  String get toolCallsPerResponse => '每次回覆的呼叫數';
+
+  @override
+  String get toolTimeLimit => '時間限制';
+
+  @override
+  String get toolTokenBudget => '工具 Token 預算';
+
+  @override
+  String get toolSeconds => '秒';
+
+  @override
+  String get toolTokens => 'Token';
+
+  @override
+  String toolDecrease(String control) {
+    return '減少$control';
+  }
+
+  @override
+  String toolIncrease(String control) {
+    return '增加$control';
+  }
+
+  @override
+  String get toolActivity => '工具活動';
+
+  @override
+  String get toolApprovalRequired => '需要核准';
+
+  @override
+  String get toolAllowOnce => '僅允許一次';
+
+  @override
+  String get toolAlwaysAllow => '一律允許';
+
+  @override
+  String get toolDeny => '拒絕';
+
+  @override
+  String get toolCancelCall => '取消工具呼叫';
+
+  @override
+  String get toolStatusWaitingApproval => '等待核准';
+
+  @override
+  String get toolStatusRunning => '執行中';
+
+  @override
+  String get toolStatusSucceeded => '已成功';
+
+  @override
+  String get toolStatusFailed => '失敗';
+
+  @override
+  String get toolStatusDenied => '已拒絕';
+
+  @override
+  String get toolStatusCancelled => '已取消';
+
+  @override
+  String get storageManagement => '儲存空間管理';
+
+  @override
+  String get storageManagementSubtitle => '空間用量、孤立檔案掃描與安全清理';
+
+  @override
+  String storageUsedOfQuota(String used, String quota) {
+    return '已使用 $used，配額 $quota';
+  }
+
+  @override
+  String get storageQuotaWarning => '儲存空間用量已超過警告門檻';
+
+  @override
+  String get storageWithinQuota => '儲存空間用量未超過警告門檻';
+
+  @override
+  String storageScanIncomplete(int count) {
+    return '有 $count 個路徑無法檢查';
+  }
+
+  @override
+  String get storageCategoryLive2d => 'Live2D 模型';
+
+  @override
+  String get storageCategoryAttachments => '附件與媒體';
+
+  @override
+  String get storageCategoryDataBank => '資料庫文件';
+
+  @override
+  String get storageCategoryAudio => '音訊';
+
+  @override
+  String get storageCategoryCache => '快取';
+
+  @override
+  String storageFilesCount(int count) {
+    return '$count 個檔案';
+  }
+
+  @override
+  String storageReclaimable(String size) {
+    return '可回收 $size';
+  }
+
+  @override
+  String get storageCleanupCandidates => '安全清理';
+
+  @override
+  String get storageNoCleanupCandidates => '未發現無引用或已過期的檔案';
+
+  @override
+  String get storageSelectAll => '全選';
+
+  @override
+  String get storageClearSelection => '清除選取';
+
+  @override
+  String get storageUndo => '復原';
+
+  @override
+  String get storageCleanSelected => '清理所選項目';
+
+  @override
+  String get storageCleanupReviewTitle => '確認清理';
+
+  @override
+  String storageCleanupReviewBody(int items, int files, String size) {
+    return '將 $items 項（共 $files 個檔案，佔用 $size）移至可復原的垃圾桶？';
+  }
+
+  @override
+  String get storageCleanupRecoverableHint => '有引用的檔案會受到保護。在暫存檔案被永久刪除前，可以復原操作。';
+
+  @override
+  String storageCleanupMoved(int count) {
+    return '已將 $count 項移至可復原的垃圾桶';
+  }
+
+  @override
+  String get storageCleanupRestored => '已復原清理';
+
+  @override
+  String get storageCleanupCompleted => '清理完成';
+
+  @override
+  String storageCleanupFailed(String error) {
+    return '清理失敗：$error';
+  }
+
+  @override
+  String get storageReasonInterruptedTemporary => '中斷操作留下的暫存資料';
+
+  @override
+  String get storageReasonMissingDatabaseReference => '資料庫中沒有文件引用此資料';
+
+  @override
+  String get storageReasonInterruptedDocumentCleanup => '文件清理被中斷';
+
+  @override
+  String get storageReasonMissingFileReference => '資料庫中沒有記錄引用此檔案';
+
+  @override
+  String get storageReasonExpiredTransient => '已過期的暫存資料';
+
+  @override
+  String get storageReasonExpiredAudio => '已過期的合成音訊';
+
+  @override
+  String get live2dUnavailableModelMessage =>
+      '已指派的 Live2D 模型無法使用。請選擇其他模型或重新匯入。';
+
+  @override
+  String get live2dSelectionExpiredMessage => '該 Live2D 模型已無法使用。請選擇其他模型或重新匯入。';
+
+  @override
+  String live2dModelsImported(int count) {
+    return '已匯入 $count 個 Live2D 模型';
+  }
+
+  @override
+  String get live2dModelDeleted => '已刪除匯入的 Live2D 模型。';
+
+  @override
+  String get live2dCleanupPending => ' 檔案清理將於下次重新整理模型庫時重試。';
+
+  @override
+  String get live2dDeleteImportedModelQuestion => '刪除匯入的模型？';
+
+  @override
+  String live2dDeletePackageBody(int count) {
+    return '此模型套件包含 $count 個模型，它們都會被刪除。';
+  }
+
+  @override
+  String live2dDeleteModelBody(String name) {
+    return '將從此裝置刪除「$name」。';
+  }
+
+  @override
+  String get live2dDisabledFor => '下列角色將停用 Live2D：';
+
+  @override
+  String get live2dLicensing => 'Live2D 授權資訊';
+
+  @override
+  String get live2dLicenseNotice =>
+      '渲染器包含 Live2D Cubism SDK 與 Core。模型檔案及商業發行可能適用其他條款。\n\n內建的 Hiyori Momose 模型是 Live2D Inc. 擁有著作權的官方範例資料，並依據 Live2D 免費素材授權協議與範例資料使用條款使用。本應用程式由作者自行決定製作。\n\n發行應用程式前，請確認每個匯入模型的使用權。';
+
+  @override
+  String get live2dReviewTerms => '查看條款';
+
+  @override
+  String live2dUnavailableLabel(String name) {
+    return '$name（無法使用）';
+  }
+
+  @override
+  String live2dImportedLabel(String name) {
+    return '$name（已匯入）';
+  }
+
+  @override
+  String get live2dImportZip => '匯入 ZIP';
+
+  @override
+  String get live2dMotion => '動作';
+
+  @override
+  String get live2dPlayMotion => '播放動作';
+
+  @override
+  String get live2dStageAdjustment => '舞台調整';
+
+  @override
+  String get live2dMotionSpeed => '動作速度';
+
+  @override
+  String get live2dImportedModels => '已匯入模型';
+
+  @override
+  String live2dModelsCount(int count) {
+    return '$count 個模型';
+  }
+
+  @override
+  String get live2dDeleteImportedModel => '刪除匯入的模型';
+
+  @override
+  String get rpgScenarioTitle => 'RPG 劇本';
+
+  @override
+  String get rpgImportScenario => '匯入劇本';
+
+  @override
+  String get rpgSaveDraft => '儲存草稿';
+
+  @override
+  String get rpgRestoreDraft => '還原草稿';
+
+  @override
+  String get rpgExportScenario => '匯出劇本';
+
+  @override
+  String get rpgIssues => '問題';
+
+  @override
+  String rpgIssuesCount(int count) {
+    return '問題（$count）';
+  }
+
+  @override
+  String get rpgScenarioImportFailed => '劇本匯入失敗';
+
+  @override
+  String rpgScenarioImported(String name) {
+    return '已匯入 $name';
+  }
+
+  @override
+  String get rpgDraftSaved => '草稿已儲存';
+
+  @override
+  String get rpgDraftRestored => '草稿已還原';
+
+  @override
+  String get rpgNoSavedDraft => '沒有已儲存的草稿';
+
+  @override
+  String get rpgScenarioExported => '劇本已匯出';
+
+  @override
+  String get rpgSetValue => '設定值';
+
+  @override
+  String rpgAddItem(String label) {
+    return '新增$label';
+  }
+
+  @override
+  String get rpgItemActions => '項目操作';
+
+  @override
+  String get rpgMoveUp => '上移';
+
+  @override
+  String get rpgMoveDown => '下移';
+
+  @override
+  String get rpgAddEntry => '新增項目';
+
+  @override
+  String get rpgDeleteEntry => '刪除項目';
+
+  @override
+  String rpgAddEntryTitle(String label) {
+    return '新增$label項目';
+  }
+
+  @override
+  String get rpgValue => '值';
+
+  @override
+  String get rpgEnterInteger => '請輸入整數';
+
+  @override
+  String get rpgEnterNumber => '請輸入數字';
+
+  @override
+  String rpgItemNumber(int number) {
+    return '項目 $number';
+  }
+
+  @override
+  String rpgFieldLabel(String field) {
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': '中繼資料',
+        'compatibility': '相容性',
+        'initialState': '初始狀態',
+        'initialSeed': '初始種子',
+        'schemaVersion': '結構版本',
+        'protectedFields': '受保護欄位',
+        'minimumEngineVersion': '最低引擎版本',
+        'maximumEngineVersion': '最高引擎版本',
+        'requiredCapabilities': '所需功能',
+        'actors': '角色',
+        'attributes': '屬性',
+        'author': '作者',
+        'availability': '可用性',
+        'branchId': '分支 ID',
+        'conditions': '條件',
+        'cooldowns': '冷卻',
+        'costs': '消耗',
+        'createdAt': '建立時間',
+        'data': '資料',
+        'day': '天數',
+        'description': '描述',
+        'difficulty': '難度',
+        'effects': '效果',
+        'elapsedMinutes': '經過分鐘',
+        'eventHistory': '事件歷程',
+        'expression': '運算式',
+        'failureEffects': '失敗效果',
+        'format': '格式',
+        'id': 'ID',
+        'initialValue': '初始值',
+        'inventory': '物品欄',
+        'items': '物品',
+        'label': '標籤',
+        'locations': '地點',
+        'maximum': '最大值',
+        'minimum': '最小值',
+        'minuteOfDay': '當日分鐘',
+        'name': '名稱',
+        'narrative': '敘事',
+        'objectiveIds': '目標 ID',
+        'objectiveProgress': '目標進度',
+        'operator': '運算子',
+        'quantity': '數量',
+        'quests': '任務',
+        'relationships': '關係',
+        'source': '來源',
+        'stages': '階段',
+        'status': '狀態',
+        'successEffects': '成功效果',
+        'summary': '摘要',
+        'tags': '標籤',
+        'target': '目標',
+        'turn': '回合',
+        'type': '類型',
+        'updatedAt': '更新時間',
+        'value': '值',
+        'variables': '變數',
+        'version': '版本',
+        'other': '$field',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankChatRetrievalSettings => '聊天檢索設定';
+
+  @override
+  String get dataBankRebuildSearchIndex => '重建搜尋索引';
+
+  @override
+  String get dataBankImportDocument => '匯入文件';
+
+  @override
+  String get dataBankSearchDocuments => '搜尋文件';
+
+  @override
+  String get dataBankClearSearch => '清除搜尋';
+
+  @override
+  String get dataBankNoMatches => '沒有相符結果';
+
+  @override
+  String get dataBankNoDocuments => '尚無文件';
+
+  @override
+  String get dataBankSearchIndexRebuilt => '搜尋索引已重建';
+
+  @override
+  String dataBankDeleteDocumentQuestion(String name) {
+    return '刪除 $name？';
+  }
+
+  @override
+  String dataBankDeleteDocumentBody(
+      int versions, int chunks, int bindings, int files) {
+    return '將刪除 $versions 個版本、$chunks 個區塊、$bindings 個綁定與 $files 個受管理檔案。';
+  }
+
+  @override
+  String get dataBankChatRetrieval => '聊天檢索';
+
+  @override
+  String get dataBankUseInChat => '在聊天中使用資料庫';
+
+  @override
+  String get dataBankQueryExpansion => '根據對話擴充查詢';
+
+  @override
+  String get dataBankSemanticReranking => '語意重新排序';
+
+  @override
+  String get dataBankUsesEmbeddingProvider => '使用已設定的嵌入模型供應商';
+
+  @override
+  String get dataBankSourcesPerResponse => '每次回覆的來源數';
+
+  @override
+  String get dataBankTokenBudget => 'Token 預算';
+
+  @override
+  String get dataBankChunksPerDocument => '每份文件的區塊數';
+
+  @override
+  String get dataBankLastRetrieval => '上次檢索';
+
+  @override
+  String get dataBankNoRetrievalYet => '尚未執行過聊天檢索。';
+
+  @override
+  String get dataBankModeLocalFts => '本機全文搜尋';
+
+  @override
+  String get dataBankModeSemantic => '混合語意重新排序';
+
+  @override
+  String get dataBankModeFallback => '本機備援';
+
+  @override
+  String dataBankSourcesCount(int count) {
+    return '$count 個來源';
+  }
+
+  @override
+  String get dataBankInspectAllSources => '查看所有來源';
+
+  @override
+  String dataBankChunksCount(int count) {
+    return '$count 個區塊';
+  }
+
+  @override
+  String dataBankBindingsCount(int count) {
+    return '$count 個綁定';
+  }
+
+  @override
+  String get dataBankProcessingFailed => '處理失敗';
+
+  @override
+  String get dataBankManageBindings => '管理綁定';
+
+  @override
+  String get dataBankRebuildDocument => '重建文件';
+
+  @override
+  String get dataBankBindings => '綁定';
+
+  @override
+  String get dataBankRemoveBinding => '移除綁定';
+
+  @override
+  String get dataBankAddBinding => '新增綁定';
+
+  @override
+  String dataBankStatusSemantics(String status) {
+    return '狀態：$status';
+  }
+
+  @override
+  String get dataBankDismiss => '關閉提示';
+
+  @override
+  String get dataBankStatePending => '等待處理';
+
+  @override
+  String get dataBankStateProcessing => '處理中';
+
+  @override
+  String get dataBankStateReady => '就緒';
+
+  @override
+  String get dataBankStateFailed => '失敗';
+
+  @override
+  String get dataBankStateDeleted => '已刪除';
+
+  @override
+  String get dataBankDuplicateDocument => '該文件已存在於資料庫中。';
+
+  @override
+  String get memoryChatContext => '聊天內容';
+
+  @override
+  String get memoryAutomaticExtraction => '自動擷取';
+
+  @override
+  String get memoryAutomaticExtractionSubtitle => '在新對話輪次後使用目前的 AI 連線';
+
+  @override
+  String get memoryRecentChat => '最近聊天';
+
+  @override
+  String get memoryCancelExtraction => '取消擷取';
+
+  @override
+  String get memoryExtractFromChat => '從聊天中擷取';
+
+  @override
+  String memoryExtractionResult(int candidates, int duplicates, int rejected) {
+    return '$candidates 個候選、$duplicates 個重複、$rejected 個遭拒';
+  }
+
+  @override
+  String memoryCandidatesCount(int count) {
+    return '候選 $count';
+  }
+
+  @override
+  String memoryActiveCount(int count) {
+    return '使用中 $count';
+  }
+
+  @override
+  String memoryHistoryCount(int count) {
+    return '歷程 $count';
+  }
+
+  @override
+  String get memoryCreate => '建立記憶';
+
+  @override
+  String get memoryClearSelection => '清除選取';
+
+  @override
+  String get memoryIgnoreSelected => '忽略所選項目';
+
+  @override
+  String get memoryMergeSelected => '合併所選項目';
+
+  @override
+  String memorySelectedCount(int count) {
+    return '已選取 $count 項';
+  }
+
+  @override
+  String get memoryUseInChat => '在聊天中使用記憶';
+
+  @override
+  String get memorySemanticReranking => '語意重新排序';
+
+  @override
+  String get memoryConfiguredEmbeddingProvider => '已設定的嵌入模型供應商';
+
+  @override
+  String get memoryContextBudget => '內容預算';
+
+  @override
+  String memoryTokensCount(int count) {
+    return '$count Token';
+  }
+
+  @override
+  String get memoryEdit => '編輯記憶';
+
+  @override
+  String get memoryMerge => '合併記憶';
+
+  @override
+  String memoryImportancePercent(int percent) {
+    return '重要性 $percent%';
+  }
+
+  @override
+  String memoryExpires(String date) {
+    return '到期時間 $date';
+  }
+
+  @override
+  String get memoryApprove => '核准';
+
+  @override
+  String get memoryUnlock => '解除鎖定';
+
+  @override
+  String get memoryLock => '鎖定';
+
+  @override
+  String get memoryOpenSource => '開啟來源';
+
+  @override
+  String get memoryIgnore => '忽略';
+
+  @override
+  String get memoryChatScope => '聊天範圍';
+
+  @override
+  String get memoryKind => '類型';
+
+  @override
+  String get memoryLabel => '記憶';
+
+  @override
+  String get memoryIdentityKey => '識別鍵';
+
+  @override
+  String get memoryImportance => '重要性';
+
+  @override
+  String get memoryLocked => '已鎖定';
+
+  @override
+  String get memoryKindPersonFact => '人物事實';
+
+  @override
+  String get memoryKindRelationship => '關係';
+
+  @override
+  String get memoryKindEvent => '事件';
+
+  @override
+  String get memoryKindCommitment => '承諾';
+
+  @override
+  String get memoryKindPreference => '偏好';
+
+  @override
+  String get memoryKindLocation => '地點';
+
+  @override
+  String get memoryKindOther => '其他';
+
+  @override
+  String get memoryScopeCharacterPersona => '角色與使用者設定';
+
+  @override
+  String get memoryScopeGroup => '群組';
+
+  @override
+  String get mcpAddServer => '新增 MCP 伺服器';
+
+  @override
+  String get mcpServersTab => '伺服器';
+
+  @override
+  String get mcpActivityTab => '活動';
+
+  @override
+  String get mcpProtocolName => '模型內容協定';
+
+  @override
+  String get mcpNoServers => '尚無 MCP 伺服器';
+
+  @override
+  String mcpErrorCode(String code) {
+    return '代碼：$code';
+  }
+
+  @override
+  String mcpProtocolVersion(String version) {
+    return '協定 $version';
+  }
+
+  @override
+  String get mcpDisconnect => '中斷連線';
+
+  @override
+  String get mcpRefreshTools => '重新整理工具';
+
+  @override
+  String get mcpReconnect => '重新連線';
+
+  @override
+  String get mcpConnect => '連線';
+
+  @override
+  String get mcpEditServer => '編輯 MCP 伺服器';
+
+  @override
+  String get mcpRemoveServer => '移除 MCP 伺服器';
+
+  @override
+  String get mcpNoToolsDiscovered => '未發現工具';
+
+  @override
+  String get mcpRemoveServerQuestion => '移除 MCP 伺服器？';
+
+  @override
+  String get mcpRemove => '移除';
+
+  @override
+  String get mcpToolPermission => '工具權限';
+
+  @override
+  String get mcpAskEveryTime => '每次詢問';
+
+  @override
+  String get mcpAlwaysAllow => '一律允許';
+
+  @override
+  String get mcpDenied => '已拒絕';
+
+  @override
+  String get mcpNoActivity => '尚無 MCP 活動';
+
+  @override
+  String get mcpEndpoint => 'MCP 端點';
+
+  @override
+  String get mcpTransport => '傳輸方式';
+
+  @override
+  String get mcpBearerToken => 'Bearer Token';
+
+  @override
+  String get mcpShowToken => '顯示 Token';
+
+  @override
+  String get mcpHideToken => '隱藏 Token';
+
+  @override
+  String get mcpRemoveStoredToken => '移除已儲存的 Token';
+
+  @override
+  String get mcpAllowInsecureHttp => '允許不安全的 HTTP';
+
+  @override
+  String get mcpServerEnabled => '啟用伺服器';
+
+  @override
+  String get mcpDisconnected => '已中斷';
+
+  @override
+  String get mcpConnecting => '連線中';
+
+  @override
+  String get mcpConnected => '已連線';
+
+  @override
+  String get mcpReconnecting => '重新連線中';
+
+  @override
+  String get mcpReadOnlyHint => '唯讀提示';
+
+  @override
+  String get mcpWriteCapable => '可寫入';
+
+  @override
+  String get mcpExternalSideEffect => '會產生外部影響';
+
+  @override
+  String get capabilityCheckFailed => '功能檢查失敗';
+
+  @override
+  String get capabilityRecentExternalActivity => '最近的外部活動';
+
+  @override
+  String get capabilityAuditUnavailable => '稽核歷程無法使用';
+
+  @override
+  String get capabilityNoExternalCalls => '沒有外部呼叫記錄';
+
+  @override
+  String capabilityReadyCount(int ready, int total) {
+    return '$total 項中有 $ready 項就緒';
+  }
+
+  @override
+  String get capabilityOpenSettings => '開啟設定';
+
+  @override
+  String get capabilityRequestPermission => '要求權限';
+
+  @override
+  String get capabilityCurrentAi => '目前的 AI';
+
+  @override
+  String get capabilitySystemSpeech => '系統語音';
+
+  @override
+  String get capabilityVoiceInput => '語音輸入';
+
+  @override
+  String get capabilitySemanticSearch => '語意搜尋';
+
+  @override
+  String get capabilityMcpTools => 'MCP 工具';
+
+  @override
+  String get capabilityChatGenerationConnection => '聊天生成連線';
+
+  @override
+  String get capabilityDeviceTts => '裝置文字轉語音';
+
+  @override
+  String get capabilityDeviceSpeechRecognition => '裝置語音辨識';
+
+  @override
+  String get capabilityOptionalEmbeddingConnection => '選用的嵌入模型連線';
+
+  @override
+  String get capabilityOptionalImageConnection => '選用的圖像連線';
+
+  @override
+  String get capabilityExternalToolServers => '外部工具伺服器';
+
+  @override
+  String get capabilityBundledCharacterRendering => '內建角色渲染';
+
+  @override
+  String get capabilityCompleteAiConnection => '請完成目前的 AI 連線設定';
+
+  @override
+  String get capabilityCompleteEmbeddingConnection => '請完成嵌入模型連線設定';
+
+  @override
+  String get capabilityCompleteImageConnection => '請完成圖像連線設定';
+
+  @override
+  String get capabilityConfigurationRequired => '需要設定';
+
+  @override
+  String get capabilityConfigured => '已設定';
+
+  @override
+  String get capabilityAvailable => '可用';
+
+  @override
+  String get capabilityPermissionRequired => '需要權限';
+
+  @override
+  String get capabilityPermissionDenied => '權限遭拒';
+
+  @override
+  String get capabilityDownloadRequired => '需要下載';
+
+  @override
+  String get capabilityUnavailableOffline => '離線時無法使用';
+
+  @override
+  String get capabilityUnavailableBuild => '此版本無法使用';
+
+  @override
+  String get capabilityDataMetadata => '中繼資料';
+
+  @override
+  String get capabilityDataPrompt => '提示詞';
+
+  @override
+  String get capabilityDataChatText => '聊天文字';
+
+  @override
+  String get capabilityDataDocumentText => '文件文字';
+
+  @override
+  String get capabilityDataImage => '圖像';
+
+  @override
+  String get capabilityDataAudio => '音訊';
+
+  @override
+  String get capabilityDataCharacterCard => '角色卡';
+
+  @override
+  String get capabilityDataToolArguments => '工具參數';
+
+  @override
+  String dataBankCitationSourcesCount(int count) {
+    return '$count 個資料庫來源';
+  }
+
+  @override
+  String get dataBankCitationSources => '資料庫來源';
+
+  @override
+  String dataBankLocalQueriesFused(int count) {
+    return '已合併 $count 個本機查詢';
+  }
+
+  @override
+  String get memoryUsed => '已使用的記憶';
+
+  @override
+  String memoryTokenUsage(int used, int allocated) {
+    return '$used/$allocated Token';
+  }
+
+  @override
+  String memoryRelevancePercent(int percent) {
+    return '相關性 $percent%';
+  }
+
+  @override
+  String get memoryModeLocalFts => '本機全文搜尋';
+
+  @override
+  String get memoryModeHybrid => '混合檢索';
+
+  @override
+  String get memoryModeLocalFallback => '本機全文搜尋備援';
+
+  @override
+  String get memoryIncluded => '已納入';
+
+  @override
+  String get memoryTrimmed => '已裁剪';
+
+  @override
+  String get memoryExcluded => '已排除';
+
+  @override
+  String rpgTurnNumber(int turn) {
+    return '第 $turn 回合';
+  }
+
+  @override
+  String get rpgDisableMode => '關閉 RPG 模式';
+
+  @override
+  String get rpgStatus => '狀態';
+
+  @override
+  String get rpgInventory => '物品欄';
+
+  @override
+  String get rpgQuests => '任務';
+
+  @override
+  String get rpgRelations => '關係';
+
+  @override
+  String get rpgActions => '行動';
+
+  @override
+  String get rpgLog => '日誌';
+
+  @override
+  String get rpgLocation => '地點';
+
+  @override
+  String get rpgTime => '時間';
+
+  @override
+  String rpgDayTime(int day, String time) {
+    return '第 $day 天，$time';
+  }
+
+  @override
+  String get rpgInventoryEmpty => '物品欄為空';
+
+  @override
+  String get rpgNoQuests => '尚無任務';
+
+  @override
+  String get rpgNoRelationships => '尚無關係';
+
+  @override
+  String get rpgNoActions => '未定義行動';
+
+  @override
+  String rpgCost(String cost) {
+    return '消耗：$cost';
+  }
+
+  @override
+  String rpgCheck(String dice, String attribute, num difficulty) {
+    return '檢定：$dice + $attribute 對抗 $difficulty';
+  }
+
+  @override
+  String rpgCooldown(int turns) {
+    return '冷卻：$turns 回合';
+  }
+
+  @override
+  String get rpgRequirementsNotMet => '不符合要求或資源不足';
+
+  @override
+  String get rpgNoTurnsRecorded => '尚無回合記錄';
+
+  @override
+  String get rpgSnapshots => '快照';
+
+  @override
+  String get rpgSnapshotActions => '快照操作';
+
+  @override
+  String get rpgRestoreSnapshot => '還原快照';
+
+  @override
+  String get rpgForkNewBranch => '建立新分支';
+
+  @override
+  String get rpgRuleEngineSource => '來源：規則引擎';
+
+  @override
+  String rpgRoll(String total, String expression) {
+    return '擲骰：$total（$expression）';
+  }
+
+  @override
+  String rpgChanges(String changes) {
+    return '變更：$changes';
+  }
+
+  @override
+  String get rpgForkBranch => '建立分支';
+
+  @override
+  String get rpgBranchId => '分支 ID';
+
+  @override
+  String get rpgFork => '建立';
+
+  @override
+  String get rpgQuestInactive => '未啟用';
+
+  @override
+  String get rpgQuestActive => '進行中';
+
+  @override
+  String get rpgQuestCompleted => '已完成';
+
+  @override
+  String get rpgQuestFailed => '失敗';
 }

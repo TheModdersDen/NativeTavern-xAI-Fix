@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/data_bank_context.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 class DataBankCitationPreview extends StatelessWidget {
   final ChatMessage message;
@@ -9,6 +10,7 @@ class DataBankCitationPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final snapshot = dataBankContextForSwipe(
       message.metadata,
       message.currentSwipeIndex,
@@ -23,9 +25,7 @@ class DataBankCitationPreview extends StatelessWidget {
         onPressed: () => showDataBankCitationSheet(context, snapshot),
         icon: const Icon(Icons.menu_book_outlined, size: 17),
         label: Text(
-          snapshot.sources.length == 1
-              ? '1 Data Bank source'
-              : '${snapshot.sources.length} Data Bank sources',
+          l10n.dataBankCitationSourcesCount(snapshot.sources.length),
         ),
         style: TextButton.styleFrom(
           visualDensity: VisualDensity.compact,
@@ -50,16 +50,17 @@ Future<void> showDataBankCitationSheet(
 
 class DataBankCitationSheet extends StatelessWidget {
   final DataBankContextSnapshot snapshot;
-  final String title;
+  final String? title;
 
   const DataBankCitationSheet({
     super.key,
     required this.snapshot,
-    this.title = 'Data Bank sources',
+    this.title,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -74,12 +75,12 @@ class DataBankCitationSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      title,
+                      title ?? l10n.dataBankCitationSources,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Close',
+                    tooltip: l10n.close,
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
                   ),
@@ -115,10 +116,11 @@ class _RetrievalSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final mode = switch (snapshot.mode) {
-      DataBankRetrievalMode.localFts => 'Local full-text search',
-      DataBankRetrievalMode.semanticReranked => 'Hybrid semantic reranking',
-      DataBankRetrievalMode.semanticFallback => 'Local full-text fallback',
+      DataBankRetrievalMode.localFts => l10n.dataBankModeLocalFts,
+      DataBankRetrievalMode.semanticReranked => l10n.dataBankModeSemantic,
+      DataBankRetrievalMode.semanticFallback => l10n.dataBankModeFallback,
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +136,7 @@ class _RetrievalSummary extends StatelessWidget {
         Text(mode, style: Theme.of(context).textTheme.bodySmall),
         if (snapshot.queries.length > 1)
           Text(
-            '${snapshot.queries.length} local queries fused',
+            l10n.dataBankLocalQueriesFused(snapshot.queries.length),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         if (snapshot.fallbackReason != null)
@@ -144,8 +146,8 @@ class _RetrievalSummary extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.error,
-            ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
           ),
       ],
     );

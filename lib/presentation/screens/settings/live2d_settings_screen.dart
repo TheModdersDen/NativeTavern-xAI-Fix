@@ -62,12 +62,6 @@ class _Live2DSettingsEditor extends ConsumerStatefulWidget {
 
 class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
   static const _noneModel = '__none__';
-  static const _unavailableModelMessage =
-      'The assigned Live2D model is unavailable. Choose another model or '
-      'import it again.';
-  static const _selectionExpiredMessage =
-      'That Live2D model is no longer available. Choose another model or '
-      'import it again.';
   late final Live2DService _service;
   late final Live2DImportService _importService;
   final Live2DCharacterController _previewController =
@@ -123,7 +117,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         _isLoadingModel = false;
         _manifest = null;
         _selectedMotion = null;
-        _error = _unavailableModelMessage;
+        _error = AppLocalizations.of(context).live2dUnavailableModelMessage;
       });
       return;
     }
@@ -153,7 +147,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       _modelLoadGeneration++;
       setState(() {
         _isLoadingModel = false;
-        _error = _selectionExpiredMessage;
+        _error = AppLocalizations.of(context).live2dSelectionExpiredMessage;
       });
       return;
     }
@@ -187,9 +181,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              imported.length == 1
-                  ? 'Live2D model imported'
-                  : '${imported.length} Live2D models imported',
+              AppLocalizations.of(context).live2dModelsImported(
+                imported.length,
+              ),
             ),
           ),
         );
@@ -250,11 +244,10 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
             .loadChat(activeChat.chat!.id);
       }
       if (!mounted) return;
-      final suffix = result.cleanupPending
-          ? ' File cleanup will be retried on the next library refresh.'
-          : '';
+      final l10n = AppLocalizations.of(context);
+      final suffix = result.cleanupPending ? l10n.live2dCleanupPending : '';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Imported Live2D model deleted.$suffix')),
+        SnackBar(content: Text('${l10n.live2dModelDeleted}$suffix')),
       );
     } catch (error) {
       if (mounted) setState(() => _error = error.toString());
@@ -267,44 +260,46 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     final removesPackage = plan.packageModels.length > 1;
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete imported model?'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                removesPackage
-                    ? 'This package contains ${plan.packageModels.length} models. '
-                        'All of them will be deleted.'
-                    : '"${plan.target.displayName}" will be deleted from this device.',
-              ),
-              if (plan.affectedCharacters.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text('Live2D will be disabled for:'),
-                const SizedBox(height: 8),
-                ...plan.affectedCharacters.map(
-                  (character) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text('- ${character.name}'),
-                  ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.live2dDeleteImportedModelQuestion),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  removesPackage
+                      ? l10n.live2dDeletePackageBody(plan.packageModels.length)
+                      : l10n.live2dDeleteModelBody(plan.target.displayName),
                 ),
+                if (plan.affectedCharacters.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(l10n.live2dDisabledFor),
+                  const SizedBox(height: 8),
+                  ...plan.affectedCharacters.map(
+                    (character) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text('- ${character.name}'),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -419,29 +414,23 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
   Future<void> _showLicenseNotice() async {
     final openTerms = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Live2D licensing'),
-        content: const Text(
-          'The renderer includes the Live2D Cubism SDK and Core. Model files '
-          'and commercial distribution may have separate terms.\n\n'
-          'The bundled Hiyori Momose model is official sample data owned and '
-          'copyrighted by Live2D Inc. It is used under the Live2D Free '
-          'Material License Agreement and Sample Data Terms of Use. This app '
-          'itself is created at the author\'s sole discretion.\n\n'
-          'Verify the rights for every imported model before publishing the '
-          'app.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Close'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Review terms'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.live2dLicensing),
+          content: Text(l10n.live2dLicenseNotice),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.close),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.live2dReviewTerms),
+            ),
+          ],
+        );
+      },
     );
     if (openTerms == true) {
       await launchUrl(
@@ -469,7 +458,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
-            tooltip: 'Live2D licensing',
+            tooltip: l10n.live2dLicensing,
             onPressed: _showLicenseNotice,
           ),
           IconButton(
@@ -508,16 +497,18 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                 MediaQuery.sizeOf(context).height * 0.6,
                 480,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Model',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.model,
+                border: const OutlineInputBorder(),
               ),
               items: [
                 DropdownMenuItem(value: _noneModel, child: Text(l10n.none)),
                 if (hasUnavailableModel)
                   DropdownMenuItem(
                     value: config.modelId,
-                    child: Text('${config.displayName} (Unavailable)'),
+                    child: Text(
+                      l10n.live2dUnavailableLabel(config.displayName),
+                    ),
                   ),
                 ..._availableModels.map(
                   (model) => DropdownMenuItem(
@@ -525,7 +516,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                     child: Text(
                       model.source == Live2DModelSource.asset
                           ? model.displayName
-                          : '${model.displayName} (Imported)',
+                          : l10n.live2dImportedLabel(model.displayName),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -550,7 +541,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.archive_outlined),
-                label: const Text('Import ZIP'),
+                label: Text(l10n.live2dImportZip),
                 onPressed: _isImporting || _isDeleting ? null : _importZip,
               ),
             ),
@@ -606,9 +597,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                     Expanded(
                       child: DropdownButtonFormField<Live2DMotionRef>(
                         initialValue: _selectedMotion,
-                        decoration: const InputDecoration(
-                          labelText: 'Motion',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.live2dMotion,
+                          border: const OutlineInputBorder(),
                         ),
                         items: _manifest!.motions
                             .map(
@@ -628,7 +619,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                     const SizedBox(width: 8),
                     IconButton.filled(
                       icon: const Icon(Icons.play_arrow),
-                      tooltip: 'Play motion',
+                      tooltip: l10n.live2dPlayMotion,
                       onPressed: _selectedMotion == null
                           ? null
                           : () => _previewController.playMotion(
@@ -641,10 +632,10 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
               ),
             ExpansionTile(
               leading: const Icon(Icons.tune),
-              title: const Text('Stage adjustment'),
+              title: Text(l10n.live2dStageAdjustment),
               children: [
                 _SliderTile(
-                  label: 'Opacity',
+                  label: l10n.opacity,
                   value: config.opacity,
                   min: 0.3,
                   max: 1,
@@ -652,7 +643,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                       setState(() => _config = config.copyWith(opacity: value)),
                 ),
                 _SliderTile(
-                  label: 'Motion speed',
+                  label: l10n.live2dMotionSpeed,
                   value: config.motionSpeed,
                   min: 0.5,
                   max: 1.5,
@@ -668,11 +659,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
             ExpansionTile(
               key: const PageStorageKey('live2d-imported-models'),
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Imported models'),
+              title: Text(l10n.live2dImportedModels),
               subtitle: Text(
-                importedModels.length == 1
-                    ? '1 model'
-                    : '${importedModels.length} models',
+                l10n.live2dModelsCount(importedModels.length),
               ),
               initiallyExpanded: false,
               children: importedModels
@@ -686,7 +675,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
-                        tooltip: 'Delete imported model',
+                        tooltip: l10n.live2dDeleteImportedModel,
                         onPressed: _isDeleting || _isImporting
                             ? null
                             : () => _deleteImportedModel(model),

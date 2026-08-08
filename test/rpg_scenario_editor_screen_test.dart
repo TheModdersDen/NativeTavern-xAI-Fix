@@ -5,10 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/domain/services/rpg_scenario_draft_store.dart';
 import 'package:native_tavern/domain/services/rpg_scenario_package_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/controllers/rpg_scenario_editor_controller.dart';
 import 'package:native_tavern/presentation/screens/rpg/rpg_scenario_editor_screen.dart';
 
 void main() {
+  testWidgets('uses localized labels for the selected app locale',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('zh'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: RpgScenarioEditorScreen(),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('RPG 剧本'), findsOneWidget);
+    expect(find.text('编辑'), findsOneWidget);
+    expect(find.text('元数据'), findsOneWidget);
+    expect(find.byTooltip('导入剧本'), findsOneWidget);
+  });
+
   for (final size in [const Size(390, 844), const Size(1280, 900)]) {
     testWidgets('editor lays out without overflow at ${size.width.toInt()}px',
         (tester) async {
@@ -18,6 +35,8 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: RpgScenarioEditorScreen(),
       ));
       await tester.pumpAndSettle();
@@ -37,7 +56,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(home: RpgScenarioEditorScreen()),
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: RpgScenarioEditorScreen(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -80,6 +103,8 @@ void main() {
       packageService: const _SynchronousPackageService(),
     );
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: RpgScenarioEditorScreen(
         controller: controller,
         draftStore: draftStore,
@@ -152,6 +177,8 @@ initialState:
   random: {initialSeed: 1, state: 1}
 ''');
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: RpgScenarioEditorScreen(
         controller: controller,
         fileGateway: gateway,

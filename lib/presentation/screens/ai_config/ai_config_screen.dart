@@ -300,7 +300,7 @@ class _LLMProviderTile extends ConsumerWidget {
   String _providerName(LLMProvider provider) {
     switch (provider) {
       case LLMProvider.openai:
-        return 'OpenAI';
+        return 'OAI Compatible';
       case LLMProvider.claude:
         return 'Claude (Anthropic)';
       case LLMProvider.openRouter:

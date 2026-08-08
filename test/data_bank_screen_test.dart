@@ -8,6 +8,7 @@ import 'package:native_tavern/data/models/data_bank_context.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/services/data_bank_ingestion_service.dart';
 import 'package:native_tavern/domain/services/data_bank_library_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/controllers/data_bank_library_controller.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
@@ -23,6 +24,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: DataBankScreen(
             controller: controller,
             fileGateway: const _NullFileGateway(),
@@ -96,6 +99,8 @@ void main() {
           lastDataBankContextProvider.overrideWith((ref) => diagnostics),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: DataBankScreen(
             controller: controller,
             fileGateway: const _NullFileGateway(),

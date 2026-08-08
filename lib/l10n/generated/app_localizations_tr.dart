@@ -508,7 +508,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get openai => 'OpenAI';
+  String get openai => 'OAI Compatible';
 
   @override
   String get claude => 'Claude';
@@ -4186,4 +4186,957 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get storageReasonExpiredAudio => 'Expired synthesized audio';
+
+  @override
+  String get live2dUnavailableModelMessage =>
+      'The assigned Live2D model is unavailable. Choose another model or import it again.';
+
+  @override
+  String get live2dSelectionExpiredMessage =>
+      'That Live2D model is no longer available. Choose another model or import it again.';
+
+  @override
+  String live2dModelsImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Live2D models imported',
+      one: 'Live2D model imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get live2dModelDeleted => 'Imported Live2D model deleted.';
+
+  @override
+  String get live2dCleanupPending =>
+      ' File cleanup will be retried on the next library refresh.';
+
+  @override
+  String get live2dDeleteImportedModelQuestion => 'Delete imported model?';
+
+  @override
+  String live2dDeletePackageBody(int count) {
+    return 'This package contains $count models. All of them will be deleted.';
+  }
+
+  @override
+  String live2dDeleteModelBody(String name) {
+    return '\"$name\" will be deleted from this device.';
+  }
+
+  @override
+  String get live2dDisabledFor => 'Live2D will be disabled for:';
+
+  @override
+  String get live2dLicensing => 'Live2D licensing';
+
+  @override
+  String get live2dLicenseNotice =>
+      'The renderer includes the Live2D Cubism SDK and Core. Model files and commercial distribution may have separate terms.\n\nThe bundled Hiyori Momose model is official sample data owned and copyrighted by Live2D Inc. It is used under the Live2D Free Material License Agreement and Sample Data Terms of Use. This app itself is created at the author\'s sole discretion.\n\nVerify the rights for every imported model before publishing the app.';
+
+  @override
+  String get live2dReviewTerms => 'Review terms';
+
+  @override
+  String live2dUnavailableLabel(String name) {
+    return '$name (Unavailable)';
+  }
+
+  @override
+  String live2dImportedLabel(String name) {
+    return '$name (Imported)';
+  }
+
+  @override
+  String get live2dImportZip => 'Import ZIP';
+
+  @override
+  String get live2dMotion => 'Motion';
+
+  @override
+  String get live2dPlayMotion => 'Play motion';
+
+  @override
+  String get live2dStageAdjustment => 'Stage adjustment';
+
+  @override
+  String get live2dMotionSpeed => 'Motion speed';
+
+  @override
+  String get live2dImportedModels => 'Imported models';
+
+  @override
+  String live2dModelsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count models',
+      one: '1 model',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get live2dDeleteImportedModel => 'Delete imported model';
+
+  @override
+  String get rpgScenarioTitle => 'RPG Scenario';
+
+  @override
+  String get rpgImportScenario => 'Import scenario';
+
+  @override
+  String get rpgSaveDraft => 'Save draft';
+
+  @override
+  String get rpgRestoreDraft => 'Restore draft';
+
+  @override
+  String get rpgExportScenario => 'Export scenario';
+
+  @override
+  String get rpgIssues => 'Issues';
+
+  @override
+  String rpgIssuesCount(int count) {
+    return 'Issues ($count)';
+  }
+
+  @override
+  String get rpgScenarioImportFailed => 'Scenario import failed';
+
+  @override
+  String rpgScenarioImported(String name) {
+    return 'Imported $name';
+  }
+
+  @override
+  String get rpgDraftSaved => 'Draft saved';
+
+  @override
+  String get rpgDraftRestored => 'Draft restored';
+
+  @override
+  String get rpgNoSavedDraft => 'No saved draft';
+
+  @override
+  String get rpgScenarioExported => 'Scenario exported';
+
+  @override
+  String get rpgSetValue => 'Set value';
+
+  @override
+  String rpgAddItem(String label) {
+    return 'Add $label';
+  }
+
+  @override
+  String get rpgItemActions => 'Item actions';
+
+  @override
+  String get rpgMoveUp => 'Move up';
+
+  @override
+  String get rpgMoveDown => 'Move down';
+
+  @override
+  String get rpgAddEntry => 'Add entry';
+
+  @override
+  String get rpgDeleteEntry => 'Delete entry';
+
+  @override
+  String rpgAddEntryTitle(String label) {
+    return 'Add $label entry';
+  }
+
+  @override
+  String get rpgValue => 'Value';
+
+  @override
+  String get rpgEnterInteger => 'Enter an integer';
+
+  @override
+  String get rpgEnterNumber => 'Enter a number';
+
+  @override
+  String rpgItemNumber(int number) {
+    return 'Item $number';
+  }
+
+  @override
+  String rpgFieldLabel(String field) {
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': 'Metadata',
+        'compatibility': 'Compatibility',
+        'initialState': 'Initial State',
+        'initialSeed': 'Initial Seed',
+        'schemaVersion': 'Schema Version',
+        'protectedFields': 'Protected Fields',
+        'minimumEngineVersion': 'Minimum Engine Version',
+        'maximumEngineVersion': 'Maximum Engine Version',
+        'requiredCapabilities': 'Required Capabilities',
+        'actors': 'Actors',
+        'attributes': 'Attributes',
+        'author': 'Author',
+        'availability': 'Availability',
+        'branchId': 'Branch ID',
+        'conditions': 'Conditions',
+        'cooldowns': 'Cooldowns',
+        'costs': 'Costs',
+        'createdAt': 'Created At',
+        'data': 'Data',
+        'day': 'Day',
+        'description': 'Description',
+        'difficulty': 'Difficulty',
+        'effects': 'Effects',
+        'elapsedMinutes': 'Elapsed Minutes',
+        'eventHistory': 'Event History',
+        'expression': 'Expression',
+        'failureEffects': 'Failure Effects',
+        'format': 'Format',
+        'id': 'ID',
+        'initialValue': 'Initial Value',
+        'inventory': 'Inventory',
+        'items': 'Items',
+        'label': 'Label',
+        'locations': 'Locations',
+        'maximum': 'Maximum',
+        'minimum': 'Minimum',
+        'minuteOfDay': 'Minute of Day',
+        'name': 'Name',
+        'narrative': 'Narrative',
+        'objectiveIds': 'Objective IDs',
+        'objectiveProgress': 'Objective Progress',
+        'operator': 'Operator',
+        'quantity': 'Quantity',
+        'quests': 'Quests',
+        'relationships': 'Relationships',
+        'source': 'Source',
+        'stages': 'Stages',
+        'status': 'Status',
+        'successEffects': 'Success Effects',
+        'summary': 'Summary',
+        'tags': 'Tags',
+        'target': 'Target',
+        'turn': 'Turn',
+        'type': 'Type',
+        'updatedAt': 'Updated At',
+        'value': 'Value',
+        'variables': 'Variables',
+        'version': 'Version',
+        'other': '$field',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankChatRetrievalSettings => 'Chat retrieval settings';
+
+  @override
+  String get dataBankRebuildSearchIndex => 'Rebuild search index';
+
+  @override
+  String get dataBankImportDocument => 'Import document';
+
+  @override
+  String get dataBankSearchDocuments => 'Search documents';
+
+  @override
+  String get dataBankClearSearch => 'Clear search';
+
+  @override
+  String get dataBankNoMatches => 'No matches';
+
+  @override
+  String get dataBankNoDocuments => 'No documents';
+
+  @override
+  String get dataBankSearchIndexRebuilt => 'Search index rebuilt';
+
+  @override
+  String dataBankDeleteDocumentQuestion(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String dataBankDeleteDocumentBody(
+      int versions, int chunks, int bindings, int files) {
+    return '$versions version(s), $chunks chunk(s), $bindings binding(s), and $files managed file(s) will be removed.';
+  }
+
+  @override
+  String get dataBankChatRetrieval => 'Chat retrieval';
+
+  @override
+  String get dataBankUseInChat => 'Use Data Bank in chat';
+
+  @override
+  String get dataBankQueryExpansion => 'Conversation-aware query expansion';
+
+  @override
+  String get dataBankSemanticReranking => 'Semantic reranking';
+
+  @override
+  String get dataBankUsesEmbeddingProvider =>
+      'Uses the configured Embedding provider';
+
+  @override
+  String get dataBankSourcesPerResponse => 'Sources per response';
+
+  @override
+  String get dataBankTokenBudget => 'Token budget';
+
+  @override
+  String get dataBankChunksPerDocument => 'Chunks per document';
+
+  @override
+  String get dataBankLastRetrieval => 'Last retrieval';
+
+  @override
+  String get dataBankNoRetrievalYet => 'No chat retrieval has run yet.';
+
+  @override
+  String get dataBankModeLocalFts => 'Local full-text search';
+
+  @override
+  String get dataBankModeSemantic => 'Hybrid semantic reranking';
+
+  @override
+  String get dataBankModeFallback => 'Local fallback';
+
+  @override
+  String dataBankSourcesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sources',
+      one: '1 source',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankInspectAllSources => 'Inspect all sources';
+
+  @override
+  String dataBankChunksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chunks',
+      one: '1 chunk',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dataBankBindingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bindings',
+      one: '1 binding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankProcessingFailed => 'Processing failed';
+
+  @override
+  String get dataBankManageBindings => 'Manage bindings';
+
+  @override
+  String get dataBankRebuildDocument => 'Rebuild document';
+
+  @override
+  String get dataBankBindings => 'Bindings';
+
+  @override
+  String get dataBankRemoveBinding => 'Remove binding';
+
+  @override
+  String get dataBankAddBinding => 'Add binding';
+
+  @override
+  String dataBankStatusSemantics(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get dataBankDismiss => 'Dismiss';
+
+  @override
+  String get dataBankStatePending => 'Pending';
+
+  @override
+  String get dataBankStateProcessing => 'Processing';
+
+  @override
+  String get dataBankStateReady => 'Ready';
+
+  @override
+  String get dataBankStateFailed => 'Failed';
+
+  @override
+  String get dataBankStateDeleted => 'Deleted';
+
+  @override
+  String get dataBankDuplicateDocument =>
+      'This document is already in the Data Bank.';
+
+  @override
+  String get memoryChatContext => 'Chat context';
+
+  @override
+  String get memoryAutomaticExtraction => 'Automatic extraction';
+
+  @override
+  String get memoryAutomaticExtractionSubtitle =>
+      'Uses the current AI connection after new turns';
+
+  @override
+  String get memoryRecentChat => 'Recent chat';
+
+  @override
+  String get memoryCancelExtraction => 'Cancel extraction';
+
+  @override
+  String get memoryExtractFromChat => 'Extract from chat';
+
+  @override
+  String memoryExtractionResult(int candidates, int duplicates, int rejected) {
+    return '$candidates candidates, $duplicates duplicates, $rejected rejected';
+  }
+
+  @override
+  String memoryCandidatesCount(int count) {
+    return 'Candidates $count';
+  }
+
+  @override
+  String memoryActiveCount(int count) {
+    return 'Active $count';
+  }
+
+  @override
+  String memoryHistoryCount(int count) {
+    return 'History $count';
+  }
+
+  @override
+  String get memoryCreate => 'Create memory';
+
+  @override
+  String get memoryClearSelection => 'Clear selection';
+
+  @override
+  String get memoryIgnoreSelected => 'Ignore selected';
+
+  @override
+  String get memoryMergeSelected => 'Merge selected';
+
+  @override
+  String memorySelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get memoryUseInChat => 'Use memories in chat';
+
+  @override
+  String get memorySemanticReranking => 'Semantic reranking';
+
+  @override
+  String get memoryConfiguredEmbeddingProvider =>
+      'Configured embedding provider';
+
+  @override
+  String get memoryContextBudget => 'Context budget';
+
+  @override
+  String memoryTokensCount(int count) {
+    return '$count tokens';
+  }
+
+  @override
+  String get memoryEdit => 'Edit memory';
+
+  @override
+  String get memoryMerge => 'Merge memories';
+
+  @override
+  String memoryImportancePercent(int percent) {
+    return '$percent% importance';
+  }
+
+  @override
+  String memoryExpires(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String get memoryApprove => 'Approve';
+
+  @override
+  String get memoryUnlock => 'Unlock';
+
+  @override
+  String get memoryLock => 'Lock';
+
+  @override
+  String get memoryOpenSource => 'Open source';
+
+  @override
+  String get memoryIgnore => 'Ignore';
+
+  @override
+  String get memoryChatScope => 'Chat scope';
+
+  @override
+  String get memoryKind => 'Kind';
+
+  @override
+  String get memoryLabel => 'Memory';
+
+  @override
+  String get memoryIdentityKey => 'Identity key';
+
+  @override
+  String get memoryImportance => 'Importance';
+
+  @override
+  String get memoryLocked => 'Locked';
+
+  @override
+  String get memoryKindPersonFact => 'Person fact';
+
+  @override
+  String get memoryKindRelationship => 'Relationship';
+
+  @override
+  String get memoryKindEvent => 'Event';
+
+  @override
+  String get memoryKindCommitment => 'Commitment';
+
+  @override
+  String get memoryKindPreference => 'Preference';
+
+  @override
+  String get memoryKindLocation => 'Location';
+
+  @override
+  String get memoryKindOther => 'Other';
+
+  @override
+  String get memoryScopeCharacterPersona => 'Character and persona';
+
+  @override
+  String get memoryScopeGroup => 'Group';
+
+  @override
+  String get mcpAddServer => 'Add MCP server';
+
+  @override
+  String get mcpServersTab => 'Servers';
+
+  @override
+  String get mcpActivityTab => 'Activity';
+
+  @override
+  String get mcpProtocolName => 'Model Context Protocol';
+
+  @override
+  String get mcpNoServers => 'No MCP servers';
+
+  @override
+  String mcpErrorCode(String code) {
+    return 'Code: $code';
+  }
+
+  @override
+  String mcpProtocolVersion(String version) {
+    return 'Protocol $version';
+  }
+
+  @override
+  String get mcpDisconnect => 'Disconnect';
+
+  @override
+  String get mcpRefreshTools => 'Refresh tools';
+
+  @override
+  String get mcpReconnect => 'Reconnect';
+
+  @override
+  String get mcpConnect => 'Connect';
+
+  @override
+  String get mcpEditServer => 'Edit MCP server';
+
+  @override
+  String get mcpRemoveServer => 'Remove MCP server';
+
+  @override
+  String get mcpNoToolsDiscovered => 'No tools discovered';
+
+  @override
+  String get mcpRemoveServerQuestion => 'Remove MCP server?';
+
+  @override
+  String get mcpRemove => 'Remove';
+
+  @override
+  String get mcpToolPermission => 'Tool permission';
+
+  @override
+  String get mcpAskEveryTime => 'Ask every time';
+
+  @override
+  String get mcpAlwaysAllow => 'Always allow';
+
+  @override
+  String get mcpDenied => 'Denied';
+
+  @override
+  String get mcpNoActivity => 'No MCP activity';
+
+  @override
+  String get mcpEndpoint => 'MCP endpoint';
+
+  @override
+  String get mcpTransport => 'Transport';
+
+  @override
+  String get mcpBearerToken => 'Bearer token';
+
+  @override
+  String get mcpShowToken => 'Show token';
+
+  @override
+  String get mcpHideToken => 'Hide token';
+
+  @override
+  String get mcpRemoveStoredToken => 'Remove stored token';
+
+  @override
+  String get mcpAllowInsecureHttp => 'Allow insecure HTTP';
+
+  @override
+  String get mcpServerEnabled => 'Server enabled';
+
+  @override
+  String get mcpDisconnected => 'Disconnected';
+
+  @override
+  String get mcpConnecting => 'Connecting';
+
+  @override
+  String get mcpConnected => 'Connected';
+
+  @override
+  String get mcpReconnecting => 'Reconnecting';
+
+  @override
+  String get mcpReadOnlyHint => 'Read-only hint';
+
+  @override
+  String get mcpWriteCapable => 'Write-capable';
+
+  @override
+  String get mcpExternalSideEffect => 'External side effect';
+
+  @override
+  String get capabilityCheckFailed => 'Capability check failed';
+
+  @override
+  String get capabilityRecentExternalActivity => 'Recent external activity';
+
+  @override
+  String get capabilityAuditUnavailable => 'Audit history unavailable';
+
+  @override
+  String get capabilityNoExternalCalls => 'No external calls recorded';
+
+  @override
+  String capabilityReadyCount(int ready, int total) {
+    return '$ready of $total ready';
+  }
+
+  @override
+  String get capabilityOpenSettings => 'Open settings';
+
+  @override
+  String get capabilityRequestPermission => 'Request permission';
+
+  @override
+  String get capabilityCurrentAi => 'Current AI';
+
+  @override
+  String get capabilitySystemSpeech => 'System speech';
+
+  @override
+  String get capabilityVoiceInput => 'Voice input';
+
+  @override
+  String get capabilitySemanticSearch => 'Semantic search';
+
+  @override
+  String get capabilityMcpTools => 'MCP tools';
+
+  @override
+  String get capabilityChatGenerationConnection => 'Chat generation connection';
+
+  @override
+  String get capabilityDeviceTts => 'Device text-to-speech';
+
+  @override
+  String get capabilityDeviceSpeechRecognition => 'Device speech recognition';
+
+  @override
+  String get capabilityOptionalEmbeddingConnection =>
+      'Optional embedding connection';
+
+  @override
+  String get capabilityOptionalImageConnection => 'Optional image connection';
+
+  @override
+  String get capabilityExternalToolServers => 'External tool servers';
+
+  @override
+  String get capabilityBundledCharacterRendering =>
+      'Bundled character rendering';
+
+  @override
+  String get capabilityCompleteAiConnection =>
+      'Complete the current AI connection';
+
+  @override
+  String get capabilityCompleteEmbeddingConnection =>
+      'Complete the embedding connection';
+
+  @override
+  String get capabilityCompleteImageConnection =>
+      'Complete the image connection';
+
+  @override
+  String get capabilityConfigurationRequired => 'Configuration required';
+
+  @override
+  String get capabilityConfigured => 'Configured';
+
+  @override
+  String get capabilityAvailable => 'Available';
+
+  @override
+  String get capabilityPermissionRequired => 'Permission required';
+
+  @override
+  String get capabilityPermissionDenied => 'Permission denied';
+
+  @override
+  String get capabilityDownloadRequired => 'Download required';
+
+  @override
+  String get capabilityUnavailableOffline => 'Unavailable while offline';
+
+  @override
+  String get capabilityUnavailableBuild => 'Not available in this build';
+
+  @override
+  String get capabilityDataMetadata => 'metadata';
+
+  @override
+  String get capabilityDataPrompt => 'prompt';
+
+  @override
+  String get capabilityDataChatText => 'chat text';
+
+  @override
+  String get capabilityDataDocumentText => 'document text';
+
+  @override
+  String get capabilityDataImage => 'image';
+
+  @override
+  String get capabilityDataAudio => 'audio';
+
+  @override
+  String get capabilityDataCharacterCard => 'character card';
+
+  @override
+  String get capabilityDataToolArguments => 'tool arguments';
+
+  @override
+  String dataBankCitationSourcesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Data Bank sources',
+      one: '1 Data Bank source',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dataBankCitationSources => 'Data Bank sources';
+
+  @override
+  String dataBankLocalQueriesFused(int count) {
+    return '$count local queries fused';
+  }
+
+  @override
+  String get memoryUsed => 'Memories used';
+
+  @override
+  String memoryTokenUsage(int used, int allocated) {
+    return '$used/$allocated tokens';
+  }
+
+  @override
+  String memoryRelevancePercent(int percent) {
+    return '$percent% relevance';
+  }
+
+  @override
+  String get memoryModeLocalFts => 'Local FTS';
+
+  @override
+  String get memoryModeHybrid => 'Hybrid';
+
+  @override
+  String get memoryModeLocalFallback => 'Local FTS fallback';
+
+  @override
+  String get memoryIncluded => 'Included';
+
+  @override
+  String get memoryTrimmed => 'Trimmed';
+
+  @override
+  String get memoryExcluded => 'Excluded';
+
+  @override
+  String rpgTurnNumber(int turn) {
+    return 'Turn $turn';
+  }
+
+  @override
+  String get rpgDisableMode => 'Disable RPG mode';
+
+  @override
+  String get rpgStatus => 'Status';
+
+  @override
+  String get rpgInventory => 'Inventory';
+
+  @override
+  String get rpgQuests => 'Quests';
+
+  @override
+  String get rpgRelations => 'Relations';
+
+  @override
+  String get rpgActions => 'Actions';
+
+  @override
+  String get rpgLog => 'Log';
+
+  @override
+  String get rpgLocation => 'Location';
+
+  @override
+  String get rpgTime => 'Time';
+
+  @override
+  String rpgDayTime(int day, String time) {
+    return 'Day $day, $time';
+  }
+
+  @override
+  String get rpgInventoryEmpty => 'Inventory is empty';
+
+  @override
+  String get rpgNoQuests => 'No quests';
+
+  @override
+  String get rpgNoRelationships => 'No relationships';
+
+  @override
+  String get rpgNoActions => 'No actions defined';
+
+  @override
+  String rpgCost(String cost) {
+    return 'Cost: $cost';
+  }
+
+  @override
+  String rpgCheck(String dice, String attribute, num difficulty) {
+    return 'Check: $dice + $attribute vs $difficulty';
+  }
+
+  @override
+  String rpgCooldown(int turns) {
+    return 'Cooldown: $turns turn(s)';
+  }
+
+  @override
+  String get rpgRequirementsNotMet => 'Requirements or resources not met';
+
+  @override
+  String get rpgNoTurnsRecorded => 'No turns recorded';
+
+  @override
+  String get rpgSnapshots => 'Snapshots';
+
+  @override
+  String get rpgSnapshotActions => 'Snapshot actions';
+
+  @override
+  String get rpgRestoreSnapshot => 'Restore snapshot';
+
+  @override
+  String get rpgForkNewBranch => 'Fork new branch';
+
+  @override
+  String get rpgRuleEngineSource => 'Source: Rule engine';
+
+  @override
+  String rpgRoll(String total, String expression) {
+    return 'Roll: $total ($expression)';
+  }
+
+  @override
+  String rpgChanges(String changes) {
+    return 'Changes: $changes';
+  }
+
+  @override
+  String get rpgForkBranch => 'Fork branch';
+
+  @override
+  String get rpgBranchId => 'Branch ID';
+
+  @override
+  String get rpgFork => 'Fork';
+
+  @override
+  String get rpgQuestInactive => 'Inactive';
+
+  @override
+  String get rpgQuestActive => 'Active';
+
+  @override
+  String get rpgQuestCompleted => 'Completed';
+
+  @override
+  String get rpgQuestFailed => 'Failed';
 }

@@ -297,7 +297,7 @@ extension EmbeddingProviderExtension on EmbeddingProvider {
   String get displayName {
     switch (this) {
       case EmbeddingProvider.openai:
-        return 'OpenAI';
+        return 'OAI Compatible';
       case EmbeddingProvider.cohere:
         return 'Cohere';
       case EmbeddingProvider.gemini:
@@ -309,7 +309,7 @@ extension EmbeddingProviderExtension on EmbeddingProvider {
       case EmbeddingProvider.local:
         return 'Local (Sentence Transformers)';
       case EmbeddingProvider.custom:
-        return 'Custom API (OpenAI-compatible)';
+        return 'Custom API (OAI Compatible)';
     }
   }
 

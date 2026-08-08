@@ -19,6 +19,7 @@ import 'package:native_tavern/domain/repositories/long_term_memory_repository.da
 import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/long_term_memory_context_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_context_providers.dart';
@@ -397,7 +398,11 @@ void main() {
             (ref) async => usage,
           ),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     );
     await tester.tap(find.byKey(const Key('open-memory-usage')));

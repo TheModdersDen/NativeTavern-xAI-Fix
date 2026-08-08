@@ -148,7 +148,7 @@
   "testConnection": "ทดสอบการเชื่อมต่อ",
   "connectionSuccessful": "เชื่อมต่อสำเร็จ!",
   "connectionFailed": "การเชื่อมต่อล้มเหลว: {error}",
-  "openai": "OpenAI",
+  "openai": "OAI Compatible",
   "claude": "Claude",
   "openRouter": "OpenRouter",
   "gemini": "Gemini",

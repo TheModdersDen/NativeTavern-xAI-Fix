@@ -148,7 +148,7 @@
   "testConnection": "Tes Koneksi",
   "connectionSuccessful": "Koneksi berhasil!",
   "connectionFailed": "Koneksi gagal: {error}",
-  "openai": "OpenAI",
+  "openai": "OAI Compatible",
   "claude": "Claude",
   "openRouter": "OpenRouter",
   "gemini": "Gemini",

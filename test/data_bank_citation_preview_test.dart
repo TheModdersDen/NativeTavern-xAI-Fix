@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/data_bank.dart';
 import 'package:native_tavern/data/models/data_bank_context.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/widgets/chat/data_bank_citation_preview.dart';
 
 void main() {
@@ -55,6 +56,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: DataBankCitationPreview(message: message),
         ),

@@ -148,7 +148,7 @@
   "testConnection": "Probar conexión",
   "connectionSuccessful": "¡Conexión exitosa!",
   "connectionFailed": "Conexión fallida: {error}",
-  "openai": "OpenAI",
+  "openai": "OAI Compatible",
   "claude": "Claude",
   "openRouter": "OpenRouter",
   "gemini": "Gemini",

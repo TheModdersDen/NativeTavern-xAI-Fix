@@ -15,6 +15,7 @@ import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/rpg_narrative_bridge.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/providers/rpg_chat_providers.dart';
@@ -234,6 +235,8 @@ void main() {
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Align(
             alignment: Alignment.bottomCenter,

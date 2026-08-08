@@ -376,12 +376,12 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                   leading: Icon(Icons.cloud, color: AppTheme.textMuted),
                   title: Text('GPT-Image'),
                   subtitle: Text(
-                      'OpenAI /v1/images/generations API (gpt-image-2)'),
+                      'OAI Compatible /v1/images/generations API (gpt-image-2)'),
                 ),
               if (settings.provider == ImageGenProvider.openaiChat)
                 const ListTile(
                   leading: Icon(Icons.chat, color: AppTheme.textMuted),
-                  title: Text('OpenAI-Chat'),
+                  title: Text('OAI Compatible Chat'),
                   subtitle: Text('Uses chat/completions API for image generation. Works with compatible APIs that return images via chat format.'),
                 ),
             ],

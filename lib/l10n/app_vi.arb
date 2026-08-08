@@ -148,7 +148,7 @@
   "testConnection": "Kiểm tra kết nối",
   "connectionSuccessful": "Kết nối thành công!",
   "connectionFailed": "Kết nối thất bại: {error}",
-  "openai": "OpenAI",
+  "openai": "OAI Compatible",
   "claude": "Claude",
   "openRouter": "OpenRouter",
   "gemini": "Gemini",

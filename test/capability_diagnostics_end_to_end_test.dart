@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/domain/services/capability_registry.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/capability_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/screens/settings/capability_diagnostics_screen.dart';
@@ -77,7 +78,11 @@ void main() {
             ),
           ),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     );
     await tester.pumpAndSettle();

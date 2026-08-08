@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/rpg/rpg.dart';
 import 'package:native_tavern/domain/services/rpg_narrative_bridge.dart';
 import 'package:native_tavern/domain/services/rpg_game_session_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/rpg_chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 
@@ -19,6 +20,7 @@ class RpgGamePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final uiState = ref.watch(rpgChatProvider(chatId));
     final session = uiState.session;
     if (!uiState.enabled || session == null) return const SizedBox.shrink();
@@ -56,7 +58,7 @@ class RpgGamePanel extends ConsumerWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Turn ${session.state.turn} · ${session.branchId}',
+                      '${l10n.rpgTurnNumber(session.state.turn)} · ${session.branchId}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
@@ -69,42 +71,42 @@ class RpgGamePanel extends ConsumerWidget {
                     key: const Key('rpg-disable'),
                     onPressed: onDisable,
                     icon: const Icon(Icons.close, size: 19),
-                    tooltip: 'Disable RPG mode',
+                    tooltip: l10n.rpgDisableMode,
                   ),
                 ],
               ),
             ),
             if (uiState.lastResult case final result?)
               _ResultBanner(result: result),
-            const TabBar(
+            TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
               dividerHeight: 1,
               tabs: [
                 Tab(
-                    key: Key('rpg-tab-status'),
-                    icon: Icon(Icons.tune),
-                    text: 'Status'),
+                    key: const Key('rpg-tab-status'),
+                    icon: const Icon(Icons.tune),
+                    text: l10n.rpgStatus),
                 Tab(
-                    key: Key('rpg-tab-inventory'),
-                    icon: Icon(Icons.backpack_outlined),
-                    text: 'Inventory'),
+                    key: const Key('rpg-tab-inventory'),
+                    icon: const Icon(Icons.backpack_outlined),
+                    text: l10n.rpgInventory),
                 Tab(
-                    key: Key('rpg-tab-quests'),
-                    icon: Icon(Icons.task_alt),
-                    text: 'Quests'),
+                    key: const Key('rpg-tab-quests'),
+                    icon: const Icon(Icons.task_alt),
+                    text: l10n.rpgQuests),
                 Tab(
-                    key: Key('rpg-tab-relations'),
-                    icon: Icon(Icons.people_outline),
-                    text: 'Relations'),
+                    key: const Key('rpg-tab-relations'),
+                    icon: const Icon(Icons.people_outline),
+                    text: l10n.rpgRelations),
                 Tab(
-                    key: Key('rpg-tab-actions'),
-                    icon: Icon(Icons.bolt),
-                    text: 'Actions'),
+                    key: const Key('rpg-tab-actions'),
+                    icon: const Icon(Icons.bolt),
+                    text: l10n.rpgActions),
                 Tab(
-                    key: Key('rpg-tab-log'),
-                    icon: Icon(Icons.history),
-                    text: 'Log'),
+                    key: const Key('rpg-tab-log'),
+                    icon: const Icon(Icons.history),
+                    text: l10n.rpgLog),
               ],
             ),
             Expanded(
@@ -195,6 +197,7 @@ class _StatusView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scenario = session.scenario;
     final state = session.state;
     final location = scenario.locations
@@ -206,15 +209,17 @@ class _StatusView extends StatelessWidget {
       children: [
         _SectionLine(
           icon: Icons.place_outlined,
-          label: 'Location',
+          label: l10n.rpgLocation,
           value: location?.label ??
-              (state.locationId.isEmpty ? 'Unknown' : state.locationId),
+              (state.locationId.isEmpty ? l10n.unknown : state.locationId),
         ),
         _SectionLine(
           icon: Icons.schedule,
-          label: 'Time',
-          value:
-              'Day ${state.clock.day}, ${_clockLabel(state.clock.minuteOfDay)}',
+          label: l10n.rpgTime,
+          value: l10n.rpgDayTime(
+            state.clock.day,
+            _clockLabel(state.clock.minuteOfDay),
+          ),
         ),
         const Divider(),
         ...scenario.attributes.map((definition) {
@@ -251,9 +256,12 @@ class _InventoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (session.state.inventory.isEmpty) {
-      return const _EmptyView(
-          icon: Icons.backpack_outlined, label: 'Inventory is empty');
+      return _EmptyView(
+        icon: Icons.backpack_outlined,
+        label: l10n.rpgInventoryEmpty,
+      );
     }
     return ListView.separated(
       key: const Key('rpg-inventory-view'),
@@ -287,8 +295,9 @@ class _QuestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (session.state.quests.isEmpty) {
-      return const _EmptyView(icon: Icons.task_alt, label: 'No quests');
+      return _EmptyView(icon: Icons.task_alt, label: l10n.rpgNoQuests);
     }
     return ListView.separated(
       key: const Key('rpg-quest-view'),
@@ -309,7 +318,7 @@ class _QuestView extends StatelessWidget {
           title: Text(definition?.label ?? quest.questId),
           subtitle: Text(
             [
-              quest.status.name,
+              _questStatusLabel(l10n, quest.status),
               if (stage != null) stage.label,
               if (quest.objectiveProgress.isNotEmpty)
                 quest.objectiveProgress.entries
@@ -332,9 +341,12 @@ class _RelationshipView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (session.state.relationships.isEmpty) {
-      return const _EmptyView(
-          icon: Icons.people_outline, label: 'No relationships');
+      return _EmptyView(
+        icon: Icons.people_outline,
+        label: l10n.rpgNoRelationships,
+      );
     }
     return ListView.separated(
       key: const Key('rpg-relationship-view'),
@@ -368,8 +380,9 @@ class _ActionView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     if (session.scenario.actions.isEmpty) {
-      return const _EmptyView(icon: Icons.bolt, label: 'No actions defined');
+      return _EmptyView(icon: Icons.bolt, label: l10n.rpgNoActions);
     }
     final controller = ref.read(rpgChatProvider(chatId).notifier);
     final availableIds =
@@ -386,13 +399,21 @@ class _ActionView extends ConsumerWidget {
         final details = <String>[
           if (action.description.isNotEmpty) action.description,
           if (action.costs.isNotEmpty)
-            'Cost: ${action.costs.map((cost) => '${cost.path} ${cost.amount}').join(', ')}',
+            l10n.rpgCost(
+              action.costs
+                  .map((cost) => '${cost.path} ${cost.amount}')
+                  .join(', '),
+            ),
           if (action.check != null)
-            'Check: ${action.check!.dice.expression} + ${action.check!.attributeId} vs ${action.check!.difficulty}',
+            l10n.rpgCheck(
+              action.check!.dice.expression,
+              action.check!.attributeId,
+              action.check!.difficulty,
+            ),
           if (!available)
             cooldown > 0
-                ? 'Cooldown: $cooldown turn(s)'
-                : 'Requirements or resources not met',
+                ? l10n.rpgCooldown(cooldown)
+                : l10n.rpgRequirementsNotMet,
         ];
         return ListTile(
           key: Key('rpg-action-${action.id}'),
@@ -435,22 +456,26 @@ class _LogView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final events = session.state.eventHistory.reversed.toList();
     return ListView(
       key: const Key('rpg-log-view'),
       padding: const EdgeInsets.symmetric(vertical: 6),
       children: [
         if (events.isEmpty)
-          const SizedBox(
+          SizedBox(
             height: 72,
-            child: _EmptyView(icon: Icons.history, label: 'No turns recorded'),
+            child: _EmptyView(
+              icon: Icons.history,
+              label: l10n.rpgNoTurnsRecorded,
+            ),
           ),
-        ...events.map((event) => _eventTile(session, event)),
+        ...events.map((event) => _eventTile(l10n, session, event)),
         const Divider(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child:
-              Text('Snapshots', style: Theme.of(context).textTheme.titleSmall),
+          child: Text(l10n.rpgSnapshots,
+              style: Theme.of(context).textTheme.titleSmall),
         ),
         ...snapshots.reversed.map(
           (snapshot) => ListTile(
@@ -462,7 +487,7 @@ class _LogView extends ConsumerWidget {
               size: 20,
             ),
             title: Text(
-                'Turn ${snapshot.metadata.turn} · ${snapshot.metadata.branchId}'),
+                '${l10n.rpgTurnNumber(snapshot.metadata.turn)} · ${snapshot.metadata.branchId}'),
             subtitle: Text(
               snapshot.metadata.createdAt.toLocal().toString(),
               maxLines: 1,
@@ -470,12 +495,13 @@ class _LogView extends ConsumerWidget {
             ),
             trailing: PopupMenuButton<String>(
               key: Key('rpg-snapshot-${snapshot.metadata.id}'),
-              tooltip: 'Snapshot actions',
+              tooltip: l10n.rpgSnapshotActions,
               enabled: snapshot.metadata.id != session.snapshot.metadata.id,
-              itemBuilder: (_) => const [
+              itemBuilder: (_) => [
                 PopupMenuItem(
-                    value: 'restore', child: Text('Restore snapshot')),
-                PopupMenuItem(value: 'fork', child: Text('Fork new branch')),
+                    value: 'restore', child: Text(l10n.rpgRestoreSnapshot)),
+                PopupMenuItem(
+                    value: 'fork', child: Text(l10n.rpgForkNewBranch)),
               ],
               onSelected: (value) async {
                 final controller = ref.read(rpgChatProvider(chatId).notifier);
@@ -506,16 +532,23 @@ class _LogView extends ConsumerWidget {
   }
 }
 
-Widget _eventTile(RpgGameSession session, RpgEventRecord event) {
+Widget _eventTile(
+  AppLocalizations l10n,
+  RpgGameSession session,
+  RpgEventRecord event,
+) {
   final action = session.scenario.actions
       .where((candidate) => candidate.id == event.actionId)
       .firstOrNull;
   final roll = event.data['roll'];
-  final details = <String>['Turn ${event.turn}', 'Source: Rule engine'];
+  final details = <String>[
+    l10n.rpgTurnNumber(event.turn),
+    l10n.rpgRuleEngineSource,
+  ];
   if (roll is Map<String, Object?>) {
-    details.add('Roll: ${roll['total']} (${roll['expression']})');
+    details.add(l10n.rpgRoll('${roll['total']}', '${roll['expression']}'));
   } else if (roll is Map) {
-    details.add('Roll: ${roll['total']} (${roll['expression']})');
+    details.add(l10n.rpgRoll('${roll['total']}', '${roll['expression']}'));
   }
   final effects = event.data['effects'];
   if (effects is List && effects.isNotEmpty) {
@@ -524,7 +557,7 @@ Widget _eventTile(RpgGameSession session, RpgEventRecord event) {
       final target = effect['target'];
       return target == null ? '$type' : '$type:$target';
     });
-    details.add('Changes: ${labels.join(', ')}');
+    details.add(l10n.rpgChanges(labels.join(', ')));
   }
   return ListTile(
     dense: true,
@@ -594,25 +627,26 @@ class _EmptyView extends StatelessWidget {
 }
 
 Future<String?> _askForBranchId(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
   var branchId = '';
   return showDialog<String>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Fork branch'),
+      title: Text(l10n.rpgForkBranch),
       content: TextField(
         key: const Key('rpg-branch-id'),
         autofocus: true,
         onChanged: (value) => branchId = value,
-        decoration: const InputDecoration(labelText: 'Branch ID'),
+        decoration: InputDecoration(labelText: l10n.rpgBranchId),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(dialogContext, branchId.trim()),
-          child: const Text('Fork'),
+          child: Text(l10n.rpgFork),
         ),
       ],
     ),
@@ -624,6 +658,14 @@ IconData _questIcon(RpgQuestStatus status) => switch (status) {
       RpgQuestStatus.active => Icons.play_circle_outline,
       RpgQuestStatus.completed => Icons.check_circle_outline,
       RpgQuestStatus.failed => Icons.cancel_outlined,
+    };
+
+String _questStatusLabel(AppLocalizations l10n, RpgQuestStatus status) =>
+    switch (status) {
+      RpgQuestStatus.inactive => l10n.rpgQuestInactive,
+      RpgQuestStatus.active => l10n.rpgQuestActive,
+      RpgQuestStatus.completed => l10n.rpgQuestCompleted,
+      RpgQuestStatus.failed => l10n.rpgQuestFailed,
     };
 
 String _clockLabel(int minuteOfDay) {

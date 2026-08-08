@@ -147,7 +147,7 @@
   "testConnection": "接続テスト",
   "connectionSuccessful": "接続成功！",
   "connectionFailed": "接続に失敗しました：{error}",
-  "openai": "OpenAI",
+  "openai": "OAI Compatible",
   "claude": "Claude",
   "openRouter": "OpenRouter",
   "gemini": "Gemini",

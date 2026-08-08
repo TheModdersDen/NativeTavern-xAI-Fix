@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/models/built_in_tool.dart';
 import 'package:native_tavern/domain/models/mcp.dart';
 import 'package:native_tavern/domain/services/mcp/mcp_client_manager.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/mcp_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
@@ -12,25 +13,30 @@ class McpSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(mcpManagementProvider);
     final controller = ref.read(mcpManagementProvider.notifier);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('MCP servers'),
+          title: Text(l10n.mcpServers),
           actions: [
             IconButton(
               key: const Key('mcp-add-server'),
               onPressed: () => _editServer(context, controller),
               icon: const Icon(Icons.add),
-              tooltip: 'Add server',
+              tooltip: l10n.mcpAddServer,
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.dns_outlined), text: 'Servers'),
-              Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Activity'),
+              Tab(
+                  icon: const Icon(Icons.dns_outlined),
+                  text: l10n.mcpServersTab),
+              Tab(
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  text: l10n.mcpActivityTab),
             ],
           ),
         ),
@@ -39,8 +45,8 @@ class McpSettingsScreen extends ConsumerWidget {
             SwitchListTile(
               key: const Key('mcp-master-toggle'),
               secondary: const Icon(Icons.extension_outlined),
-              title: const Text('Model Context Protocol'),
-              subtitle: Text(state.enabled ? 'Enabled' : 'Disabled'),
+              title: Text(l10n.mcpProtocolName),
+              subtitle: Text(state.enabled ? l10n.enabled : l10n.disabled),
               value: state.enabled,
               onChanged: state.loading
                   ? null
@@ -130,10 +136,11 @@ class _ServerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (state.servers.isEmpty) {
-      return const _EmptyState(
+      return _EmptyState(
         icon: Icons.dns_outlined,
-        title: 'No MCP servers',
+        title: l10n.mcpNoServers,
       );
     }
     return RefreshIndicator(
@@ -172,6 +179,7 @@ class _ServerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final config = snapshot.config;
     return ExpansionTile(
       key: Key('mcp-server-${config.id}'),
@@ -185,7 +193,7 @@ class _ServerTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '${_statusLabel(snapshot.status)}  ${config.displayEndpoint}',
+        '${_statusLabel(l10n, snapshot.status)}  ${config.displayEndpoint}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -205,7 +213,7 @@ class _ServerTile extends StatelessWidget {
             title: Text(snapshot.errorMessage!),
             subtitle: snapshot.errorCode == null
                 ? null
-                : Text('Code: ${snapshot.errorCode}'),
+                : Text(l10n.mcpErrorCode(snapshot.errorCode!)),
           ),
         if (snapshot.serverImplementation != null)
           ListTile(
@@ -215,7 +223,11 @@ class _ServerTile extends StatelessWidget {
               '${snapshot.serverImplementation} ${snapshot.serverVersion ?? ''}'
                   .trim(),
             ),
-            subtitle: Text('Protocol ${snapshot.protocolVersion ?? 'unknown'}'),
+            subtitle: Text(
+              l10n.mcpProtocolVersion(
+                snapshot.protocolVersion ?? l10n.unknown,
+              ),
+            ),
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -225,14 +237,14 @@ class _ServerTile extends StatelessWidget {
                 _ActionIcon(
                   key: Key('mcp-cancel-${config.id}'),
                   icon: Icons.stop_circle_outlined,
-                  tooltip: 'Cancel',
+                  tooltip: l10n.cancel,
                   onPressed: () => controller.cancelOperation(config.id),
                 )
               else if (snapshot.isConnected) ...[
                 _ActionIcon(
                   key: Key('mcp-disconnect-${config.id}'),
                   icon: Icons.link_off,
-                  tooltip: 'Disconnect',
+                  tooltip: l10n.mcpDisconnect,
                   onPressed: () => McpSettingsScreen._guard(
                     context,
                     () => controller.disconnect(config.id),
@@ -241,7 +253,7 @@ class _ServerTile extends StatelessWidget {
                 _ActionIcon(
                   key: Key('mcp-refresh-${config.id}'),
                   icon: Icons.refresh,
-                  tooltip: 'Refresh tools',
+                  tooltip: l10n.mcpRefreshTools,
                   onPressed: () => McpSettingsScreen._guard(
                     context,
                     () => controller.refreshTools(config.id),
@@ -250,7 +262,7 @@ class _ServerTile extends StatelessWidget {
                 _ActionIcon(
                   key: Key('mcp-reconnect-${config.id}'),
                   icon: Icons.sync,
-                  tooltip: 'Reconnect',
+                  tooltip: l10n.mcpReconnect,
                   onPressed: () => McpSettingsScreen._guard(
                     context,
                     () => controller.reconnect(config.id),
@@ -260,7 +272,7 @@ class _ServerTile extends StatelessWidget {
                 _ActionIcon(
                   key: Key('mcp-connect-${config.id}'),
                   icon: Icons.link,
-                  tooltip: 'Connect',
+                  tooltip: l10n.mcpConnect,
                   onPressed: globallyEnabled && config.enabled
                       ? () => McpSettingsScreen._guard(
                             context,
@@ -272,23 +284,23 @@ class _ServerTile extends StatelessWidget {
               _ActionIcon(
                 key: Key('mcp-edit-${config.id}'),
                 icon: Icons.edit_outlined,
-                tooltip: 'Edit server',
+                tooltip: l10n.mcpEditServer,
                 onPressed: () => _edit(context),
               ),
               _ActionIcon(
                 key: Key('mcp-delete-${config.id}'),
                 icon: Icons.delete_outline,
-                tooltip: 'Remove server',
+                tooltip: l10n.mcpRemoveServer,
                 onPressed: () => _remove(context),
               ),
             ],
           ),
         ),
         if (snapshot.isConnected && snapshot.tools.isEmpty)
-          const ListTile(
+          ListTile(
             dense: true,
-            leading: Icon(Icons.extension_off_outlined),
-            title: Text('No tools discovered'),
+            leading: const Icon(Icons.extension_off_outlined),
+            title: Text(l10n.mcpNoToolsDiscovered),
           ),
         ...snapshot.tools.map(
           (tool) => _ToolTile(tool: tool, controller: controller),
@@ -314,19 +326,20 @@ class _ServerTile extends StatelessWidget {
   }
 
   Future<void> _remove(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Remove MCP server?'),
+        title: Text(l10n.mcpRemoveServerQuestion),
         content: Text(snapshot.config.name),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Remove'),
+            child: Text(l10n.mcpRemove),
           ),
         ],
       ),
@@ -347,6 +360,7 @@ class _ToolTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final permission = controller.permissionFor(tool.serverId, tool.name);
     final collision = controller.hasNameCollision(tool);
     return ListTile(
@@ -360,28 +374,28 @@ class _ToolTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '${_accessLabel(tool.accessLevel)}  ${_permissionLabel(permission)}\n'
+        '${_accessLabel(l10n, tool.accessLevel)}  ${_permissionLabel(l10n, permission)}\n'
         '${tool.description}',
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),
       trailing: PopupMenuButton<McpToolPermission>(
         key: Key('mcp-permission-${tool.serverId}-${tool.name}'),
-        tooltip: 'Tool permission',
+        tooltip: l10n.mcpToolPermission,
         initialValue: permission,
         icon: Icon(_permissionIcon(permission)),
         onSelected: (value) => McpSettingsScreen._guard(
           context,
           () => controller.setToolPermission(tool.serverId, tool.name, value),
         ),
-        itemBuilder: (_) => const [
+        itemBuilder: (_) => [
           PopupMenuItem(
             value: McpToolPermission.askEveryTime,
             child: Row(
               children: [
-                Icon(Icons.help_outline),
-                SizedBox(width: 12),
-                Text('Ask every time'),
+                const Icon(Icons.help_outline),
+                const SizedBox(width: 12),
+                Text(l10n.mcpAskEveryTime),
               ],
             ),
           ),
@@ -389,9 +403,9 @@ class _ToolTile extends StatelessWidget {
             value: McpToolPermission.alwaysAllow,
             child: Row(
               children: [
-                Icon(Icons.verified_user_outlined),
-                SizedBox(width: 12),
-                Text('Always allow'),
+                const Icon(Icons.verified_user_outlined),
+                const SizedBox(width: 12),
+                Text(l10n.mcpAlwaysAllow),
               ],
             ),
           ),
@@ -399,9 +413,9 @@ class _ToolTile extends StatelessWidget {
             value: McpToolPermission.denied,
             child: Row(
               children: [
-                Icon(Icons.block),
-                SizedBox(width: 12),
-                Text('Denied'),
+                const Icon(Icons.block),
+                const SizedBox(width: 12),
+                Text(l10n.mcpDenied),
               ],
             ),
           ),
@@ -418,10 +432,11 @@ class _ActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (records.isEmpty) {
-      return const _EmptyState(
+      return _EmptyState(
         icon: Icons.receipt_long_outlined,
-        title: 'No MCP activity',
+        title: l10n.mcpNoActivity,
       );
     }
     return ListView.separated(
@@ -498,10 +513,12 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title:
-          Text(widget.existing == null ? 'Add MCP server' : 'Edit MCP server'),
+      title: Text(
+        widget.existing == null ? l10n.mcpAddServer : l10n.mcpEditServer,
+      ),
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
@@ -511,14 +528,14 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
               TextField(
                 key: const Key('mcp-server-name'),
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: InputDecoration(labelText: l10n.name),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 12),
               TextField(
                 key: const Key('mcp-server-endpoint'),
                 controller: _endpointController,
-                decoration: const InputDecoration(labelText: 'MCP endpoint'),
+                decoration: InputDecoration(labelText: l10n.mcpEndpoint),
                 keyboardType: TextInputType.url,
                 autocorrect: false,
               ),
@@ -526,7 +543,7 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
               DropdownButtonFormField<McpTransportType>(
                 key: const Key('mcp-server-transport'),
                 initialValue: _transport,
-                decoration: const InputDecoration(labelText: 'Transport'),
+                decoration: InputDecoration(labelText: l10n.mcpTransport),
                 items: const [
                   DropdownMenuItem(
                     value: McpTransportType.streamableHttp,
@@ -549,14 +566,15 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
                 autocorrect: false,
                 enableSuggestions: false,
                 decoration: InputDecoration(
-                  labelText: 'Bearer token',
+                  labelText: l10n.mcpBearerToken,
                   suffixIcon: IconButton(
                     onPressed: () =>
                         setState(() => _obscureToken = !_obscureToken),
                     icon: Icon(
                       _obscureToken ? Icons.visibility : Icons.visibility_off,
                     ),
-                    tooltip: _obscureToken ? 'Show token' : 'Hide token',
+                    tooltip:
+                        _obscureToken ? l10n.mcpShowToken : l10n.mcpHideToken,
                   ),
                 ),
               ),
@@ -564,7 +582,7 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
                 CheckboxListTile(
                   key: const Key('mcp-clear-token'),
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Remove stored token'),
+                  title: Text(l10n.mcpRemoveStoredToken),
                   value: _clearCredential,
                   onChanged: (value) =>
                       setState(() => _clearCredential = value ?? false),
@@ -572,14 +590,14 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
               SwitchListTile(
                 key: const Key('mcp-allow-insecure'),
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Allow insecure HTTP'),
+                title: Text(l10n.mcpAllowInsecureHttp),
                 value: _allowInsecure,
                 onChanged: (value) => setState(() => _allowInsecure = value),
               ),
               SwitchListTile(
                 key: const Key('mcp-server-enabled'),
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Server enabled'),
+                title: Text(l10n.mcpServerEnabled),
                 value: _enabled,
                 onChanged: (value) => setState(() => _enabled = value),
               ),
@@ -598,12 +616,12 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           key: const Key('mcp-save-server'),
           onPressed: _submit,
-          child: const Text('Save'),
+          child: Text(l10n.save),
         ),
       ],
     );
@@ -715,13 +733,14 @@ Color _statusColor(McpConnectionStatus status) => switch (status) {
       _ => AppTheme.textMuted,
     };
 
-String _statusLabel(McpConnectionStatus status) => switch (status) {
-      McpConnectionStatus.disabled => 'Disabled',
-      McpConnectionStatus.disconnected => 'Disconnected',
-      McpConnectionStatus.connecting => 'Connecting',
-      McpConnectionStatus.connected => 'Connected',
-      McpConnectionStatus.reconnecting => 'Reconnecting',
-      McpConnectionStatus.error => 'Error',
+String _statusLabel(AppLocalizations l10n, McpConnectionStatus status) =>
+    switch (status) {
+      McpConnectionStatus.disabled => l10n.disabled,
+      McpConnectionStatus.disconnected => l10n.mcpDisconnected,
+      McpConnectionStatus.connecting => l10n.mcpConnecting,
+      McpConnectionStatus.connected => l10n.mcpConnected,
+      McpConnectionStatus.reconnecting => l10n.mcpReconnecting,
+      McpConnectionStatus.error => l10n.error,
     };
 
 IconData _accessIcon(ToolAccessLevel access) => switch (access) {
@@ -730,10 +749,11 @@ IconData _accessIcon(ToolAccessLevel access) => switch (access) {
       ToolAccessLevel.externalSideEffect => Icons.public_outlined,
     };
 
-String _accessLabel(ToolAccessLevel access) => switch (access) {
-      ToolAccessLevel.readOnly => 'Read-only hint',
-      ToolAccessLevel.write => 'Write-capable',
-      ToolAccessLevel.externalSideEffect => 'External side effect',
+String _accessLabel(AppLocalizations l10n, ToolAccessLevel access) =>
+    switch (access) {
+      ToolAccessLevel.readOnly => l10n.mcpReadOnlyHint,
+      ToolAccessLevel.write => l10n.mcpWriteCapable,
+      ToolAccessLevel.externalSideEffect => l10n.mcpExternalSideEffect,
     };
 
 IconData _permissionIcon(McpToolPermission permission) => switch (permission) {
@@ -742,10 +762,11 @@ IconData _permissionIcon(McpToolPermission permission) => switch (permission) {
       McpToolPermission.denied => Icons.block,
     };
 
-String _permissionLabel(McpToolPermission permission) => switch (permission) {
-      McpToolPermission.askEveryTime => 'Ask every time',
-      McpToolPermission.alwaysAllow => 'Always allow',
-      McpToolPermission.denied => 'Denied',
+String _permissionLabel(AppLocalizations l10n, McpToolPermission permission) =>
+    switch (permission) {
+      McpToolPermission.askEveryTime => l10n.mcpAskEveryTime,
+      McpToolPermission.alwaysAllow => l10n.mcpAlwaysAllow,
+      McpToolPermission.denied => l10n.mcpDenied,
     };
 
 IconData _activityIcon(McpActivityKind kind) => switch (kind) {

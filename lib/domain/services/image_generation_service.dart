@@ -8,8 +8,8 @@ import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 /// Image Generation Provider types (channels, not models)
 enum ImageGenProvider {
   // Cloud providers
-  openai('openai', 'OpenAI', 'https://api.openai.com/v1'),
-  openaiChat('openai_chat', 'OpenAI-Chat', 'https://api.openai.com/v1'),
+  openai('openai', 'OAI Compatible', 'https://api.openai.com/v1'),
+  openaiChat('openai_chat', 'OAI Compatible Chat', 'https://api.openai.com/v1'),
   gemini('gemini', 'Gemini', 'https://generativelanguage.googleapis.com/v1beta'),
   novelai('novelai', 'NovelAI', 'https://image.novelai.net'),
   pollinations('pollinations', 'Pollinations (Free)', 'https://image.pollinations.ai'),

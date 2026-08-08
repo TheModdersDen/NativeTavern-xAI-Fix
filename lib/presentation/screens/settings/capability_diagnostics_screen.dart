@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/domain/services/capability_registry.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/capability_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/providers/stt_providers.dart';
@@ -12,15 +13,16 @@ class CapabilityDiagnosticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final diagnostics = ref.watch(capabilityDiagnosticsProvider);
     final externalCalls = ref.watch(recentExternalCallsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Capability check'),
+        title: Text(l10n.capabilityCheck),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => _refresh(ref),
           ),
@@ -38,9 +40,9 @@ class CapabilityDiagnosticsScreen extends ConsumerWidget {
               ),
               error: (_, __) => ListTile(
                 leading: const Icon(Icons.error_outline, color: Colors.red),
-                title: const Text('Capability check failed'),
+                title: Text(l10n.capabilityCheckFailed),
                 trailing: IconButton(
-                  tooltip: 'Retry',
+                  tooltip: l10n.retry,
                   icon: const Icon(Icons.refresh),
                   onPressed: () => _refresh(ref),
                 ),
@@ -54,7 +56,7 @@ class CapabilityDiagnosticsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                'Recent external activity',
+                l10n.capabilityRecentExternalActivity,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -63,14 +65,14 @@ class CapabilityDiagnosticsScreen extends ConsumerWidget {
                 padding: EdgeInsets.all(16),
                 child: LinearProgressIndicator(),
               ),
-              error: (_, __) => const ListTile(
-                leading: Icon(Icons.error_outline),
-                title: Text('Audit history unavailable'),
+              error: (_, __) => ListTile(
+                leading: const Icon(Icons.error_outline),
+                title: Text(l10n.capabilityAuditUnavailable),
               ),
               data: (records) => records.isEmpty
-                  ? const ListTile(
-                      leading: Icon(Icons.history),
-                      title: Text('No external calls recorded'),
+                  ? ListTile(
+                      leading: const Icon(Icons.history),
+                      title: Text(l10n.capabilityNoExternalCalls),
                     )
                   : Column(
                       children: [
@@ -119,6 +121,7 @@ class _CapabilityReport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final total = report.results.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,7 +132,7 @@ class _CapabilityReport extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${report.readyCount} of $total ready',
+                  l10n.capabilityReadyCount(report.readyCount, total),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -168,6 +171,7 @@ class _CapabilityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = _statusColor(context, result.availability);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -175,18 +179,21 @@ class _CapabilityTile extends StatelessWidget {
         dimension: 40,
         child: Icon(_capabilityIcon(result.capability.id)),
       ),
-      title: Text(result.capability.name),
+      title: Text(_capabilityName(l10n, result.capability.id)),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(result.capability.description),
+          Text(_capabilityDescription(l10n, result.capability.id)),
           const SizedBox(height: 4),
           Row(
             children: [
               Icon(_statusIcon(result.availability), size: 16, color: color),
               const SizedBox(width: 6),
               Flexible(
-                child: Text(result.message, style: TextStyle(color: color)),
+                child: Text(
+                  _capabilityMessage(l10n, result),
+                  style: TextStyle(color: color),
+                ),
               ),
             ],
           ),
@@ -194,17 +201,17 @@ class _CapabilityTile extends StatelessWidget {
       ),
       trailing: switch (result.fixKind) {
         CapabilityFixKind.openSettings => IconButton(
-            tooltip: 'Open settings',
+            tooltip: l10n.capabilityOpenSettings,
             icon: const Icon(Icons.chevron_right),
             onPressed: () => onAction(result),
           ),
         CapabilityFixKind.requestPermission => IconButton(
-            tooltip: 'Request permission',
+            tooltip: l10n.capabilityRequestPermission,
             icon: const Icon(Icons.security),
             onPressed: () => onAction(result),
           ),
         CapabilityFixKind.retry => IconButton(
-            tooltip: 'Retry',
+            tooltip: l10n.retry,
             icon: const Icon(Icons.refresh),
             onPressed: () => onAction(result),
           ),
@@ -257,8 +264,11 @@ class _ExternalCallTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final succeeded = record.outcome == ExternalCallOutcome.succeeded;
-    final types = record.dataTypes.map((type) => type.name).join(', ');
+    final types = record.dataTypes
+        .map((type) => _externalDataTypeLabel(l10n, type))
+        .join(', ');
     final localTime = record.timestamp.toLocal();
     final time = '${localTime.hour.toString().padLeft(2, '0')}:'
         '${localTime.minute.toString().padLeft(2, '0')}';
@@ -274,3 +284,66 @@ class _ExternalCallTile extends StatelessWidget {
     );
   }
 }
+
+String _capabilityName(AppLocalizations l10n, CapabilityId id) => switch (id) {
+      CapabilityId.llm => l10n.capabilityCurrentAi,
+      CapabilityId.systemTts => l10n.capabilitySystemSpeech,
+      CapabilityId.systemStt => l10n.capabilityVoiceInput,
+      CapabilityId.embedding => l10n.capabilitySemanticSearch,
+      CapabilityId.imageGeneration => l10n.imageGeneration,
+      CapabilityId.mcp => l10n.capabilityMcpTools,
+      CapabilityId.live2d => 'Live2D',
+    };
+
+String _capabilityDescription(AppLocalizations l10n, CapabilityId id) =>
+    switch (id) {
+      CapabilityId.llm => l10n.capabilityChatGenerationConnection,
+      CapabilityId.systemTts => l10n.capabilityDeviceTts,
+      CapabilityId.systemStt => l10n.capabilityDeviceSpeechRecognition,
+      CapabilityId.embedding => l10n.capabilityOptionalEmbeddingConnection,
+      CapabilityId.imageGeneration => l10n.capabilityOptionalImageConnection,
+      CapabilityId.mcp => l10n.capabilityExternalToolServers,
+      CapabilityId.live2d => l10n.capabilityBundledCharacterRendering,
+    };
+
+String _capabilityMessage(
+  AppLocalizations l10n,
+  CapabilityDiagnosticResult result,
+) {
+  if (result.availability == CapabilityAvailability.needsConfiguration) {
+    return switch (result.capability.id) {
+      CapabilityId.llm => l10n.capabilityCompleteAiConnection,
+      CapabilityId.embedding => l10n.capabilityCompleteEmbeddingConnection,
+      CapabilityId.imageGeneration => l10n.capabilityCompleteImageConnection,
+      _ => l10n.capabilityConfigurationRequired,
+    };
+  }
+  return switch (result.availability) {
+    CapabilityAvailability.ready => result.message == 'Configured'
+        ? l10n.capabilityConfigured
+        : l10n.capabilityAvailable,
+    CapabilityAvailability.disabled => l10n.off,
+    CapabilityAvailability.needsPermission => l10n.capabilityPermissionRequired,
+    CapabilityAvailability.permissionDenied => l10n.capabilityPermissionDenied,
+    CapabilityAvailability.needsDownload => l10n.capabilityDownloadRequired,
+    CapabilityAvailability.offline => l10n.capabilityUnavailableOffline,
+    CapabilityAvailability.unsupported => l10n.capabilityUnavailableBuild,
+    CapabilityAvailability.needsConfiguration =>
+      l10n.capabilityConfigurationRequired,
+  };
+}
+
+String _externalDataTypeLabel(
+  AppLocalizations l10n,
+  ExternalDataType type,
+) =>
+    switch (type) {
+      ExternalDataType.chatText => l10n.capabilityDataChatText,
+      ExternalDataType.prompt => l10n.capabilityDataPrompt,
+      ExternalDataType.documentText => l10n.capabilityDataDocumentText,
+      ExternalDataType.audio => l10n.capabilityDataAudio,
+      ExternalDataType.image => l10n.capabilityDataImage,
+      ExternalDataType.characterCard => l10n.capabilityDataCharacterCard,
+      ExternalDataType.toolArguments => l10n.capabilityDataToolArguments,
+      ExternalDataType.metadata => l10n.capabilityDataMetadata,
+    };

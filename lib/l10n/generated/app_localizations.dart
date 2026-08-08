@@ -1045,10 +1045,10 @@ abstract class AppLocalizations {
   /// **'Connection failed: {error}'**
   String connectionFailed(String error);
 
-  /// OpenAI provider name
+  /// OAI Compatible provider name
   ///
   /// In en, this message translates to:
-  /// **'OpenAI'**
+  /// **'OAI Compatible'**
   String get openai;
 
   /// Claude provider name
@@ -7632,6 +7632,1525 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expired synthesized audio'**
   String get storageReasonExpiredAudio;
+
+  /// No description provided for @live2dUnavailableModelMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The assigned Live2D model is unavailable. Choose another model or import it again.'**
+  String get live2dUnavailableModelMessage;
+
+  /// No description provided for @live2dSelectionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That Live2D model is no longer available. Choose another model or import it again.'**
+  String get live2dSelectionExpiredMessage;
+
+  /// No description provided for @live2dModelsImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Live2D model imported} other{{count} Live2D models imported}}'**
+  String live2dModelsImported(int count);
+
+  /// No description provided for @live2dModelDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported Live2D model deleted.'**
+  String get live2dModelDeleted;
+
+  /// No description provided for @live2dCleanupPending.
+  ///
+  /// In en, this message translates to:
+  /// **' File cleanup will be retried on the next library refresh.'**
+  String get live2dCleanupPending;
+
+  /// No description provided for @live2dDeleteImportedModelQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete imported model?'**
+  String get live2dDeleteImportedModelQuestion;
+
+  /// No description provided for @live2dDeletePackageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This package contains {count} models. All of them will be deleted.'**
+  String live2dDeletePackageBody(int count);
+
+  /// No description provided for @live2dDeleteModelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be deleted from this device.'**
+  String live2dDeleteModelBody(String name);
+
+  /// No description provided for @live2dDisabledFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Live2D will be disabled for:'**
+  String get live2dDisabledFor;
+
+  /// No description provided for @live2dLicensing.
+  ///
+  /// In en, this message translates to:
+  /// **'Live2D licensing'**
+  String get live2dLicensing;
+
+  /// No description provided for @live2dLicenseNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The renderer includes the Live2D Cubism SDK and Core. Model files and commercial distribution may have separate terms.\n\nThe bundled Hiyori Momose model is official sample data owned and copyrighted by Live2D Inc. It is used under the Live2D Free Material License Agreement and Sample Data Terms of Use. This app itself is created at the author\'s sole discretion.\n\nVerify the rights for every imported model before publishing the app.'**
+  String get live2dLicenseNotice;
+
+  /// No description provided for @live2dReviewTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Review terms'**
+  String get live2dReviewTerms;
+
+  /// No description provided for @live2dUnavailableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (Unavailable)'**
+  String live2dUnavailableLabel(String name);
+
+  /// No description provided for @live2dImportedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (Imported)'**
+  String live2dImportedLabel(String name);
+
+  /// No description provided for @live2dImportZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Import ZIP'**
+  String get live2dImportZip;
+
+  /// No description provided for @live2dMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion'**
+  String get live2dMotion;
+
+  /// No description provided for @live2dPlayMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Play motion'**
+  String get live2dPlayMotion;
+
+  /// No description provided for @live2dStageAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage adjustment'**
+  String get live2dStageAdjustment;
+
+  /// No description provided for @live2dMotionSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion speed'**
+  String get live2dMotionSpeed;
+
+  /// No description provided for @live2dImportedModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported models'**
+  String get live2dImportedModels;
+
+  /// No description provided for @live2dModelsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 model} other{{count} models}}'**
+  String live2dModelsCount(int count);
+
+  /// No description provided for @live2dDeleteImportedModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete imported model'**
+  String get live2dDeleteImportedModel;
+
+  /// No description provided for @rpgScenarioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'RPG Scenario'**
+  String get rpgScenarioTitle;
+
+  /// No description provided for @rpgImportScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Import scenario'**
+  String get rpgImportScenario;
+
+  /// No description provided for @rpgSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get rpgSaveDraft;
+
+  /// No description provided for @rpgRestoreDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore draft'**
+  String get rpgRestoreDraft;
+
+  /// No description provided for @rpgExportScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Export scenario'**
+  String get rpgExportScenario;
+
+  /// No description provided for @rpgIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Issues'**
+  String get rpgIssues;
+
+  /// No description provided for @rpgIssuesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Issues ({count})'**
+  String rpgIssuesCount(int count);
+
+  /// No description provided for @rpgScenarioImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario import failed'**
+  String get rpgScenarioImportFailed;
+
+  /// No description provided for @rpgScenarioImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {name}'**
+  String rpgScenarioImported(String name);
+
+  /// No description provided for @rpgDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get rpgDraftSaved;
+
+  /// No description provided for @rpgDraftRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft restored'**
+  String get rpgDraftRestored;
+
+  /// No description provided for @rpgNoSavedDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved draft'**
+  String get rpgNoSavedDraft;
+
+  /// No description provided for @rpgScenarioExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario exported'**
+  String get rpgScenarioExported;
+
+  /// No description provided for @rpgSetValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Set value'**
+  String get rpgSetValue;
+
+  /// No description provided for @rpgAddItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {label}'**
+  String rpgAddItem(String label);
+
+  /// No description provided for @rpgItemActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Item actions'**
+  String get rpgItemActions;
+
+  /// No description provided for @rpgMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get rpgMoveUp;
+
+  /// No description provided for @rpgMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get rpgMoveDown;
+
+  /// No description provided for @rpgAddEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get rpgAddEntry;
+
+  /// No description provided for @rpgDeleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get rpgDeleteEntry;
+
+  /// No description provided for @rpgAddEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {label} entry'**
+  String rpgAddEntryTitle(String label);
+
+  /// No description provided for @rpgValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get rpgValue;
+
+  /// No description provided for @rpgEnterInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an integer'**
+  String get rpgEnterInteger;
+
+  /// No description provided for @rpgEnterNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number'**
+  String get rpgEnterNumber;
+
+  /// No description provided for @rpgItemNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {number}'**
+  String rpgItemNumber(int number);
+
+  /// No description provided for @rpgFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{field, select, metadata{Metadata} compatibility{Compatibility} initialState{Initial State} initialSeed{Initial Seed} schemaVersion{Schema Version} protectedFields{Protected Fields} minimumEngineVersion{Minimum Engine Version} maximumEngineVersion{Maximum Engine Version} requiredCapabilities{Required Capabilities} actors{Actors} attributes{Attributes} author{Author} availability{Availability} branchId{Branch ID} conditions{Conditions} cooldowns{Cooldowns} costs{Costs} createdAt{Created At} data{Data} day{Day} description{Description} difficulty{Difficulty} effects{Effects} elapsedMinutes{Elapsed Minutes} eventHistory{Event History} expression{Expression} failureEffects{Failure Effects} format{Format} id{ID} initialValue{Initial Value} inventory{Inventory} items{Items} label{Label} locations{Locations} maximum{Maximum} minimum{Minimum} minuteOfDay{Minute of Day} name{Name} narrative{Narrative} objectiveIds{Objective IDs} objectiveProgress{Objective Progress} operator{Operator} quantity{Quantity} quests{Quests} relationships{Relationships} source{Source} stages{Stages} status{Status} successEffects{Success Effects} summary{Summary} tags{Tags} target{Target} turn{Turn} type{Type} updatedAt{Updated At} value{Value} variables{Variables} version{Version} other{{field}}}'**
+  String rpgFieldLabel(String field);
+
+  /// No description provided for @dataBankChatRetrievalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat retrieval settings'**
+  String get dataBankChatRetrievalSettings;
+
+  /// No description provided for @dataBankRebuildSearchIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild search index'**
+  String get dataBankRebuildSearchIndex;
+
+  /// No description provided for @dataBankImportDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Import document'**
+  String get dataBankImportDocument;
+
+  /// No description provided for @dataBankSearchDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Search documents'**
+  String get dataBankSearchDocuments;
+
+  /// No description provided for @dataBankClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get dataBankClearSearch;
+
+  /// No description provided for @dataBankNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get dataBankNoMatches;
+
+  /// No description provided for @dataBankNoDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents'**
+  String get dataBankNoDocuments;
+
+  /// No description provided for @dataBankSearchIndexRebuilt.
+  ///
+  /// In en, this message translates to:
+  /// **'Search index rebuilt'**
+  String get dataBankSearchIndexRebuilt;
+
+  /// No description provided for @dataBankDeleteDocumentQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String dataBankDeleteDocumentQuestion(String name);
+
+  /// No description provided for @dataBankDeleteDocumentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{versions} version(s), {chunks} chunk(s), {bindings} binding(s), and {files} managed file(s) will be removed.'**
+  String dataBankDeleteDocumentBody(
+      int versions, int chunks, int bindings, int files);
+
+  /// No description provided for @dataBankChatRetrieval.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat retrieval'**
+  String get dataBankChatRetrieval;
+
+  /// No description provided for @dataBankUseInChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Data Bank in chat'**
+  String get dataBankUseInChat;
+
+  /// No description provided for @dataBankQueryExpansion.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation-aware query expansion'**
+  String get dataBankQueryExpansion;
+
+  /// No description provided for @dataBankSemanticReranking.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic reranking'**
+  String get dataBankSemanticReranking;
+
+  /// No description provided for @dataBankUsesEmbeddingProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the configured Embedding provider'**
+  String get dataBankUsesEmbeddingProvider;
+
+  /// No description provided for @dataBankSourcesPerResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources per response'**
+  String get dataBankSourcesPerResponse;
+
+  /// No description provided for @dataBankTokenBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Token budget'**
+  String get dataBankTokenBudget;
+
+  /// No description provided for @dataBankChunksPerDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Chunks per document'**
+  String get dataBankChunksPerDocument;
+
+  /// No description provided for @dataBankLastRetrieval.
+  ///
+  /// In en, this message translates to:
+  /// **'Last retrieval'**
+  String get dataBankLastRetrieval;
+
+  /// No description provided for @dataBankNoRetrievalYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No chat retrieval has run yet.'**
+  String get dataBankNoRetrievalYet;
+
+  /// No description provided for @dataBankModeLocalFts.
+  ///
+  /// In en, this message translates to:
+  /// **'Local full-text search'**
+  String get dataBankModeLocalFts;
+
+  /// No description provided for @dataBankModeSemantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid semantic reranking'**
+  String get dataBankModeSemantic;
+
+  /// No description provided for @dataBankModeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Local fallback'**
+  String get dataBankModeFallback;
+
+  /// No description provided for @dataBankSourcesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 source} other{{count} sources}}'**
+  String dataBankSourcesCount(int count);
+
+  /// No description provided for @dataBankInspectAllSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect all sources'**
+  String get dataBankInspectAllSources;
+
+  /// No description provided for @dataBankChunksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 chunk} other{{count} chunks}}'**
+  String dataBankChunksCount(int count);
+
+  /// No description provided for @dataBankBindingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 binding} other{{count} bindings}}'**
+  String dataBankBindingsCount(int count);
+
+  /// No description provided for @dataBankProcessingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing failed'**
+  String get dataBankProcessingFailed;
+
+  /// No description provided for @dataBankManageBindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage bindings'**
+  String get dataBankManageBindings;
+
+  /// No description provided for @dataBankRebuildDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild document'**
+  String get dataBankRebuildDocument;
+
+  /// No description provided for @dataBankBindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bindings'**
+  String get dataBankBindings;
+
+  /// No description provided for @dataBankRemoveBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove binding'**
+  String get dataBankRemoveBinding;
+
+  /// No description provided for @dataBankAddBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Add binding'**
+  String get dataBankAddBinding;
+
+  /// No description provided for @dataBankStatusSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String dataBankStatusSemantics(String status);
+
+  /// No description provided for @dataBankDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dataBankDismiss;
+
+  /// No description provided for @dataBankStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get dataBankStatePending;
+
+  /// No description provided for @dataBankStateProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get dataBankStateProcessing;
+
+  /// No description provided for @dataBankStateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get dataBankStateReady;
+
+  /// No description provided for @dataBankStateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get dataBankStateFailed;
+
+  /// No description provided for @dataBankStateDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get dataBankStateDeleted;
+
+  /// No description provided for @dataBankDuplicateDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'This document is already in the Data Bank.'**
+  String get dataBankDuplicateDocument;
+
+  /// No description provided for @memoryChatContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat context'**
+  String get memoryChatContext;
+
+  /// No description provided for @memoryAutomaticExtraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic extraction'**
+  String get memoryAutomaticExtraction;
+
+  /// No description provided for @memoryAutomaticExtractionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the current AI connection after new turns'**
+  String get memoryAutomaticExtractionSubtitle;
+
+  /// No description provided for @memoryRecentChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent chat'**
+  String get memoryRecentChat;
+
+  /// No description provided for @memoryCancelExtraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel extraction'**
+  String get memoryCancelExtraction;
+
+  /// No description provided for @memoryExtractFromChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract from chat'**
+  String get memoryExtractFromChat;
+
+  /// No description provided for @memoryExtractionResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{candidates} candidates, {duplicates} duplicates, {rejected} rejected'**
+  String memoryExtractionResult(int candidates, int duplicates, int rejected);
+
+  /// No description provided for @memoryCandidatesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidates {count}'**
+  String memoryCandidatesCount(int count);
+
+  /// No description provided for @memoryActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active {count}'**
+  String memoryActiveCount(int count);
+
+  /// No description provided for @memoryHistoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'History {count}'**
+  String memoryHistoryCount(int count);
+
+  /// No description provided for @memoryCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create memory'**
+  String get memoryCreate;
+
+  /// No description provided for @memoryClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get memoryClearSelection;
+
+  /// No description provided for @memoryIgnoreSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore selected'**
+  String get memoryIgnoreSelected;
+
+  /// No description provided for @memoryMergeSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge selected'**
+  String get memoryMergeSelected;
+
+  /// No description provided for @memorySelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String memorySelectedCount(int count);
+
+  /// No description provided for @memoryUseInChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Use memories in chat'**
+  String get memoryUseInChat;
+
+  /// No description provided for @memorySemanticReranking.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic reranking'**
+  String get memorySemanticReranking;
+
+  /// No description provided for @memoryConfiguredEmbeddingProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured embedding provider'**
+  String get memoryConfiguredEmbeddingProvider;
+
+  /// No description provided for @memoryContextBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Context budget'**
+  String get memoryContextBudget;
+
+  /// No description provided for @memoryTokensCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tokens'**
+  String memoryTokensCount(int count);
+
+  /// No description provided for @memoryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit memory'**
+  String get memoryEdit;
+
+  /// No description provided for @memoryMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge memories'**
+  String get memoryMerge;
+
+  /// No description provided for @memoryImportancePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% importance'**
+  String memoryImportancePercent(int percent);
+
+  /// No description provided for @memoryExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String memoryExpires(String date);
+
+  /// No description provided for @memoryApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get memoryApprove;
+
+  /// No description provided for @memoryUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get memoryUnlock;
+
+  /// No description provided for @memoryLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get memoryLock;
+
+  /// No description provided for @memoryOpenSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source'**
+  String get memoryOpenSource;
+
+  /// No description provided for @memoryIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get memoryIgnore;
+
+  /// No description provided for @memoryChatScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat scope'**
+  String get memoryChatScope;
+
+  /// No description provided for @memoryKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get memoryKind;
+
+  /// No description provided for @memoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get memoryLabel;
+
+  /// No description provided for @memoryIdentityKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity key'**
+  String get memoryIdentityKey;
+
+  /// No description provided for @memoryImportance.
+  ///
+  /// In en, this message translates to:
+  /// **'Importance'**
+  String get memoryImportance;
+
+  /// No description provided for @memoryLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get memoryLocked;
+
+  /// No description provided for @memoryKindPersonFact.
+  ///
+  /// In en, this message translates to:
+  /// **'Person fact'**
+  String get memoryKindPersonFact;
+
+  /// No description provided for @memoryKindRelationship.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get memoryKindRelationship;
+
+  /// No description provided for @memoryKindEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get memoryKindEvent;
+
+  /// No description provided for @memoryKindCommitment.
+  ///
+  /// In en, this message translates to:
+  /// **'Commitment'**
+  String get memoryKindCommitment;
+
+  /// No description provided for @memoryKindPreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Preference'**
+  String get memoryKindPreference;
+
+  /// No description provided for @memoryKindLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get memoryKindLocation;
+
+  /// No description provided for @memoryKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get memoryKindOther;
+
+  /// No description provided for @memoryScopeCharacterPersona.
+  ///
+  /// In en, this message translates to:
+  /// **'Character and persona'**
+  String get memoryScopeCharacterPersona;
+
+  /// No description provided for @memoryScopeGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get memoryScopeGroup;
+
+  /// No description provided for @mcpAddServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add MCP server'**
+  String get mcpAddServer;
+
+  /// No description provided for @mcpServersTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Servers'**
+  String get mcpServersTab;
+
+  /// No description provided for @mcpActivityTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get mcpActivityTab;
+
+  /// No description provided for @mcpProtocolName.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Context Protocol'**
+  String get mcpProtocolName;
+
+  /// No description provided for @mcpNoServers.
+  ///
+  /// In en, this message translates to:
+  /// **'No MCP servers'**
+  String get mcpNoServers;
+
+  /// No description provided for @mcpErrorCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code: {code}'**
+  String mcpErrorCode(String code);
+
+  /// No description provided for @mcpProtocolVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol {version}'**
+  String mcpProtocolVersion(String version);
+
+  /// No description provided for @mcpDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get mcpDisconnect;
+
+  /// No description provided for @mcpRefreshTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh tools'**
+  String get mcpRefreshTools;
+
+  /// No description provided for @mcpReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get mcpReconnect;
+
+  /// No description provided for @mcpConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get mcpConnect;
+
+  /// No description provided for @mcpEditServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit MCP server'**
+  String get mcpEditServer;
+
+  /// No description provided for @mcpRemoveServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove MCP server'**
+  String get mcpRemoveServer;
+
+  /// No description provided for @mcpNoToolsDiscovered.
+  ///
+  /// In en, this message translates to:
+  /// **'No tools discovered'**
+  String get mcpNoToolsDiscovered;
+
+  /// No description provided for @mcpRemoveServerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove MCP server?'**
+  String get mcpRemoveServerQuestion;
+
+  /// No description provided for @mcpRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get mcpRemove;
+
+  /// No description provided for @mcpToolPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool permission'**
+  String get mcpToolPermission;
+
+  /// No description provided for @mcpAskEveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask every time'**
+  String get mcpAskEveryTime;
+
+  /// No description provided for @mcpAlwaysAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Always allow'**
+  String get mcpAlwaysAllow;
+
+  /// No description provided for @mcpDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get mcpDenied;
+
+  /// No description provided for @mcpNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No MCP activity'**
+  String get mcpNoActivity;
+
+  /// No description provided for @mcpEndpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP endpoint'**
+  String get mcpEndpoint;
+
+  /// No description provided for @mcpTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get mcpTransport;
+
+  /// No description provided for @mcpBearerToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearer token'**
+  String get mcpBearerToken;
+
+  /// No description provided for @mcpShowToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Show token'**
+  String get mcpShowToken;
+
+  /// No description provided for @mcpHideToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide token'**
+  String get mcpHideToken;
+
+  /// No description provided for @mcpRemoveStoredToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stored token'**
+  String get mcpRemoveStoredToken;
+
+  /// No description provided for @mcpAllowInsecureHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow insecure HTTP'**
+  String get mcpAllowInsecureHttp;
+
+  /// No description provided for @mcpServerEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Server enabled'**
+  String get mcpServerEnabled;
+
+  /// No description provided for @mcpDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get mcpDisconnected;
+
+  /// No description provided for @mcpConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting'**
+  String get mcpConnecting;
+
+  /// No description provided for @mcpConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get mcpConnected;
+
+  /// No description provided for @mcpReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting'**
+  String get mcpReconnecting;
+
+  /// No description provided for @mcpReadOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only hint'**
+  String get mcpReadOnlyHint;
+
+  /// No description provided for @mcpWriteCapable.
+  ///
+  /// In en, this message translates to:
+  /// **'Write-capable'**
+  String get mcpWriteCapable;
+
+  /// No description provided for @mcpExternalSideEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'External side effect'**
+  String get mcpExternalSideEffect;
+
+  /// No description provided for @capabilityCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Capability check failed'**
+  String get capabilityCheckFailed;
+
+  /// No description provided for @capabilityRecentExternalActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent external activity'**
+  String get capabilityRecentExternalActivity;
+
+  /// No description provided for @capabilityAuditUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit history unavailable'**
+  String get capabilityAuditUnavailable;
+
+  /// No description provided for @capabilityNoExternalCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'No external calls recorded'**
+  String get capabilityNoExternalCalls;
+
+  /// No description provided for @capabilityReadyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} of {total} ready'**
+  String capabilityReadyCount(int ready, int total);
+
+  /// No description provided for @capabilityOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get capabilityOpenSettings;
+
+  /// No description provided for @capabilityRequestPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Request permission'**
+  String get capabilityRequestPermission;
+
+  /// No description provided for @capabilityCurrentAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Current AI'**
+  String get capabilityCurrentAi;
+
+  /// No description provided for @capabilitySystemSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'System speech'**
+  String get capabilitySystemSpeech;
+
+  /// No description provided for @capabilityVoiceInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input'**
+  String get capabilityVoiceInput;
+
+  /// No description provided for @capabilitySemanticSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search'**
+  String get capabilitySemanticSearch;
+
+  /// No description provided for @capabilityMcpTools.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP tools'**
+  String get capabilityMcpTools;
+
+  /// No description provided for @capabilityChatGenerationConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat generation connection'**
+  String get capabilityChatGenerationConnection;
+
+  /// No description provided for @capabilityDeviceTts.
+  ///
+  /// In en, this message translates to:
+  /// **'Device text-to-speech'**
+  String get capabilityDeviceTts;
+
+  /// No description provided for @capabilityDeviceSpeechRecognition.
+  ///
+  /// In en, this message translates to:
+  /// **'Device speech recognition'**
+  String get capabilityDeviceSpeechRecognition;
+
+  /// No description provided for @capabilityOptionalEmbeddingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional embedding connection'**
+  String get capabilityOptionalEmbeddingConnection;
+
+  /// No description provided for @capabilityOptionalImageConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional image connection'**
+  String get capabilityOptionalImageConnection;
+
+  /// No description provided for @capabilityExternalToolServers.
+  ///
+  /// In en, this message translates to:
+  /// **'External tool servers'**
+  String get capabilityExternalToolServers;
+
+  /// No description provided for @capabilityBundledCharacterRendering.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundled character rendering'**
+  String get capabilityBundledCharacterRendering;
+
+  /// No description provided for @capabilityCompleteAiConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the current AI connection'**
+  String get capabilityCompleteAiConnection;
+
+  /// No description provided for @capabilityCompleteEmbeddingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the embedding connection'**
+  String get capabilityCompleteEmbeddingConnection;
+
+  /// No description provided for @capabilityCompleteImageConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the image connection'**
+  String get capabilityCompleteImageConnection;
+
+  /// No description provided for @capabilityConfigurationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration required'**
+  String get capabilityConfigurationRequired;
+
+  /// No description provided for @capabilityConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get capabilityConfigured;
+
+  /// No description provided for @capabilityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get capabilityAvailable;
+
+  /// No description provided for @capabilityPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission required'**
+  String get capabilityPermissionRequired;
+
+  /// No description provided for @capabilityPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get capabilityPermissionDenied;
+
+  /// No description provided for @capabilityDownloadRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Download required'**
+  String get capabilityDownloadRequired;
+
+  /// No description provided for @capabilityUnavailableOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable while offline'**
+  String get capabilityUnavailableOffline;
+
+  /// No description provided for @capabilityUnavailableBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this build'**
+  String get capabilityUnavailableBuild;
+
+  /// No description provided for @capabilityDataMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'metadata'**
+  String get capabilityDataMetadata;
+
+  /// No description provided for @capabilityDataPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'prompt'**
+  String get capabilityDataPrompt;
+
+  /// No description provided for @capabilityDataChatText.
+  ///
+  /// In en, this message translates to:
+  /// **'chat text'**
+  String get capabilityDataChatText;
+
+  /// No description provided for @capabilityDataDocumentText.
+  ///
+  /// In en, this message translates to:
+  /// **'document text'**
+  String get capabilityDataDocumentText;
+
+  /// No description provided for @capabilityDataImage.
+  ///
+  /// In en, this message translates to:
+  /// **'image'**
+  String get capabilityDataImage;
+
+  /// No description provided for @capabilityDataAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'audio'**
+  String get capabilityDataAudio;
+
+  /// No description provided for @capabilityDataCharacterCard.
+  ///
+  /// In en, this message translates to:
+  /// **'character card'**
+  String get capabilityDataCharacterCard;
+
+  /// No description provided for @capabilityDataToolArguments.
+  ///
+  /// In en, this message translates to:
+  /// **'tool arguments'**
+  String get capabilityDataToolArguments;
+
+  /// No description provided for @dataBankCitationSourcesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Data Bank source} other{{count} Data Bank sources}}'**
+  String dataBankCitationSourcesCount(int count);
+
+  /// No description provided for @dataBankCitationSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Bank sources'**
+  String get dataBankCitationSources;
+
+  /// No description provided for @dataBankLocalQueriesFused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} local queries fused'**
+  String dataBankLocalQueriesFused(int count);
+
+  /// No description provided for @memoryUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories used'**
+  String get memoryUsed;
+
+  /// No description provided for @memoryTokenUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'{used}/{allocated} tokens'**
+  String memoryTokenUsage(int used, int allocated);
+
+  /// No description provided for @memoryRelevancePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% relevance'**
+  String memoryRelevancePercent(int percent);
+
+  /// No description provided for @memoryModeLocalFts.
+  ///
+  /// In en, this message translates to:
+  /// **'Local FTS'**
+  String get memoryModeLocalFts;
+
+  /// No description provided for @memoryModeHybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get memoryModeHybrid;
+
+  /// No description provided for @memoryModeLocalFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Local FTS fallback'**
+  String get memoryModeLocalFallback;
+
+  /// No description provided for @memoryIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Included'**
+  String get memoryIncluded;
+
+  /// No description provided for @memoryTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Trimmed'**
+  String get memoryTrimmed;
+
+  /// No description provided for @memoryExcluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded'**
+  String get memoryExcluded;
+
+  /// No description provided for @rpgTurnNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn {turn}'**
+  String rpgTurnNumber(int turn);
+
+  /// No description provided for @rpgDisableMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable RPG mode'**
+  String get rpgDisableMode;
+
+  /// No description provided for @rpgStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get rpgStatus;
+
+  /// No description provided for @rpgInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get rpgInventory;
+
+  /// No description provided for @rpgQuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Quests'**
+  String get rpgQuests;
+
+  /// No description provided for @rpgRelations.
+  ///
+  /// In en, this message translates to:
+  /// **'Relations'**
+  String get rpgRelations;
+
+  /// No description provided for @rpgActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get rpgActions;
+
+  /// No description provided for @rpgLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get rpgLog;
+
+  /// No description provided for @rpgLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get rpgLocation;
+
+  /// No description provided for @rpgTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get rpgTime;
+
+  /// No description provided for @rpgDayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}, {time}'**
+  String rpgDayTime(int day, String time);
+
+  /// No description provided for @rpgInventoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory is empty'**
+  String get rpgInventoryEmpty;
+
+  /// No description provided for @rpgNoQuests.
+  ///
+  /// In en, this message translates to:
+  /// **'No quests'**
+  String get rpgNoQuests;
+
+  /// No description provided for @rpgNoRelationships.
+  ///
+  /// In en, this message translates to:
+  /// **'No relationships'**
+  String get rpgNoRelationships;
+
+  /// No description provided for @rpgNoActions.
+  ///
+  /// In en, this message translates to:
+  /// **'No actions defined'**
+  String get rpgNoActions;
+
+  /// No description provided for @rpgCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost: {cost}'**
+  String rpgCost(String cost);
+
+  /// No description provided for @rpgCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check: {dice} + {attribute} vs {difficulty}'**
+  String rpgCheck(String dice, String attribute, num difficulty);
+
+  /// No description provided for @rpgCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown: {turns} turn(s)'**
+  String rpgCooldown(int turns);
+
+  /// No description provided for @rpgRequirementsNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements or resources not met'**
+  String get rpgRequirementsNotMet;
+
+  /// No description provided for @rpgNoTurnsRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'No turns recorded'**
+  String get rpgNoTurnsRecorded;
+
+  /// No description provided for @rpgSnapshots.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshots'**
+  String get rpgSnapshots;
+
+  /// No description provided for @rpgSnapshotActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot actions'**
+  String get rpgSnapshotActions;
+
+  /// No description provided for @rpgRestoreSnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore snapshot'**
+  String get rpgRestoreSnapshot;
+
+  /// No description provided for @rpgForkNewBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fork new branch'**
+  String get rpgForkNewBranch;
+
+  /// No description provided for @rpgRuleEngineSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Rule engine'**
+  String get rpgRuleEngineSource;
+
+  /// No description provided for @rpgRoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll: {total} ({expression})'**
+  String rpgRoll(String total, String expression);
+
+  /// No description provided for @rpgChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes: {changes}'**
+  String rpgChanges(String changes);
+
+  /// No description provided for @rpgForkBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fork branch'**
+  String get rpgForkBranch;
+
+  /// No description provided for @rpgBranchId.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch ID'**
+  String get rpgBranchId;
+
+  /// No description provided for @rpgFork.
+  ///
+  /// In en, this message translates to:
+  /// **'Fork'**
+  String get rpgFork;
+
+  /// No description provided for @rpgQuestInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get rpgQuestInactive;
+
+  /// No description provided for @rpgQuestActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get rpgQuestActive;
+
+  /// No description provided for @rpgQuestCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get rpgQuestCompleted;
+
+  /// No description provided for @rpgQuestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get rpgQuestFailed;
 }
 
 class _AppLocalizationsDelegate

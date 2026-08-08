@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:native_tavern/data/models/long_term_memory.dart';
 import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/domain/services/long_term_memory_context_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/memory_context_providers.dart';
 
 class MemoryContextUsageSheet extends ConsumerWidget {
@@ -13,6 +14,7 @@ class MemoryContextUsageSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final usage = ref.watch(memoryContextUsageProvider(chatId));
     final maximumHeight = MediaQuery.sizeOf(context).height * 0.72;
     return SafeArea(
@@ -42,12 +44,12 @@ class MemoryContextUsageSheet extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Memories used',
+                              l10n.memoryUsed,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             Text(
-                              '${_modeLabel(value.mode)} | '
-                              '${value.usedTokens}/${value.allocatedTokens} tokens',
+                              '${_memoryModeLabel(l10n, value.mode)} | '
+                              '${l10n.memoryTokenUsage(value.usedTokens, value.allocatedTokens)}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -102,13 +104,15 @@ class MemoryContextUsageSheet extends ConsumerWidget {
                                       runSpacing: 4,
                                       children: [
                                         Text(
-                                          '${(item.score * 100).round()}% relevance',
+                                          l10n.memoryRelevancePercent(
+                                            (item.score * 100).round(),
+                                          ),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
                                         ),
                                         Text(
-                                          _statusLabel(item.status),
+                                          _memoryStatusLabel(l10n, item.status),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
@@ -117,7 +121,7 @@ class MemoryContextUsageSheet extends ConsumerWidget {
                                           source.origin ==
                                                   MemoryOrigin.generated
                                               ? '${source.providerId} / ${source.modelId}'
-                                              : 'Manual',
+                                              : l10n.manual,
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
@@ -130,7 +134,7 @@ class MemoryContextUsageSheet extends ConsumerWidget {
                               if (canOpenSource)
                                 IconButton(
                                   key: Key('memory-usage-source-${memory.id}'),
-                                  tooltip: 'Open source',
+                                  tooltip: l10n.memoryOpenSource,
                                   onPressed: () {
                                     final router = GoRouter.of(context);
                                     Navigator.of(context).pop();
@@ -156,10 +160,11 @@ class MemoryContextUsageSheet extends ConsumerWidget {
   }
 }
 
-String _modeLabel(MemoryRetrievalMode mode) => switch (mode) {
-      MemoryRetrievalMode.fts => 'Local FTS',
-      MemoryRetrievalMode.hybrid => 'Hybrid',
-      MemoryRetrievalMode.ftsFallback => 'Local FTS fallback',
+String _memoryModeLabel(AppLocalizations l10n, MemoryRetrievalMode mode) =>
+    switch (mode) {
+      MemoryRetrievalMode.fts => l10n.memoryModeLocalFts,
+      MemoryRetrievalMode.hybrid => l10n.memoryModeHybrid,
+      MemoryRetrievalMode.ftsFallback => l10n.memoryModeLocalFallback,
     };
 
 IconData _statusIcon(ContextContributionItemStatus status) => switch (status) {
@@ -168,8 +173,10 @@ IconData _statusIcon(ContextContributionItemStatus status) => switch (status) {
       ContextContributionItemStatus.dropped => Icons.block_outlined,
     };
 
-String _statusLabel(ContextContributionItemStatus status) => switch (status) {
-      ContextContributionItemStatus.included => 'Included',
-      ContextContributionItemStatus.truncated => 'Trimmed',
-      ContextContributionItemStatus.dropped => 'Excluded',
+String _memoryStatusLabel(
+        AppLocalizations l10n, ContextContributionItemStatus status) =>
+    switch (status) {
+      ContextContributionItemStatus.included => l10n.memoryIncluded,
+      ContextContributionItemStatus.truncated => l10n.memoryTrimmed,
+      ContextContributionItemStatus.dropped => l10n.memoryExcluded,
     };
