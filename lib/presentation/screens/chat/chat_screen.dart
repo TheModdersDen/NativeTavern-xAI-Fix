@@ -41,6 +41,7 @@ import 'package:native_tavern/presentation/widgets/chat/data_bank_citation_previ
 import 'package:native_tavern/presentation/widgets/chat/chat_background_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/chat_voice_input_button.dart';
 import 'package:native_tavern/presentation/widgets/chat/message_content_widget.dart';
+import 'package:native_tavern/presentation/widgets/chat/memory_context_usage_sheet.dart';
 import 'package:native_tavern/presentation/widgets/chat/quick_reply_bar.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/presentation/widgets/chat/markdown_input_field.dart';
@@ -1353,6 +1354,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
+            const PopupMenuItem(
+              key: Key('memory-usage-menu'),
+              value: 'memory_usage',
+              child: ListTile(
+                leading: Icon(Icons.psychology_outlined),
+                title: Text('Memories used'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
             PopupMenuItem(
               value: 'export',
               child: ListTile(
@@ -1409,6 +1419,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               case 'bookmarks':
                 _showBookmarksDialog(context);
                 break;
+              case 'memory_usage':
+                _showMemoryUsage();
+                break;
               case 'export':
                 _showExportDialog();
                 break;
@@ -1422,6 +1435,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           },
         ),
       ],
+    );
+  }
+
+  void _showMemoryUsage() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => MemoryContextUsageSheet(chatId: widget.chatId),
     );
   }
 

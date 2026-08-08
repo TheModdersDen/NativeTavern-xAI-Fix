@@ -97,11 +97,12 @@ void main() {
 
     final assembly = container.read(lastContextAssemblyProvider);
     expect(assembly, isNotNull);
-    final memoryTrace = assembly!.traces.singleWhere(
+    final testTrace = assembly!.traces.singleWhere(
       (trace) => trace.contributorId == 'test.memory',
     );
+    expect(testTrace.contributorId, 'test.memory');
     expect(
-      memoryTrace.status,
+      testTrace.status,
       ContextContributionStatus.applied,
     );
     final generation = container.read(lastChatGenerationTraceProvider);
@@ -109,7 +110,7 @@ void main() {
     expect(generation?.middlewareTraces, hasLength(2));
   });
 
-  test('Data Bank with no matches sends the baseline without prompt changes',
+  test('built-in contributors with no matches preserve the baseline prompt',
       () async {
     final notifier = container.read(activeChatProvider.notifier);
     await notifier.createChat('character-1');
@@ -118,12 +119,15 @@ void main() {
 
     final assembly = container.read(lastContextAssemblyProvider);
     expect(assembly, isNotNull);
-    expect(assembly!.traces, hasLength(1));
+    expect(assembly!.traces, hasLength(2));
     expect(
-      assembly.traces.single.contributorId,
-      'data-bank.retrieval',
+      assembly.traces.map((trace) => trace.contributorId),
+      ['data-bank.retrieval', 'memory.long_term'],
     );
-    expect(assembly.traces.single.injectedMessages, isEmpty);
+    expect(
+      assembly.traces.every((trace) => trace.injectedMessages.isEmpty),
+      isTrue,
+    );
     expect(llmService.requests.single, assembly.messages);
     expect(
       llmService.requests.single

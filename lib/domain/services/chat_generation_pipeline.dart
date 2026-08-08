@@ -35,6 +35,8 @@ enum ContextContributionStatus {
   skippedNoBudget,
 }
 
+enum ContextContributionItemStatus { included, truncated, dropped }
+
 enum GenerationMiddlewarePhase {
   before,
   transform,
@@ -82,10 +84,13 @@ class ChatContextRequest {
     required this.inputTokenBudget,
     required this.availableContributionTokens,
     required this.cancellationToken,
+    int? conversationStartIndex,
     this.characterId,
     this.groupId,
     Map<String, Object?> metadata = const {},
-  })  : baseMessages = _immutableMessages(baseMessages),
+  })  : conversationStartIndex = conversationStartIndex ??
+            _defaultConversationStartIndex(baseMessages),
+        baseMessages = _immutableMessages(baseMessages),
         metadata = Map<String, Object?>.unmodifiable(metadata);
 
   final String sessionId;
@@ -96,6 +101,7 @@ class ChatContextRequest {
   final List<ChatMessageMap> baseMessages;
   final int inputTokenBudget;
   final int availableContributionTokens;
+  final int conversationStartIndex;
   final ChatCancellationToken cancellationToken;
   final Map<String, Object?> metadata;
 
@@ -113,6 +119,7 @@ class ChatContextRequest {
       inputTokenBudget: inputTokenBudget,
       availableContributionTokens:
           availableContributionTokens ?? this.availableContributionTokens,
+      conversationStartIndex: conversationStartIndex,
       cancellationToken: cancellationToken,
       metadata: metadata,
     );
@@ -123,10 +130,20 @@ class ContextContribution {
   ContextContribution({
     required List<ChatMessageMap> messages,
     this.placement = ContextContributionPlacement.beforeConversation,
-  }) : messages = _immutableMessages(messages);
+    List<String> itemIds = const [],
+    Map<String, Object?> metadata = const {},
+  })  : assert(
+          itemIds.isEmpty || itemIds.length == messages.length,
+          'itemIds must be empty or align one-to-one with messages.',
+        ),
+        messages = _immutableMessages(messages),
+        itemIds = List<String>.unmodifiable(itemIds),
+        metadata = _immutableMetadata(metadata);
 
   final List<ChatMessageMap> messages;
   final ContextContributionPlacement placement;
+  final List<String> itemIds;
+  final Map<String, Object?> metadata;
 }
 
 abstract class ContextContributor {
@@ -139,6 +156,20 @@ abstract class ContextContributor {
   Future<ContextContribution> contribute(ChatContextRequest request);
 
   FutureOr<void> onCancelled(ChatContextRequest request) {}
+}
+
+class ContextContributionItemTrace {
+  const ContextContributionItemTrace({
+    required this.itemId,
+    required this.status,
+    required this.originalTokens,
+    required this.usedTokens,
+  });
+
+  final String itemId;
+  final ContextContributionItemStatus status;
+  final int originalTokens;
+  final int usedTokens;
 }
 
 class ContextContributionTrace {
@@ -154,9 +185,14 @@ class ContextContributionTrace {
     required this.droppedMessageCount,
     required this.elapsed,
     required List<ChatMessageMap> injectedMessages,
+    List<ContextContributionItemTrace> itemTraces = const [],
+    Map<String, Object?> metadata = const {},
     this.placement,
     this.error,
-  }) : injectedMessages = _immutableMessages(injectedMessages);
+  })  : injectedMessages = _immutableMessages(injectedMessages),
+        itemTraces =
+            List<ContextContributionItemTrace>.unmodifiable(itemTraces),
+        metadata = _immutableMetadata(metadata);
 
   final String contributorId;
   final int order;
@@ -170,12 +206,16 @@ class ContextContributionTrace {
   final int droppedMessageCount;
   final Duration elapsed;
   final List<ChatMessageMap> injectedMessages;
+  final List<ContextContributionItemTrace> itemTraces;
+  final Map<String, Object?> metadata;
   final String? error;
 }
 
 class ContextAssemblyResult {
   ContextAssemblyResult({
     required this.sessionId,
+    required this.chatId,
+    required this.mode,
     required List<ChatMessageMap> baseMessages,
     required List<ChatMessageMap> messages,
     required this.inputTokenBudget,
@@ -185,11 +225,17 @@ class ContextAssemblyResult {
     required this.startedAt,
     required this.completedAt,
     required this.cancelled,
+    this.characterId,
+    this.groupId,
   })  : baseMessages = _immutableMessages(baseMessages),
         messages = _immutableMessages(messages),
         traces = List<ContextContributionTrace>.unmodifiable(traces);
 
   final String sessionId;
+  final String chatId;
+  final String? characterId;
+  final String? groupId;
+  final ChatGenerationMode mode;
   final List<ChatMessageMap> baseMessages;
   final List<ChatMessageMap> messages;
   final int inputTokenBudget;
@@ -528,11 +574,30 @@ class ChatGenerationPipeline {
   _FittedContribution _fitContribution(
     List<ChatMessageMap> messages,
     int tokenBudget,
+    List<String> itemIds,
   ) {
     final fitted = <ChatMessageMap>[];
+    final itemTraces = <ContextContributionItemTrace>[];
     var remaining = max(0, tokenBudget);
     var truncated = 0;
     var dropped = 0;
+
+    void recordItem(
+      int index,
+      ContextContributionItemStatus status,
+      int originalTokens,
+      int usedTokens,
+    ) {
+      if (itemIds.isEmpty) return;
+      itemTraces.add(
+        ContextContributionItemTrace(
+          itemId: itemIds[index],
+          status: status,
+          originalTokens: originalTokens,
+          usedTokens: usedTokens,
+        ),
+      );
+    }
 
     for (var index = 0; index < messages.length; index++) {
       final message = Map<String, dynamic>.from(messages[index]);
@@ -540,6 +605,12 @@ class ChatGenerationPipeline {
       if (tokens <= remaining) {
         fitted.add(message);
         remaining -= tokens;
+        recordItem(
+          index,
+          ContextContributionItemStatus.included,
+          tokens,
+          tokens,
+        );
         continue;
       }
 
@@ -563,14 +634,33 @@ class ChatGenerationPipeline {
               '${content.substring(0, candidateLength)}$marker';
         }
         if (_estimateMessage(message) <= remaining) {
+          final usedTokens = _estimateMessage(message);
           fitted.add(message);
-          remaining -= _estimateMessage(message);
+          remaining -= usedTokens;
           truncated++;
+          recordItem(
+            index,
+            ContextContributionItemStatus.truncated,
+            tokens,
+            usedTokens,
+          );
         } else {
           dropped++;
+          recordItem(index, ContextContributionItemStatus.dropped, tokens, 0);
         }
       } else {
         dropped++;
+        recordItem(index, ContextContributionItemStatus.dropped, tokens, 0);
+      }
+      for (var droppedIndex = index + 1;
+          droppedIndex < messages.length;
+          droppedIndex++) {
+        recordItem(
+          droppedIndex,
+          ContextContributionItemStatus.dropped,
+          _estimateMessage(messages[droppedIndex]),
+          0,
+        );
       }
       dropped += messages.length - index - 1;
       break;
@@ -581,6 +671,7 @@ class ChatGenerationPipeline {
       tokens: tokenBudget - remaining,
       truncatedMessages: truncated,
       droppedMessages: dropped,
+      itemTraces: itemTraces,
     );
   }
 }
@@ -614,11 +705,15 @@ class ChatGenerationSession {
   bool _cancellationNotified = false;
 
   Future<ContextAssemblyResult> assemble(
-    List<ChatMessageMap> baseMessages,
-  ) async {
+    List<ChatMessageMap> baseMessages, {
+    int? conversationStartIndex,
+  }) async {
     final startedAt = DateTime.now();
     final inputBudget = _pipeline._inputBudget(config);
     final immutableBase = _immutableMessages(baseMessages);
+    final resolvedConversationStartIndex = conversationStartIndex == null
+        ? immutableBase.indexWhere((message) => message['role'] != 'system')
+        : conversationStartIndex.clamp(0, immutableBase.length).toInt();
     final baseTokens = _pipeline._estimateMessages(immutableBase);
     var remaining = max(0, inputBudget - baseTokens);
     final traces = <ContextContributionTrace>[];
@@ -635,6 +730,9 @@ class ChatGenerationSession {
       baseMessages: immutableBase,
       inputTokenBudget: inputBudget,
       availableContributionTokens: remaining,
+      conversationStartIndex: resolvedConversationStartIndex < 0
+          ? immutableBase.length
+          : resolvedConversationStartIndex,
       cancellationToken: cancellationToken,
       metadata: metadata,
     );
@@ -697,8 +795,11 @@ class ChatGenerationSession {
 
         final originalTokens =
             _pipeline._estimateMessages(contribution.messages);
-        final fitted =
-            _pipeline._fitContribution(contribution.messages, allocation);
+        final fitted = _pipeline._fitContribution(
+          contribution.messages,
+          allocation,
+          contribution.itemIds,
+        );
         remaining -= fitted.tokens;
         switch (contribution.placement) {
           case ContextContributionPlacement.beforeBase:
@@ -721,6 +822,8 @@ class ChatGenerationSession {
           droppedMessageCount: fitted.droppedMessages,
           elapsed: stopwatch.elapsed,
           injectedMessages: fitted.messages,
+          itemTraces: fitted.itemTraces,
+          metadata: contribution.metadata,
         ));
       } catch (error) {
         traces.add(_emptyContributionTrace(
@@ -739,20 +842,18 @@ class ChatGenerationSession {
       ...beforeBase,
       ...immutableBase.map(_copyMessage),
     ];
-    final baseConversationIndex = immutableBase.indexWhere(
-      (message) => message['role'] != 'system',
-    );
     assembled.insertAll(
-      beforeBase.length +
-          (baseConversationIndex < 0
-              ? immutableBase.length
-              : baseConversationIndex),
+      beforeBase.length + request.conversationStartIndex,
       beforeConversation,
     );
     assembled.addAll(afterBase);
 
     final result = ContextAssemblyResult(
       sessionId: sessionId,
+      chatId: chatId,
+      characterId: characterId,
+      groupId: groupId,
+      mode: mode,
       baseMessages: immutableBase,
       messages: assembled,
       inputTokenBudget: inputBudget,
@@ -1210,12 +1311,14 @@ class _FittedContribution {
     required this.tokens,
     required this.truncatedMessages,
     required this.droppedMessages,
+    required this.itemTraces,
   });
 
   final List<ChatMessageMap> messages;
   final int tokens;
   final int truncatedMessages;
   final int droppedMessages;
+  final List<ContextContributionItemTrace> itemTraces;
 }
 
 class _ActiveMiddlewares {
@@ -1227,6 +1330,16 @@ class _ActiveMiddlewares {
 
 List<ChatMessageMap> _immutableMessages(Iterable<ChatMessageMap> messages) =>
     List<ChatMessageMap>.unmodifiable(messages.map(_copyMessage));
+
+int _defaultConversationStartIndex(List<ChatMessageMap> messages) {
+  final index = messages.indexWhere((message) => message['role'] != 'system');
+  return index < 0 ? messages.length : index;
+}
+
+Map<String, Object?> _immutableMetadata(Map<String, Object?> metadata) =>
+    Map<String, Object?>.unmodifiable(
+      metadata.map((key, value) => MapEntry(key, _copyValue(value))),
+    );
 
 ChatMessageMap _copyMessage(ChatMessageMap message) =>
     Map<String, dynamic>.unmodifiable(
