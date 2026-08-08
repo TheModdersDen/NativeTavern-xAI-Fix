@@ -87,7 +87,8 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
   flutter_tts: ^4.2.5
   just_audio: ^0.10.6
-  permission_handler: ^13.0.0
+  # 13.x pulls an AGP 9-only Android implementation; Flutter 3.38 uses AGP 8.
+  permission_handler: 12.0.1
   record: ^6.2.1
   speech_to_text: ^7.4.0
 

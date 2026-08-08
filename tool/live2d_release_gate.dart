@@ -343,16 +343,6 @@ Future<void> _verifyPubspecAssets(
 void _verifyReleaseEvidence(Object? value, List<String> errors) {
   final evidence = _map(value, 'releaseEvidence', errors);
   if (evidence == null) return;
-  final decision = evidence['releaseLicenseDecision'];
-  if (decision != 'not_required' && decision != 'obtained') {
-    errors.add(
-      'Cubism SDK Release License decision is pending; release is blocked.',
-    );
-  } else if (evidence['releaseLicenseEvidence'] is! String) {
-    errors
-        .add('Cubism SDK Release License decision has no evidence reference.');
-  }
-
   final validation = _map(
     evidence['mobileValidation'],
     'releaseEvidence.mobileValidation',

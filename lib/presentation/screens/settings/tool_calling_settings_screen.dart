@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/domain/models/tool_generation.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/tool_calling_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 
@@ -13,22 +14,21 @@ class ToolCallingSettingsScreen extends ConsumerWidget {
     final settings = ref.watch(toolCallingSettingsProvider);
     final controller = ref.read(toolCallingSettingsProvider.notifier);
     final descriptors = ref.watch(builtInToolRegistryProvider).descriptors;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Tool calling')),
+      appBar: AppBar(title: Text(l10n.toolCalling)),
       body: ListView(
         children: [
           SwitchListTile(
             key: const Key('tool-calling-master-toggle'),
             secondary: const Icon(Icons.build_outlined),
-            title: const Text('Allow tool calling'),
-            subtitle: const Text(
-              'Providers may request only the tools enabled below',
-            ),
+            title: Text(l10n.toolCallingAllow),
+            subtitle: Text(l10n.toolCallingAllowSubtitle),
             value: settings.enabled,
             onChanged: controller.setEnabled,
           ),
           const Divider(height: 24),
-          const _SectionTitle('Built-in tools'),
+          _SectionTitle(l10n.toolBuiltInTools),
           for (final descriptor in descriptors)
             CheckboxListTile(
               key: Key('built-in-tool-${descriptor.definition.name}'),
@@ -48,19 +48,17 @@ class ToolCallingSettingsScreen extends ConsumerWidget {
           ListTile(
             key: const Key('tool-calling-mcp-link'),
             leading: const Icon(Icons.extension_outlined),
-            title: const Text('MCP tools'),
-            subtitle: const Text(
-              'Connected MCP servers use their individual permissions',
-            ),
+            title: Text(l10n.toolMcpTools),
+            subtitle: Text(l10n.toolMcpPermissionsSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.mcpSettings),
           ),
           const Divider(height: 24),
-          const _SectionTitle('Safety limits'),
+          _SectionTitle(l10n.toolSafetyLimits),
           _LimitStepper(
             key: const Key('tool-round-limit'),
             icon: Icons.repeat,
-            title: 'Tool rounds',
+            title: l10n.toolRounds,
             value: settings.limits.maxToolRounds,
             minimum: 1,
             maximum: 16,
@@ -71,7 +69,7 @@ class ToolCallingSettingsScreen extends ConsumerWidget {
           _LimitStepper(
             key: const Key('tool-call-limit'),
             icon: Icons.numbers,
-            title: 'Calls per response',
+            title: l10n.toolCallsPerResponse,
             value: settings.limits.maxCalls,
             minimum: 1,
             maximum: 64,
@@ -82,8 +80,8 @@ class ToolCallingSettingsScreen extends ConsumerWidget {
           _LimitStepper(
             key: const Key('tool-time-limit'),
             icon: Icons.timer_outlined,
-            title: 'Time limit',
-            suffix: 'seconds',
+            title: l10n.toolTimeLimit,
+            suffix: l10n.toolSeconds,
             value: settings.limits.maxElapsed.inSeconds,
             minimum: 5,
             maximum: 600,
@@ -95,8 +93,8 @@ class ToolCallingSettingsScreen extends ConsumerWidget {
           _LimitStepper(
             key: const Key('tool-token-limit'),
             icon: Icons.token_outlined,
-            title: 'Tool token budget',
-            suffix: 'tokens',
+            title: l10n.toolTokenBudget,
+            suffix: l10n.toolTokens,
             value: settings.limits.maxTokenBudget,
             minimum: 256,
             maximum: 65536,
@@ -156,6 +154,7 @@ class _LimitStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -170,14 +169,14 @@ class _LimitStepper extends StatelessWidget {
                   ? null
                   : () => onChanged((value - step).clamp(minimum, maximum)),
               icon: const Icon(Icons.remove),
-              tooltip: 'Decrease $title',
+              tooltip: l10n.toolDecrease(title),
             ),
             IconButton(
               onPressed: value >= maximum
                   ? null
                   : () => onChanged((value + step).clamp(minimum, maximum)),
               icon: const Icon(Icons.add),
-              tooltip: 'Increase $title',
+              tooltip: l10n.toolIncrease(title),
             ),
           ],
         ),

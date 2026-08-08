@@ -7,6 +7,7 @@ import 'package:native_tavern/domain/models/built_in_tool.dart';
 import 'package:native_tavern/domain/models/mcp.dart';
 import 'package:native_tavern/domain/models/tool_generation.dart';
 import 'package:native_tavern/domain/services/tool_calling/built_in_tool_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/tool_calling_providers.dart';
 import 'package:native_tavern/presentation/screens/settings/tool_calling_settings_screen.dart';
@@ -32,7 +33,11 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(preferences),
           builtInToolRegistryProvider.overrideWithValue(registry),
         ],
-        child: const MaterialApp(home: ToolCallingSettingsScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ToolCallingSettingsScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -82,6 +87,8 @@ void main() {
       ProviderScope(
         overrides: [toolRuntimeProvider.overrideWith((ref) => runtime)],
         child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(body: ToolActivityPanel(chatId: 'chat')),
         ),
       ),

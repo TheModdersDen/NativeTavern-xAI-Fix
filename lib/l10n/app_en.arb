@@ -5367,5 +5367,110 @@
   "automaticRouting": "Automatic routing",
   "openRouterProviderHint": "Choose the upstream provider used for this model",
   "useCurrentChatConnection": "Use current chat connection",
-  "chatConnectionAppliedToEmbeddings": "Chat endpoint and API key applied to embeddings"
+  "chatConnectionAppliedToEmbeddings": "Chat endpoint and API key applied to embeddings",
+  "localFeatures": "Local features",
+  "memoryInbox": "Memory inbox",
+  "memoryInboxSubtitle": "Review and maintain long-term memories",
+  "dataBank": "Data Bank",
+  "dataBankSubtitle": "Import, search, and bind local documents",
+  "rpgScenarioEditor": "RPG scenario editor",
+  "rpgScenarioEditorSubtitle": "Create and validate local scenario packages",
+  "capabilityCheck": "Capability check",
+  "capabilityCheckSubtitle": "Availability, permissions, and configuration",
+  "mcpServers": "MCP servers",
+  "mcpServersSubtitle": "Connections, tools, permissions, and activity",
+  "toolCalling": "Tool calling",
+  "toolCallingSubtitle": "Built-in tools, approvals, and limits",
+  "toolCallingAllow": "Allow tool calling",
+  "toolCallingAllowSubtitle": "Providers may request only the tools enabled below",
+  "toolBuiltInTools": "Built-in tools",
+  "toolMcpTools": "MCP tools",
+  "toolMcpPermissionsSubtitle": "Connected MCP servers use their individual permissions",
+  "toolSafetyLimits": "Safety limits",
+  "toolRounds": "Tool rounds",
+  "toolCallsPerResponse": "Calls per response",
+  "toolTimeLimit": "Time limit",
+  "toolTokenBudget": "Tool token budget",
+  "toolSeconds": "seconds",
+  "toolTokens": "tokens",
+  "toolDecrease": "Decrease {control}",
+  "@toolDecrease": {
+    "placeholders": {"control": {"type": "String"}}
+  },
+  "toolIncrease": "Increase {control}",
+  "@toolIncrease": {
+    "placeholders": {"control": {"type": "String"}}
+  },
+  "toolActivity": "Tool activity",
+  "toolApprovalRequired": "Approval required",
+  "toolAllowOnce": "Allow once",
+  "toolAlwaysAllow": "Always allow",
+  "toolDeny": "Deny",
+  "toolCancelCall": "Cancel tool call",
+  "toolStatusWaitingApproval": "Waiting for approval",
+  "toolStatusRunning": "Running",
+  "toolStatusSucceeded": "Succeeded",
+  "toolStatusFailed": "Failed",
+  "toolStatusDenied": "Denied",
+  "toolStatusCancelled": "Cancelled",
+  "storageManagement": "Storage management",
+  "storageManagementSubtitle": "Usage, orphan scanning, and safe cleanup",
+  "storageUsedOfQuota": "{used} used of {quota}",
+  "@storageUsedOfQuota": {
+    "placeholders": {
+      "used": {"type": "String"},
+      "quota": {"type": "String"}
+    }
+  },
+  "storageQuotaWarning": "Storage usage is above the warning threshold",
+  "storageWithinQuota": "Storage usage is within the warning threshold",
+  "storageScanIncomplete": "{count} path(s) could not be inspected",
+  "@storageScanIncomplete": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "storageCategoryLive2d": "Live2D models",
+  "storageCategoryAttachments": "Attachments and media",
+  "storageCategoryDataBank": "Data Bank documents",
+  "storageCategoryAudio": "Audio",
+  "storageCategoryCache": "Cache",
+  "storageFilesCount": "{count} file(s)",
+  "@storageFilesCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "storageReclaimable": "{size} reclaimable",
+  "@storageReclaimable": {
+    "placeholders": {"size": {"type": "String"}}
+  },
+  "storageCleanupCandidates": "Safe cleanup",
+  "storageNoCleanupCandidates": "No unreferenced or expired files found",
+  "storageSelectAll": "Select all",
+  "storageClearSelection": "Clear selection",
+  "storageUndo": "Undo",
+  "storageCleanSelected": "Clean selected",
+  "storageCleanupReviewTitle": "Review cleanup",
+  "storageCleanupReviewBody": "Move {items} item(s), containing {files} file(s) and using {size}, to recoverable trash?",
+  "@storageCleanupReviewBody": {
+    "placeholders": {
+      "items": {"type": "int"},
+      "files": {"type": "int"},
+      "size": {"type": "String"}
+    }
+  },
+  "storageCleanupRecoverableHint": "Referenced files are protected. You can undo until staged files are permanently removed.",
+  "storageCleanupMoved": "{count} item(s) moved to recoverable trash",
+  "@storageCleanupMoved": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "storageCleanupRestored": "Cleanup undone",
+  "storageCleanupCompleted": "Cleanup completed",
+  "storageCleanupFailed": "Cleanup failed: {error}",
+  "@storageCleanupFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "storageReasonInterruptedTemporary": "Interrupted temporary data",
+  "storageReasonMissingDatabaseReference": "No database document references this data",
+  "storageReasonInterruptedDocumentCleanup": "Interrupted document cleanup",
+  "storageReasonMissingFileReference": "No database record references this file",
+  "storageReasonExpiredTransient": "Expired transient data",
+  "storageReasonExpiredAudio": "Expired synthesized audio"
 }

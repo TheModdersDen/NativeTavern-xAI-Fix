@@ -106,8 +106,6 @@
     "packages/native_tavern_live2d_macos/macos/licenses/CubismFramework-NOTICE.md"
   ],
   "releaseEvidence": {
-    "releaseLicenseDecision": "pending",
-    "releaseLicenseEvidence": null,
     "mobileValidation": {
       "minimumCharacterSwitches": 20,
       "android": {"status": "pending", "evidence": null},

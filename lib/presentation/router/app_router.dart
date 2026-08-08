@@ -32,6 +32,9 @@ import 'package:native_tavern/presentation/screens/settings/capability_diagnosti
 import 'package:native_tavern/presentation/screens/settings/memory_inbox_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/mcp_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/tool_calling_settings_screen.dart';
+import 'package:native_tavern/presentation/screens/settings/storage_management_screen.dart';
+import 'package:native_tavern/presentation/screens/data_bank/data_bank_screen.dart';
+import 'package:native_tavern/presentation/screens/rpg/rpg_scenario_editor_screen.dart';
 import 'package:native_tavern/presentation/widgets/chat/logprobs_panel.dart';
 import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.dart';
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
@@ -86,6 +89,9 @@ abstract class AppRoutes {
   static const memoryInbox = '/memory-inbox';
   static const mcpSettings = '/mcp-settings';
   static const toolCallingSettings = '/tool-calling-settings';
+  static const dataBank = '/data-bank';
+  static const rpgScenarioEditor = '/rpg-scenario-editor';
+  static const storageManagement = '/storage-management';
 }
 
 /// Navigation keys for nested navigation
@@ -400,6 +406,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'toolCallingSettings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ToolCallingSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.dataBank,
+        name: 'dataBank',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DataBankScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.rpgScenarioEditor,
+        name: 'rpgScenarioEditor',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const RpgScenarioEditorScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.storageManagement,
+        name: 'storageManagement',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const StorageManagementScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

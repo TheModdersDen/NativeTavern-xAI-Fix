@@ -7206,6 +7206,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat endpoint and API key applied to embeddings'**
   String get chatConnectionAppliedToEmbeddings;
+
+  /// No description provided for @localFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Local features'**
+  String get localFeatures;
+
+  /// No description provided for @memoryInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory inbox'**
+  String get memoryInbox;
+
+  /// No description provided for @memoryInboxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and maintain long-term memories'**
+  String get memoryInboxSubtitle;
+
+  /// No description provided for @dataBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Bank'**
+  String get dataBank;
+
+  /// No description provided for @dataBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import, search, and bind local documents'**
+  String get dataBankSubtitle;
+
+  /// No description provided for @rpgScenarioEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'RPG scenario editor'**
+  String get rpgScenarioEditor;
+
+  /// No description provided for @rpgScenarioEditorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and validate local scenario packages'**
+  String get rpgScenarioEditorSubtitle;
+
+  /// No description provided for @capabilityCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Capability check'**
+  String get capabilityCheck;
+
+  /// No description provided for @capabilityCheckSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability, permissions, and configuration'**
+  String get capabilityCheckSubtitle;
+
+  /// No description provided for @mcpServers.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP servers'**
+  String get mcpServers;
+
+  /// No description provided for @mcpServersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections, tools, permissions, and activity'**
+  String get mcpServersSubtitle;
+
+  /// No description provided for @toolCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool calling'**
+  String get toolCalling;
+
+  /// No description provided for @toolCallingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in tools, approvals, and limits'**
+  String get toolCallingSubtitle;
+
+  /// No description provided for @toolCallingAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow tool calling'**
+  String get toolCallingAllow;
+
+  /// No description provided for @toolCallingAllowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers may request only the tools enabled below'**
+  String get toolCallingAllowSubtitle;
+
+  /// No description provided for @toolBuiltInTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in tools'**
+  String get toolBuiltInTools;
+
+  /// No description provided for @toolMcpTools.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP tools'**
+  String get toolMcpTools;
+
+  /// No description provided for @toolMcpPermissionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected MCP servers use their individual permissions'**
+  String get toolMcpPermissionsSubtitle;
+
+  /// No description provided for @toolSafetyLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety limits'**
+  String get toolSafetyLimits;
+
+  /// No description provided for @toolRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool rounds'**
+  String get toolRounds;
+
+  /// No description provided for @toolCallsPerResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls per response'**
+  String get toolCallsPerResponse;
+
+  /// No description provided for @toolTimeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Time limit'**
+  String get toolTimeLimit;
+
+  /// No description provided for @toolTokenBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool token budget'**
+  String get toolTokenBudget;
+
+  /// No description provided for @toolSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'seconds'**
+  String get toolSeconds;
+
+  /// No description provided for @toolTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'tokens'**
+  String get toolTokens;
+
+  /// No description provided for @toolDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease {control}'**
+  String toolDecrease(String control);
+
+  /// No description provided for @toolIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase {control}'**
+  String toolIncrease(String control);
+
+  /// No description provided for @toolActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool activity'**
+  String get toolActivity;
+
+  /// No description provided for @toolApprovalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval required'**
+  String get toolApprovalRequired;
+
+  /// No description provided for @toolAllowOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow once'**
+  String get toolAllowOnce;
+
+  /// No description provided for @toolAlwaysAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Always allow'**
+  String get toolAlwaysAllow;
+
+  /// No description provided for @toolDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get toolDeny;
+
+  /// No description provided for @toolCancelCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel tool call'**
+  String get toolCancelCall;
+
+  /// No description provided for @toolStatusWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get toolStatusWaitingApproval;
+
+  /// No description provided for @toolStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get toolStatusRunning;
+
+  /// No description provided for @toolStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get toolStatusSucceeded;
+
+  /// No description provided for @toolStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get toolStatusFailed;
+
+  /// No description provided for @toolStatusDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get toolStatusDenied;
+
+  /// No description provided for @toolStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get toolStatusCancelled;
+
+  /// No description provided for @storageManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage management'**
+  String get storageManagement;
+
+  /// No description provided for @storageManagementSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage, orphan scanning, and safe cleanup'**
+  String get storageManagementSubtitle;
+
+  /// No description provided for @storageUsedOfQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} used of {quota}'**
+  String storageUsedOfQuota(String used, String quota);
+
+  /// No description provided for @storageQuotaWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage usage is above the warning threshold'**
+  String get storageQuotaWarning;
+
+  /// No description provided for @storageWithinQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage usage is within the warning threshold'**
+  String get storageWithinQuota;
+
+  /// No description provided for @storageScanIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} path(s) could not be inspected'**
+  String storageScanIncomplete(int count);
+
+  /// No description provided for @storageCategoryLive2d.
+  ///
+  /// In en, this message translates to:
+  /// **'Live2D models'**
+  String get storageCategoryLive2d;
+
+  /// No description provided for @storageCategoryAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments and media'**
+  String get storageCategoryAttachments;
+
+  /// No description provided for @storageCategoryDataBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Bank documents'**
+  String get storageCategoryDataBank;
+
+  /// No description provided for @storageCategoryAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get storageCategoryAudio;
+
+  /// No description provided for @storageCategoryCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache'**
+  String get storageCategoryCache;
+
+  /// No description provided for @storageFilesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} file(s)'**
+  String storageFilesCount(int count);
+
+  /// No description provided for @storageReclaimable.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} reclaimable'**
+  String storageReclaimable(String size);
+
+  /// No description provided for @storageCleanupCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe cleanup'**
+  String get storageCleanupCandidates;
+
+  /// No description provided for @storageNoCleanupCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'No unreferenced or expired files found'**
+  String get storageNoCleanupCandidates;
+
+  /// No description provided for @storageSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get storageSelectAll;
+
+  /// No description provided for @storageClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get storageClearSelection;
+
+  /// No description provided for @storageUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get storageUndo;
+
+  /// No description provided for @storageCleanSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean selected'**
+  String get storageCleanSelected;
+
+  /// No description provided for @storageCleanupReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review cleanup'**
+  String get storageCleanupReviewTitle;
+
+  /// No description provided for @storageCleanupReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {items} item(s), containing {files} file(s) and using {size}, to recoverable trash?'**
+  String storageCleanupReviewBody(int items, int files, String size);
+
+  /// No description provided for @storageCleanupRecoverableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Referenced files are protected. You can undo until staged files are permanently removed.'**
+  String get storageCleanupRecoverableHint;
+
+  /// No description provided for @storageCleanupMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} item(s) moved to recoverable trash'**
+  String storageCleanupMoved(int count);
+
+  /// No description provided for @storageCleanupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup undone'**
+  String get storageCleanupRestored;
+
+  /// No description provided for @storageCleanupCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup completed'**
+  String get storageCleanupCompleted;
+
+  /// No description provided for @storageCleanupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup failed: {error}'**
+  String storageCleanupFailed(String error);
+
+  /// No description provided for @storageReasonInterruptedTemporary.
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupted temporary data'**
+  String get storageReasonInterruptedTemporary;
+
+  /// No description provided for @storageReasonMissingDatabaseReference.
+  ///
+  /// In en, this message translates to:
+  /// **'No database document references this data'**
+  String get storageReasonMissingDatabaseReference;
+
+  /// No description provided for @storageReasonInterruptedDocumentCleanup.
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupted document cleanup'**
+  String get storageReasonInterruptedDocumentCleanup;
+
+  /// No description provided for @storageReasonMissingFileReference.
+  ///
+  /// In en, this message translates to:
+  /// **'No database record references this file'**
+  String get storageReasonMissingFileReference;
+
+  /// No description provided for @storageReasonExpiredTransient.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired transient data'**
+  String get storageReasonExpiredTransient;
+
+  /// No description provided for @storageReasonExpiredAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired synthesized audio'**
+  String get storageReasonExpiredAudio;
 }
 
 class _AppLocalizationsDelegate

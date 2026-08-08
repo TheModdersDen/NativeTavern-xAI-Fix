@@ -58,5 +58,8 @@ release
 build_*
 resize_app_store_images.py
 config
+!config/
+config/*
+!config/mobile_release_gate.json
 assets_for_discord
 scripts

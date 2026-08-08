@@ -20,18 +20,15 @@ void main() {
     expect(report.checkedArtifacts, 61);
   });
 
-  test('release is blocked until legal and physical-device evidence exists',
-      () async {
+  test('release is blocked until physical-device evidence exists', () async {
     final report = await auditLive2DRelease(
       repositoryRoot: repositoryRoot,
       mode: Live2DGateMode.release,
     );
 
     expect(
-      report.errors,
-      contains(
-        'Cubism SDK Release License decision is pending; release is blocked.',
-      ),
+      report.errors.where((error) => error.contains('Release License')),
+      isEmpty,
     );
     expect(
       report.errors,

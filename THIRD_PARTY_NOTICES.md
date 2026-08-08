@@ -51,6 +51,6 @@ Momose's character design. Live2D sample data is licensed material, not public
 domain or CC0 content.
 
 Native runtime binaries, Framework sources, model assets, required notices,
-publisher Release License evidence, and mobile validation evidence are checked
-by `tool/live2d_release_gate.dart`. A distributable build must not proceed when
-that release gate fails.
+and mobile validation evidence are checked by
+`tool/live2d_release_gate.dart`. Commercial licensing decisions are handled
+outside the engineering release gate.

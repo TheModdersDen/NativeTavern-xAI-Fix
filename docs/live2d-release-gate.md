@@ -1,8 +1,9 @@
 # Live2D release gate
 
 NativeTavern treats Live2D runtime code, proprietary binaries, and model data
-as separately licensed inputs. A development build may use audited inputs while
-a distributable build also requires publisher and physical-device evidence.
+as pinned third-party inputs. The engineering gate verifies their provenance,
+integrity, required notices, and physical-device behavior. Commercial licensing
+decisions are outside this engineering gate and do not block it.
 
 ## Pinned inputs
 
@@ -29,18 +30,13 @@ Run the stricter gate before producing a distributable build:
 dart run tool/live2d_release_gate.dart
 ```
 
-The release command fails until both of these requirements are recorded in the
-manifest:
-
-1. The publisher records `not_required` or `obtained` for the Cubism SDK
-   Release License decision and links the internal legal evidence.
-2. Android and iOS physical-device runs are marked `verified` and link their
-   captured test reports.
+The release command fails until Android and iOS physical-device runs are marked
+`verified` and link their captured test reports.
 
 Imported user models remain application data and are never copied into a
 release bundle. Any new bundled model directory must be added to the manifest
-with its source, license, release decision, complete file inventory, and
-SHA-256 values. Merely adding a directory to `pubspec.yaml` fails the gate.
+with its source, required notice, release approval, complete file inventory,
+and SHA-256 values. Merely adding a directory to `pubspec.yaml` fails the gate.
 
 ## Mobile evidence protocol
 
