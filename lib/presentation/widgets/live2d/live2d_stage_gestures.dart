@@ -79,12 +79,14 @@ class Live2DTwoFingerGestureRegion extends StatefulWidget {
   final Live2DStageTransform initialTransform;
   final Live2DTransformBuilder builder;
   final ValueChanged<Live2DStageTransform>? onTransformEnd;
+  final bool resetOnDoubleTap;
 
   const Live2DTwoFingerGestureRegion({
     super.key,
     required this.initialTransform,
     required this.builder,
     this.onTransformEnd,
+    this.resetOnDoubleTap = false,
   });
 
   @override
@@ -179,6 +181,17 @@ class _Live2DTwoFingerGestureRegionState
     }
   }
 
+  void _handleDoubleTap() {
+    const reset = Live2DStageTransform(
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
+    );
+    if (_transform == reset) return;
+    setState(() => _transform = reset);
+    widget.onTransformEnd?.call(reset);
+  }
+
   Offset _centroid(List<Offset> touches) {
     return Offset(
       touches.map((point) => point.dx).reduce((a, b) => a + b) / touches.length,
@@ -201,6 +214,12 @@ class _Live2DTwoFingerGestureRegionState
               ..onPointerEnd = _handlePointerEnd;
           },
         ),
+        if (widget.resetOnDoubleTap)
+          DoubleTapGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
+            DoubleTapGestureRecognizer.new,
+            (recognizer) => recognizer.onDoubleTap = _handleDoubleTap,
+          ),
       },
       child: widget.builder(context, _transform),
     );

@@ -73,9 +73,9 @@ void main() {
     expect(
         plan.affectedCharacters.map((character) => character.id), ['affected']);
 
+    final confirmation = lifecycle.confirmDeletion(plan);
     final result = await lifecycle.deleteImportedModel(
-      definition,
-      confirmedCharacterIds: {'affected'},
+      confirmation,
     );
 
     expect(result.plan.affectedCharacters, hasLength(1));
@@ -111,9 +111,11 @@ void main() {
       characterRepository: failingRepository,
       importService: importService,
     );
+    final plan = await lifecycle.planDeletion(definition);
+    final confirmation = lifecycle.confirmDeletion(plan);
 
     await expectLater(
-      lifecycle.deleteImportedModel(definition),
+      lifecycle.deleteImportedModel(confirmation),
       throwsA(isA<Live2DDeletionException>()),
     );
 
@@ -154,9 +156,9 @@ void main() {
     expect(plan.packageModels, hasLength(2));
     expect(plan.affectedCharacters.single.id, 'sibling-reference');
 
+    final confirmation = lifecycle.confirmDeletion(plan);
     await lifecycle.deleteImportedModel(
-      definitions.first,
-      confirmedCharacterIds: {'sibling-reference'},
+      confirmation,
     );
 
     expect(await importService.listImportedModels(), isEmpty);
@@ -170,6 +172,12 @@ void main() {
 
   test('changed references require a fresh confirmation', () async {
     final definition = await _importModel(tempDirectory, importService);
+    final lifecycle = Live2DModelLifecycleService(
+      characterRepository: characterRepository,
+      importService: importService,
+    );
+    final plan = await lifecycle.planDeletion(definition);
+    final confirmation = lifecycle.confirmDeletion(plan);
     final now = DateTime.now();
     await characterRepository.createCharacter(
       Character(
@@ -180,16 +188,9 @@ void main() {
         modifiedAt: now,
       ),
     );
-    final lifecycle = Live2DModelLifecycleService(
-      characterRepository: characterRepository,
-      importService: importService,
-    );
 
     await expectLater(
-      lifecycle.deleteImportedModel(
-        definition,
-        confirmedCharacterIds: const {},
-      ),
+      lifecycle.deleteImportedModel(confirmation),
       throwsA(isA<Live2DDeletionException>()),
     );
 
@@ -197,6 +198,43 @@ void main() {
     expect(
       (await characterRepository.getCharacter('new-reference'))?.assets?.live2d,
       isNotNull,
+    );
+  });
+
+  test('confirmation token is bound to the service that issued it', () async {
+    final definition = await _importModel(tempDirectory, importService);
+    final issuer = Live2DModelLifecycleService(
+      characterRepository: characterRepository,
+      importService: importService,
+    );
+    final otherService = Live2DModelLifecycleService(
+      characterRepository: characterRepository,
+      importService: importService,
+    );
+    final plan = await issuer.planDeletion(definition);
+    final confirmation = issuer.confirmDeletion(plan);
+
+    await expectLater(
+      otherService.deleteImportedModel(confirmation),
+      throwsA(isA<Live2DDeletionException>()),
+    );
+
+    expect(await importService.listImportedModels(), hasLength(1));
+  });
+
+  test('confirmation token can only be used once', () async {
+    final definition = await _importModel(tempDirectory, importService);
+    final lifecycle = Live2DModelLifecycleService(
+      characterRepository: characterRepository,
+      importService: importService,
+    );
+    final plan = await lifecycle.planDeletion(definition);
+    final confirmation = lifecycle.confirmDeletion(plan);
+
+    await lifecycle.deleteImportedModel(confirmation);
+    await expectLater(
+      lifecycle.deleteImportedModel(confirmation),
+      throwsA(isA<Live2DDeletionException>()),
     );
   });
 }

@@ -206,10 +206,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         _error = null;
       });
 
+      final confirmation = lifecycle.confirmDeletion(plan);
       final result = await lifecycle.deleteImportedModel(
-        definition,
-        confirmedCharacterIds:
-            plan.affectedCharacters.map((character) => character.id).toSet(),
+        confirmation,
       );
       if (!mounted) return;
       final deletedModels = result.plan.packageModels;
