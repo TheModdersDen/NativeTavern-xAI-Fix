@@ -4723,6 +4723,42 @@ abstract class AppLocalizations {
   /// **'Voice input'**
   String get voiceInput;
 
+  /// Hold-to-talk microphone tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to talk'**
+  String get holdToTalk;
+
+  /// Active hold-to-talk microphone tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Release to transcribe'**
+  String get releaseToTranscribe;
+
+  /// Cancel active voice input tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel voice input'**
+  String get cancelVoiceInput;
+
+  /// Open the operating system settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSystemSettings;
+
+  /// System speech recognition offline capability note
+  ///
+  /// In en, this message translates to:
+  /// **'Offline recognition depends on your operating system and installed language packs.'**
+  String get systemSttOfflineNote;
+
+  /// External STT configuration warning
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the selected provider configuration before testing.'**
+  String get sttConfigurationRequired;
+
   /// Speech recognition not available warning
   ///
   /// In en, this message translates to:

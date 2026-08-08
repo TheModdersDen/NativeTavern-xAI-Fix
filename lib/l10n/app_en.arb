@@ -3534,6 +3534,30 @@
   "@voiceInput": {
     "description": "Voice input tooltip"
   },
+  "holdToTalk": "Hold to talk",
+  "@holdToTalk": {
+    "description": "Hold-to-talk microphone tooltip"
+  },
+  "releaseToTranscribe": "Release to transcribe",
+  "@releaseToTranscribe": {
+    "description": "Active hold-to-talk microphone tooltip"
+  },
+  "cancelVoiceInput": "Cancel voice input",
+  "@cancelVoiceInput": {
+    "description": "Cancel active voice input tooltip"
+  },
+  "openSystemSettings": "Open settings",
+  "@openSystemSettings": {
+    "description": "Open the operating system settings"
+  },
+  "systemSttOfflineNote": "Offline recognition depends on your operating system and installed language packs.",
+  "@systemSttOfflineNote": {
+    "description": "System speech recognition offline capability note"
+  },
+  "sttConfigurationRequired": "Complete the selected provider configuration before testing.",
+  "@sttConfigurationRequired": {
+    "description": "External STT configuration warning"
+  },
   "speechRecognitionNotAvailable": "Speech recognition may not be available on this device.",
   "@speechRecognitionNotAvailable": {
     "description": "Speech recognition not available warning"

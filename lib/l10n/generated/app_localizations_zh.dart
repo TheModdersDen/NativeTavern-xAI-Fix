@@ -2517,6 +2517,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get voiceInput => 'Voice input';
 
   @override
+  String get holdToTalk => '按住说话';
+
+  @override
+  String get releaseToTranscribe => '松开并转写';
+
+  @override
+  String get cancelVoiceInput => '取消语音输入';
+
+  @override
+  String get openSystemSettings => '打开系统设置';
+
+  @override
+  String get systemSttOfflineNote => '离线识别能力取决于操作系统和已安装的语言包。';
+
+  @override
+  String get sttConfigurationRequired => '请先完成所选语音服务的配置再进行测试。';
+
+  @override
   String get speechRecognitionNotAvailable =>
       'Speech recognition may not be available on this device.';
 

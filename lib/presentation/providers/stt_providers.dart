@@ -1,190 +1,163 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/stt_service.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Provider for STT service
 final sttServiceProvider = Provider<STTService>((ref) {
-  final service = STTService();
-  ref.onDispose(() => service.dispose());
+  final service = STTService(
+    auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+  );
+  ref.onDispose(service.dispose);
   return service;
 });
 
-/// Provider for STT settings
-final sttSettingsProvider = StateNotifierProvider<STTSettingsNotifier, STTSettings>((ref) {
+final sttSettingsProvider =
+    StateNotifierProvider<STTSettingsNotifier, STTSettings>((ref) {
   return STTSettingsNotifier(ref.watch(sttServiceProvider));
 });
 
-/// Notifier for STT settings
 class STTSettingsNotifier extends StateNotifier<STTSettings> {
+  STTSettingsNotifier(this._service) : super(const STTSettings()) {
+    unawaited(_loadSettings());
+  }
+
   static const _prefsKey = 'stt_settings';
   final STTService _service;
-
-  STTSettingsNotifier(this._service) : super(const STTSettings()) {
-    _loadSettings();
-  }
 
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonStr = prefs.getString(_prefsKey);
-      if (jsonStr != null) {
-        final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-        state = STTSettings.fromJson(json);
-        _service.updateSettings(state);
-      }
-    } catch (e) {
-      // Use default settings on error
+      final jsonString = prefs.getString(_prefsKey);
+      if (jsonString == null) return;
+      state = STTSettings.fromJson(
+        jsonDecode(jsonString) as Map<String, dynamic>,
+      );
+      _service.updateSettings(state);
+    } catch (_) {
+      // Corrupt or unavailable preferences fall back to local defaults.
     }
   }
 
   Future<void> _saveSettings() async {
+    _service.updateSettings(state);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonStr = jsonEncode(state.toJson());
-      await prefs.setString(_prefsKey, jsonStr);
-      _service.updateSettings(state);
-    } catch (e) {
-      // Ignore save errors
+      await prefs.setString(_prefsKey, jsonEncode(state.toJson()));
+    } catch (_) {
+      // The active in-memory configuration remains usable.
     }
   }
 
   void setEnabled(bool enabled) {
     state = state.copyWith(enabled: enabled);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setProvider(STTProvider provider) {
     state = state.copyWith(provider: provider);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setLanguage(String language) {
     state = state.copyWith(language: language);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setContinuousListening(bool continuous) {
     state = state.copyWith(continuousListening: continuous);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setAutoSend(bool autoSend) {
     state = state.copyWith(autoSend: autoSend);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setShowPartialResults(bool show) {
     state = state.copyWith(showPartialResults: show);
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 
   void setApiKey(String? apiKey) {
-    state = state.copyWith(apiKey: apiKey);
-    _saveSettings();
+    state = state.copyWith(apiKey: apiKey?.trim() ?? '');
+    unawaited(_saveSettings());
   }
 
   void setApiEndpoint(String? endpoint) {
-    state = state.copyWith(apiEndpoint: endpoint);
-    _saveSettings();
+    state = state.copyWith(apiEndpoint: endpoint?.trim() ?? '');
+    unawaited(_saveSettings());
+  }
+
+  void setModel(String? model) {
+    state = state.copyWith(model: model?.trim() ?? '');
+    unawaited(_saveSettings());
   }
 
   void reset() {
     state = const STTSettings();
-    _saveSettings();
+    unawaited(_saveSettings());
   }
 }
 
-/// Provider for STT listening state
-final sttListeningProvider = StateProvider<bool>((ref) => false);
+final sttSessionProvider =
+    StateNotifierProvider<STTSessionNotifier, STTSessionState>((ref) {
+  return STTSessionNotifier(ref.watch(sttServiceProvider));
+});
 
-/// Provider for current STT result (partial or final)
-final sttResultProvider = StateProvider<STTResult?>((ref) => null);
+class STTSessionNotifier extends StateNotifier<STTSessionState> {
+  STTSessionNotifier(this._service) : super(_service.state) {
+    _subscription = _service.states.listen((next) => state = next);
+  }
 
-/// Provider for STT availability
+  final STTService _service;
+  late final StreamSubscription<STTSessionState> _subscription;
+
+  Future<void> start() => _service.startListening();
+  Future<void> stop() => _service.stopListening();
+  Future<void> toggle() => _service.toggleListening();
+  Future<void> cancel() => _service.cancelListening();
+  Future<bool> openPermissionSettings() => _service.openPermissionSettings();
+  void clear() => _service.clearResult();
+
+  @override
+  void dispose() {
+    unawaited(_subscription.cancel());
+    super.dispose();
+  }
+}
+
+final sttListeningProvider = Provider<bool>(
+  (ref) => ref.watch(sttSessionProvider).phase == STTSessionPhase.listening,
+);
+
+final sttResultProvider = Provider<STTResult?>(
+  (ref) => ref.watch(sttSessionProvider).result,
+);
+
 final sttAvailableProvider = FutureProvider<bool>((ref) async {
-  final service = ref.watch(sttServiceProvider);
-  return service.isAvailable();
+  ref.watch(sttSettingsProvider);
+  return ref.watch(sttServiceProvider).isAvailable();
 });
 
-/// STT action provider for starting listening
 final sttStartListeningProvider = Provider<Future<void> Function()>((ref) {
-  final service = ref.watch(sttServiceProvider);
-  final settings = ref.watch(sttSettingsProvider);
-  
-  return () async {
-    if (!settings.enabled) return;
-    
-    await service.initialize();
-    
-    service.onListeningStarted = () {
-      ref.read(sttListeningProvider.notifier).state = true;
-    };
-    service.onListeningStopped = () {
-      ref.read(sttListeningProvider.notifier).state = false;
-    };
-    service.onResult = (result) {
-      ref.read(sttResultProvider.notifier).state = result;
-    };
-    service.onError = (error) {
-      ref.read(sttListeningProvider.notifier).state = false;
-    };
-    
-    await service.startListening();
-  };
+  return ref.read(sttSessionProvider.notifier).start;
 });
 
-/// STT action provider for stopping listening
 final sttStopListeningProvider = Provider<Future<void> Function()>((ref) {
-  final service = ref.watch(sttServiceProvider);
-  
-  return () async {
-    await service.stopListening();
-    ref.read(sttListeningProvider.notifier).state = false;
-  };
+  return ref.read(sttSessionProvider.notifier).stop;
 });
 
-/// STT action provider for toggling listening
 final sttToggleListeningProvider = Provider<Future<void> Function()>((ref) {
-  final service = ref.watch(sttServiceProvider);
-  final settings = ref.watch(sttSettingsProvider);
-  
-  return () async {
-    if (!settings.enabled) return;
-    
-    await service.initialize();
-    
-    service.onListeningStarted = () {
-      ref.read(sttListeningProvider.notifier).state = true;
-    };
-    service.onListeningStopped = () {
-      ref.read(sttListeningProvider.notifier).state = false;
-    };
-    service.onResult = (result) {
-      ref.read(sttResultProvider.notifier).state = result;
-    };
-    service.onError = (error) {
-      ref.read(sttListeningProvider.notifier).state = false;
-    };
-    
-    await service.toggleListening();
-  };
+  return ref.read(sttSessionProvider.notifier).toggle;
 });
 
-/// STT action provider for cancelling listening
 final sttCancelListeningProvider = Provider<Future<void> Function()>((ref) {
-  final service = ref.watch(sttServiceProvider);
-  
-  return () async {
-    await service.cancelListening();
-    ref.read(sttListeningProvider.notifier).state = false;
-    ref.read(sttResultProvider.notifier).state = null;
-  };
+  return ref.read(sttSessionProvider.notifier).cancel;
 });
 
-/// Clear STT result
 final sttClearResultProvider = Provider<void Function()>((ref) {
-  return () {
-    ref.read(sttResultProvider.notifier).state = null;
-  };
+  return ref.read(sttSessionProvider.notifier).clear;
 });
