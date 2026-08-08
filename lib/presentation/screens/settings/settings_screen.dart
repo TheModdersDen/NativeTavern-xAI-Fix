@@ -133,6 +133,15 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.capabilityDiagnostics),
           ),
           ListTile(
+            key: const Key('mcp-settings-tile'),
+            leading: const Icon(Icons.extension_outlined),
+            title: const Text('MCP servers'),
+            subtitle:
+                const Text('Connections, tools, permissions, and activity'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.mcpSettings),
+          ),
+          ListTile(
             leading: const Icon(Icons.find_replace),
             title: Text(l10n.regex),
             trailing: const Icon(Icons.chevron_right),

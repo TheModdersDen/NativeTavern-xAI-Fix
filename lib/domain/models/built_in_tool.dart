@@ -11,6 +11,8 @@ enum ToolDataScope {
   worldInfoContent,
   imagePrompt,
   generatedImage,
+  mcpToolArguments,
+  mcpToolResult,
 }
 
 enum ToolAuthorizationSource { none, userSettings, oneTimeApproval, dryRun }

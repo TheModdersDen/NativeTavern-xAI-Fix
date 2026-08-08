@@ -28,12 +28,14 @@ dependencies:
   path_provider: ^2.1.1
   path: ^1.8.3
   shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.2.4
   
   # File Picker
   file_picker: ^8.0.0
   
   # Networking
   dio: ^5.4.0
+  mcp_dart: ^2.4.0
   
   # Image Processing
   image: ^4.1.3
