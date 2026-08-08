@@ -104,6 +104,103 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
   }
 
   @override
+  Future<List<LongTermMemorySearchResult>> search(
+    String query, {
+    required MemoryScope scope,
+    int topK = 20,
+    Set<MemoryState> states = const <MemoryState>{MemoryState.active},
+    bool includeExpired = false,
+    DateTime? at,
+  }) async {
+    if (topK <= 0) {
+      throw RangeError.range(topK, 1, null, 'topK');
+    }
+    final matchQuery = _plainTextFtsQuery(query);
+    if (matchQuery == null) return const [];
+
+    final conditions = <String>[
+      'long_term_memories_fts MATCH ?',
+      'm.scope_kind = ?',
+    ];
+    final variables = <Variable<Object>>[
+      Variable<String>(matchQuery),
+      Variable<String>(scope.kind.name),
+    ];
+    switch (scope.kind) {
+      case MemoryScopeKind.character:
+        conditions.add('m.character_id = ?');
+        variables.add(Variable<String>(scope.characterId!));
+      case MemoryScopeKind.characterPersona:
+        conditions.add('m.character_id = ?');
+        conditions.add('m.persona_id = ?');
+        variables.add(Variable<String>(scope.characterId!));
+        variables.add(Variable<String>(scope.personaId!));
+      case MemoryScopeKind.chat:
+        conditions.add('m.chat_id = ?');
+        variables.add(Variable<String>(scope.chatId!));
+      case MemoryScopeKind.group:
+        conditions.add('m.group_id = ?');
+        variables.add(Variable<String>(scope.groupId!));
+    }
+
+    if (states.isNotEmpty) {
+      final orderedStates = states.toList()
+        ..sort((left, right) => left.index.compareTo(right.index));
+      conditions.add(
+        'm.state IN (${List.filled(orderedStates.length, '?').join(', ')})',
+      );
+      variables.addAll(
+        orderedStates.map((state) => Variable<String>(state.name)),
+      );
+    }
+    if (!includeExpired) {
+      conditions.add('(m.expires_at IS NULL OR m.expires_at > ?)');
+      variables.add(Variable<DateTime>((at ?? _now()).toUtc()));
+    }
+    variables.add(Variable<int>(topK));
+
+    final rows = await _database
+        .customSelect(
+          '''
+        SELECT m.id AS memory_id, bm25(long_term_memories_fts) AS rank
+        FROM long_term_memories_fts
+        JOIN long_term_memories AS m
+          ON m.rowid = long_term_memories_fts.rowid
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY bm25(long_term_memories_fts) ASC,
+                 m.importance DESC,
+                 m.updated_at DESC,
+                 m.id ASC
+        LIMIT ?
+      ''',
+          variables: variables,
+          readsFrom: {_database.longTermMemories},
+        )
+        .get();
+
+    final results = <LongTermMemorySearchResult>[];
+    for (final row in rows) {
+      final memoryId = row.read<String>('memory_id');
+      final memory = await getById(memoryId);
+      if (memory == null) {
+        throw StateError('FTS index references missing memory $memoryId.');
+      }
+      results.add(
+        LongTermMemorySearchResult(
+          memory: memory,
+          rank: row.read<double>('rank'),
+        ),
+      );
+    }
+    return results;
+  }
+
+  @override
+  Future<void> rebuildSearchIndex() {
+    return _database.rebuildLongTermMemorySearchIndex();
+  }
+
+  @override
   Future<void> updateStates({
     required Set<String> memoryIds,
     required MemoryState state,
@@ -242,6 +339,15 @@ class DriftLongTermMemoryRepository implements LongTermMemoryRepository {
       throw StateError('Memory $id does not exist.');
     }
   }
+}
+
+String? _plainTextFtsQuery(String input) {
+  final tokens = RegExp(
+    r'[\p{L}\p{N}]+',
+    unicode: true,
+  ).allMatches(input).map((match) => match.group(0)!).toList();
+  if (tokens.isEmpty) return null;
+  return tokens.map((token) => '"$token"*').join(' AND ');
 }
 
 T _enumByName<T extends Enum>(Iterable<T> values, String name) {

@@ -185,6 +185,20 @@ class _JsonMemoryRepository implements LongTermMemoryRepository {
   }
 
   @override
+  Future<void> rebuildSearchIndex() async {}
+
+  @override
+  Future<List<LongTermMemorySearchResult>> search(
+    String query, {
+    required MemoryScope scope,
+    int topK = 20,
+    Set<MemoryState> states = const <MemoryState>{MemoryState.active},
+    bool includeExpired = false,
+    DateTime? at,
+  }) async =>
+      const [];
+
+  @override
   Future<LongTermMemory?> getById(String id) async => _read(id);
 
   @override
