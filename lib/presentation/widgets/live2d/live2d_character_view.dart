@@ -11,6 +11,7 @@ import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/domain/services/emotion_detection_service.dart';
 import 'package:native_tavern/domain/services/live2d_action_orchestrator.dart';
 import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
+import 'package:native_tavern/domain/services/live2d_render_lifecycle.dart';
 import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:native_tavern/domain/services/live2d_tts_playback_coordinator.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
@@ -150,16 +151,23 @@ class _MacOSLive2DController implements _NativeLive2DController {
 class Live2DCharacterController {
   _NativeLive2DController? _nativeController;
   Live2DActionOrchestrator? _orchestrator;
+  String? _loadedModelId;
   String _lipSyncParameter = 'ParamMouthOpenY';
 
+  bool get isAttached => _nativeController?.value.isAttached ?? false;
   bool get isReady => _nativeController?.value.isLoaded ?? false;
+  bool get isRenderingPaused =>
+      _nativeController?.value.isRenderingPaused ?? false;
+  String? get loadedModelId => _loadedModelId;
 
   void _attach(
     _NativeLive2DController controller,
+    String modelId,
     String lipSyncParameter,
     Live2DActionOrchestrator orchestrator,
   ) {
     _nativeController = controller;
+    _loadedModelId = modelId;
     _lipSyncParameter = lipSyncParameter;
     _orchestrator = orchestrator;
   }
@@ -167,6 +175,7 @@ class Live2DCharacterController {
   void _detach(_NativeLive2DController controller) {
     if (identical(_nativeController, controller)) {
       _nativeController = null;
+      _loadedModelId = null;
       _orchestrator = null;
     }
   }
@@ -245,6 +254,7 @@ class Live2DCharacterView extends StatefulWidget {
 class _Live2DCharacterViewState extends State<Live2DCharacterView>
     with WidgetsBindingObserver {
   late final _NativeLive2DController _nativeController;
+  late final Live2DRenderingLifecycle _renderingLifecycle;
   late Live2DActionOrchestrator _orchestrator;
   late Live2DConfig _actionConfig;
   final Live2DHitTestService _hitTestService = const Live2DHitTestService();
@@ -271,6 +281,12 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     super.initState();
     _nativeController =
         Platform.isMacOS ? _MacOSLive2DController() : _MobileLive2DController();
+    final appLifecycleState = WidgetsBinding.instance.lifecycleState;
+    _renderingLifecycle = Live2DRenderingLifecycle(
+      applyPaused: _nativeController.setRenderingPaused,
+      initialPaused: appLifecycleState != null &&
+          appLifecycleState != AppLifecycleState.resumed,
+    );
     _actionConfig = widget.config;
     _orchestrator = _createOrchestrator(_actionConfig);
     _applyConfigTransform(widget.config);
@@ -316,9 +332,11 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_nativeController.value.isAttached) return;
-    final paused = state != AppLifecycleState.resumed;
-    unawaited(_nativeController.setRenderingPaused(paused).catchError((_) {}));
+    unawaited(
+      _renderingLifecycle
+          .setAppActive(state == AppLifecycleState.resumed)
+          .catchError((_) {}),
+    );
   }
 
   @override
@@ -340,6 +358,20 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     try {
       await _nativeController.whenAttached;
       if (!mounted || generation != _loadGeneration) return;
+      if (Platform.isAndroid && !_renderingLifecycle.isAttached) {
+        // flutter_live2d reports its platform-view id before Android attaches
+        // the TextureView surface. Commands sent in that gap are discarded by
+        // the render hub, so let the platform view composite before loading.
+        await WidgetsBinding.instance.endOfFrame;
+        await WidgetsBinding.instance.endOfFrame;
+      }
+      if (!mounted || generation != _loadGeneration) return;
+      try {
+        await _renderingLifecycle.setAttached(true);
+      } catch (_) {
+        // A lifecycle command can be retried on the next app state change.
+      }
+      if (!mounted || generation != _loadGeneration) return;
       final actionConfig = await _discoverActionConfig();
       if (!mounted || generation != _loadGeneration) return;
       final modelDirectory = await _resolveModelDirectory();
@@ -359,6 +391,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
       _replaceOrchestrator(actionConfig);
       widget.controller?._attach(
         _nativeController,
+        widget.config.modelId,
         actionConfig.lipSyncParameter,
         _orchestrator,
       );
@@ -646,6 +679,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     WidgetsBinding.instance.removeObserver(this);
     widget.controller?._detach(_nativeController);
     _orchestrator.dispose();
+    _renderingLifecycle.dispose();
     unawaited(
       _setMouthOpen(0).whenComplete(_nativeController.dispose),
     );

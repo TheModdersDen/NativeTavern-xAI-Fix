@@ -16,6 +16,7 @@ tracked by this repository. Before building the macOS app:
 
 The bundled `macos/Libs/libLive2DCubismCore.dylib` is listed by Live2D as a
 redistributable file. Applicable licenses and notices are retained under
-`macos/licenses/`.
+`macos/licenses/`. It reports Cubism Core runtime version 6.0.1 and its digest
+is pinned by the repository Live2D release manifest.
 
 Official download: https://www.live2d.com/en/sdk/download/native/
