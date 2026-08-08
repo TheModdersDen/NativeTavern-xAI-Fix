@@ -28,6 +28,44 @@ void main() {
     });
   }
 
+  testWidgets('top-level scalar sections expand without PageStorage errors', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: RpgScenarioEditorScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    const sections = {
+      'Compatibility': 'rpg-field-/compatibility/minimumEngineVersion',
+      'Initial State': 'rpg-field-/initialState/scenarioId',
+    };
+    final editorScroll = find
+        .descendant(
+          of: find.byKey(const PageStorageKey('rpg-document-editor')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    for (final entry in sections.entries) {
+      final header = find.text(entry.key);
+      await tester.scrollUntilVisible(
+        header,
+        300,
+        scrollable: editorScroll,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(header);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(Key(entry.value)), findsOneWidget);
+    }
+  });
+
   testWidgets('imports, edits, drafts, previews, exports, and reimports',
       (tester) async {
     tester.view.physicalSize = const Size(1200, 1000);
