@@ -153,8 +153,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (!mounted || !_scrollController.hasClients) return;
       final reversedIndex = messages.length - 1 - actualIndex;
       final denominator = math.max(1, messages.length - 1);
-      final estimatedOffset =
-          _scrollController.position.maxScrollExtent *
+      final estimatedOffset = _scrollController.position.maxScrollExtent *
           reversedIndex /
           denominator;
       _scrollController.jumpTo(
@@ -196,9 +195,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     Live2DStageTransform transform,
   ) async {
     try {
-      await ref
-          .read(activeChatProvider.notifier)
-          .updateLive2DStageTransform(
+      await ref.read(activeChatProvider.notifier).updateLive2DStageTransform(
             scale: transform.scale,
             offsetX: transform.offsetX,
             offsetY: transform.offsetY,
@@ -441,23 +438,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Choose RPG scenario',
+                        AppLocalizations.of(context).chooseRpgScenario,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(sheetContext, _importRpg),
                       icon: const Icon(Icons.file_open_outlined),
-                      tooltip: 'Import scenario',
+                      tooltip: AppLocalizations.of(context).importScenario,
                     ),
                   ],
                 ),
               ),
               if (scenarios.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(24),
+                Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                      'No saved scenarios. Import a JSON or YAML package.'),
+                    AppLocalizations.of(context).noSavedScenarios,
+                  ),
                 )
               else
                 Flexible(
@@ -483,7 +481,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ListTile(
                 key: const Key('rpg-import-scenario'),
                 leading: const Icon(Icons.file_open_outlined),
-                title: const Text('Import scenario package'),
+                title:
+                    Text(AppLocalizations.of(context).rpgImportScenarioPackage),
                 onTap: () => Navigator.pop(sheetContext, _importRpg),
               ),
             ],
@@ -509,7 +508,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final bytes = file.bytes ??
         (file.path == null ? null : await File(file.path!).readAsBytes());
     if (bytes == null) {
-      throw StateError('The selected scenario could not be read.');
+      throw StateError(
+        AppLocalizations.of(context).rpgSelectedScenarioUnreadable,
+      );
     }
     final result = await const RpgScenarioPackageService().importBytesAsync(
       bytes,
@@ -564,6 +565,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> _executeCommand(SlashCommand command, String? argument) async {
+    final l10n = AppLocalizations.of(context);
     final config = ref.read(llmConfigProvider);
     final chatNotifier = ref.read(activeChatProvider.notifier);
     final chatState = ref.read(activeChatProvider);
@@ -670,7 +672,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         if (argument != null && argument.isNotEmpty) {
           await chatNotifier.updateAuthorNote(argument);
           await chatNotifier.toggleAuthorNote(true);
-          _showSnackBar('Author\'s note updated');
+          _showSnackBar(l10n.authorsNoteUpdated);
         } else {
           showAuthorNoteDialog(context);
         }
@@ -695,21 +697,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     _showSnackBar(l10n.imageGeneration);
-    final result = await ref
-        .read(imageGenStateProvider.notifier)
-        .generate(request);
+    final result =
+        await ref.read(imageGenStateProvider.notifier).generate(request);
     if (!mounted) return;
     if (result == null || result.images.isEmpty) {
       final error = ref.read(imageGenStateProvider).error;
-      _showCommandError(error ?? 'No image generated');
+      _showCommandError(error ?? l10n.noImageGenerated);
       return;
     }
 
     try {
       final attachments = await _saveGeneratedImages(result);
-      await ref
-          .read(activeChatProvider.notifier)
-          .addLocalMessage(
+      await ref.read(activeChatProvider.notifier).addLocalMessage(
             role: MessageRole.user,
             content: request.prompt,
             attachments: attachments,
@@ -717,7 +716,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _showSnackBar('${l10n.generationComplete} (${attachments.length})');
       _scrollToBottom();
     } catch (error) {
-      _showCommandError('Failed to save image: $error');
+      _showCommandError(l10n.failedToSaveImage('$error'));
     }
   }
 
@@ -764,8 +763,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (argument == null || argument.isEmpty || argument == 'right') {
       newIndex = (newIndex + 1) % lastMessage.swipes.length;
     } else if (argument == 'left') {
-      newIndex =
-          (newIndex - 1 + lastMessage.swipes.length) %
+      newIndex = (newIndex - 1 + lastMessage.swipes.length) %
           lastMessage.swipes.length;
     } else {
       final parsed = int.tryParse(argument);
@@ -879,9 +877,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    final text = await ref
-        .read(activeChatProvider.notifier)
-        .impersonate(config);
+    final text =
+        await ref.read(activeChatProvider.notifier).impersonate(config);
     if (!mounted) return;
     if (text != null) {
       _messageController.text = text;
@@ -1027,8 +1024,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       // 2. Chat finishes loading (transitions from loading to loaded with messages)
       final messageCountChanged =
           previous?.messages.length != next.messages.length;
-      final loadingFinished =
-          previous?.isLoading == true &&
+      final loadingFinished = previous?.isLoading == true &&
           next.isLoading == false &&
           next.messages.isNotEmpty;
 
@@ -1158,8 +1154,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   AppBar _buildAppBar(ActiveChatState chatState) {
     final l10n = AppLocalizations.of(context);
-    final hasAuthorNote =
-        chatState.chat?.authorNoteEnabled == true &&
+    final hasAuthorNote = chatState.chat?.authorNoteEnabled == true &&
         (chatState.chat?.authorNote.isNotEmpty ?? false);
     final llmConfig = ref.watch(llmConfigProvider);
     final rpgState = ref.watch(rpgChatProvider(widget.chatId));
@@ -1210,7 +1205,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 : Icons.sports_esports_outlined,
             color: rpgState.enabled ? AppTheme.accentColor : null,
           ),
-          tooltip: rpgState.enabled ? 'Disable RPG mode' : 'Enable RPG mode',
+          tooltip: rpgState.enabled ? l10n.rpgDisableMode : l10n.rpgEnableMode,
           onPressed: rpgState.isLoading ? null : _toggleRpgMode,
         ),
         // Author's Note button
@@ -1239,16 +1234,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             icon: Icon(
               ref.watch(appSettingsProvider.select((s) => s.chatLayoutMode)) ==
                       'bubble'
-                  ? Icons
-                        .auto_stories // Novel mode icon
+                  ? Icons.auto_stories // Novel mode icon
                   : Icons.chat_bubble, // Bubble mode icon
             ),
             tooltip: l10n.switchLayout,
             onPressed: () {
               final currentMode = ref.read(appSettingsProvider).chatLayoutMode;
-              final newMode = currentMode == 'bubble'
-                  ? 'visualNovel'
-                  : 'bubble';
+              final newMode =
+                  currentMode == 'bubble' ? 'visualNovel' : 'bubble';
               ref
                   .read(appSettingsProvider.notifier)
                   .updateChatLayoutMode(newMode);
@@ -1306,8 +1299,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: ListTile(
                 leading: Icon(
                   Icons.format_quote,
-                  color:
-                      (ref
+                  color: (ref
                               .read(activeChatProvider)
                               .chat
                               ?.startReplyWith
@@ -1337,8 +1329,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: ListTile(
                 leading: Icon(
                   Icons.public,
-                  color:
-                      (ref
+                  color: (ref
                               .read(activeChatProvider)
                               .chat
                               ?.linkedWorldInfoIds
@@ -1362,12 +1353,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
-            const PopupMenuItem(
-              key: Key('memory-usage-menu'),
+            PopupMenuItem(
+              key: const Key('memory-usage-menu'),
               value: 'memory_usage',
               child: ListTile(
-                leading: Icon(Icons.psychology_outlined),
-                title: Text('Memories used'),
+                leading: const Icon(Icons.psychology_outlined),
+                title: Text(l10n.memoryUsed),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -1615,15 +1606,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ttsSettingsProvider.select((settings) => settings.enabled),
         );
         final playback = ttsRef.watch(ttsPlaybackStateProvider);
-        final matchesStage =
-            playback.ownerId == widget.chatId &&
+        final matchesStage = playback.ownerId == widget.chatId &&
             (playback.characterId == null ||
                 playback.characterId == character.id);
         final stagePlayback = !ttsEnabled
             ? null
             : matchesStage
-            ? playback
-            : TTSPlaybackState(sequence: playback.sequence);
+                ? playback
+                : TTSPlaybackState(sequence: playback.sequence);
 
         return Live2DCharacterView(
           config: live2d!,
@@ -1693,7 +1683,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             if (isAssistant)
               ListTile(
                 leading: const Icon(Icons.volume_up_outlined),
-                title: const Text('Read aloud'),
+                title: Text(l10n.readAloud),
                 onTap: () {
                   Navigator.pop(context);
                   unawaited(
@@ -1752,8 +1742,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       effectiveBackgroundProvider(chatState.character?.id),
     );
     final background = backgroundAsync.valueOrNull ?? ChatBackground.none;
-    final hasBackground =
-        background.type != BackgroundType.none ||
+    final hasBackground = background.type != BackgroundType.none ||
         chatState.character?.assets?.live2d?.enabled == true;
 
     return ListView.builder(
@@ -1925,7 +1914,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${l10n.generationComplete} - ${result.images.length} image(s) added',
+              l10n.imagesAdded(result.images.length),
             ),
           ),
         );
@@ -1933,7 +1922,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         debugPrint('Failed to save generated image: $e');
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save image: $e')));
+        ).showSnackBar(
+          SnackBar(content: Text(l10n.failedToSaveImage('$e'))),
+        );
       }
     }
   }
@@ -2146,8 +2137,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildInputMenuOverlay(ActiveChatState chatState) {
     final quickReplyConfig = ref.watch(quickReplyConfigProvider);
     final enabledReplies = ref.watch(enabledQuickRepliesProvider);
-    final showQuickReplies =
-        quickReplyConfig.showQuickReplies &&
+    final showQuickReplies = quickReplyConfig.showQuickReplies &&
         enabledReplies.isNotEmpty &&
         !chatState.isGenerating;
     final width = math.max(0.0, MediaQuery.sizeOf(context).width - 32);
@@ -2750,7 +2740,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final exportService = ref.read(chatExportServiceProvider);
     final activePersonaAsync = ref.read(activePersonaProvider);
-    final userName = activePersonaAsync.valueOrNull?.name ?? 'User';
+    final userName = activePersonaAsync.valueOrNull?.name ??
+        AppLocalizations.of(context).user;
 
     try {
       await exportService.exportAndShare(
@@ -3010,17 +3001,15 @@ class _MessageBubbleState extends State<_MessageBubble> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: isUser
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[_buildAvatar(), const SizedBox(width: 8)],
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 GestureDetector(
                   onLongPress: () => _showMessageOptions(context),
@@ -3076,8 +3065,8 @@ class _MessageBubbleState extends State<_MessageBubble> {
                           icon: const Icon(Icons.chevron_left, size: 20),
                           onPressed: widget.message.currentSwipeIndex > 0
                               ? () => widget.onSwipe(
-                                  widget.message.currentSwipeIndex - 1,
-                                )
+                                    widget.message.currentSwipeIndex - 1,
+                                  )
                               : null,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -3090,19 +3079,20 @@ class _MessageBubbleState extends State<_MessageBubble> {
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: Text(
                               '${widget.message.currentSwipeIndex + 1}/${widget.message.swipes.length}',
-                              style: Theme.of(context).textTheme.bodySmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
                                   ?.copyWith(color: AppTheme.textMuted),
                             ),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.chevron_right, size: 20),
-                          onPressed:
-                              widget.message.currentSwipeIndex <
+                          onPressed: widget.message.currentSwipeIndex <
                                   widget.message.swipes.length - 1
                               ? () => widget.onSwipe(
-                                  widget.message.currentSwipeIndex + 1,
-                                )
+                                    widget.message.currentSwipeIndex + 1,
+                                  )
                               : null,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -3162,8 +3152,8 @@ class _MessageBubbleState extends State<_MessageBubble> {
           color: widget.highlighted
               ? Theme.of(context).colorScheme.tertiary
               : isUser
-              ? AppTheme.accentColor.withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.3),
+                  ? AppTheme.accentColor.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.3),
           width: widget.highlighted ? 3 : 1,
         ),
         // Glass morphism effect
@@ -3180,11 +3170,11 @@ class _MessageBubbleState extends State<_MessageBubble> {
       return BoxDecoration(
         color: isUser
             ? (widget.hasBackground
-                  ? AppTheme.accentColor.withValues(alpha: widget.bubbleOpacity)
-                  : AppTheme.accentColor)
+                ? AppTheme.accentColor.withValues(alpha: widget.bubbleOpacity)
+                : AppTheme.accentColor)
             : (widget.hasBackground
-                  ? AppTheme.darkCard.withValues(alpha: widget.bubbleOpacity)
-                  : AppTheme.darkCard),
+                ? AppTheme.darkCard.withValues(alpha: widget.bubbleOpacity)
+                : AppTheme.darkCard),
         borderRadius: BorderRadius.circular(16),
         border: widget.highlighted
             ? Border.all(

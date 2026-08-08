@@ -51,7 +51,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get save => '保存';
 
   @override
-  String get saveAs => 'Save As';
+  String get saveAs => '另存为';
 
   @override
   String get edit => '编辑';
@@ -457,14 +457,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maxTokens => '最大令牌数';
 
   @override
-  String get contextLength => 'Context Length';
+  String get contextLength => '上下文长度';
 
   @override
-  String get contextWindowSize => 'Context Window Size';
+  String get contextWindowSize => '上下文窗口大小';
 
   @override
-  String get contextLengthDescription =>
-      'Maximum number of tokens the model can process as input context.';
+  String get contextLengthDescription => '模型作为输入上下文可处理的最大 Token 数。';
 
   @override
   String get topP => 'Top P';
@@ -907,55 +906,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commandHelp => '输入 / 查看可用命令';
 
   @override
-  String get characterNotFound => 'Character Not Found';
+  String get characterNotFound => '未找到角色';
 
   @override
-  String get characterNotFoundMessage => 'Character not found';
+  String get characterNotFoundMessage => '找不到角色';
 
   @override
-  String get exportAsPng => 'Export as PNG';
+  String get exportAsPng => '导出为 PNG';
 
   @override
-  String get exportAsCharx => 'Export as CharX';
+  String get exportAsCharx => '导出为 CharX';
 
   @override
-  String get duplicate => 'Duplicate';
+  String get duplicate => '复制';
 
   @override
   String deleteCharacterConfirmationSimple(String name) {
-    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+    return '确定删除“$name”吗？此操作无法撤销。';
   }
 
   @override
   String characterDuplicated(String name) {
-    return '$name duplicated';
+    return '已复制$name';
   }
 
   @override
   String failedToDelete(String error) {
-    return 'Failed to delete: $error';
+    return '删除失败：$error';
   }
 
   @override
   String failedToDuplicate(String error) {
-    return 'Failed to duplicate: $error';
+    return '复制失败：$error';
   }
 
   @override
-  String get pngExportComingSoon => 'PNG export coming soon';
+  String get pngExportComingSoon => '即将支持 PNG 导出';
 
   @override
-  String get charxExportComingSoon => 'CharX export coming soon';
+  String get charxExportComingSoon => '即将支持 CharX 导出';
 
   @override
-  String get failedToCreateChat => 'Failed to create chat';
+  String get failedToCreateChat => '创建聊天失败';
 
   @override
-  String get creating => 'Creating...';
+  String get creating => '正在创建...';
 
   @override
   String byCreator(String creator) {
-    return 'by $creator';
+    return '作者：$creator';
   }
 
   @override
@@ -964,428 +963,412 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get showLess => 'Show less';
+  String get showLess => '收起';
 
   @override
-  String get showMore => 'Show more';
+  String get showMore => '显示更多';
 
   @override
   String greetingNumber(int number) {
-    return 'Greeting $number';
+    return '问候语 $number';
   }
 
   @override
   String alternateGreetingsCount(int count) {
-    return 'Alternate Greetings ($count)';
+    return '备选问候语（$count）';
   }
 
   @override
-  String get embeddedLorebook => 'Embedded Lorebook';
+  String get embeddedLorebook => '内嵌世界书';
 
   @override
   String entriesEnabled(int enabled, int total) {
-    return '$enabled of $total entries enabled';
+    return '已启用 $enabled/$total 个条目';
   }
 
   @override
   String andMoreEntries(int count) {
-    return '... and $count more entries';
+    return '...以及另外 $count 个条目';
   }
 
   @override
-  String get exampleMessages => 'Example Messages';
+  String get exampleMessages => '示例消息';
 
   @override
-  String get postHistoryInstructions => 'Post-History Instructions';
+  String get postHistoryInstructions => '历史记录后指令';
 
   @override
-  String get selectImages => 'Select Images';
+  String get selectImages => '选择图片';
 
   @override
-  String get presetsAndTemplates => 'Presets & Templates';
+  String get presetsAndTemplates => '预设与模板';
 
   @override
-  String get activePreset => 'Active Preset';
+  String get activePreset => '当前预设';
 
   @override
-  String get change => 'Change';
+  String get change => '更改';
 
   @override
-  String get noPresetSelected => 'No preset selected';
+  String get noPresetSelected => '未选择预设';
 
   @override
-  String get instructTemplate => 'Instruct Template';
+  String get instructTemplate => '指令模板';
 
   @override
-  String get selectInstructTemplate => 'Select Instruct Template';
+  String get selectInstructTemplate => '选择指令模板';
 
   @override
   String get instructTemplateDescription =>
-      'Instruct templates format prompts for different LLM models. Use \"None\" for API providers like OpenAI or Claude that handle formatting automatically.';
+      '指令模板会针对不同 LLM 模型设置提示词格式。对于会自动处理格式的 OAI Compatible 或 Claude 等 API 服务，请选择“无”。';
 
   @override
-  String get orderAndTogglePromptSections => 'Order and toggle prompt sections';
+  String get orderAndTogglePromptSections => '调整提示词部分的顺序和启用状态';
 
   @override
-  String get llmConnection => 'LLM Connection';
+  String get llmConnection => 'LLM 连接';
 
   @override
-  String get generationSettings => 'Generation Settings';
+  String get generationSettings => '生成设置';
 
   @override
-  String get advancedSamplerSettings => 'Advanced Sampler Settings';
+  String get advancedSamplerSettings => '高级采样器设置';
 
   @override
-  String get fullControlOverSampling => 'Full control over sampling parameters';
+  String get fullControlOverSampling => '完整控制采样参数';
 
   @override
-  String get selectLlmProvider => 'Select LLM Provider';
+  String get selectLlmProvider => '选择 LLM 服务';
 
   @override
-  String get notSet => 'Not set';
+  String get notSet => '未设置';
 
   @override
-  String get enterApiKey => 'Enter your API key';
+  String get enterApiKey => '输入 API 密钥';
 
   @override
-  String get apiEndpointUrl => 'API endpoint URL';
+  String get apiEndpointUrl => 'API 端点 URL';
 
   @override
-  String get modelName => 'Model name';
+  String get modelName => '模型名称';
 
   @override
-  String get fetchAvailableModels => 'Fetch Available Models';
+  String get fetchAvailableModels => '获取可用模型';
 
   @override
-  String get fetchModelsDescription =>
-      'Fetch models from the API or enter a model name manually';
+  String get fetchModelsDescription => '从 API 获取模型，或手动输入模型名称';
 
   @override
-  String get enterModelName => 'Enter Model Name';
+  String get enterModelName => '输入模型名称';
 
   @override
-  String get fetchingModels => 'Fetching models...';
+  String get fetchingModels => '正在获取模型...';
 
   @override
-  String get failedToFetchModels => 'Failed to fetch models';
+  String get failedToFetchModels => '获取模型失败';
 
   @override
-  String get tapToTestConnection => 'Tap to test API connection';
+  String get tapToTestConnection => '点击测试 API 连接';
 
   @override
-  String get testing => 'Testing...';
+  String get testing => '正在测试...';
 
   @override
-  String get connected => 'Connected';
+  String get connected => '已连接';
 
   @override
-  String get connectionFailedSimple => 'Connection failed';
+  String get connectionFailedSimple => '连接失败';
 
   @override
-  String get maximumTokensToGenerate => 'Maximum tokens to generate';
+  String get maximumTokensToGenerate => '最大生成 Token 数';
 
   @override
-  String get streaming => 'Streaming';
+  String get streaming => '流式传输';
 
   @override
-  String get showResponseAsItGenerates => 'Show response as it generates';
+  String get showResponseAsItGenerates => '生成时实时显示回复';
 
   @override
   String selectModelCount(int count) {
-    return 'Select Model ($count)';
+    return '选择模型（$count）';
   }
 
   @override
-  String get refreshModels => 'Refresh models';
+  String get refreshModels => '刷新模型';
 
   @override
-  String get enterManually => 'Enter manually';
+  String get enterManually => '手动输入';
 
   @override
-  String get noModelsFound => 'No models found';
+  String get noModelsFound => '未找到模型';
 
   @override
-  String get tryDifferentSearchTerm => 'Try a different search term';
+  String get tryDifferentSearchTerm => '请尝试其他搜索词';
 
   @override
   String modelsOfTotal(int filtered, int total) {
-    return '$filtered of $total models';
+    return '显示 $filtered/$total 个模型';
   }
 
   @override
-  String get importPreset => 'Import Preset';
+  String get importPreset => '导入预设';
 
   @override
-  String get noGroupChatsYet => 'No group chats yet';
+  String get noGroupChatsYet => '暂无群聊';
 
   @override
-  String get createGroupDescription =>
-      'Create a group to chat with multiple characters';
+  String get createGroupDescription => '创建群组，与多个角色聊天';
 
   @override
-  String get newGroup => 'New Group';
+  String get newGroup => '新建群组';
 
   @override
   String membersAndMode(int count, String mode) {
-    return '$count members • $mode mode';
+    return '$count 位成员 · $mode 模式';
   }
 
   @override
-  String get groupChatWillBeImplemented =>
-      'Group chat will be implemented with chat integration';
+  String get groupChatWillBeImplemented => '群聊将在聊天集成中实现';
 
   @override
   String deleteGroupConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"? This will also delete all associated chats.';
+    return '确定删除“$name”吗？相关聊天也会一并删除。';
   }
 
   @override
   String groupDeleted(String name) {
-    return '$name deleted';
+    return '已删除$name';
   }
 
   @override
-  String get groupNameRequired => 'Group Name *';
+  String get groupNameRequired => '群组名称 *';
 
   @override
-  String get enterGroupName => 'Enter group name';
+  String get enterGroupName => '输入群组名称';
 
   @override
-  String get optionalDescription => 'Optional description';
+  String get optionalDescription => '可选描述';
 
   @override
-  String get selectCharacters => 'Select Characters';
+  String get selectCharacters => '选择角色';
 
   @override
   String get noCharactersAvailable => '暂无可用角色';
 
   @override
   String charactersSelected(int count) {
-    return '$count character(s) selected';
+    return '已选择 $count 个角色';
   }
 
   @override
-  String get create => 'Create';
+  String get create => '创建';
 
   @override
-  String get selectAtLeast2Characters => 'Select at least 2 characters';
+  String get selectAtLeast2Characters => '请至少选择 2 个角色';
 
   @override
-  String get groupCreatedSuccessfully => 'Group created successfully';
+  String get groupCreatedSuccessfully => '群组创建成功';
 
   @override
   String failedToCreateGroup(String error) {
-    return 'Failed to create group: $error';
+    return '创建群组失败：$error';
   }
 
   @override
-  String get selectCharacterCard => 'Select a character card';
+  String get selectCharacterCard => '选择角色卡';
 
   @override
-  String get supportsPngCharxJson => 'Supports PNG, CharX, and JSON formats';
+  String get supportsPngCharxJson => '支持 PNG、CharX 和 JSON 格式';
 
   @override
-  String get browseFiles => 'Browse Files';
+  String get browseFiles => '浏览文件';
 
   @override
   String failedToPickFile(String error) {
-    return 'Failed to pick file: $error';
+    return '选择文件失败：$error';
   }
 
   @override
   String failedToLoadCharacter(String error) {
-    return 'Failed to load character: $error';
+    return '加载角色失败：$error';
   }
 
   @override
   String unsupportedFileFormat(String format) {
-    return 'Unsupported file format: $format';
+    return '不支持的文件格式：$format';
   }
 
   @override
-  String get pngCharacterCard => 'PNG Character Card';
+  String get pngCharacterCard => 'PNG 角色卡';
 
   @override
-  String get characterDataEmbeddedInImage =>
-      'Character data embedded in image metadata';
+  String get characterDataEmbeddedInImage => '角色数据内嵌在图片元数据中';
 
   @override
-  String get charxArchive => 'CharX Archive';
+  String get charxArchive => 'CharX 压缩包';
 
   @override
-  String get zipArchiveWithCharacterData =>
-      'ZIP archive with character data and assets';
+  String get zipArchiveWithCharacterData => '包含角色数据和资源的 ZIP 压缩包';
 
   @override
-  String get plainCharacterCardJson => 'Plain character card JSON file';
+  String get plainCharacterCardJson => '纯角色卡 JSON 文件';
 
   @override
   String importedWithLorebook(String name) {
-    return 'Imported \"$name\" with embedded lorebook!';
+    return '已导入带内嵌世界书的“$name”！';
   }
 
   @override
   String importedSuccessfully(String name) {
-    return 'Imported \"$name\" successfully!';
+    return '已成功导入“$name”！';
   }
 
   @override
   String failedToImport(String error) {
-    return 'Failed to import: $error';
+    return '导入失败：$error';
   }
 
   @override
   String embeddedLorebookEntries(int count) {
-    return 'Embedded Lorebook ($count entries)';
+    return '内嵌世界书（$count 个条目）';
   }
 
   @override
-  String get saveCurrentAsPreset => 'Save Current as Preset';
+  String get saveCurrentAsPreset => '将当前设置保存为预设';
 
   @override
-  String get exportCurrentSettings => 'Export Current Settings';
+  String get exportCurrentSettings => '导出当前设置';
 
   @override
-  String get builtInPresets => 'Built-in Presets';
+  String get builtInPresets => '内置预设';
 
   @override
-  String get customPresets => 'Custom Presets';
+  String get customPresets => '自定义预设';
 
   @override
-  String get aiPresetsDescription =>
-      'AI Presets combine generation settings, prompt ordering, and instruct templates. Select a preset to apply all settings at once.';
+  String get aiPresetsDescription => 'AI 预设包含生成设置、提示词顺序和指令模板。选择一个预设即可一次应用全部设置。';
 
   @override
   String appliedPreset(String name) {
-    return 'Applied \"$name\" preset';
+    return '已应用“$name”预设';
   }
 
   @override
   String failedToApplyPreset(String error) {
-    return 'Failed to apply preset: $error';
+    return '应用预设失败：$error';
   }
 
   @override
-  String get invalidPresetFormat =>
-      'Invalid preset format. Expected preset with generation settings.';
+  String get invalidPresetFormat => '预设格式无效，应包含生成设置。';
 
   @override
   String importedAndApplied(String name) {
-    return 'Imported and applied \"$name\"';
+    return '已导入并应用“$name”';
   }
 
   @override
-  String get saveAsPreset => 'Save as Preset';
+  String get saveAsPreset => '保存为预设';
 
   @override
-  String get descriptionOptional => 'Description (optional)';
+  String get descriptionOptional => '描述（可选）';
 
   @override
-  String get pleaseEnterAName => 'Please enter a name';
+  String get pleaseEnterAName => '请输入名称';
 
   @override
   String savedPreset(String name) {
-    return 'Saved \"$name\"';
+    return '已保存“$name”';
   }
 
   @override
   String saveFailed(String error) {
-    return 'Save failed: $error';
+    return '保存失败：$error';
   }
 
   @override
   String deletePresetConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"?';
+    return '确定删除“$name”吗？';
   }
 
   @override
   String deletedPreset(String name) {
-    return 'Deleted \"$name\"';
+    return '已删除“$name”';
   }
 
   @override
   String get export => '导出';
 
   @override
-  String get resetToDefaults => 'Reset to Defaults';
+  String get resetToDefaults => '恢复默认值';
 
   @override
-  String get basicSampling => 'Basic Sampling';
+  String get basicSampling => '基础采样';
 
   @override
-  String get temperatureDescription =>
-      'Controls randomness. Higher = more creative, lower = more focused.';
+  String get temperatureDescription => '控制随机性。数值越高越有创意，越低越专注。';
 
   @override
-  String get topPNucleusSampling => 'Top P (Nucleus Sampling)';
+  String get topPNucleusSampling => 'Top P（核采样）';
 
   @override
-  String get topPDescription =>
-      'Cumulative probability threshold for token selection.';
+  String get topPDescription => '选择 Token 的累积概率阈值。';
 
   @override
-  String get topKDescription =>
-      'Number of top tokens to consider. 0 = disabled.';
+  String get topKDescription => '纳入考虑的最高概率 Token 数。0 表示停用。';
 
   @override
-  String get advancedSampling => 'Advanced Sampling';
+  String get advancedSampling => '高级采样';
 
   @override
   String get minP => 'Min P';
 
   @override
-  String get minPDescription =>
-      'Minimum probability threshold relative to top token.';
+  String get minPDescription => '相对于最高概率 Token 的最低概率阈值。';
 
   @override
   String get typicalP => 'Typical P';
 
   @override
-  String get typicalPDescription => 'Locally typical sampling. 1.0 = disabled.';
+  String get typicalPDescription => '局部典型采样。1.0 表示停用。';
 
   @override
   String get topA => 'Top A';
 
   @override
-  String get topADescription => 'Top-A sampling threshold. 0 = disabled.';
+  String get topADescription => 'Top-A 采样阈值。0 表示停用。';
 
   @override
-  String get tailFreeSamplingTfs => 'Tail Free Sampling (TFS)';
+  String get tailFreeSamplingTfs => '尾部自由采样（TFS）';
 
   @override
-  String get tfsDescription => 'Removes low-probability tail. 1.0 = disabled.';
+  String get tfsDescription => '移除低概率尾部。1.0 表示停用。';
 
   @override
-  String get repetitionControl => 'Repetition Control';
+  String get repetitionControl => '重复控制';
 
   @override
-  String get repetitionPenaltyDescription =>
-      'Penalizes repeated tokens. 1.0 = no penalty.';
+  String get repetitionPenaltyDescription => '惩罚重复 Token。1.0 表示不惩罚。';
 
   @override
-  String get repetitionPenaltyRange => 'Repetition Penalty Range';
+  String get repetitionPenaltyRange => '重复惩罚范围';
 
   @override
-  String get repetitionPenaltyRangeDescription =>
-      'How many tokens to consider. 0 = all.';
+  String get repetitionPenaltyRangeDescription => '纳入计算的 Token 数。0 表示全部。';
 
   @override
-  String get frequencyPenaltyDescription =>
-      'Penalizes tokens based on frequency in text.';
+  String get frequencyPenaltyDescription => '根据 Token 在文本中的出现频率进行惩罚。';
 
   @override
-  String get presencePenaltyDescription =>
-      'Penalizes tokens that appear at all in text.';
+  String get presencePenaltyDescription => '对文本中出现过的 Token 进行惩罚。';
 
   @override
-  String get mirostatLocalModels => 'Mirostat (Local Models)';
+  String get mirostatLocalModels => 'Mirostat（本地模型）';
 
   @override
-  String get mirostatMode => 'Mirostat Mode';
+  String get mirostatMode => 'Mirostat 模式';
 
   @override
-  String get adaptiveSamplingForLocalModels =>
-      'Adaptive sampling for local models';
+  String get adaptiveSamplingForLocalModels => '适用于本地模型的自适应采样';
 
   @override
   String get off => '关闭';
@@ -1394,114 +1377,112 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mirostatTau => 'Mirostat Tau';
 
   @override
-  String get mirostatTauDescription => 'Target entropy/perplexity.';
+  String get mirostatTauDescription => '目标熵/困惑度。';
 
   @override
   String get mirostatEta => 'Mirostat Eta';
 
   @override
-  String get mirostatEtaDescription => 'Learning rate for Mirostat.';
+  String get mirostatEtaDescription => 'Mirostat 的学习率。';
 
   @override
-  String get generationControl => 'Generation Control';
+  String get generationControl => '生成控制';
 
   @override
-  String get maxTokensDescription => 'Maximum tokens to generate.';
+  String get maxTokensDescription => '最多生成的 Token 数。';
 
   @override
-  String get seed => 'Seed';
+  String get seed => '种子';
 
   @override
-  String get seedDescription => 'Random seed for reproducibility. -1 = random.';
+  String get seedDescription => '用于复现结果的随机种子。-1 表示随机。';
 
   @override
-  String get stopSequences => 'Stop Sequences';
+  String get stopSequences => '停止序列';
 
   @override
-  String get noStopSequencesConfigured => 'No stop sequences configured';
+  String get noStopSequencesConfigured => '尚未配置停止序列';
 
   @override
-  String get stopSequencesDescription =>
-      'Enter one sequence per line. Generation stops when any of these are produced.';
+  String get stopSequencesDescription => '每行输入一个序列。生成到其中任一序列时停止。';
 
   @override
-  String get resetConfirmation =>
-      'This will reset all sampler settings to their default values. Continue?';
+  String get resetConfirmation => '这将把所有采样器设置恢复为默认值。是否继续？';
 
   @override
-  String get reset => 'Reset';
+  String get reset => '重置';
 
   @override
-  String get settingsResetToDefaults => 'Settings reset to defaults';
+  String get settingsResetToDefaults => '设置已恢复默认值';
 
   @override
-  String get characterBackground => 'Character Background';
+  String get characterBackground => '角色背景';
 
   @override
-  String get chatBackground => 'Chat Background';
+  String get chatBackground => '聊天背景';
 
   @override
-  String get clearBackground => 'Clear background';
+  String get clearBackground => '清除背景';
 
   @override
-  String get gradientPresets => 'Gradient Presets';
+  String get gradientPresets => '渐变预设';
 
   @override
-  String get solidColors => 'Solid Colors';
+  String get solidColors => '纯色';
 
   @override
-  String get customImage => 'Custom Image';
+  String get customImage => '自定义图片';
 
   @override
-  String get adjustments => 'Adjustments';
+  String get adjustments => '调整';
 
   @override
-  String get noBackgroundSelected => 'No background selected';
+  String get noBackgroundSelected => '未选择背景';
 
   @override
-  String get chooseImage => 'Choose Image';
+  String get chooseImage => '选择图片';
 
   @override
-  String get fromUrl => 'From URL';
+  String get fromUrl => '来自 URL';
 
   @override
   String localImage(String filename) {
-    return 'Local image: $filename';
+    return '本地图片：$filename';
   }
 
   @override
   String urlLabel(String url) {
-    return 'URL: $url';
+    return 'URL：$url';
   }
 
   @override
-  String get noImage => 'No image';
+  String get noImage => '无图片';
 
   @override
-  String get opacity => 'Opacity';
+  String get opacity => '不透明度';
 
   @override
-  String get blurEffect => 'Blur Effect';
+  String get blurEffect => '模糊效果';
 
   @override
-  String get applyBlurToBackground => 'Apply blur to the background';
+  String get applyBlurToBackground => '对背景应用模糊';
 
   @override
-  String get blurAmount => 'Blur Amount';
+  String get blurAmount => '模糊程度';
 
   @override
   String failedToLoadImage(String error) {
-    return 'Failed to load image: $error';
+    return '加载图片失败：$error';
   }
 
   @override
-  String get imageUrl => 'Image URL';
+  String get imageUrl => '图片 URL';
 
   @override
-  String get enterImageUrl => 'Enter image URL';
+  String get enterImageUrl => '输入图片 URL';
 
   @override
-  String get apply => 'Apply';
+  String get apply => '应用';
 
   @override
   String get backupAndRestore => '备份与恢复';
@@ -1631,890 +1612,863 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get enableCfgScale => 'Enable CFG Scale';
+  String get enableCfgScale => '启用 CFG Scale';
 
   @override
-  String get cfgScaleDescription =>
-      'Classifier-Free Guidance for text generation';
+  String get cfgScaleDescription => '用于文本生成的无分类器引导';
 
   @override
-  String get globalSettings => 'Global Settings';
+  String get globalSettings => '全局设置';
 
   @override
-  String get guidanceScale => 'Guidance Scale';
+  String get guidanceScale => '引导强度';
 
   @override
-  String get negativePrompt => 'Negative Prompt';
+  String get negativePrompt => '负面提示词';
 
   @override
-  String get textToSteerAwayFrom => 'Text to steer the model away from';
+  String get textToSteerAwayFrom => '希望模型避开的文本';
 
   @override
-  String get positivePromptOptional => 'Positive Prompt (Optional)';
+  String get positivePromptOptional => '正面提示词（可选）';
 
   @override
-  String get textToEnhanceInOutput => 'Text to enhance in the output';
+  String get textToEnhanceInOutput => '希望在输出中强化的文本';
 
   @override
-  String get characterSettings => 'Character Settings';
+  String get characterSettings => '角色设置';
 
   @override
-  String get useCharacterSpecificSettings => 'Use Character-Specific Settings';
+  String get useCharacterSpecificSettings => '使用角色专属设置';
 
   @override
-  String get overrideGlobalForCharacter =>
-      'Override global settings for this character';
+  String get overrideGlobalForCharacter => '为此角色覆盖全局设置';
 
   @override
-  String get characterNegativePrompt => 'Character Negative Prompt';
+  String get characterNegativePrompt => '角色负面提示词';
 
   @override
-  String get overrideGlobalNegativePrompt => 'Override global negative prompt';
+  String get overrideGlobalNegativePrompt => '覆盖全局负面提示词';
 
   @override
-  String get chatSettings => 'Chat Settings';
+  String get chatSettings => '聊天设置';
 
   @override
-  String get chatSettingsDescription =>
-      'These settings override global and character settings for this chat only.';
+  String get chatSettingsDescription => '这些设置仅对当前聊天生效，并覆盖全局和角色设置。';
 
   @override
-  String get chatNegativePrompt => 'Chat Negative Prompt';
+  String get chatNegativePrompt => '聊天负面提示词';
 
   @override
-  String get overrideForThisChat => 'Override for this chat';
+  String get overrideForThisChat => '为当前聊天覆盖设置';
 
   @override
-  String get chatPositivePrompt => 'Chat Positive Prompt';
+  String get chatPositivePrompt => '聊天正面提示词';
 
   @override
-  String get enhancementForThisChat => 'Enhancement for this chat';
+  String get enhancementForThisChat => '当前聊天的强化内容';
 
   @override
-  String get promptCombineMode => 'Prompt Combine Mode';
+  String get promptCombineMode => '提示词组合方式';
 
   @override
-  String get replaceChatPromptOnly => 'Replace (use chat prompt only)';
+  String get replaceChatPromptOnly => '替换（仅使用聊天提示词）';
 
   @override
-  String get prependChatPlusGlobal => 'Prepend (chat + global)';
+  String get prependChatPlusGlobal => '前置（聊天 + 全局）';
 
   @override
-  String get appendGlobalPlusChat => 'Append (global + chat)';
+  String get appendGlobalPlusChat => '后置（全局 + 聊天）';
 
   @override
-  String get aboutCfgScale => 'About CFG Scale';
+  String get aboutCfgScale => '关于 CFG Scale';
 
   @override
   String get aboutCfgScaleDescription =>
-      'CFG (Classifier-Free Guidance) Scale controls how strongly the model follows the negative prompt to avoid certain content or styles.\n\n• Scale 1.0 = No effect (default)\n• Scale 1.5-3.0 = Subtle guidance\n• Scale 3.0-7.0 = Moderate guidance\n• Scale 7.0+ = Strong guidance (may affect coherence)';
+      'CFG（无分类器引导）Scale 控制模型遵循负面提示词、避开特定内容或风格的强度。\n\n• 1.0 = 无效果（默认）\n• 1.5-3.0 = 轻度引导\n• 3.0-7.0 = 中度引导\n• 7.0+ = 强引导（可能影响连贯性）';
 
   @override
-  String get cfgScaleHelp => 'CFG Scale Help';
+  String get cfgScaleHelp => 'CFG Scale 帮助';
 
   @override
   String get cfgScaleHelpContent =>
-      'Classifier-Free Guidance (CFG) Scale is a technique that allows you to guide the AI model\'s output by specifying what you want to avoid.\n\n**How it works:**\nThe model generates two outputs - one with your prompt and one with the negative prompt. The final output is adjusted to move away from the negative prompt direction.\n\n**Settings Priority:**\n1. Chat-specific settings (highest)\n2. Character-specific settings\n3. Global settings (lowest)\n\n**Tips:**\n• Start with low values (1.5-2.0) and increase gradually\n• Use specific negative prompts for better results\n• High values may cause repetition or incoherence\n• Not all AI backends support CFG Scale';
+      '无分类器引导（CFG）Scale 可通过指定希望避开的内容来引导 AI 模型输出。\n\n**工作方式：**\n模型会生成两份输出，一份使用提示词，另一份使用负面提示词。最终输出会向远离负面提示词的方向调整。\n\n**设置优先级：**\n1. 聊天专属设置（最高）\n2. 角色专属设置\n3. 全局设置（最低）\n\n**提示：**\n• 从较低数值（1.5-2.0）开始并逐渐增加\n• 使用具体的负面提示词可获得更好效果\n• 数值过高可能导致重复或不连贯\n• 并非所有 AI 后端都支持 CFG Scale';
 
   @override
-  String get help => 'Help';
+  String get help => '帮助';
 
   @override
   String get processing => '处理中...';
 
   @override
-  String get sampleMessage1 => 'Hello! How are you?';
+  String get sampleMessage1 => '你好！有什么可以帮你？';
 
   @override
-  String get sampleMessage2 => 'I\'m doing great!';
+  String get sampleMessage2 => '给我讲个故事吧！';
 
   @override
-  String get general => 'General';
+  String get general => '常规';
 
   @override
-  String get enableImageGeneration => 'Enable Image Generation';
+  String get enableImageGeneration => '启用图片生成';
 
   @override
-  String get generateImagesUsingAi => 'Generate images using AI';
+  String get generateImagesUsingAi => '使用 AI 生成图片';
 
   @override
-  String get imageGenerationProvider => 'Image Generation Provider';
+  String get imageGenerationProvider => '图片生成服务';
 
   @override
-  String get apiEndpoint => 'API Endpoint';
+  String get apiEndpoint => 'API 端点';
 
   @override
-  String get notConfigured => 'Not configured';
+  String get notConfigured => '未配置';
 
   @override
-  String get defaultParameters => 'Default Parameters';
+  String get defaultParameters => '默认参数';
 
   @override
-  String get imageSize => 'Image Size';
+  String get imageSize => '图片尺寸';
 
   @override
-  String get steps => 'Steps';
+  String get steps => '步数';
 
   @override
-  String get sampler => 'Sampler';
+  String get sampler => '采样器';
 
   @override
-  String get defaultNegativePrompt => 'Default Negative Prompt';
+  String get defaultNegativePrompt => '默认负面提示词';
 
   @override
-  String get enterTermsToAvoid => 'Enter terms to avoid in generated images';
+  String get enterTermsToAvoid => '输入生成图片中需要避免的内容';
 
   @override
-  String get test => 'Test';
+  String get test => '测试';
 
   @override
-  String get aboutImageGeneration => 'About Image Generation';
+  String get aboutImageGeneration => '关于图片生成';
 
   @override
   String get aboutImageGenerationDescription =>
-      'Generate images using AI models. Use the /imagine command in chat or generate character portraits from the character editor.';
+      '使用 AI 模型生成图片。可在聊天中使用 /imagine 命令，或在角色编辑器中生成角色肖像。';
 
   @override
-  String get imagineCommand => '/imagine Command';
+  String get imagineCommand => '/imagine 命令';
 
   @override
   String get imagineCommandUsage =>
-      'Usage: /imagine <prompt> [--width N] [--height N] [--steps N] [--cfg N] [--seed N]';
+      '用法：/imagine <提示词> [--width N] [--height N] [--steps N] [--cfg N] [--seed N]';
 
   @override
   String get stableDiffusion => 'Stable Diffusion';
 
   @override
   String get stableDiffusionDescription =>
-      'Connect to a local or remote Stable Diffusion WebUI instance. Requires the API to be enabled.';
+      '连接本地或远程 Stable Diffusion WebUI，需要启用 API。';
 
   @override
   String get dalle => 'DALL-E';
 
   @override
   String get dalleDescription =>
-      'OpenAI\'s DALL-E image generation. Requires an API key from OpenAI.';
+      '通过 OAI Compatible 端点使用 DALL-E 生成图片，需要 API 密钥。';
 
   @override
-  String get prompt => 'Prompt';
+  String get prompt => '提示词';
 
   @override
-  String get enterPromptToGenerate => 'Enter a prompt to generate an image';
+  String get enterPromptToGenerate => '输入图片生成提示词';
 
   @override
-  String get generate => 'Generate';
+  String get generate => '生成';
 
   @override
-  String get generating => 'Generating...';
+  String get generating => '正在生成...';
 
   @override
-  String get generationComplete => 'Generation Complete';
+  String get generationComplete => '生成完成';
 
   @override
-  String get imageWouldBeDisplayed => 'Image would be displayed here';
+  String get imageWouldBeDisplayed => '图片将在此处显示';
 
   @override
-  String get enableLogitBias => 'Enable Logit Bias';
+  String get enableLogitBias => '启用 Logit Bias';
 
   @override
-  String get adjustTokenProbabilities =>
-      'Adjust token probabilities in AI responses';
+  String get adjustTokenProbabilities => '调整 AI 回复中的 Token 概率';
 
   @override
-  String get presets => 'Presets';
+  String get presets => '预设';
 
   @override
-  String get activePresetLabel => 'Active Preset';
+  String get activePresetLabel => '当前预设';
 
   @override
-  String get none => 'None';
+  String get none => '无';
 
   @override
-  String get newPreset => 'New Preset';
+  String get newPreset => '新建预设';
 
   @override
-  String get importPresetLabel => 'Import Preset';
+  String get importPresetLabel => '导入预设';
 
   @override
-  String get biasEntries => 'Bias Entries';
+  String get biasEntries => '偏置条目';
 
   @override
-  String get noBiasEntries => 'No bias entries';
+  String get noBiasEntries => '暂无偏置条目';
 
   @override
-  String get addEntriesToAdjust => 'Add entries to adjust token probabilities';
+  String get addEntriesToAdjust => '添加条目以调整 Token 概率';
 
   @override
-  String get addEntry => 'Add Entry';
+  String get addEntry => '添加条目';
 
   @override
-  String get textOrToken => 'Text / Token';
+  String get textOrToken => '文本 / Token';
 
   @override
   String textTokenHint(Object verbatim) {
-    return 'word, $verbatim, or [1234]';
+    return '单词、$verbatim 或 [1234]';
   }
 
   @override
-  String get bias => 'Bias';
+  String get bias => '偏置';
 
   @override
-  String get logitBiasHelp => 'Logit Bias Help';
+  String get logitBiasHelp => 'Logit Bias 帮助';
 
   @override
-  String get presetCopiedToClipboard => 'Preset copied to clipboard';
+  String get presetCopiedToClipboard => '预设已复制到剪贴板';
 
   @override
   String exportPresetFailed(String error) {
-    return 'Export failed: $error';
+    return '导出失败：$error';
   }
 
   @override
-  String get pastePresetJson => 'Paste preset JSON here';
+  String get pastePresetJson => '在此粘贴预设 JSON';
 
   @override
-  String get presetImportedSuccessfully => 'Preset imported successfully';
+  String get presetImportedSuccessfully => '预设导入成功';
 
   @override
   String importPresetFailed(String error) {
-    return 'Import failed: $error';
+    return '导入失败：$error';
   }
 
   @override
-  String get rename => 'Rename';
+  String get rename => '重命名';
 
   @override
-  String get deletePresetQuestion =>
-      'Are you sure you want to delete this preset?';
+  String get deletePresetQuestion => '确定删除此预设吗？';
 
   @override
-  String get moreOptions => 'More options';
+  String get moreOptions => '更多选项';
 
   @override
-  String get loadPreset => 'Load Preset';
+  String get loadPreset => '加载预设';
 
   @override
-  String get saveAsPresetLabel => 'Save as Preset';
+  String get saveAsPresetLabel => '保存为预设';
 
   @override
-  String get exportPreset => 'Export Preset';
+  String get exportPreset => '导出预设';
 
   @override
-  String get resetToDefault => 'Reset to Default';
+  String get resetToDefault => '恢复默认';
 
   @override
-  String get dragToReorder =>
-      'Drag to reorder sections. Toggle switches to enable/disable.';
+  String get dragToReorder => '拖动可调整各部分顺序，使用开关启用或停用。';
 
   @override
   String deleted(String name) {
-    return 'Deleted \"$name\"';
+    return '已删除“$name”';
   }
 
   @override
   String imported(String name) {
-    return 'Imported \"$name\"';
+    return '已导入“$name”';
   }
 
   @override
-  String get invalidPresetFormatMessage => 'Invalid preset format';
+  String get invalidPresetFormatMessage => '预设格式无效';
 
   @override
-  String get exportPresetTitle => 'Export Preset';
+  String get exportPresetTitle => '导出预设';
 
   @override
-  String get presetNameLabel => 'Preset Name';
+  String get presetNameLabel => '预设名称';
 
   @override
-  String get pleaseEnterNameMessage => 'Please enter a name';
+  String get pleaseEnterNameMessage => '请输入名称';
 
   @override
   String saved(String name) {
-    return 'Saved \"$name\"';
+    return '已保存“$name”';
   }
 
   @override
   String saveFailedMessage(String error) {
-    return 'Save failed: $error';
+    return '保存失败：$error';
   }
 
   @override
-  String get resetToDefaultQuestion =>
-      'This will reset all prompt sections to their default order and enable all sections. Continue?';
+  String get resetToDefaultQuestion => '这将恢复所有提示词部分的默认顺序并全部启用。是否继续？';
 
   @override
-  String get resetToDefaultConfig => 'Reset to default configuration';
+  String get resetToDefaultConfig => '恢复默认配置';
 
   @override
-  String get promptManagerHelp => 'Prompt Manager Help';
+  String get promptManagerHelp => '提示词管理器帮助';
 
   @override
   String applied(String name) {
-    return 'Applied \"$name\" preset';
+    return '已应用“$name”预设';
   }
 
   @override
-  String get showQuickReplies => 'Show Quick Replies';
+  String get showQuickReplies => '显示快捷回复';
 
   @override
-  String get displayQuickReplyButtons => 'Display quick reply buttons in chat';
+  String get displayQuickReplyButtons => '在聊天中显示快捷回复按钮';
 
   @override
-  String get positionAboveInput => 'Position Above Input';
+  String get positionAboveInput => '位于输入框上方';
 
   @override
-  String get quickRepliesAboveInput =>
-      'Quick replies appear above the input field';
+  String get quickRepliesAboveInput => '快捷回复显示在输入框上方';
 
   @override
-  String get quickRepliesBelowInput =>
-      'Quick replies appear below the input field';
+  String get quickRepliesBelowInput => '快捷回复显示在输入框下方';
 
   @override
-  String get add => 'Add';
+  String get add => '添加';
 
   @override
-  String get noQuickReplies => 'No quick replies';
+  String get noQuickReplies => '暂无快捷回复';
 
   @override
-  String get addYourFirstQuickReply => 'Add your first quick reply';
+  String get addYourFirstQuickReply => '添加第一条快捷回复';
 
   @override
   String deleteQuickReplyQuestion(String label) {
-    return 'Are you sure you want to delete \"$label\"?';
+    return '确定删除“$label”吗？';
   }
 
   @override
-  String get resetToDefaultQuestion2 =>
-      'This will replace all your quick replies with the default set. Continue?';
+  String get resetToDefaultQuestion2 => '这将用默认集合替换你的所有快捷回复。是否继续？';
 
   @override
-  String get continueOrEmpty => '(Continue/Empty message)';
+  String get continueOrEmpty => '（继续/空消息）';
 
   @override
-  String get autoSendTooltip => 'Auto-send';
+  String get autoSendTooltip => '自动发送';
 
   @override
-  String get addQuickReply => 'Add Quick Reply';
+  String get addQuickReply => '添加快捷回复';
 
   @override
-  String get editQuickReplyLabel => 'Edit Quick Reply';
+  String get editQuickReplyLabel => '编辑快捷回复';
 
   @override
-  String get buttonLabel => 'Button Label';
+  String get buttonLabel => '按钮文字';
 
   @override
-  String get buttonLabelHint => 'e.g., Yes, Continue, Think...';
+  String get buttonLabelHint => '例如：是、继续、思考...';
 
   @override
-  String get messageLabel => 'Message';
+  String get messageLabel => '消息';
 
   @override
-  String get leaveEmptyForContinue => 'Leave empty for continue action';
+  String get leaveEmptyForContinue => '留空表示继续生成';
 
   @override
-  String supportsMacros(Object char, Object user) {
-    return 'Supports macros like \'$user\', \'$char\'';
-  }
+  String get supportsMacros => '支持提示词宏';
 
   @override
-  String get autoSendLabel => 'Auto-send';
+  String get autoSendLabel => '自动发送';
 
   @override
-  String get messageSentImmediately => 'Message will be sent immediately';
+  String get messageSentImmediately => '消息将立即发送';
 
   @override
-  String get messageFillsInput => 'Message will fill the input field';
+  String get messageFillsInput => '消息将填入输入框';
 
   @override
-  String get regexScripts => 'Regex Scripts';
+  String get regexScripts => '正则脚本';
 
   @override
-  String get addScript => 'Add Script';
+  String get addScript => '添加脚本';
 
   @override
-  String get addPresets => 'Add Presets';
+  String get addPresets => '添加预设';
 
   @override
-  String get clearAll => 'Clear All';
+  String get clearAll => '全部清除';
 
   @override
-  String get enableRegexScripts => 'Enable Regex Scripts';
+  String get enableRegexScripts => '启用正则脚本';
 
   @override
-  String get applyFindReplacePatterns =>
-      'Apply find/replace patterns to messages';
+  String get applyFindReplacePatterns => '对消息应用查找/替换规则';
 
   @override
-  String get applyTo => 'Apply To';
+  String get applyTo => '应用到';
 
   @override
-  String get userInput => 'User Input';
+  String get userInput => '用户输入';
 
   @override
-  String get applyBeforeSending => 'Apply to messages before sending';
+  String get applyBeforeSending => '发送前应用于消息';
 
   @override
-  String get aiOutput => 'AI Output';
+  String get aiOutput => 'AI 输出';
 
   @override
-  String get applyToAiResponses => 'Apply to AI responses';
+  String get applyToAiResponses => '应用到 AI 回复';
 
   @override
-  String get slashCommandsLabel => 'Slash Commands';
+  String get slashCommandsLabel => '斜杠命令';
 
   @override
-  String get applyDuringCommandProcessing => 'Apply during command processing';
+  String get applyDuringCommandProcessing => '处理命令时应用';
 
   @override
-  String get worldInfoLabel => 'World Info';
+  String get worldInfoLabel => '世界信息';
 
   @override
-  String get applyToWorldInfoEntries => 'Apply to world info entries';
+  String get applyToWorldInfoEntries => '应用到世界信息条目';
 
   @override
   String scriptsCount(int count) {
-    return 'Scripts ($count)';
+    return '脚本（$count）';
   }
 
   @override
-  String get noRegexScripts => 'No regex scripts';
+  String get noRegexScripts => '暂无正则脚本';
 
   @override
-  String get tapToAddOrUseMenu =>
-      'Tap + to add a script or use the menu to add presets';
+  String get tapToAddOrUseMenu => '点击 + 添加脚本，或使用菜单添加预设';
 
   @override
-  String get aboutRegexScripts => 'About Regex Scripts';
+  String get aboutRegexScripts => '关于正则脚本';
 
   @override
   String get aboutRegexScriptsDescription =>
-      'Regex scripts allow you to find and replace text patterns in messages. Use capture groups (\\\$1, \\\$2) in replacements.';
+      '正则脚本可在消息中查找并替换文本模式。替换内容可使用捕获组（\$1、\$2）。';
 
   @override
-  String get patternFormat => 'Pattern Format';
+  String get patternFormat => '模式格式';
 
   @override
   String get patternFormatDescription =>
-      'Use /pattern/flags format (e.g., /hello/gi) or plain patterns. Flags: i=case-insensitive, m=multiline, s=dotall';
+      '使用 /pattern/flags 格式（如 /hello/gi）或普通模式。标志：i=不区分大小写，m=多行，s=点号匹配换行';
 
   @override
-  String get presetScriptsAdded => 'Preset scripts added';
+  String get presetScriptsAdded => '预设脚本已添加';
 
   @override
   String deleteScriptQuestion(String name) {
-    return 'Delete \"$name\"?';
+    return '删除“$name”？';
   }
 
   @override
-  String get clearAllScripts => 'Clear All Scripts';
+  String get clearAllScripts => '清空所有脚本';
 
   @override
-  String get clearAllScriptsQuestion =>
-      'This will delete all regex scripts. This cannot be undone.';
+  String get clearAllScriptsQuestion => '这将删除所有正则脚本，且无法撤销。';
 
   @override
-  String get importScripts => 'Import Scripts';
+  String get importScripts => '导入脚本';
 
   @override
-  String get pasteJsonArray => 'Paste JSON array of scripts';
+  String get pasteJsonArray => '粘贴脚本 JSON 数组';
 
   @override
   String importedCount(int count) {
-    return 'Imported $count scripts';
+    return '已导入 $count 个脚本';
   }
 
   @override
-  String get exportScripts => 'Export Scripts';
+  String get exportScripts => '导出脚本';
 
   @override
-  String get newScript => 'New Script';
+  String get newScript => '新建脚本';
 
   @override
-  String get editScript => 'Edit Script';
+  String get editScript => '编辑脚本';
 
   @override
-  String get scriptName => 'Script Name';
+  String get scriptName => '脚本名称';
 
   @override
-  String get descriptionOptionalLabel => 'Description (optional)';
+  String get descriptionOptionalLabel => '描述（可选）';
 
   @override
-  String get findPattern => 'Find Pattern';
+  String get findPattern => '查找模式';
 
   @override
-  String get patternOrPlainPattern => '/pattern/flags or plain pattern';
+  String get patternOrPlainPattern => '/pattern/flags 或普通模式';
 
   @override
-  String get replaceWith => 'Replace With';
+  String get replaceWith => '替换为';
 
   @override
-  String get useCaptureGroups => 'Use \\\$1, \\\$2 for capture groups';
+  String get useCaptureGroups => '使用 \$1、\$2 表示捕获组';
 
   @override
-  String get applyToLabel => 'Apply To';
+  String get applyToLabel => '应用到';
 
   @override
-  String get options => 'Options';
+  String get options => '选项';
 
   @override
-  String get markdownOnly => 'Markdown Only';
+  String get markdownOnly => '仅 Markdown';
 
   @override
-  String get onlyApplyDuringMarkdown => 'Only apply during markdown rendering';
+  String get onlyApplyDuringMarkdown => '仅在 Markdown 渲染时应用';
 
   @override
-  String get promptOnly => 'Prompt Only';
+  String get promptOnly => '仅提示词';
 
   @override
-  String get onlyApplyDuringPrompt => 'Only apply during prompt generation';
+  String get onlyApplyDuringPrompt => '仅在生成提示词时应用';
 
   @override
-  String get runOnEdit => 'Run on Edit';
+  String get runOnEdit => '编辑时运行';
 
   @override
-  String get applyWhenEditingMessages => 'Apply when editing messages';
+  String get applyWhenEditingMessages => '编辑消息时应用';
 
   @override
-  String get macroSubstitution => 'Macro Substitution';
+  String get macroSubstitution => '宏替换';
 
   @override
-  String get nameAndPatternRequired => 'Name and pattern are required';
+  String get nameAndPatternRequired => '名称和模式不能为空';
 
   @override
-  String get patternLabel => 'Pattern';
+  String get patternLabel => '模式';
 
   @override
   String get patternHint => '/pattern/flags';
 
   @override
-  String get testString => 'Test String';
+  String get testString => '测试文本';
 
   @override
-  String get replacementLabel => 'Replacement';
+  String get replacementLabel => '替换内容';
 
   @override
-  String replacementHint(Object match) {
-    return '\$1, \$2, \'$match\'';
-  }
+  String get replacementHint => '\$1、\$2 或匹配的文本';
 
   @override
-  String get testButton => 'Test';
+  String get testButton => '测试';
 
   @override
   String matchesCount(int count) {
-    return '$count match(es)';
+    return '$count 个匹配项';
   }
 
   @override
-  String get errorLabel => 'Error';
+  String get errorLabel => '错误';
 
   @override
-  String get resultLabel => 'Result:';
+  String get resultLabel => '结果：';
 
   @override
-  String get expressionSprites => 'Expression Sprites';
+  String get expressionSprites => '表情立绘';
 
   @override
-  String get enableSprites => 'Enable Sprites';
+  String get enableSprites => '启用立绘';
 
   @override
-  String get showCharacterExpressions =>
-      'Show character expression images in chat';
+  String get showCharacterExpressions => '在聊天中显示角色表情图片';
 
   @override
-  String get display => 'Display';
+  String get display => '显示';
 
   @override
-  String get spriteSize => 'Sprite Size';
+  String get spriteSize => '立绘大小';
 
   @override
-  String get position => 'Position';
+  String get position => '位置';
 
   @override
-  String get whereToDisplaySprites => 'Where to display sprites';
+  String get whereToDisplaySprites => '立绘显示位置';
 
   @override
-  String get left => 'Left';
+  String get left => '左侧';
 
   @override
-  String get right => 'Right';
+  String get right => '右侧';
 
   @override
-  String get center => 'Center';
+  String get center => '居中';
 
   @override
-  String get floatingLeft => 'Floating Left';
+  String get floatingLeft => '左侧悬浮';
 
   @override
-  String get floatingRight => 'Floating Right';
+  String get floatingRight => '右侧悬浮';
 
   @override
-  String get animation => 'Animation';
+  String get animation => '动画';
 
   @override
-  String get animateTransitions => 'Animate Transitions';
+  String get animateTransitions => '过渡动画';
 
   @override
-  String get smoothFadeWhenSpriteChanges => 'Smooth fade when sprite changes';
+  String get smoothFadeWhenSpriteChanges => '立绘切换时平滑淡入淡出';
 
   @override
-  String get transitionDuration => 'Transition Duration';
+  String get transitionDuration => '过渡时长';
 
   @override
-  String get showDuringStreaming => 'Show During Streaming';
+  String get showDuringStreaming => '流式生成时显示';
 
   @override
-  String get displaySpritesWhileGenerating =>
-      'Display sprites while AI is generating';
+  String get displaySpritesWhileGenerating => 'AI 生成时显示立绘';
 
   @override
-  String get emotionDetection => 'Emotion Detection';
+  String get emotionDetection => '情绪检测';
 
   @override
-  String get howItWorks => 'How it works';
+  String get howItWorks => '工作方式';
 
   @override
   String get spriteEmotionDetectionDescription =>
-      'Sprites are automatically selected based on emotion keywords detected in messages. Action text like *smiles* or *laughs* is prioritized.';
+      '系统会根据消息中检测到的情绪关键词自动选择立绘，并优先识别 *微笑*、*大笑* 等动作文本。';
 
   @override
-  String get supportedEmotions => 'Supported Emotions';
+  String get supportedEmotions => '支持的情绪';
 
   @override
   String characterSprites(String name) {
-    return '$name Sprites';
+    return '$name的立绘';
   }
 
   @override
-  String get importFromFolder => 'Import from folder';
+  String get importFromFolder => '从文件夹导入';
 
   @override
-  String get deleteAllSprites => 'Delete All Sprites';
+  String get deleteAllSprites => '删除所有立绘';
 
   @override
-  String get addSprite => 'Add Sprite';
+  String get addSprite => '添加立绘';
 
   @override
   String spritesCount(int count) {
-    return '$count sprites';
+    return '$count 张立绘';
   }
 
   @override
   String defaultEmotion(String emotion) {
-    return 'Default: $emotion';
+    return '默认：$emotion';
   }
 
   @override
-  String get noSpritesYet => 'No sprites yet';
+  String get noSpritesYet => '暂无立绘';
 
   @override
-  String get addExpressionImages => 'Add expression images for this character';
+  String get addExpressionImages => '为此角色添加表情图片';
 
   @override
-  String get selectEmotion => 'Select Emotion';
+  String get selectEmotion => '选择表情';
 
   @override
   String addedSpriteEmotion(String emotion) {
-    return 'Added $emotion sprite';
+    return '已添加$emotion立绘';
   }
 
   @override
-  String get setAsDefaultEmotion => 'Set as Default';
+  String get setAsDefaultEmotion => '设为默认表情';
 
   @override
-  String get changeEmotion => 'Change Emotion';
+  String get changeEmotion => '更改表情';
 
   @override
-  String get deleteSprite => 'Delete Sprite';
+  String get deleteSprite => '删除立绘';
 
   @override
   String deleteSpriteConfirmation(String emotion) {
-    return 'Delete the $emotion sprite?';
+    return '删除$emotion立绘？';
   }
 
   @override
-  String get deleteAllSpritesConfirmation =>
-      'Are you sure you want to delete all sprites for this character? This cannot be undone.';
+  String get deleteAllSpritesConfirmation => '确定删除此角色的所有立绘吗？此操作无法撤销。';
 
   @override
-  String get importSprites => 'Import Sprites';
+  String get importSprites => '导入立绘';
 
   @override
-  String get importSpritesDescription =>
-      'Import sprites from a folder. Files should be named with emotion keywords:';
+  String get importSpritesDescription => '从文件夹导入立绘。文件名应包含情绪关键词：';
 
   @override
-  String get supportedFormatsSprites =>
-      'Supported formats: PNG, JPG, GIF, WebP';
+  String get supportedFormatsSprites => '支持格式：PNG、JPG、GIF、WebP';
 
   @override
-  String get selectFolder => 'Select Folder';
+  String get selectFolder => '选择文件夹';
 
   @override
-  String get folderImportRequiresPackage =>
-      'Folder import requires file_picker package';
+  String get folderImportRequiresPackage => '从文件夹导入需要 file_picker 软件包';
 
   @override
-  String get appStatistics => 'App Statistics';
+  String get appStatistics => '应用统计';
 
   @override
-  String get chatStatistics => 'Chat Statistics';
+  String get chatStatistics => '聊天统计';
 
   @override
-  String get resetStatistics => 'Reset statistics';
+  String get resetStatistics => '重置统计';
 
   @override
-  String get resetStatisticsConfirmation =>
-      'Are you sure you want to reset all statistics? This cannot be undone.';
+  String get resetStatisticsConfirmation => '确定重置所有统计数据吗？此操作无法撤销。';
 
   @override
-  String get statisticsReset => 'Statistics reset';
+  String get statisticsReset => '统计数据已重置';
 
   @override
-  String get overview => 'Overview';
+  String get overview => '概览';
 
   @override
-  String get firstUsed => 'First Used';
+  String get firstUsed => '首次使用';
 
   @override
-  String get unknown => 'Unknown';
+  String get unknown => '未知';
 
   @override
-  String get totalGroups => 'Total Groups';
+  String get totalGroups => '群组总数';
 
   @override
-  String get totalGenerations => 'Total Generations';
+  String get totalGenerations => '总生成次数';
 
   @override
-  String get tokenUsage => 'Token Usage';
+  String get tokenUsage => 'Token 用量';
 
   @override
-  String get totalTokensUsed => 'Total Tokens Used';
+  String get totalTokensUsed => 'Token 总用量';
 
   @override
-  String get avgTokensPerGeneration => 'Avg Tokens/Generation';
+  String get avgTokensPerGeneration => '每次生成平均 Token';
 
   @override
-  String get performance => 'Performance';
+  String get performance => '性能';
 
   @override
-  String get totalGenerationTime => 'Total Generation Time';
+  String get totalGenerationTime => '总生成时间';
 
   @override
-  String get avgGenerationTime => 'Avg Generation Time';
+  String get avgGenerationTime => '平均生成时间';
 
   @override
-  String get userMessages => 'User Messages';
+  String get userMessages => '用户消息';
 
   @override
-  String get assistantMessages => 'Assistant Messages';
+  String get assistantMessages => '助手消息';
 
   @override
-  String get systemMessages => 'System Messages';
+  String get systemMessages => '系统消息';
 
   @override
-  String get timeline => 'Timeline';
+  String get timeline => '时间线';
 
   @override
-  String get firstMessage_ => 'First Message';
+  String get firstMessage_ => '第一条消息';
 
   @override
-  String get lastMessage => 'Last Message';
+  String get lastMessage => '最后一条消息';
 
   @override
-  String get chatDuration => 'Chat Duration';
+  String get chatDuration => '聊天时长';
 
   @override
-  String get promptTokens => 'Prompt Tokens';
+  String get promptTokens => '提示词 Token';
 
   @override
-  String get completionTokens => 'Completion Tokens';
+  String get completionTokens => '补全 Token';
 
   @override
-  String get avgTokensPerMessage => 'Avg Tokens/Message';
+  String get avgTokensPerMessage => '每条消息平均 Token';
 
   @override
-  String get generationPerformance => 'Generation Performance';
+  String get generationPerformance => '生成性能';
 
   @override
-  String get generationCount => 'Total Generations';
+  String get generationCount => '总生成次数';
 
   @override
-  String get speechToText => 'Speech-to-Text';
+  String get speechToText => '语音转文字';
 
   @override
-  String get enableStt => 'Enable STT';
+  String get enableStt => '启用语音转文字';
 
   @override
-  String get useVoiceInputForMessages => 'Use voice input for messages';
+  String get useVoiceInputForMessages => '使用语音输入消息';
 
   @override
-  String get autoSendStt => 'Auto-send';
+  String get autoSendStt => '自动发送';
 
   @override
-  String get automaticallySendAfterSpeaking =>
-      'Automatically send message after speaking';
+  String get automaticallySendAfterSpeaking => '说完后自动发送消息';
 
   @override
-  String get continuousListening => 'Continuous Listening';
+  String get continuousListening => '持续聆听';
 
   @override
-  String get keepListeningAfterPhrase => 'Keep listening after each phrase';
+  String get keepListeningAfterPhrase => '每句话结束后继续聆听';
 
   @override
-  String get showPartialResults => 'Show Partial Results';
+  String get showPartialResults => '显示临时结果';
 
   @override
-  String get displayTextAsYouSpeak => 'Display text as you speak';
+  String get displayTextAsYouSpeak => '说话时实时显示文字';
 
   @override
-  String get sttProvider => 'STT Provider';
+  String get sttProvider => '语音转文字服务';
 
   @override
-  String get recognitionLanguage => 'Recognition Language';
+  String get recognitionLanguage => '识别语言';
 
   @override
-  String get testVoiceInput => 'Test Voice Input';
+  String get testVoiceInput => '测试语音输入';
 
   @override
-  String get stopListening => 'Stop Listening';
+  String get stopListening => '停止聆听';
 
   @override
-  String get tapToStop => 'Tap to stop';
+  String get tapToStop => '点击停止';
 
   @override
-  String get tapToTestSpeechRecognition => 'Tap to test speech recognition';
+  String get tapToTestSpeechRecognition => '点击测试语音识别';
 
   @override
-  String get final_ => 'Final';
+  String get final_ => '最终结果';
 
   @override
-  String get listening => 'Listening...';
+  String get listening => '正在聆听...';
 
   @override
-  String get aboutStt => 'About STT';
+  String get aboutStt => '关于语音转文字';
 
   @override
-  String get aboutSttDescription =>
-      'Speech-to-Text allows you to dictate messages using your voice. Tap the microphone button in the chat input to start speaking.';
+  String get aboutSttDescription => '语音转文字可让你通过语音听写消息。点击聊天输入框中的麦克风按钮开始说话。';
 
   @override
-  String get systemStt => 'System STT';
+  String get systemStt => '系统语音识别';
 
   @override
-  String get systemSttDescription =>
-      'Using your device\'s built-in speech recognition. Accuracy depends on your system settings.';
+  String get systemSttDescription => '使用设备内置的语音识别。准确度取决于系统设置。';
 
   @override
   String get whisper => 'Whisper';
 
   @override
   String get whisperDescription =>
-      'OpenAI\'s Whisper model for high-accuracy transcription. Requires an API key.';
+      '通过 OAI Compatible 端点使用 Whisper 转写，需要 API 密钥。';
 
   @override
-  String get voiceInput => 'Voice input';
+  String get voiceInput => '语音输入';
 
   @override
   String get holdToTalk => '按住说话';
@@ -2535,248 +2489,245 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sttConfigurationRequired => '请先完成所选语音服务的配置再进行测试。';
 
   @override
-  String get speechRecognitionNotAvailable =>
-      'Speech recognition may not be available on this device.';
+  String get speechRecognitionNotAvailable => '此设备可能不支持语音识别。';
 
   @override
-  String get themes => 'Themes';
+  String get themes => '主题';
 
   @override
-  String get createCustomTheme => 'Create custom theme';
+  String get createCustomTheme => '创建自定义主题';
 
   @override
-  String get builtInThemes => 'Built-in Themes';
+  String get builtInThemes => '内置主题';
 
   @override
-  String get preview => 'Preview';
+  String get preview => '预览';
 
   @override
-  String get chatPreview => 'Chat Preview';
+  String get chatPreview => '聊天预览';
 
   @override
-  String get helloHowCanIHelp => 'Hello! How can I help you today?';
+  String get helloHowCanIHelp => '你好！有什么可以帮你？';
 
   @override
-  String get tellMeAStory => 'Tell me a story!';
+  String get tellMeAStory => '给我讲个故事吧！';
 
   @override
-  String get typeAMessage => 'Type a message...';
+  String get typeAMessage => '输入消息...';
 
   @override
-  String get createTheme => 'Create Theme';
+  String get createTheme => '创建主题';
 
   @override
-  String get editTheme => 'Edit Theme';
+  String get editTheme => '编辑主题';
 
   @override
-  String get deleteTheme => 'Delete Theme';
+  String get deleteTheme => '删除主题';
 
   @override
   String deleteThemeConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"?';
+    return '确定删除“$name”吗？';
   }
 
   @override
-  String get themeName => 'Theme Name';
+  String get themeName => '主题名称';
 
   @override
-  String get background => 'Background';
+  String get background => '背景';
 
   @override
-  String get surface => 'Surface';
+  String get surface => '表面';
 
   @override
-  String get card => 'Card';
+  String get card => '卡片';
 
   @override
   String selectThemeColor(String label) {
-    return 'Select $label';
+    return '选择$label';
   }
 
   @override
-  String get hexColor => 'Hex Color';
+  String get hexColor => '十六进制颜色';
 
   @override
-  String get tokenizerSettings => 'Tokenizer';
+  String get tokenizerSettings => '分词器';
 
   @override
-  String get tokenizerHelp => 'Help';
+  String get tokenizerHelp => '帮助';
 
   @override
-  String get tokenizerLabel => 'Tokenizer';
+  String get tokenizerLabel => '分词器';
 
   @override
-  String get showTokenCount => 'Show Token Count';
+  String get showTokenCount => '显示 Token 数';
 
   @override
-  String get displayTokenCountInInput => 'Display token count in chat input';
+  String get displayTokenCountInInput => '在聊天输入框中显示 Token 数';
 
   @override
-  String get showTokenVisualization => 'Show Token Visualization';
+  String get showTokenVisualization => '显示 Token 可视化';
 
   @override
-  String get highlightIndividualTokens => 'Highlight individual tokens';
+  String get highlightIndividualTokens => '高亮各个 Token';
 
   @override
-  String get cacheResults => 'Cache Results';
+  String get cacheResults => '缓存结果';
 
   @override
-  String get cacheTokenizationForPerformance =>
-      'Cache tokenization for performance';
+  String get cacheTokenizationForPerformance => '缓存分词结果以提升性能';
 
   @override
-  String get tokenVisualization => 'Token Visualization';
+  String get tokenVisualization => 'Token 可视化';
 
   @override
-  String get enterTextToTokenize => 'Enter text to tokenize';
+  String get enterTextToTokenize => '输入要分词的文本';
 
   @override
-  String get typePasteTextHere => 'Type or paste text here...';
+  String get typePasteTextHere => '在此输入或粘贴文本...';
 
   @override
-  String get quickEstimate => 'Quick Estimate';
+  String get quickEstimate => '快速估算';
 
   @override
   String approximateTokens(int count) {
-    return '~$count tokens';
+    return '约 $count 个 Token';
   }
 
   @override
   String chars(int count) {
-    return '$count chars';
+    return '$count 个字符';
   }
 
   @override
-  String get statisticsLabel => 'Statistics';
+  String get statisticsLabel => '统计';
 
   @override
   String get totalTokens => '总令牌数';
 
   @override
-  String get unique => 'Unique';
+  String get unique => '唯一';
 
   @override
-  String get charsPerToken => 'Chars/Token';
+  String get charsPerToken => '每个 Token 的字符数';
 
   @override
-  String get avgLength => 'Avg Length';
+  String get avgLength => '平均长度';
 
   @override
-  String get longest => 'Longest';
+  String get longest => '最长';
 
   @override
-  String get shortest => 'Shortest';
+  String get shortest => '最短';
 
   @override
-  String get mostCommonTokens => 'Most Common Tokens';
+  String get mostCommonTokens => '最常见 Token';
 
   @override
-  String get tokenBreakdown => 'Token Breakdown';
+  String get tokenBreakdown => 'Token 明细';
 
   @override
   String tokensCount(int count) {
-    return '$count tokens';
+    return '$count 个 Token';
   }
 
   @override
   String tokenIdLength(String id, int length) {
-    return 'Token ID: $id\nLength: $length chars';
+    return 'Token ID：$id\n长度：$length 个字符';
   }
 
   @override
-  String get translationSettings => 'Translation';
+  String get translationSettings => '翻译';
 
   @override
-  String get enableTranslation => 'Enable Translation';
+  String get enableTranslation => '启用翻译';
 
   @override
-  String get translateMessagesAutomatically =>
-      'Translate messages automatically';
+  String get translateMessagesAutomatically => '自动翻译消息';
 
   @override
-  String get translationProvider => 'Translation Provider';
+  String get translationProvider => '翻译服务';
 
   @override
-  String get sourceLanguage => 'Source Language';
+  String get sourceLanguage => '源语言';
 
   @override
-  String get targetLanguage => 'Target Language';
+  String get targetLanguage => '目标语言';
 
   @override
-  String get autoDetect => 'Auto-detect';
+  String get autoDetect => '自动检测';
 
   @override
-  String get translateUserMessages => 'Translate User Messages';
+  String get translateUserMessages => '翻译用户消息';
 
   @override
-  String get translateAiResponses => 'Translate AI Responses';
+  String get translateAiResponses => '翻译 AI 回复';
 
   @override
-  String get textToSpeech => 'Text-to-Speech';
+  String get textToSpeech => '文本转语音';
 
   @override
-  String get enableTts => 'Enable TTS';
+  String get enableTts => '启用文本转语音';
 
   @override
-  String get readAiResponsesAloud => 'Read AI responses aloud';
+  String get readAiResponsesAloud => '朗读 AI 回复';
 
   @override
-  String get ttsProvider => 'TTS Provider';
+  String get ttsProvider => '文本转语音服务';
 
   @override
-  String get voiceSettings => 'Voice Settings';
+  String get voiceSettings => '语音设置';
 
   @override
-  String get voice => 'Voice';
+  String get voice => '语音';
 
   @override
-  String get speed => 'Speed';
+  String get speed => '语速';
 
   @override
-  String get pitch => 'Pitch';
+  String get pitch => '音调';
 
   @override
-  String get volume => 'Volume';
+  String get volume => '音量';
 
   @override
-  String get autoPlay => 'Auto-play';
+  String get autoPlay => '自动播放';
 
   @override
-  String get automaticallyPlayResponses => 'Automatically play AI responses';
+  String get automaticallyPlayResponses => '自动播放 AI 回复';
 
   @override
-  String get testVoice => 'Test Voice';
+  String get testVoice => '测试语音';
 
   @override
-  String get chatVariables => 'Chat Variables';
+  String get chatVariables => '聊天变量';
 
   @override
-  String get variableSystem => 'Variable System';
+  String get variableSystem => '变量系统';
 
   @override
-  String get globalVariables => 'Global Variables';
+  String get globalVariables => '全局变量';
 
   @override
   String globalVariablesCount(int count) {
-    return '$count global variables';
+    return '$count 个全局变量';
   }
 
   @override
-  String get localVariables => 'Local Variables';
+  String get localVariables => '局部变量';
 
   @override
   String localVariablesCount(int count) {
-    return '$count local variables';
+    return '$count 个局部变量';
   }
 
   @override
-  String get addVariable => 'Add Variable';
+  String get addVariable => '添加变量';
 
   @override
-  String get variableName => 'Variable Name';
+  String get variableName => '变量名称';
 
   @override
-  String get variableValue => 'Variable Value';
+  String get variableValue => '变量值';
 
   @override
   String get scope => '范围';
@@ -2785,416 +2736,398 @@ class AppLocalizationsZh extends AppLocalizations {
   String get global => '全局';
 
   @override
-  String get vectorStorageRag => 'Vector Storage (RAG)';
+  String get vectorStorageRag => '向量存储（RAG）';
 
   @override
-  String get enableRag => 'Enable RAG';
+  String get enableRag => '启用 RAG';
 
   @override
-  String get useVectorStorageForContext =>
-      'Use vector storage for context retrieval';
+  String get useVectorStorageForContext => '使用向量存储检索上下文';
 
   @override
-  String get collections => 'Collections';
+  String get collections => '集合';
 
   @override
-  String get createCollection => 'Create Collection';
+  String get createCollection => '创建集合';
 
   @override
-  String get collectionName => 'Collection Name';
+  String get collectionName => '集合名称';
 
   @override
-  String get embeddingProvider => 'Embedding Provider';
+  String get embeddingProvider => '嵌入服务';
 
   @override
-  String get embeddingModel => 'Embedding Model';
+  String get embeddingModel => '嵌入模型';
 
   @override
-  String get chunkSize => 'Chunk Size';
+  String get chunkSize => '分块大小';
 
   @override
-  String get chunkOverlap => 'Chunk Overlap';
+  String get chunkOverlap => '分块重叠';
 
   @override
-  String get topKResults => 'Top K Results';
+  String get topKResults => 'Top K 结果';
 
   @override
-  String get similarityThreshold => 'Similarity Threshold';
+  String get similarityThreshold => '相似度阈值';
 
   @override
-  String get characterEditor => 'Character Editor';
+  String get characterEditor => '角色编辑器';
 
   @override
-  String get basic => 'Basic';
+  String get basic => '基础';
 
   @override
-  String get prompts => 'Prompts';
+  String get prompts => '提示词';
 
   @override
-  String get meta => 'Meta';
+  String get meta => '元数据';
 
   @override
-  String get nameRequired => 'Name *';
+  String get nameRequired => '名称 *';
 
   @override
-  String get characterName => 'Character name';
+  String get characterName => '角色名称';
 
   @override
-  String get nameIsRequired => 'Name is required';
+  String get nameIsRequired => '名称不能为空';
 
   @override
-  String get characterDescription =>
-      'Character description, background, appearance...';
+  String get characterDescription => '角色描述、背景、外观...';
 
   @override
-  String get characterPersonalityTraits => 'Character personality traits...';
+  String get characterPersonalityTraits => '角色性格特征...';
 
   @override
-  String get currentCircumstancesContext =>
-      'The current circumstances and context...';
+  String get currentCircumstancesContext => '当前情境和上下文...';
 
   @override
-  String get customInstructionsSystemMessage =>
-      'Custom instructions sent as part of the system message.';
+  String get customInstructionsSystemMessage => '作为系统消息一部分发送的自定义指令。';
 
   @override
   String systemPromptHint(Object char) {
-    return 'You are $char. You will...';
+    return '你是 $char。你将...';
   }
 
   @override
-  String get instructionsInsertedAfterHistory =>
-      'Instructions inserted after the chat history (also known as \"jailbreak\").';
+  String get instructionsInsertedAfterHistory => '插入在聊天记录之后的指令（也称为“越狱提示词”）。';
 
   @override
   String postHistoryInstructionsHint(Object char) {
-    return 'Continue the roleplay as $char...';
+    return '继续扮演 $char...';
   }
 
   @override
-  String get firstMessageGreeting => 'First Message (Greeting)';
+  String get firstMessageGreeting => '第一条消息（问候语）';
 
   @override
-  String get firstMessageSentByCharacter =>
-      'The first message sent by the character when starting a new chat.';
+  String get firstMessageSentByCharacter => '开始新聊天时由角色发送的第一条消息。';
 
   @override
   String firstMessageHint(Object user) {
-    return '*walks into the room* Hello, $user!';
+    return '*走进房间* 你好，$user！';
   }
 
   @override
-  String get alternateGreetingsCanSwipe =>
-      'Alternative first messages that can be swiped through.';
+  String get alternateGreetingsCanSwipe => '可以通过滑动切换的备选第一条消息。';
 
   @override
   String greeting(int index) {
-    return 'Greeting $index';
+    return '问候语 $index';
   }
 
   @override
-  String get alternativeGreetingMessage => 'Alternative greeting message...';
+  String get alternativeGreetingMessage => '备选问候消息...';
 
   @override
-  String get removeGreeting => 'Remove greeting';
+  String get removeGreeting => '移除问候语';
 
   @override
-  String get moveUp => 'Move up';
+  String get moveUp => '上移';
 
   @override
-  String get moveDown => 'Move down';
+  String get moveDown => '下移';
 
   @override
-  String get noAlternateGreetings =>
-      'No alternate greetings. Tap + to add one.';
+  String get noAlternateGreetings => '暂无备选问候语。点击 + 添加。';
 
   @override
   String exampleDialogueDemonstrate(Object char, Object user) {
-    return 'Example dialogue to demonstrate how the character speaks.\\nFormat: <START>\\n$user: Hello\\n$char: Hi there!';
+    return '用于展示角色说话方式的示例对话。\n格式：<START>\n$user：你好\n$char：你好！';
   }
 
   @override
   String exampleMessagesHint(Object char, Object user) {
-    return '<START>\\n$user: How are you?\\n$char: I\'m doing well, thanks for asking!';
+    return '<START>\n$user：你好吗？\n$char：我很好，谢谢关心！';
   }
 
   @override
-  String get creatorNotesNotSentToAi =>
-      'Notes from the character creator (not sent to the AI).';
+  String get creatorNotesNotSentToAi => '角色作者留下的备注（不会发送给 AI）。';
 
   @override
-  String get creatorNotesHint => 'Recommended settings, backstory notes...';
+  String get creatorNotesHint => '推荐设置、背景备注...';
 
   @override
-  String get tagsCommaSeparated => 'Comma-separated list of tags';
+  String get tagsCommaSeparated => '以逗号分隔的标签列表';
 
   @override
-  String get tagsHint => 'fantasy, female, adventure';
+  String get tagsHint => '奇幻, 女性, 冒险';
 
   @override
-  String get creator => 'Creator';
+  String get creator => '作者';
 
   @override
-  String get yourNameOrUsername => 'Your name or username';
+  String get yourNameOrUsername => '你的姓名或用户名';
 
   @override
   String get versionNumber => '1.0.0';
 
   @override
-  String get characterInfo => 'Character Info';
+  String get characterInfo => '角色信息';
 
   @override
   String characterId(String id) {
-    return 'ID: $id';
+    return 'ID：$id';
   }
 
   @override
   String created(String date) {
-    return 'Created: $date';
+    return '创建时间：$date';
   }
 
   @override
   String modified(String date) {
-    return 'Modified: $date';
+    return '修改时间：$date';
   }
 
   @override
-  String get characterSavedSuccessfully => 'Character saved successfully';
+  String get characterSavedSuccessfully => '角色保存成功';
 
   @override
   String failedToSaveCharacter(String error) {
-    return 'Failed to save character: $error';
+    return '保存角色失败：$error';
   }
 
   @override
-  String get addAlternateGreeting => 'Add alternate greeting';
+  String get addAlternateGreeting => '添加备选问候语';
 
   @override
-  String get groupInfo => 'Group Info';
+  String get groupInfo => '群组信息';
 
   @override
-  String get responseMode => 'Response Mode';
+  String get responseMode => '回复模式';
 
   @override
-  String get howCharactersTakeTurns => 'How characters take turns responding';
+  String get howCharactersTakeTurns => '角色轮流回复的方式';
 
   @override
-  String get sequential => 'Sequential';
+  String get sequential => '按顺序';
 
   @override
-  String get charactersRespondInOrder => 'Characters respond in order';
+  String get charactersRespondInOrder => '角色按顺序回复';
 
   @override
-  String get random => 'Random';
+  String get random => '随机';
 
   @override
-  String get randomCharacterResponds => 'Random character responds each turn';
+  String get randomCharacterResponds => '每轮由随机角色回复';
 
   @override
-  String get allAtOnce => 'All at Once';
+  String get allAtOnce => '全部同时回复';
 
   @override
-  String get allNonMutedCharactersRespond => 'All non-muted characters respond';
+  String get allNonMutedCharactersRespond => '所有未静音的角色都回复';
 
   @override
   String get manual => '手动';
 
   @override
-  String get youSelectWhoResponds => 'You select which character responds';
+  String get youSelectWhoResponds => '由你选择回复的角色';
 
   @override
-  String get natural => 'Natural';
+  String get natural => '自然';
 
   @override
-  String get aiDecidesBasedOnContext =>
-      'AI decides based on context and trigger words';
+  String get aiDecidesBasedOnContext => 'AI 根据上下文和触发词决定';
 
   @override
   String membersCount(int count) {
-    return 'Members ($count)';
+    return '成员（$count）';
   }
 
   @override
-  String get noMembersYet => 'No members yet. Add characters to this group.';
+  String get noMembersYet => '暂无成员，请向群组添加角色。';
 
   @override
   String talkativenessPercent(int percent) {
-    return 'Talkativeness: $percent%';
+    return '活跃度：$percent%';
   }
 
   @override
   String triggers(String words) {
-    return 'Triggers: $words';
+    return '触发词：$words';
   }
 
   @override
-  String get mute => 'Mute';
+  String get mute => '静音';
 
   @override
-  String get unmute => 'Unmute';
+  String get unmute => '取消静音';
 
   @override
-  String get memberSettings => 'Member Settings';
+  String get memberSettings => '成员设置';
 
   @override
   String talkativenessLabel(int percent) {
-    return 'Talkativeness: $percent%';
+    return '活跃度：$percent%';
   }
 
   @override
-  String get higherValuesMoreLikely =>
-      'Higher values make the character more likely to respond.';
+  String get higherValuesMoreLikely => '数值越高，角色回复的可能性越大。';
 
   @override
-  String get triggerWords => 'Trigger Words';
+  String get triggerWords => '触发词';
 
   @override
-  String get triggerWordsHint => 'word1, word2, word3';
+  String get triggerWordsHint => '词语1, 词语2, 词语3';
 
   @override
-  String get characterWillRespondWhenTriggered =>
-      'Character will respond when these words appear in messages.';
+  String get characterWillRespondWhenTriggered => '消息中出现这些词时，角色会回复。';
 
   @override
-  String get addMemberToGroup => 'Add Member';
+  String get addMemberToGroup => '添加群组成员';
 
   @override
-  String get noMoreCharactersAvailable => 'No more characters available to add';
+  String get noMoreCharactersAvailable => '没有更多可添加的角色';
 
   @override
-  String get groupSaved => 'Group saved';
+  String get groupSaved => '群组已保存';
 
   @override
   String deleteGroupAndChats(String name) {
-    return 'Are you sure you want to delete \"$name\"?';
+    return '确定删除“$name”吗？';
   }
 
   @override
-  String get startChatAction => 'Start Chat';
+  String get startChatAction => '开始聊天';
 
   @override
-  String get noTagsYet => 'No tags yet';
+  String get noTagsYet => '暂无标签';
 
   @override
-  String get createTagsToOrganize => 'Create tags to organize your characters';
+  String get createTagsToOrganize => '创建标签来整理角色';
 
   @override
   String characterCount(int count, String plural) {
-    return '$count character$plural';
+    return '$count 个角色$plural';
   }
 
   @override
   String deleteTagConfirmation(String name) {
-    return 'Are you sure you want to delete the tag \"$name\"?\\n\\nThis will remove the tag from all characters.';
+    return '确定删除标签“$name”吗？\n\n所有角色上的此标签都会被移除。';
   }
 
   @override
-  String get enterTagName => 'Enter tag name';
+  String get enterTagName => '输入标签名称';
 
   @override
-  String get iconEmoji => 'Icon (emoji)';
+  String get iconEmoji => '图标（表情符号）';
 
   @override
-  String get enterEmojiOptional => 'Enter an emoji (optional)';
+  String get enterEmojiOptional => '输入表情符号（可选）';
 
   @override
-  String get pleaseEnterTagName => 'Please enter a tag name';
+  String get pleaseEnterTagName => '请输入标签名称';
 
   @override
-  String get worldInfoLorebooks => 'World Info / Lorebooks';
+  String get worldInfoLorebooks => '世界信息 / 世界书';
 
   @override
-  String get createLorebook => 'Create Lorebook';
+  String get createLorebook => '创建世界书';
 
   @override
-  String get noLorebooksYet => 'No Lorebooks yet';
+  String get noLorebooksYet => '暂无世界书';
 
   @override
-  String get lorebooksInjectContext =>
-      'Lorebooks inject context into your chats when keywords are detected.';
+  String get lorebooksInjectContext => '检测到关键词时，世界书会向聊天注入上下文。';
 
   @override
   String entriesCount(int count) {
-    return '$count entries';
+    return '$count 个条目';
   }
 
   @override
   String deleteLorebookConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\" and all its entries?';
+    return '确定删除“$name”及其所有条目吗？';
   }
 
   @override
-  String get enterLorebookName => 'Enter lorebook name';
+  String get enterLorebookName => '输入世界书名称';
 
   @override
-  String get optionalDescriptionHint => 'Optional description';
+  String get optionalDescriptionHint => '可选描述';
 
   @override
-  String get globalScope => 'Global';
+  String get globalScope => '全局';
 
   @override
-  String get applyToAllChats => 'Apply to all chats';
+  String get applyToAllChats => '应用到所有聊天';
 
   @override
-  String get pleaseEnterName2 => 'Please enter a name';
+  String get pleaseEnterName2 => '请输入名称';
 
   @override
-  String get noEntriesYet => 'No entries yet';
+  String get noEntriesYet => '暂无条目';
 
   @override
-  String get addEntriesWithKeywords =>
-      'Add entries with keywords to inject context into chats';
+  String get addEntriesWithKeywords => '添加带关键词的条目，以便向聊天注入上下文';
 
   @override
   String deleteEntryConfirmation(String keys) {
-    return 'Are you sure you want to delete this entry?\\n\\nKeys: $keys';
+    return '确定删除此条目吗？\n\n关键词：$keys';
   }
 
   @override
-  String get constant => 'Constant';
+  String get constant => '常量';
 
   @override
-  String get selective => 'Selective';
+  String get selective => '选择性匹配';
 
   @override
-  String get keywordsCommaSeparated => 'Keywords (comma-separated)';
+  String get keywordsCommaSeparated => '关键词（用逗号分隔）';
 
   @override
-  String get keywordsHint => 'dragon, wyrm, serpent';
+  String get keywordsHint => '龙, 巨龙, 蛇';
 
   @override
-  String get entryActivatesWhenKeywordFound =>
-      'Entry activates when any keyword is found in chat';
+  String get entryActivatesWhenKeywordFound => '聊天中出现任一关键词时激活条目';
 
   @override
-  String get secondaryKeysOptional => 'Secondary Keys (optional)';
+  String get secondaryKeysOptional => '次关键词（可选）';
 
   @override
-  String get secondaryKeysHint => 'fire, flame';
+  String get secondaryKeysHint => '火, 火焰';
 
   @override
-  String get bothPrimaryAndSecondaryMustMatch =>
-      'If set, both primary AND secondary must match (selective mode)';
+  String get bothPrimaryAndSecondaryMustMatch => '启用后，主关键词和次关键词必须同时匹配（选择性模式）';
 
   @override
-  String get commentOptional => 'Comment (optional)';
+  String get commentOptional => '备注（可选）';
 
   @override
-  String get noteForThisEntry => 'Note for this entry';
+  String get noteForThisEntry => '此条目的备注';
 
   @override
-  String get contentLabel => 'Content';
+  String get contentLabel => '内容';
 
   @override
-  String get contextToInjectWhenMatches =>
-      'The context to inject when keywords match...';
+  String get contextToInjectWhenMatches => '关键词匹配时要注入的上下文...';
 
   @override
-  String get pleaseEnterAtLeastOneKeyword =>
-      'Please enter at least one keyword';
+  String get pleaseEnterAtLeastOneKeyword => '请至少输入一个关键词';
 
   @override
-  String get pleaseEnterContent => 'Please enter content';
+  String get pleaseEnterContent => '请输入内容';
 
   @override
   String get anthropic => 'Anthropic';
@@ -3203,7 +3136,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cohere => 'Cohere';
 
   @override
-  String get customProvider => 'Custom';
+  String get customProvider => '自定义';
 
   @override
   String get apiEndpointHint => 'https://api.example.com/v1';
@@ -3237,117 +3170,113 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get streamResponse => 'Stream Response';
+  String get streamResponse => '流式回复';
 
   @override
-  String get streamTokensAsGenerated => 'Stream tokens as they are generated';
+  String get streamTokensAsGenerated => '生成 Token 时实时传输';
 
   @override
-  String get useSystemPrompt => 'Use System Prompt';
+  String get useSystemPrompt => '使用系统提示词';
 
   @override
-  String get includeSystemInstructions => 'Include system instructions';
+  String get includeSystemInstructions => '包含系统指令';
 
   @override
-  String get configurationSavedSuccessfully =>
-      'Configuration saved successfully';
+  String get configurationSavedSuccessfully => '配置保存成功';
 
   @override
-  String get errorSavingConfiguration => 'Error saving configuration';
+  String get errorSavingConfiguration => '保存配置时出错';
 
   @override
-  String get copyAll => 'Copy All';
+  String get copyAll => '全部复制';
 
   @override
-  String get showFavoritesOnly => 'Show favorites only';
+  String get showFavoritesOnly => '仅显示收藏';
 
   @override
-  String get sortBy => 'Sort by';
+  String get sortBy => '排序方式';
 
   @override
-  String get filterByTags => 'Filter by tags';
+  String get filterByTags => '按标签筛选';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => '收藏';
 
   @override
-  String get manage => 'Manage';
+  String get manage => '管理';
 
   @override
-  String get noTagsCreatedYet => 'No tags created yet';
+  String get noTagsCreatedYet => '尚未创建标签';
 
   @override
-  String get createTags => 'Create Tags';
+  String get createTags => '创建标签';
 
   @override
   String charactersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count characters',
-      one: '1 character',
+      other: '$count 个角色',
+      one: '1 个角色',
     );
     return '$_temp0';
   }
 
   @override
-  String get characterTagsLegacy => 'Character Tags (Legacy)';
+  String get characterTagsLegacy => '角色标签（旧版）';
 
   @override
-  String get done => 'Done';
+  String get done => '完成';
 
   @override
   String applyFiltersSelected(int count) {
-    return 'Apply ($count selected)';
+    return '应用（已选 $count 项）';
   }
 
   @override
-  String get enterPresetName => 'Enter preset name';
+  String get enterPresetName => '输入预设名称';
 
   @override
-  String get deleteScript => 'Delete Script';
+  String get deleteScript => '删除脚本';
 
   @override
-  String get aiConfig => 'AI Config';
+  String get aiConfig => 'AI 配置';
 
   @override
-  String get authorsNoteDescription =>
-      'Add context or instructions that will be injected into the conversation at a specific depth.';
+  String get authorsNoteDescription => '添加将在指定深度注入对话的上下文或指令。';
 
   @override
-  String get enableAuthorsNote => 'Enable Author\'s Note';
+  String get enableAuthorsNote => '启用作者注释';
 
   @override
-  String get injectNoteIntoContext => 'Inject note into conversation context';
+  String get injectNoteIntoContext => '将注释注入对话上下文';
 
   @override
-  String get injectionDepth => 'Injection Depth';
+  String get injectionDepth => '注入深度';
 
   @override
-  String get messagesFromEndWhereInserted =>
-      'Messages from the end where note is inserted';
+  String get messagesFromEndWhereInserted => '从末尾数起插入注释的消息位置';
 
   @override
-  String get noteContent => 'Note Content';
+  String get noteContent => '注释内容';
 
   @override
   String get authorsNoteHint =>
-      'Enter your author\'s note here...\\n\\nExamples:\\n• [Style: Write in a poetic, descriptive manner]\\n• [Focus on emotional depth and character development]\\n• [The character is feeling melancholic today]';
+      '在此输入作者注释...\n\n示例：\n• [风格：使用诗意、富有描述性的方式写作]\n• [注重情感深度和角色发展]\n• [角色今天心情忧郁]';
 
   @override
-  String get enterNameForCheckpoint => 'Enter a name for this checkpoint';
+  String get enterNameForCheckpoint => '输入此检查点的名称';
 
   @override
-  String get addDescription => 'Add a description';
+  String get addDescription => '添加描述';
 
   @override
   String createCheckpointAtMessage(int index) {
-    return 'This will create a checkpoint at message $index.';
+    return '将在消息 $index 处创建检查点。';
   }
 
   @override
-  String get longPressMessageToBookmark =>
-      'Long-press a message to create a bookmark';
+  String get longPressMessageToBookmark => '长按消息可创建书签';
 
   @override
   String get contextManagement => '上下文管理';
@@ -3365,116 +3294,114 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoSummarizeThresholdDescription => '当上下文达到最大值的此百分比时触发总结';
 
   @override
-  String get branchFromBookmark => 'Branch from Bookmark';
+  String get branchFromBookmark => '从书签创建分支';
 
   @override
   String branchFromBookmarkWarning(String name) {
-    return 'This will delete all messages after \"$name\" and continue from that point. You can create a new bookmark before doing this to save the current state.';
+    return '这将删除“$name”之后的所有消息，并从该位置继续。可先创建新书签以保存当前状态。';
   }
 
   @override
-  String get branch => 'Branch';
+  String get branch => '分支';
 
   @override
   String branchedFrom(String name) {
-    return 'Branched from \"$name\"';
+    return '分支起点：“$name”';
   }
 
   @override
   String deleteBookmarkConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"?';
+    return '确定删除“$name”吗？';
   }
 
   @override
   String messageIndexAndDate(int index, String date) {
-    return 'Message $index • $date';
+    return '消息 $index · $date';
   }
 
   @override
-  String get branchFromHere => 'Branch from here';
+  String get branchFromHere => '从此处创建分支';
 
   @override
   String previewBookmark(String name) {
-    return 'Preview: $name';
+    return '预览：$name';
   }
 
   @override
-  String get messageNotFoundInChat => 'Message not found in current chat';
+  String get messageNotFoundInChat => '当前聊天中找不到该消息';
 
   @override
-  String get you => 'You';
+  String get you => '你';
 
   @override
-  String get assistant => 'Assistant';
+  String get assistant => '助手';
 
   @override
-  String get reasoningCopiedToClipboard => 'Reasoning copied to clipboard';
+  String get reasoningCopiedToClipboard => '推理内容已复制到剪贴板';
 
   @override
   String charsCount(int count) {
-    return '$count chars';
+    return '$count 个字符';
   }
 
   @override
-  String get copyReasoning => 'Copy reasoning';
+  String get copyReasoning => '复制推理内容';
 
   @override
-  String get commands => 'Commands';
+  String get commands => '命令';
 
   @override
   String aliasesLabel(String aliases) {
-    return 'Aliases: $aliases';
+    return '别名：$aliases';
   }
 
   @override
-  String get noSpritesAddedYet => 'No sprites added yet';
+  String get noSpritesAddedYet => '尚未添加立绘';
 
   @override
-  String get errorLoadingSprites => 'Error loading sprites';
+  String get errorLoadingSprites => '加载立绘时出错';
 
   @override
-  String get insertionPosition => 'Insertion Position';
+  String get insertionPosition => '插入位置';
 
   @override
-  String get beforeCharacterDefinition => 'Before Character Definition';
+  String get beforeCharacterDefinition => '角色定义之前';
 
   @override
-  String get afterCharacterDefinition => 'After Character Definition';
+  String get afterCharacterDefinition => '角色定义之后';
 
   @override
-  String get beforeExampleMessages => 'Before Example Messages';
+  String get beforeExampleMessages => '示例消息之前';
 
   @override
-  String get afterExampleMessages => 'After Example Messages';
+  String get afterExampleMessages => '示例消息之后';
 
   @override
-  String get beforeAuthorNote => 'Before Author\'s Note';
+  String get beforeAuthorNote => '作者注释之前';
 
   @override
-  String get afterAuthorNote => 'After Author\'s Note';
+  String get afterAuthorNote => '作者注释之后';
 
   @override
-  String get atDepth => 'At Depth';
+  String get atDepth => '指定深度';
 
   @override
-  String get beforeSystemPrompt => 'Before System Prompt';
+  String get beforeSystemPrompt => '系统提示词之前';
 
   @override
-  String get afterSystemPrompt => 'After System Prompt';
+  String get afterSystemPrompt => '系统提示词之后';
 
   @override
-  String get insertionOrder => 'Insertion Order';
+  String get insertionOrder => '插入顺序';
 
   @override
-  String get lowerOrderInsertsFirst => 'Lower order values are inserted first';
+  String get lowerOrderInsertsFirst => '顺序值越小越先插入';
 
   @override
-  String get alwaysIncludeInPrompt =>
-      'Always include in prompt (ignore keywords)';
+  String get alwaysIncludeInPrompt => '始终加入提示词（忽略关键词）';
 
   @override
-  String get requiresSecondaryKey =>
-      'Requires both primary AND secondary key to match';
+  String get requiresSecondaryKey => '主关键词和次关键词必须同时匹配';
 
   @override
   String get debugLog => '调试日志';
@@ -3638,11 +3565,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get googleDriveBackups => 'Google Drive 备份';
 
   @override
-  String get bubbleOpacity => 'Message Opacity';
+  String get bubbleOpacity => '消息不透明度';
 
   @override
-  String get bubbleOpacityHelp =>
-      'Controls the transparency of message bubbles when a background is active.';
+  String get bubbleOpacityHelp => '控制启用背景时消息气泡的透明度。';
 
   @override
   String get swipes => '备选回复';
@@ -5039,6 +4965,1000 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rpgQuestFailed => '失败';
+
+  @override
+  String get rpgEnableMode => '开启 RPG 模式';
+
+  @override
+  String get noImageGenerated => '未生成图片';
+
+  @override
+  String failedToSaveImage(String error) {
+    return '保存图片失败：$error';
+  }
+
+  @override
+  String imagesAdded(int count) {
+    return '已添加 $count 张图片';
+  }
+
+  @override
+  String get addConnection => '添加关联';
+
+  @override
+  String get group => '群组';
+
+  @override
+  String get lockType => '锁定类型';
+
+  @override
+  String errorLoadingCharacters(String error) {
+    return '加载角色失败：$error';
+  }
+
+  @override
+  String errorLoadingGroups(String error) {
+    return '加载群组失败：$error';
+  }
+
+  @override
+  String get inSystemPrompt => '系统提示词中';
+
+  @override
+  String get connectingGoogleDrive => '正在连接 Google 云端硬盘...';
+
+  @override
+  String get checkingICloud => '正在检查 iCloud...';
+
+  @override
+  String get whatIsPromptManager => '什么是提示词管理器？';
+
+  @override
+  String get promptManagerHelpDescription =>
+      '提示词管理器控制消息发送给 AI 前系统提示词的组装方式。你可以调整各部分的顺序，并启用或停用它们。';
+
+  @override
+  String get promptSectionTypes => '提示词部分类型';
+
+  @override
+  String get promptSectionTypesDescription =>
+      '提示词可包含系统指令、用户设定、角色信息、场景、世界书上下文、示例消息、作者注释、聊天记录和历史记录后指令。';
+
+  @override
+  String get tips => '提示';
+
+  @override
+  String get promptManagerTips =>
+      '越靠上的部分优先级越高。停用不需要的部分可以节省 Token，也可以调整顺序来获得不同效果。';
+
+  @override
+  String get customImportedPrompt => '从预设导入的自定义提示词';
+
+  @override
+  String editPromptSection(String name) {
+    return '编辑$name';
+  }
+
+  @override
+  String get promptName => '提示词名称';
+
+  @override
+  String identifierLabel(String identifier) {
+    return 'ID：$identifier';
+  }
+
+  @override
+  String roleLabel(String role) {
+    return '角色：$role';
+  }
+
+  @override
+  String supportedPromptMacros(
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    return '支持 $userMacro、$charMacro、$timeMacro 和 $dateMacro 等宏。';
+  }
+
+  @override
+  String get enterPromptContent => '输入提示词内容...';
+
+  @override
+  String updated(String name) {
+    return '已更新$name';
+  }
+
+  @override
+  String get customPrompt => '自定义提示词';
+
+  @override
+  String get promptSectionSystemPrompt => '系统提示词';
+
+  @override
+  String get promptSectionSystemPromptDescription => '基础角色扮演指令';
+
+  @override
+  String get promptSectionPersona => '用户设定';
+
+  @override
+  String get promptSectionPersonaDescription => '你的用户设定信息';
+
+  @override
+  String get promptSectionCharacterDescription => '角色描述';
+
+  @override
+  String get promptSectionCharacterDescriptionDescription => 'AI 角色的详细信息';
+
+  @override
+  String get promptSectionCharacterPersonality => '角色性格';
+
+  @override
+  String get promptSectionCharacterPersonalityDescription => '角色的性格特征';
+
+  @override
+  String get promptSectionScenario => '场景';
+
+  @override
+  String get promptSectionScenarioDescription => '当前情境与背景设定';
+
+  @override
+  String get promptSectionExampleMessages => '示例消息';
+
+  @override
+  String get promptSectionExampleMessagesDescription => '用于展示对话风格的示例';
+
+  @override
+  String get promptSectionWorldInfoBefore => '前置世界信息';
+
+  @override
+  String get promptSectionWorldInfoBeforeDescription => '插入在角色信息之前的世界书上下文';
+
+  @override
+  String get promptSectionWorldInfoAfter => '后置世界信息';
+
+  @override
+  String get promptSectionWorldInfoAfterDescription => '插入在角色信息之后的世界书上下文';
+
+  @override
+  String get promptSectionAuthorNote => '作者注释';
+
+  @override
+  String get promptSectionAuthorNoteDescription => '当前聊天使用的动态指令';
+
+  @override
+  String get promptSectionPostHistory => '历史记录后指令';
+
+  @override
+  String get promptSectionPostHistoryDescription => '插入在聊天记录之后的指令';
+
+  @override
+  String get promptSectionNsfw => 'NSFW 提示词';
+
+  @override
+  String get promptSectionNsfwDescription => '可选的成人内容指令';
+
+  @override
+  String get promptSectionChatHistory => '聊天记录';
+
+  @override
+  String get promptSectionChatHistoryDescription => '会话中的近期消息';
+
+  @override
+  String get promptSectionEnhanceDefinitions => '强化定义';
+
+  @override
+  String get promptSectionEnhanceDefinitionsDescription => '用于强化角色定义的附加指令';
+
+  @override
+  String get promptSectionCustomDescription => '自定义提示词部分';
+
+  @override
+  String get reasoning => '推理内容';
+
+  @override
+  String get emotionNeutral => '平静';
+
+  @override
+  String get emotionHappy => '开心';
+
+  @override
+  String get emotionSad => '悲伤';
+
+  @override
+  String get emotionAngry => '生气';
+
+  @override
+  String get emotionSurprised => '惊讶';
+
+  @override
+  String get emotionScared => '害怕';
+
+  @override
+  String get emotionDisgusted => '厌恶';
+
+  @override
+  String get emotionConfused => '困惑';
+
+  @override
+  String get emotionEmbarrassed => '尴尬';
+
+  @override
+  String get emotionExcited => '兴奋';
+
+  @override
+  String get emotionLoving => '喜爱';
+
+  @override
+  String get emotionThinking => '思考';
+
+  @override
+  String get emotionSmug => '得意';
+
+  @override
+  String get emotionTired => '疲惫';
+
+  @override
+  String get emotionBored => '无聊';
+
+  @override
+  String get tokenizerHelpContent =>
+      '分词器用于估算模型能够处理的文本量。请选择与模型匹配的分词器，或使用“最佳匹配”自动选择。';
+
+  @override
+  String get tokenizerNoneEstimate => '无（仅估算）';
+
+  @override
+  String get tokenizerBestMatchAuto => '最佳匹配（自动）';
+
+  @override
+  String get tokenizerEstimateDescription => '根据字符数快速估算 Token';
+
+  @override
+  String get tokenizerGpt2Description => '适用于较旧 GPT 风格模型的 GPT-2 分词器';
+
+  @override
+  String get tokenizerOaiDescription =>
+      '适用于 GPT 模型的 OAI Compatible tiktoken 分词器';
+
+  @override
+  String get tokenizerLlamaDescription => '适用于 Llama 模型的 SentencePiece 分词器';
+
+  @override
+  String get tokenizerLlama3Description => '适用于 Llama 3 模型的分词器';
+
+  @override
+  String get tokenizerMistralDescription => '适用于 Mistral 模型的分词器';
+
+  @override
+  String get tokenizerClaudeDescription => '适用于 Claude 模型的 Token 估算';
+
+  @override
+  String get tokenizerGemmaDescription => '适用于 Gemma 模型的分词器';
+
+  @override
+  String get tokenizerQwenDescription => '适用于 Qwen 模型的分词器';
+
+  @override
+  String get tokenizerDeepSeekDescription => '适用于 DeepSeek 模型的分词器';
+
+  @override
+  String get tokenizerCommandRDescription => '适用于 Command R 模型的分词器';
+
+  @override
+  String get tokenizerNemoDescription => '适用于 Mistral NeMo 模型的分词器';
+
+  @override
+  String get tokenizerBestMatchDescription => '根据当前模型自动选择分词器';
+
+  @override
+  String get showOriginal => '显示原文';
+
+  @override
+  String get showOriginalDescription => '在译文旁同时显示原文';
+
+  @override
+  String get swapLanguages => '交换语言';
+
+  @override
+  String get aboutTranslation => '关于翻译';
+
+  @override
+  String get aboutTranslationDescription => '可自动或按需翻译消息，帮助你使用不同语言交流。';
+
+  @override
+  String get googleTranslate => 'Google 翻译';
+
+  @override
+  String get googleTranslateDescription =>
+      '使用 Google Cloud Translation API，需要 Google Cloud API 密钥。';
+
+  @override
+  String get deepL => 'DeepL';
+
+  @override
+  String get deepLDescription => '高质量神经网络机器翻译，需要 deepl.com 的 API 密钥。';
+
+  @override
+  String get libreTranslate => 'LibreTranslate';
+
+  @override
+  String get libreTranslateDescription => '免费开源的翻译服务，可自行托管或使用公共实例。';
+
+  @override
+  String get queueMessages => '消息排队';
+
+  @override
+  String get queueMessagesDescription => '将多条消息加入队列，而不是中断当前朗读';
+
+  @override
+  String get loadingVoices => '正在加载语音...';
+
+  @override
+  String get failedToLoadVoices => '加载语音失败';
+
+  @override
+  String get ttsTestPhrase => '你好！这是一段文本转语音系统测试。欢迎使用 NativeTavern。';
+
+  @override
+  String get aboutTts => '关于文本转语音';
+
+  @override
+  String get aboutTtsDescription => '文本转语音可以朗读消息。你可以在角色设置中为不同角色配置不同语音。';
+
+  @override
+  String get systemTts => '系统文本转语音';
+
+  @override
+  String get systemTtsDetails => '使用设备内置的文本转语音引擎，可用语音取决于系统设置。';
+
+  @override
+  String get elevenLabsDescription => '高质量 AI 语音，需要 elevenlabs.io 的 API 密钥。';
+
+  @override
+  String get clearGlobalVariables => '清空全局变量';
+
+  @override
+  String get clearLocalVariables => '清空局部变量';
+
+  @override
+  String get aboutVariables => '关于变量';
+
+  @override
+  String get variableSystemDescription => '变量可在全局或当前聊天中保存可复用的值，并通过宏在提示词中引用。';
+
+  @override
+  String get macroUsage => '宏用法';
+
+  @override
+  String macroUsageDescription(String localMacro, String globalMacro) {
+    return '使用 $localMacro 引用局部变量，使用 $globalMacro 引用全局变量。也可以通过变量宏设置值。';
+  }
+
+  @override
+  String get noGlobalVariables => '暂无全局变量';
+
+  @override
+  String get noLocalVariables => '暂无局部变量';
+
+  @override
+  String editVariable(String name) {
+    return '编辑变量“$name”';
+  }
+
+  @override
+  String get deleteVariable => '删除变量';
+
+  @override
+  String deleteVariableQuestion(String name) {
+    return '确定删除变量“$name”吗？';
+  }
+
+  @override
+  String clearVariables(String scope) {
+    return '清空$scope变量';
+  }
+
+  @override
+  String clearVariablesConfirmation(String scope) {
+    return '确定清空所有$scope变量吗？此操作无法撤销。';
+  }
+
+  @override
+  String get decrement => '减少';
+
+  @override
+  String get increment => '增加';
+
+  @override
+  String get testInput => '测试输入';
+
+  @override
+  String get variableTestHint => '输入包含变量宏的文本...';
+
+  @override
+  String get processMacros => '处理宏';
+
+  @override
+  String get result => '结果';
+
+  @override
+  String get emptyString => '（空字符串）';
+
+  @override
+  String get retrievalAugmentedGeneration => '检索增强生成（RAG）';
+
+  @override
+  String get searchSettings => '搜索设置';
+
+  @override
+  String topKResultsDescription(int count) {
+    return '最多返回 $count 条匹配结果';
+  }
+
+  @override
+  String minimumPercent(String percent) {
+    return '最低相似度：$percent%';
+  }
+
+  @override
+  String get promptIntegration => '提示词集成';
+
+  @override
+  String get includeInPrompt => '加入提示词';
+
+  @override
+  String get automaticallyAddContext => '自动将相关上下文加入提示词';
+
+  @override
+  String get promptTemplate => '提示词模板';
+
+  @override
+  String useContextPlaceholder(String contextMacro) {
+    return '使用 $contextMacro 指定检索内容的插入位置';
+  }
+
+  @override
+  String get vectorStorageHelp => '向量存储帮助';
+
+  @override
+  String get vectorStorageHelpContent =>
+      '向量存储会将文档转换为嵌入向量，并为每条消息检索相关段落。请配置嵌入服务、创建集合、添加文档并启用提示词集成。';
+
+  @override
+  String get enterCollectionName => '输入集合名称';
+
+  @override
+  String get deleteCollection => '删除集合';
+
+  @override
+  String get deleteCollectionConfirmation => '确定删除此集合及其中的所有文档吗？';
+
+  @override
+  String get collectionExported => '集合已导出';
+
+  @override
+  String get importCollection => '导入集合';
+
+  @override
+  String get pasteCollectionJson => '粘贴集合 JSON...';
+
+  @override
+  String get collectionImported => '集合已导入';
+
+  @override
+  String get activeCollection => '当前集合';
+
+  @override
+  String collectionWithDocumentCount(String name, int count) {
+    return '$name（$count 篇文档）';
+  }
+
+  @override
+  String documentsCount(int count) {
+    return '$count 篇文档';
+  }
+
+  @override
+  String embeddedCount(String percent) {
+    return '已嵌入 $percent';
+  }
+
+  @override
+  String get addDocument => '添加文档';
+
+  @override
+  String get viewDocuments => '查看文档';
+
+  @override
+  String get enterDocumentContent => '输入文档内容';
+
+  @override
+  String get documentAdded => '文档已添加';
+
+  @override
+  String get noDocuments => '暂无文档';
+
+  @override
+  String documentEmbeddingStatus(int characters, String status) {
+    return '$characters 个字符 · $status';
+  }
+
+  @override
+  String get embedded => '已嵌入';
+
+  @override
+  String get notEmbedded => '未嵌入';
+
+  @override
+  String get tokenProbabilities => 'Token 概率';
+
+  @override
+  String get requestTokenProbabilities => '请求 Token 概率';
+
+  @override
+  String get requestTokenProbabilitiesDescription => '请求模型返回生成 Token 的概率数据';
+
+  @override
+  String get topCandidatesCount => '候选项数量';
+
+  @override
+  String topCandidatesDescription(int count) {
+    return '每个 Token 最多显示 $count 个候选项';
+  }
+
+  @override
+  String get showLogprobsPanel => '显示 Token 概率面板';
+
+  @override
+  String get showLogprobsPanelDescription => '在支持的消息下方显示 Token 概率';
+
+  @override
+  String get colorIntensity => '颜色强度';
+
+  @override
+  String get aboutTokenProbabilities => '关于 Token 概率';
+
+  @override
+  String get tokenProbabilitiesDescription =>
+      'Token 概率可以显示模型的置信程度及其考虑过的候选项。是否可用取决于当前 API 和模型。';
+
+  @override
+  String get moreFormatting => '更多格式';
+
+  @override
+  String get readAloud => '朗读';
+
+  @override
+  String get openInBrowser => '在浏览器中打开';
+
+  @override
+  String get imageLoadFailed => '图片加载失败';
+
+  @override
+  String get pauseReading => '暂停朗读';
+
+  @override
+  String get resumeReading => '继续朗读';
+
+  @override
+  String get stopReading => '停止朗读';
+
+  @override
+  String get noTagsAvailable => '暂无可用标签';
+
+  @override
+  String rerollAlternativeNotImplemented(String alternative) {
+    return '暂不支持使用“$alternative”重新生成';
+  }
+
+  @override
+  String get enableTokenProbabilitiesHint => '请在设置中启用 Token 概率以查看此数据';
+
+  @override
+  String get noTokenProbabilities => '暂无 Token 概率数据';
+
+  @override
+  String get noAlternativeTokens => '暂无候选 Token';
+
+  @override
+  String get alternativeTokens => '候选 Token';
+
+  @override
+  String get otherTokens => '其他 Token';
+
+  @override
+  String get chooseRpgScenario => '选择 RPG 剧本';
+
+  @override
+  String get importScenario => '导入剧本';
+
+  @override
+  String get noSavedScenarios => '暂无已保存的剧本';
+
+  @override
+  String get rpgImportScenarioPackage => '导入 RPG 剧本包';
+
+  @override
+  String get rpgSelectedScenarioUnreadable => '无法读取所选剧本文件';
+
+  @override
+  String get favorite => '收藏';
+
+  @override
+  String get connections => '关联';
+
+  @override
+  String get systemPromptOverride => '覆盖系统提示词';
+
+  @override
+  String get systemPromptOverrideHint => '输入此用户设定专用的系统提示词...';
+
+  @override
+  String get systemPromptOverrideDescription => '启用此用户设定时覆盖默认系统提示词';
+
+  @override
+  String get instructionsAddedAfterHistory => '添加在聊天记录之后的指令';
+
+  @override
+  String get bindPersonaDescription => '绑定用户设定描述';
+
+  @override
+  String get noConnections => '暂无关联';
+
+  @override
+  String connectionCharacter(String id) {
+    return '角色：$id';
+  }
+
+  @override
+  String connectionGroup(String id) {
+    return '群组：$id';
+  }
+
+  @override
+  String connectionChat(String id) {
+    return '聊天：$id';
+  }
+
+  @override
+  String lockLabel(String type) {
+    return '锁定：$type';
+  }
+
+  @override
+  String get addTag => '添加标签';
+
+  @override
+  String errorLoadingLorebooks(String error) {
+    return '加载世界书失败：$error';
+  }
+
+  @override
+  String get personaLorebook => '用户设定世界书';
+
+  @override
+  String get selectLorebook => '选择世界书';
+
+  @override
+  String get personaLorebookDescription => '与此用户设定关联的世界书';
+
+  @override
+  String get descriptionPlacement => '描述插入位置';
+
+  @override
+  String get personaDescriptionPositionHelp => '选择用户设定描述在提示词中的插入位置';
+
+  @override
+  String get depth => '深度';
+
+  @override
+  String get depthInChatHistory => '聊天记录中的深度';
+
+  @override
+  String get messageRole => '消息角色';
+
+  @override
+  String get roleForDescription => '用户设定描述使用的角色';
+
+  @override
+  String get novelAiSettings => 'NovelAI 设置';
+
+  @override
+  String get anlasGuard => 'Anlas 保护';
+
+  @override
+  String get anlasGuardDescription => '预计 Anlas 消耗过高时阻止生成';
+
+  @override
+  String get smea => 'SMEA';
+
+  @override
+  String get smeaDescription => '启用 SMEA 采样以提升图片一致性';
+
+  @override
+  String get smeaDynamic => '动态 SMEA';
+
+  @override
+  String get smeaDynamicDescription => '根据图片尺寸动态调整 SMEA';
+
+  @override
+  String get decrisper => '柔化细节';
+
+  @override
+  String get decrisperDescription => '减少图片中过度锐利的细节';
+
+  @override
+  String get varietyPlus => 'Variety+';
+
+  @override
+  String get varietyPlusDescription => '提高生成图片之间的差异性';
+
+  @override
+  String get gptImageApiDescription => '通过 OAI Compatible 图片 API 生成图片';
+
+  @override
+  String get oaiCompatibleChat => 'OAI Compatible Chat';
+
+  @override
+  String get oaiCompatibleChatDescription => '通过 OAI Compatible 聊天补全端点生成图片';
+
+  @override
+  String get errorFetchingModels => '获取模型失败';
+
+  @override
+  String generatedPrompt(String prompt) {
+    return '提示词：$prompt';
+  }
+
+  @override
+  String generatedSeed(String seed) {
+    return '种子：$seed';
+  }
+
+  @override
+  String imagesGenerated(int count) {
+    return '已生成 $count 张图片';
+  }
+
+  @override
+  String get myTheme => '我的主题';
+
+  @override
+  String get translate => '翻译';
+
+  @override
+  String get stopSpeaking => '停止朗读';
+
+  @override
+  String get insertion => '插入';
+
+  @override
+  String get filters => '过滤条件';
+
+  @override
+  String get scanDepth => '扫描深度';
+
+  @override
+  String get scanDepthDescription => '扫描最近多少条消息来匹配关键词';
+
+  @override
+  String get roleForInjectedContent => '注入内容使用的消息角色';
+
+  @override
+  String get caseSensitive => '区分大小写';
+
+  @override
+  String get matchKeywordsExactCase => '按完全一致的大小写匹配关键词';
+
+  @override
+  String get matchWholeWords => '匹配完整单词';
+
+  @override
+  String get onlyMatchCompleteWords => '仅匹配完整单词';
+
+  @override
+  String get recursionControl => '递归控制';
+
+  @override
+  String get preventRecursion => '阻止递归';
+
+  @override
+  String get preventRecursionDescription => '不允许此条目触发其他条目';
+
+  @override
+  String get excludeRecursion => '从递归中排除';
+
+  @override
+  String get excludeRecursionDescription => '递归扫描时不激活此条目';
+
+  @override
+  String get delayUntilRecursion => '延迟至递归';
+
+  @override
+  String get delayUntilRecursionDescription => '仅在递归扫描时激活此条目';
+
+  @override
+  String get characterFilter => '角色过滤';
+
+  @override
+  String get groupSettings => '分组设置';
+
+  @override
+  String get groupMutuallyExclusive => '组内互斥';
+
+  @override
+  String get useGroupScoring => '使用分组评分';
+
+  @override
+  String get groupWeight => '分组权重';
+
+  @override
+  String get groupWeightDescription => '从组中选择条目时使用的相对权重';
+
+  @override
+  String get groupOverride => '覆盖分组';
+
+  @override
+  String get groupPriority => '分组优先级';
+
+  @override
+  String get probability => '概率';
+
+  @override
+  String get useProbability => '使用概率';
+
+  @override
+  String get randomActivationProbability => '此条目随机激活的概率';
+
+  @override
+  String probabilityPercent(int percent) {
+    return '激活概率：$percent%';
+  }
+
+  @override
+  String get timedEffects => '定时效果';
+
+  @override
+  String get filterType => '过滤类型';
+
+  @override
+  String get characterIds => '角色 ID';
+
+  @override
+  String get stickyDuration => '持续时长';
+
+  @override
+  String get stickyDurationDescription => '匹配后此条目保持激活的消息数';
+
+  @override
+  String get cooldown => '冷却';
+
+  @override
+  String get cooldownDescription => '此条目再次激活前需要经过的消息数';
+
+  @override
+  String get delay => '延迟';
+
+  @override
+  String get delayDescription => '此条目可激活前需要经过的消息数';
+
+  @override
+  String get outlet => '出口';
+
+  @override
+  String get include => '包含';
+
+  @override
+  String get exclude => '排除';
+
+  @override
+  String translatedFromLanguage(String language) {
+    return '译自$language';
+  }
+
+  @override
+  String originalText(String text) {
+    return '原文：$text';
+  }
+
+  @override
+  String get loadingImage => '正在加载图片...';
+
+  @override
+  String get backupIntervalNever => '从不';
+
+  @override
+  String get backupIntervalHourly => '每小时';
+
+  @override
+  String get backupIntervalDaily => '每天';
+
+  @override
+  String get backupIntervalWeekly => '每周';
+
+  @override
+  String get backupIntervalMonthly => '每月';
+
+  @override
+  String get restoreModeReplace => '替换';
+
+  @override
+  String get restoreModeReplaceDescription => '使用备份数据替换所有本地数据';
+
+  @override
+  String get restoreModeMerge => '合并';
+
+  @override
+  String get restoreModeMergeDescription => '合并备份与本地数据，冲突时以较新的数据为准';
+
+  @override
+  String get restoreModeAddNewOnly => '仅添加新内容';
+
+  @override
+  String get restoreModeAddNewOnlyDescription => '仅添加备份中的新项目，并保留所有现有数据';
+
+  @override
+  String get sortNameAscending => '名称（A-Z）';
+
+  @override
+  String get sortNameDescending => '名称（Z-A）';
+
+  @override
+  String get sortNewestFirst => '最新创建优先';
+
+  @override
+  String get sortOldestFirst => '最早创建优先';
+
+  @override
+  String get sortRecentlyModified => '最近修改优先';
+
+  @override
+  String get sortLeastRecentlyModified => '最早修改优先';
+
+  @override
+  String get codeBlock => '代码块';
+
+  @override
+  String get quote => '引用';
+
+  @override
+  String get heading1 => '一级标题';
+
+  @override
+  String get heading2 => '二级标题';
+
+  @override
+  String get heading3 => '三级标题';
+
+  @override
+  String get bulletList => '项目符号列表';
+
+  @override
+  String get numberedList => '编号列表';
+
+  @override
+  String get horizontalRule => '分隔线';
+
+  @override
+  String get pageNotFound => '页面未找到';
+
+  @override
+  String get goHome => '返回首页';
+
+  @override
+  String get officialWebsite => '官方网站';
+
+  @override
+  String get mcpStreamableHttp => '可流式传输 HTTP';
+
+  @override
+  String get mcpLegacyHttpSse => '旧版 HTTP + SSE';
+
+  @override
+  String chatWithName(String name) {
+    return '与$name聊天';
+  }
+
+  @override
+  String get noValidCharactersInGroup => '群组中没有有效角色';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -5086,6 +6006,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get save => '儲存';
+
+  @override
+  String get saveAs => '另存新檔';
 
   @override
   String get edit => '編輯';
@@ -5271,6 +6194,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get attachImage => '附加圖片';
+
+  @override
+  String get formatting => '格式設定';
 
   @override
   String get chooseFromGallery => '從相簿選擇';
@@ -5488,6 +6414,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get maxTokens => '最大令牌數';
 
   @override
+  String get contextLength => '上下文長度';
+
+  @override
+  String get contextWindowSize => '上下文視窗大小';
+
+  @override
+  String get contextLengthDescription => '模型作為輸入上下文可處理的最大 Token 數。';
+
+  @override
   String get topP => 'Top P';
 
   @override
@@ -5665,6 +6600,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get backup => '備份';
+
+  @override
+  String get backupSubtitle => '本機與雲端備份及還原';
 
   @override
   String get createBackup => '建立備份';
@@ -5925,7 +6863,1828 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get commandHelp => '輸入 / 檢視可用指令';
 
   @override
+  String get characterNotFound => '找不到角色';
+
+  @override
+  String get characterNotFoundMessage => '找不到角色';
+
+  @override
+  String get exportAsPng => '匯出為 PNG';
+
+  @override
+  String get exportAsCharx => '匯出為 CharX';
+
+  @override
+  String get duplicate => '複製';
+
+  @override
+  String deleteCharacterConfirmationSimple(String name) {
+    return '確定要刪除「$name」嗎？此操作無法復原。';
+  }
+
+  @override
+  String characterDuplicated(String name) {
+    return '已複製$name';
+  }
+
+  @override
+  String failedToDelete(String error) {
+    return '刪除失敗：$error';
+  }
+
+  @override
+  String failedToDuplicate(String error) {
+    return '複製失敗：$error';
+  }
+
+  @override
+  String get pngExportComingSoon => '即將支援 PNG 匯出';
+
+  @override
+  String get charxExportComingSoon => '即將支援 CharX 匯出';
+
+  @override
+  String get failedToCreateChat => '建立聊天失敗';
+
+  @override
+  String get creating => '正在建立...';
+
+  @override
+  String byCreator(String creator) {
+    return '作者：$creator';
+  }
+
+  @override
+  String versionLabel(String version) {
+    return 'v$version';
+  }
+
+  @override
+  String get showLess => '收合';
+
+  @override
+  String get showMore => '顯示更多';
+
+  @override
+  String greetingNumber(int number) {
+    return '問候語 $number';
+  }
+
+  @override
+  String alternateGreetingsCount(int count) {
+    return '替代問候語（$count）';
+  }
+
+  @override
+  String get embeddedLorebook => '內嵌世界書';
+
+  @override
+  String entriesEnabled(int enabled, int total) {
+    return '已啟用 $enabled/$total 個項目';
+  }
+
+  @override
+  String andMoreEntries(int count) {
+    return '...以及另外 $count 個項目';
+  }
+
+  @override
+  String get exampleMessages => '範例訊息';
+
+  @override
+  String get postHistoryInstructions => '歷史記錄後指令';
+
+  @override
+  String get selectImages => '選擇圖片';
+
+  @override
+  String get presetsAndTemplates => '預設與範本';
+
+  @override
+  String get activePreset => '目前預設';
+
+  @override
+  String get change => '變更';
+
+  @override
+  String get noPresetSelected => '未選擇預設';
+
+  @override
+  String get instructTemplate => '指令範本';
+
+  @override
+  String get selectInstructTemplate => '選擇指令範本';
+
+  @override
+  String get instructTemplateDescription =>
+      '指令範本會針對不同 LLM 模型設定提示詞格式。對於會自動處理格式的 OAI Compatible 或 Claude 等 API 服務，請選擇「無」。';
+
+  @override
+  String get orderAndTogglePromptSections => '調整提示詞部分的順序與啟用狀態';
+
+  @override
+  String get llmConnection => 'LLM 連線';
+
+  @override
+  String get generationSettings => '產生設定';
+
+  @override
+  String get advancedSamplerSettings => '進階採樣器設定';
+
+  @override
+  String get fullControlOverSampling => '完整控制採樣參數';
+
+  @override
+  String get selectLlmProvider => '選擇 LLM 服務';
+
+  @override
+  String get notSet => '未設定';
+
+  @override
+  String get enterApiKey => '輸入 API 金鑰';
+
+  @override
+  String get apiEndpointUrl => 'API 端點 URL';
+
+  @override
+  String get modelName => '模型名稱';
+
+  @override
+  String get fetchAvailableModels => '取得可用模型';
+
+  @override
+  String get fetchModelsDescription => '從 API 取得模型，或手動輸入模型名稱';
+
+  @override
+  String get enterModelName => '輸入模型名稱';
+
+  @override
+  String get fetchingModels => '正在取得模型...';
+
+  @override
+  String get failedToFetchModels => '取得模型失敗';
+
+  @override
+  String get tapToTestConnection => '點選以測試 API 連線';
+
+  @override
+  String get testing => '正在測試...';
+
+  @override
+  String get connected => '已連線';
+
+  @override
+  String get connectionFailedSimple => '連線失敗';
+
+  @override
+  String get maximumTokensToGenerate => '最大產生 Token 數';
+
+  @override
+  String get streaming => '串流傳輸';
+
+  @override
+  String get showResponseAsItGenerates => '產生時即時顯示回覆';
+
+  @override
+  String selectModelCount(int count) {
+    return '選擇模型（$count）';
+  }
+
+  @override
+  String get refreshModels => '重新整理模型';
+
+  @override
+  String get enterManually => '手動輸入';
+
+  @override
+  String get noModelsFound => '找不到模型';
+
+  @override
+  String get tryDifferentSearchTerm => '請嘗試其他搜尋詞';
+
+  @override
+  String modelsOfTotal(int filtered, int total) {
+    return '顯示 $filtered/$total 個模型';
+  }
+
+  @override
+  String get importPreset => '匯入預設';
+
+  @override
+  String get noGroupChatsYet => '尚無群組聊天';
+
+  @override
+  String get createGroupDescription => '建立群組，與多個角色聊天';
+
+  @override
+  String get newGroup => '新增群組';
+
+  @override
+  String membersAndMode(int count, String mode) {
+    return '$count 位成員 · $mode 模式';
+  }
+
+  @override
+  String get groupChatWillBeImplemented => '群組聊天將在聊天整合中實作';
+
+  @override
+  String deleteGroupConfirmation(String name) {
+    return '確定要刪除「$name」嗎？相關聊天也會一併刪除。';
+  }
+
+  @override
+  String groupDeleted(String name) {
+    return '已刪除$name';
+  }
+
+  @override
+  String get groupNameRequired => '群組名稱 *';
+
+  @override
+  String get enterGroupName => '輸入群組名稱';
+
+  @override
+  String get optionalDescription => '選填描述';
+
+  @override
+  String get selectCharacters => '選擇角色';
+
+  @override
+  String get noCharactersAvailable => '沒有可用角色';
+
+  @override
+  String charactersSelected(int count) {
+    return '已選擇 $count 個角色';
+  }
+
+  @override
+  String get create => '建立';
+
+  @override
+  String get selectAtLeast2Characters => '請至少選擇 2 個角色';
+
+  @override
+  String get groupCreatedSuccessfully => '群組建立成功';
+
+  @override
+  String failedToCreateGroup(String error) {
+    return '建立群組失敗：$error';
+  }
+
+  @override
+  String get selectCharacterCard => '選擇角色卡';
+
+  @override
+  String get supportsPngCharxJson => '支援 PNG、CharX 與 JSON 格式';
+
+  @override
+  String get browseFiles => '瀏覽檔案';
+
+  @override
+  String failedToPickFile(String error) {
+    return '選擇檔案失敗：$error';
+  }
+
+  @override
+  String failedToLoadCharacter(String error) {
+    return '載入角色失敗：$error';
+  }
+
+  @override
+  String unsupportedFileFormat(String format) {
+    return '不支援的檔案格式：$format';
+  }
+
+  @override
+  String get pngCharacterCard => 'PNG 角色卡';
+
+  @override
+  String get characterDataEmbeddedInImage => '角色資料內嵌於圖片中繼資料';
+
+  @override
+  String get charxArchive => 'CharX 封存檔';
+
+  @override
+  String get zipArchiveWithCharacterData => '包含角色資料與資源的 ZIP 封存檔';
+
+  @override
+  String get plainCharacterCardJson => '純角色卡 JSON 檔案';
+
+  @override
+  String importedWithLorebook(String name) {
+    return '已匯入含內嵌世界書的「$name」！';
+  }
+
+  @override
+  String importedSuccessfully(String name) {
+    return '已成功匯入「$name」！';
+  }
+
+  @override
+  String failedToImport(String error) {
+    return '匯入失敗：$error';
+  }
+
+  @override
+  String embeddedLorebookEntries(int count) {
+    return '內嵌世界書（$count 個項目）';
+  }
+
+  @override
+  String get saveCurrentAsPreset => '將目前設定儲存為預設';
+
+  @override
+  String get exportCurrentSettings => '匯出目前設定';
+
+  @override
+  String get builtInPresets => '內建預設';
+
+  @override
+  String get customPresets => '自訂預設';
+
+  @override
+  String get aiPresetsDescription => 'AI 預設包含產生設定、提示詞順序與指令範本。選擇一個預設即可一次套用全部設定。';
+
+  @override
+  String appliedPreset(String name) {
+    return '已套用「$name」預設';
+  }
+
+  @override
+  String failedToApplyPreset(String error) {
+    return '套用預設失敗：$error';
+  }
+
+  @override
+  String get invalidPresetFormat => '預設格式無效，應包含產生設定。';
+
+  @override
+  String importedAndApplied(String name) {
+    return '已匯入並套用「$name」';
+  }
+
+  @override
+  String get saveAsPreset => '儲存為預設';
+
+  @override
+  String get descriptionOptional => '描述（選填）';
+
+  @override
+  String get pleaseEnterAName => '請輸入名稱';
+
+  @override
+  String savedPreset(String name) {
+    return '已儲存「$name」';
+  }
+
+  @override
+  String saveFailed(String error) {
+    return '儲存失敗：$error';
+  }
+
+  @override
+  String deletePresetConfirmation(String name) {
+    return '確定要刪除「$name」嗎？';
+  }
+
+  @override
+  String deletedPreset(String name) {
+    return '已刪除「$name」';
+  }
+
+  @override
+  String get export => '匯出';
+
+  @override
+  String get resetToDefaults => '還原預設值';
+
+  @override
+  String get basicSampling => '基本採樣';
+
+  @override
+  String get temperatureDescription => '控制隨機性。數值越高越有創意，越低越專注。';
+
+  @override
+  String get topPNucleusSampling => 'Top P（核採樣）';
+
+  @override
+  String get topPDescription => '選擇 Token 的累積機率門檻。';
+
+  @override
+  String get topKDescription => '納入考慮的最高機率 Token 數。0 表示停用。';
+
+  @override
+  String get advancedSampling => '進階採樣';
+
+  @override
+  String get minP => 'Min P';
+
+  @override
+  String get minPDescription => '相對於最高機率 Token 的最低機率門檻。';
+
+  @override
+  String get typicalP => 'Typical P';
+
+  @override
+  String get typicalPDescription => '區域典型採樣。1.0 表示停用。';
+
+  @override
+  String get topA => 'Top A';
+
+  @override
+  String get topADescription => 'Top-A 採樣門檻。0 表示停用。';
+
+  @override
+  String get tailFreeSamplingTfs => '尾端自由採樣（TFS）';
+
+  @override
+  String get tfsDescription => '移除低機率尾端。1.0 表示停用。';
+
+  @override
+  String get repetitionControl => '重複控制';
+
+  @override
+  String get repetitionPenaltyDescription => '懲罰重複 Token。1.0 表示不懲罰。';
+
+  @override
+  String get repetitionPenaltyRange => '重複懲罰範圍';
+
+  @override
+  String get repetitionPenaltyRangeDescription => '納入計算的 Token 數。0 表示全部。';
+
+  @override
+  String get frequencyPenaltyDescription => '依 Token 在文字中的出現頻率進行懲罰。';
+
+  @override
+  String get presencePenaltyDescription => '對文字中出現過的 Token 進行懲罰。';
+
+  @override
+  String get mirostatLocalModels => 'Mirostat（本機模型）';
+
+  @override
+  String get mirostatMode => 'Mirostat 模式';
+
+  @override
+  String get adaptiveSamplingForLocalModels => '適用於本機模型的自適應採樣';
+
+  @override
   String get off => '關閉';
+
+  @override
+  String get mirostatTau => 'Mirostat Tau';
+
+  @override
+  String get mirostatTauDescription => '目標熵/困惑度。';
+
+  @override
+  String get mirostatEta => 'Mirostat Eta';
+
+  @override
+  String get mirostatEtaDescription => 'Mirostat 的學習率。';
+
+  @override
+  String get generationControl => '產生控制';
+
+  @override
+  String get maxTokensDescription => '最多產生的 Token 數。';
+
+  @override
+  String get seed => '種子';
+
+  @override
+  String get seedDescription => '用於重現結果的隨機種子。-1 表示隨機。';
+
+  @override
+  String get stopSequences => '停止序列';
+
+  @override
+  String get noStopSequencesConfigured => '尚未設定停止序列';
+
+  @override
+  String get stopSequencesDescription => '每行輸入一個序列。產生到其中任一序列時停止。';
+
+  @override
+  String get resetConfirmation => '這將把所有採樣器設定還原為預設值。是否繼續？';
+
+  @override
+  String get reset => '重設';
+
+  @override
+  String get settingsResetToDefaults => '設定已還原預設值';
+
+  @override
+  String get characterBackground => '角色背景';
+
+  @override
+  String get chatBackground => '聊天背景';
+
+  @override
+  String get clearBackground => '清除背景';
+
+  @override
+  String get gradientPresets => '漸層預設';
+
+  @override
+  String get solidColors => '純色';
+
+  @override
+  String get customImage => '自訂圖片';
+
+  @override
+  String get adjustments => '調整';
+
+  @override
+  String get noBackgroundSelected => '未選擇背景';
+
+  @override
+  String get chooseImage => '選擇圖片';
+
+  @override
+  String get fromUrl => '來自 URL';
+
+  @override
+  String localImage(String filename) {
+    return '本機圖片：$filename';
+  }
+
+  @override
+  String urlLabel(String url) {
+    return 'URL：$url';
+  }
+
+  @override
+  String get noImage => '無圖片';
+
+  @override
+  String get opacity => '不透明度';
+
+  @override
+  String get blurEffect => '模糊效果';
+
+  @override
+  String get applyBlurToBackground => '對背景套用模糊';
+
+  @override
+  String get blurAmount => '模糊程度';
+
+  @override
+  String failedToLoadImage(String error) {
+    return '載入圖片失敗：$error';
+  }
+
+  @override
+  String get imageUrl => '圖片 URL';
+
+  @override
+  String get enterImageUrl => '輸入圖片 URL';
+
+  @override
+  String get apply => '套用';
+
+  @override
+  String get backupAndRestore => '備份與還原';
+
+  @override
+  String get refresh => '重新整理';
+
+  @override
+  String get storage => '儲存空間';
+
+  @override
+  String get totalBackupSize => '備份總大小';
+
+  @override
+  String get calculating => '正在計算...';
+
+  @override
+  String get lastAutoBackup => '上次自動備份';
+
+  @override
+  String get autoBackup => '自動備份';
+
+  @override
+  String get enableAutoBackup => '啟用自動備份';
+
+  @override
+  String get automaticallyBackupChats => '自動備份聊天';
+
+  @override
+  String get backupInterval => '備份間隔';
+
+  @override
+  String get backupOnExit => '結束時備份';
+
+  @override
+  String get createBackupWhenClosingApp => '關閉應用程式時建立備份';
+
+  @override
+  String get retention => '保留規則';
+
+  @override
+  String get maxChatBackups => '聊天備份上限';
+
+  @override
+  String keepUpToChatBackups(int count) {
+    return '最多保留 $count 個聊天備份';
+  }
+
+  @override
+  String get maxFullBackups => '完整備份上限';
+
+  @override
+  String keepUpToFullBackups(int count) {
+    return '最多保留 $count 個完整備份';
+  }
+
+  @override
+  String get cleanupOldBackups => '清理舊備份';
+
+  @override
+  String get deleteBackupsExceedingLimits => '刪除超出限制的備份';
+
+  @override
+  String get cleanup => '清理';
+
+  @override
+  String deletedOldBackups(int count) {
+    return '已刪除 $count 個舊備份';
+  }
+
+  @override
+  String get chatBackups => '聊天備份';
+
+  @override
+  String get noChatBackups => '尚無聊天備份';
+
+  @override
+  String viewAllBackups(int count) {
+    return '檢視全部 $count 個備份';
+  }
+
+  @override
+  String get fullBackups => '完整備份';
+
+  @override
+  String get noFullBackups => '尚無完整備份';
+
+  @override
+  String get information => '資訊';
+
+  @override
+  String get aboutBackups => '關於備份';
+
+  @override
+  String get aboutBackupsDescription => '聊天備份會儲存個別對話。完整備份包含所有角色、聊天、設定與世界資訊。';
+
+  @override
+  String get backupLocation => '備份位置';
+
+  @override
+  String errorReadingBackup(String error) {
+    return '讀取備份時發生錯誤：$error';
+  }
+
+  @override
+  String get deleteBackup => '刪除備份';
+
+  @override
+  String deleteBackupConfirmation(String name) {
+    return '要刪除「$name」嗎？\n\n此操作無法復原。';
+  }
+
+  @override
+  String get view => '檢視';
+
+  @override
+  String get justNow => '剛剛';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count 分鐘前';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count 小時前';
+  }
+
+  @override
+  String get enableCfgScale => '啟用 CFG Scale';
+
+  @override
+  String get cfgScaleDescription => '用於文字產生的無分類器引導';
+
+  @override
+  String get globalSettings => '全域設定';
+
+  @override
+  String get guidanceScale => '引導強度';
+
+  @override
+  String get negativePrompt => '負面提示詞';
+
+  @override
+  String get textToSteerAwayFrom => '希望模型避開的文字';
+
+  @override
+  String get positivePromptOptional => '正面提示詞（選填）';
+
+  @override
+  String get textToEnhanceInOutput => '希望在輸出中強化的文字';
+
+  @override
+  String get characterSettings => '角色設定';
+
+  @override
+  String get useCharacterSpecificSettings => '使用角色專屬設定';
+
+  @override
+  String get overrideGlobalForCharacter => '為此角色覆寫全域設定';
+
+  @override
+  String get characterNegativePrompt => '角色負面提示詞';
+
+  @override
+  String get overrideGlobalNegativePrompt => '覆寫全域負面提示詞';
+
+  @override
+  String get chatSettings => '聊天設定';
+
+  @override
+  String get chatSettingsDescription => '這些設定僅對目前聊天生效，並覆寫全域與角色設定。';
+
+  @override
+  String get chatNegativePrompt => '聊天負面提示詞';
+
+  @override
+  String get overrideForThisChat => '為目前聊天覆寫設定';
+
+  @override
+  String get chatPositivePrompt => '聊天正面提示詞';
+
+  @override
+  String get enhancementForThisChat => '目前聊天的強化內容';
+
+  @override
+  String get promptCombineMode => '提示詞組合方式';
+
+  @override
+  String get replaceChatPromptOnly => '取代（僅使用聊天提示詞）';
+
+  @override
+  String get prependChatPlusGlobal => '前置（聊天 + 全域）';
+
+  @override
+  String get appendGlobalPlusChat => '後置（全域 + 聊天）';
+
+  @override
+  String get aboutCfgScale => '關於 CFG Scale';
+
+  @override
+  String get aboutCfgScaleDescription =>
+      'CFG（無分類器引導）Scale 控制模型遵循負面提示詞、避開特定內容或風格的強度。\n\n• 1.0 = 無效果（預設）\n• 1.5-3.0 = 輕度引導\n• 3.0-7.0 = 中度引導\n• 7.0+ = 強引導（可能影響連貫性）';
+
+  @override
+  String get cfgScaleHelp => 'CFG Scale 說明';
+
+  @override
+  String get cfgScaleHelpContent =>
+      '無分類器引導（CFG）Scale 可透過指定希望避開的內容來引導 AI 模型輸出。\n\n**運作方式：**\n模型會產生兩份輸出，一份使用提示詞，另一份使用負面提示詞。最終輸出會朝遠離負面提示詞的方向調整。\n\n**設定優先級：**\n1. 聊天專屬設定（最高）\n2. 角色專屬設定\n3. 全域設定（最低）\n\n**提示：**\n• 從較低數值（1.5-2.0）開始並逐漸增加\n• 使用具體的負面提示詞可獲得更好效果\n• 數值過高可能導致重複或不連貫\n• 並非所有 AI 後端都支援 CFG Scale';
+
+  @override
+  String get help => '說明';
+
+  @override
+  String get processing => '處理中...';
+
+  @override
+  String get sampleMessage1 => '你好！有什麼可以幫你？';
+
+  @override
+  String get sampleMessage2 => '告訴我一個故事吧！';
+
+  @override
+  String get general => '一般';
+
+  @override
+  String get enableImageGeneration => '啟用圖片產生';
+
+  @override
+  String get generateImagesUsingAi => '使用 AI 產生圖片';
+
+  @override
+  String get imageGenerationProvider => '圖片產生服務';
+
+  @override
+  String get apiEndpoint => 'API 端點';
+
+  @override
+  String get notConfigured => '未設定';
+
+  @override
+  String get defaultParameters => '預設參數';
+
+  @override
+  String get imageSize => '圖片尺寸';
+
+  @override
+  String get steps => '步數';
+
+  @override
+  String get sampler => '採樣器';
+
+  @override
+  String get defaultNegativePrompt => '預設負面提示詞';
+
+  @override
+  String get enterTermsToAvoid => '輸入產生圖片中需要避免的內容';
+
+  @override
+  String get test => '測試';
+
+  @override
+  String get aboutImageGeneration => '關於圖片產生';
+
+  @override
+  String get aboutImageGenerationDescription =>
+      '使用 AI 模型產生圖片。可在聊天中使用 /imagine 命令，或在角色編輯器中產生角色肖像。';
+
+  @override
+  String get imagineCommand => '/imagine 命令';
+
+  @override
+  String get imagineCommandUsage =>
+      '用法：/imagine <提示詞> [--width N] [--height N] [--steps N] [--cfg N] [--seed N]';
+
+  @override
+  String get stableDiffusion => 'Stable Diffusion';
+
+  @override
+  String get stableDiffusionDescription =>
+      '連線至本機或遠端 Stable Diffusion WebUI，需要啟用 API。';
+
+  @override
+  String get dalle => 'DALL-E';
+
+  @override
+  String get dalleDescription =>
+      '透過 OAI Compatible 端點使用 DALL-E 產生圖片，需要 API 金鑰。';
+
+  @override
+  String get prompt => '提示詞';
+
+  @override
+  String get enterPromptToGenerate => '輸入圖片產生提示詞';
+
+  @override
+  String get generate => '產生';
+
+  @override
+  String get generating => '正在產生...';
+
+  @override
+  String get generationComplete => '產生完成';
+
+  @override
+  String get imageWouldBeDisplayed => '圖片將顯示於此處';
+
+  @override
+  String get enableLogitBias => '啟用 Logit Bias';
+
+  @override
+  String get adjustTokenProbabilities => '調整 AI 回覆中的 Token 機率';
+
+  @override
+  String get presets => '預設';
+
+  @override
+  String get activePresetLabel => '目前預設';
+
+  @override
+  String get none => '無';
+
+  @override
+  String get newPreset => '新增預設';
+
+  @override
+  String get importPresetLabel => '匯入預設';
+
+  @override
+  String get biasEntries => '偏置項目';
+
+  @override
+  String get noBiasEntries => '尚無偏置項目';
+
+  @override
+  String get addEntriesToAdjust => '加入項目以調整 Token 機率';
+
+  @override
+  String get addEntry => '加入項目';
+
+  @override
+  String get textOrToken => '文字 / Token';
+
+  @override
+  String textTokenHint(Object verbatim) {
+    return '單字、$verbatim 或 [1234]';
+  }
+
+  @override
+  String get bias => '偏置';
+
+  @override
+  String get logitBiasHelp => 'Logit Bias 說明';
+
+  @override
+  String get presetCopiedToClipboard => '預設已複製到剪貼簿';
+
+  @override
+  String exportPresetFailed(String error) {
+    return '匯出失敗：$error';
+  }
+
+  @override
+  String get pastePresetJson => '在此貼上預設 JSON';
+
+  @override
+  String get presetImportedSuccessfully => '預設匯入成功';
+
+  @override
+  String importPresetFailed(String error) {
+    return '匯入失敗：$error';
+  }
+
+  @override
+  String get rename => '重新命名';
+
+  @override
+  String get deletePresetQuestion => '確定要刪除此預設嗎？';
+
+  @override
+  String get moreOptions => '更多選項';
+
+  @override
+  String get loadPreset => '載入預設';
+
+  @override
+  String get saveAsPresetLabel => '儲存為預設';
+
+  @override
+  String get exportPreset => '匯出預設';
+
+  @override
+  String get resetToDefault => '還原預設';
+
+  @override
+  String get dragToReorder => '拖曳可調整各部分順序，使用開關啟用或停用。';
+
+  @override
+  String deleted(String name) {
+    return '已刪除「$name」';
+  }
+
+  @override
+  String imported(String name) {
+    return '已匯入「$name」';
+  }
+
+  @override
+  String get invalidPresetFormatMessage => '預設格式無效';
+
+  @override
+  String get exportPresetTitle => '匯出預設';
+
+  @override
+  String get presetNameLabel => '預設名稱';
+
+  @override
+  String get pleaseEnterNameMessage => '請輸入名稱';
+
+  @override
+  String saved(String name) {
+    return '已儲存「$name」';
+  }
+
+  @override
+  String saveFailedMessage(String error) {
+    return '儲存失敗：$error';
+  }
+
+  @override
+  String get resetToDefaultQuestion => '這將還原所有提示詞部分的預設順序並全部啟用。是否繼續？';
+
+  @override
+  String get resetToDefaultConfig => '還原預設設定';
+
+  @override
+  String get promptManagerHelp => '提示詞管理器說明';
+
+  @override
+  String applied(String name) {
+    return '已套用「$name」預設';
+  }
+
+  @override
+  String get showQuickReplies => '顯示快速回覆';
+
+  @override
+  String get displayQuickReplyButtons => '在聊天中顯示快速回覆按鈕';
+
+  @override
+  String get positionAboveInput => '位於輸入框上方';
+
+  @override
+  String get quickRepliesAboveInput => '快速回覆顯示在輸入框上方';
+
+  @override
+  String get quickRepliesBelowInput => '快速回覆顯示在輸入框下方';
+
+  @override
+  String get add => '加入';
+
+  @override
+  String get noQuickReplies => '尚無快速回覆';
+
+  @override
+  String get addYourFirstQuickReply => '加入第一則快速回覆';
+
+  @override
+  String deleteQuickReplyQuestion(String label) {
+    return '確定要刪除「$label」嗎？';
+  }
+
+  @override
+  String get resetToDefaultQuestion2 => '這將以預設集合取代你的所有快速回覆。是否繼續？';
+
+  @override
+  String get continueOrEmpty => '（繼續/空白訊息）';
+
+  @override
+  String get autoSendTooltip => '自動傳送';
+
+  @override
+  String get addQuickReply => '加入快速回覆';
+
+  @override
+  String get editQuickReplyLabel => '編輯快速回覆';
+
+  @override
+  String get buttonLabel => '按鈕文字';
+
+  @override
+  String get buttonLabelHint => '例如：是、繼續、思考...';
+
+  @override
+  String get messageLabel => '訊息';
+
+  @override
+  String get leaveEmptyForContinue => '留空表示繼續產生';
+
+  @override
+  String get supportsMacros => '支援提示詞巨集';
+
+  @override
+  String get autoSendLabel => '自動傳送';
+
+  @override
+  String get messageSentImmediately => '訊息將立即傳送';
+
+  @override
+  String get messageFillsInput => '訊息將填入輸入框';
+
+  @override
+  String get regexScripts => '正規表示式指令碼';
+
+  @override
+  String get addScript => '加入指令碼';
+
+  @override
+  String get addPresets => '加入預設';
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get enableRegexScripts => '啟用正規表示式指令碼';
+
+  @override
+  String get applyFindReplacePatterns => '對訊息套用尋找/取代規則';
+
+  @override
+  String get applyTo => '套用至';
+
+  @override
+  String get userInput => '使用者輸入';
+
+  @override
+  String get applyBeforeSending => '傳送前套用至訊息';
+
+  @override
+  String get aiOutput => 'AI 輸出';
+
+  @override
+  String get applyToAiResponses => '套用至 AI 回覆';
+
+  @override
+  String get slashCommandsLabel => '斜線命令';
+
+  @override
+  String get applyDuringCommandProcessing => '處理命令時套用';
+
+  @override
+  String get worldInfoLabel => '世界資訊';
+
+  @override
+  String get applyToWorldInfoEntries => '套用至世界資訊項目';
+
+  @override
+  String scriptsCount(int count) {
+    return '指令碼（$count）';
+  }
+
+  @override
+  String get noRegexScripts => '尚無正規表示式指令碼';
+
+  @override
+  String get tapToAddOrUseMenu => '點選 + 加入指令碼，或使用選單加入預設';
+
+  @override
+  String get aboutRegexScripts => '關於正規表示式指令碼';
+
+  @override
+  String get aboutRegexScriptsDescription =>
+      '正規表示式指令碼可在訊息中尋找並取代文字模式。取代內容可使用擷取群組（\$1、\$2）。';
+
+  @override
+  String get patternFormat => '模式格式';
+
+  @override
+  String get patternFormatDescription =>
+      '使用 /pattern/flags 格式（如 /hello/gi）或一般模式。旗標：i=不區分大小寫，m=多行，s=點號比對換行';
+
+  @override
+  String get presetScriptsAdded => '預設指令碼已加入';
+
+  @override
+  String deleteScriptQuestion(String name) {
+    return '要刪除「$name」嗎？';
+  }
+
+  @override
+  String get clearAllScripts => '清除所有指令碼';
+
+  @override
+  String get clearAllScriptsQuestion => '這將刪除所有正規表示式指令碼，且無法復原。';
+
+  @override
+  String get importScripts => '匯入指令碼';
+
+  @override
+  String get pasteJsonArray => '貼上指令碼 JSON 陣列';
+
+  @override
+  String importedCount(int count) {
+    return '已匯入 $count 個指令碼';
+  }
+
+  @override
+  String get exportScripts => '匯出指令碼';
+
+  @override
+  String get newScript => '新增指令碼';
+
+  @override
+  String get editScript => '編輯指令碼';
+
+  @override
+  String get scriptName => '指令碼名稱';
+
+  @override
+  String get descriptionOptionalLabel => '描述（選填）';
+
+  @override
+  String get findPattern => '尋找模式';
+
+  @override
+  String get patternOrPlainPattern => '/pattern/flags 或一般模式';
+
+  @override
+  String get replaceWith => '取代為';
+
+  @override
+  String get useCaptureGroups => '使用 \$1、\$2 表示擷取群組';
+
+  @override
+  String get applyToLabel => '套用至';
+
+  @override
+  String get options => '選項';
+
+  @override
+  String get markdownOnly => '僅 Markdown';
+
+  @override
+  String get onlyApplyDuringMarkdown => '僅在 Markdown 轉譯時套用';
+
+  @override
+  String get promptOnly => '僅提示詞';
+
+  @override
+  String get onlyApplyDuringPrompt => '僅在產生提示詞時套用';
+
+  @override
+  String get runOnEdit => '編輯時執行';
+
+  @override
+  String get applyWhenEditingMessages => '編輯訊息時套用';
+
+  @override
+  String get macroSubstitution => '巨集取代';
+
+  @override
+  String get nameAndPatternRequired => '名稱與模式不能為空';
+
+  @override
+  String get patternLabel => '模式';
+
+  @override
+  String get patternHint => '/pattern/flags';
+
+  @override
+  String get testString => '測試文字';
+
+  @override
+  String get replacementLabel => '取代內容';
+
+  @override
+  String get replacementHint => '\$1、\$2 或符合的文字';
+
+  @override
+  String get testButton => '測試';
+
+  @override
+  String matchesCount(int count) {
+    return '$count 個符合項目';
+  }
+
+  @override
+  String get errorLabel => '錯誤';
+
+  @override
+  String get resultLabel => '結果：';
+
+  @override
+  String get expressionSprites => '表情立繪';
+
+  @override
+  String get enableSprites => '啟用立繪';
+
+  @override
+  String get showCharacterExpressions => '在聊天中顯示角色表情圖片';
+
+  @override
+  String get display => '顯示';
+
+  @override
+  String get spriteSize => '立繪大小';
+
+  @override
+  String get position => '位置';
+
+  @override
+  String get whereToDisplaySprites => '立繪顯示位置';
+
+  @override
+  String get left => '左側';
+
+  @override
+  String get right => '右側';
+
+  @override
+  String get center => '置中';
+
+  @override
+  String get floatingLeft => '左側浮動';
+
+  @override
+  String get floatingRight => '右側浮動';
+
+  @override
+  String get animation => '動畫';
+
+  @override
+  String get animateTransitions => '過場動畫';
+
+  @override
+  String get smoothFadeWhenSpriteChanges => '立繪切換時平滑淡入淡出';
+
+  @override
+  String get transitionDuration => '過場時間';
+
+  @override
+  String get showDuringStreaming => '串流產生時顯示';
+
+  @override
+  String get displaySpritesWhileGenerating => 'AI 產生時顯示立繪';
+
+  @override
+  String get emotionDetection => '情緒偵測';
+
+  @override
+  String get howItWorks => '運作方式';
+
+  @override
+  String get spriteEmotionDetectionDescription =>
+      '系統會依訊息中偵測到的情緒關鍵字自動選擇立繪，並優先辨識 *微笑*、*大笑* 等動作文字。';
+
+  @override
+  String get supportedEmotions => '支援的情緒';
+
+  @override
+  String characterSprites(String name) {
+    return '$name的立繪';
+  }
+
+  @override
+  String get importFromFolder => '從資料夾匯入';
+
+  @override
+  String get deleteAllSprites => '刪除所有立繪';
+
+  @override
+  String get addSprite => '加入立繪';
+
+  @override
+  String spritesCount(int count) {
+    return '$count 張立繪';
+  }
+
+  @override
+  String defaultEmotion(String emotion) {
+    return '預設：$emotion';
+  }
+
+  @override
+  String get noSpritesYet => '尚無立繪';
+
+  @override
+  String get addExpressionImages => '為此角色加入表情圖片';
+
+  @override
+  String get selectEmotion => '選擇表情';
+
+  @override
+  String addedSpriteEmotion(String emotion) {
+    return '已加入$emotion立繪';
+  }
+
+  @override
+  String get setAsDefaultEmotion => '設為預設表情';
+
+  @override
+  String get changeEmotion => '變更表情';
+
+  @override
+  String get deleteSprite => '刪除立繪';
+
+  @override
+  String deleteSpriteConfirmation(String emotion) {
+    return '要刪除$emotion立繪嗎？';
+  }
+
+  @override
+  String get deleteAllSpritesConfirmation => '確定要刪除此角色的所有立繪嗎？此操作無法復原。';
+
+  @override
+  String get importSprites => '匯入立繪';
+
+  @override
+  String get importSpritesDescription => '從資料夾匯入立繪。檔名應包含情緒關鍵字：';
+
+  @override
+  String get supportedFormatsSprites => '支援格式：PNG、JPG、GIF、WebP';
+
+  @override
+  String get selectFolder => '選擇資料夾';
+
+  @override
+  String get folderImportRequiresPackage => '從資料夾匯入需要 file_picker 軟體套件';
+
+  @override
+  String get appStatistics => '應用程式統計';
+
+  @override
+  String get chatStatistics => '聊天統計';
+
+  @override
+  String get resetStatistics => '重設統計';
+
+  @override
+  String get resetStatisticsConfirmation => '確定要重設所有統計資料嗎？此操作無法復原。';
+
+  @override
+  String get statisticsReset => '統計資料已重設';
+
+  @override
+  String get overview => '概覽';
+
+  @override
+  String get firstUsed => '首次使用';
+
+  @override
+  String get unknown => '未知';
+
+  @override
+  String get totalGroups => '群組總數';
+
+  @override
+  String get totalGenerations => '總產生次數';
+
+  @override
+  String get tokenUsage => 'Token 用量';
+
+  @override
+  String get totalTokensUsed => 'Token 總用量';
+
+  @override
+  String get avgTokensPerGeneration => '每次產生平均 Token';
+
+  @override
+  String get performance => '效能';
+
+  @override
+  String get totalGenerationTime => '總產生時間';
+
+  @override
+  String get avgGenerationTime => '平均產生時間';
+
+  @override
+  String get userMessages => '使用者訊息';
+
+  @override
+  String get assistantMessages => '助理訊息';
+
+  @override
+  String get systemMessages => '系統訊息';
+
+  @override
+  String get timeline => '時間軸';
+
+  @override
+  String get firstMessage_ => '第一則訊息';
+
+  @override
+  String get lastMessage => '最後一則訊息';
+
+  @override
+  String get chatDuration => '聊天時間';
+
+  @override
+  String get promptTokens => '提示詞 Token';
+
+  @override
+  String get completionTokens => '補全 Token';
+
+  @override
+  String get avgTokensPerMessage => '每則訊息平均 Token';
+
+  @override
+  String get generationPerformance => '產生效能';
+
+  @override
+  String get generationCount => '總產生次數';
+
+  @override
+  String get speechToText => '語音轉文字';
+
+  @override
+  String get enableStt => '啟用語音轉文字';
+
+  @override
+  String get useVoiceInputForMessages => '使用語音輸入訊息';
+
+  @override
+  String get autoSendStt => '自動傳送';
+
+  @override
+  String get automaticallySendAfterSpeaking => '說完後自動傳送訊息';
+
+  @override
+  String get continuousListening => '持續聆聽';
+
+  @override
+  String get keepListeningAfterPhrase => '每句話結束後繼續聆聽';
+
+  @override
+  String get showPartialResults => '顯示暫時結果';
+
+  @override
+  String get displayTextAsYouSpeak => '說話時即時顯示文字';
+
+  @override
+  String get sttProvider => '語音轉文字服務';
+
+  @override
+  String get recognitionLanguage => '辨識語言';
+
+  @override
+  String get testVoiceInput => '測試語音輸入';
+
+  @override
+  String get stopListening => '停止聆聽';
+
+  @override
+  String get tapToStop => '點選以停止';
+
+  @override
+  String get tapToTestSpeechRecognition => '點選以測試語音辨識';
+
+  @override
+  String get final_ => '最終結果';
+
+  @override
+  String get listening => '正在聆聽...';
+
+  @override
+  String get aboutStt => '關於語音轉文字';
+
+  @override
+  String get aboutSttDescription => '語音轉文字可讓你透過語音聽寫訊息。點選聊天輸入框中的麥克風按鈕開始說話。';
+
+  @override
+  String get systemStt => '系統語音辨識';
+
+  @override
+  String get systemSttDescription => '使用裝置內建的語音辨識。準確度取決於系統設定。';
+
+  @override
+  String get whisper => 'Whisper';
+
+  @override
+  String get whisperDescription =>
+      '透過 OAI Compatible 端點使用 Whisper 轉錄，需要 API 金鑰。';
+
+  @override
+  String get voiceInput => '語音輸入';
+
+  @override
+  String get holdToTalk => '按住說話';
+
+  @override
+  String get releaseToTranscribe => '放開以轉錄';
+
+  @override
+  String get cancelVoiceInput => '取消語音輸入';
+
+  @override
+  String get openSystemSettings => '開啟設定';
+
+  @override
+  String get systemSttOfflineNote => '離線辨識取決於作業系統與已安裝的語言套件。';
+
+  @override
+  String get sttConfigurationRequired => '測試前請先完成所選服務的設定。';
+
+  @override
+  String get speechRecognitionNotAvailable => '此裝置可能不支援語音辨識。';
+
+  @override
+  String get themes => '主題';
+
+  @override
+  String get createCustomTheme => '建立自訂主題';
+
+  @override
+  String get builtInThemes => '內建主題';
+
+  @override
+  String get preview => '預覽';
+
+  @override
+  String get chatPreview => '聊天預覽';
+
+  @override
+  String get helloHowCanIHelp => '你好！有什麼可以幫你？';
+
+  @override
+  String get tellMeAStory => '告訴我一個故事吧！';
+
+  @override
+  String get typeAMessage => '輸入訊息...';
+
+  @override
+  String get createTheme => '建立主題';
+
+  @override
+  String get editTheme => '編輯主題';
+
+  @override
+  String get deleteTheme => '刪除主題';
+
+  @override
+  String deleteThemeConfirmation(String name) {
+    return '確定要刪除「$name」嗎？';
+  }
+
+  @override
+  String get themeName => '主題名稱';
+
+  @override
+  String get background => '背景';
+
+  @override
+  String get surface => '表面';
+
+  @override
+  String get card => '卡片';
+
+  @override
+  String selectThemeColor(String label) {
+    return '選擇$label';
+  }
+
+  @override
+  String get hexColor => '十六進位色彩';
+
+  @override
+  String get tokenizerSettings => '分詞器';
+
+  @override
+  String get tokenizerHelp => '說明';
+
+  @override
+  String get tokenizerLabel => '分詞器';
+
+  @override
+  String get showTokenCount => '顯示 Token 數';
+
+  @override
+  String get displayTokenCountInInput => '在聊天輸入框中顯示 Token 數';
+
+  @override
+  String get showTokenVisualization => '顯示 Token 視覺化';
+
+  @override
+  String get highlightIndividualTokens => '醒目提示各個 Token';
+
+  @override
+  String get cacheResults => '快取結果';
+
+  @override
+  String get cacheTokenizationForPerformance => '快取分詞結果以提升效能';
+
+  @override
+  String get tokenVisualization => 'Token 視覺化';
+
+  @override
+  String get enterTextToTokenize => '輸入要分詞的文字';
+
+  @override
+  String get typePasteTextHere => '在此輸入或貼上文字...';
+
+  @override
+  String get quickEstimate => '快速估算';
+
+  @override
+  String approximateTokens(int count) {
+    return '約 $count 個 Token';
+  }
+
+  @override
+  String chars(int count) {
+    return '$count 個字元';
+  }
+
+  @override
+  String get statisticsLabel => '統計';
+
+  @override
+  String get totalTokens => 'Token 總數';
+
+  @override
+  String get unique => '唯一';
+
+  @override
+  String get charsPerToken => '每個 Token 的字元數';
+
+  @override
+  String get avgLength => '平均長度';
+
+  @override
+  String get longest => '最長';
+
+  @override
+  String get shortest => '最短';
+
+  @override
+  String get mostCommonTokens => '最常見 Token';
+
+  @override
+  String get tokenBreakdown => 'Token 明細';
+
+  @override
+  String tokensCount(int count) {
+    return '$count 個 Token';
+  }
+
+  @override
+  String tokenIdLength(String id, int length) {
+    return 'Token ID：$id\n長度：$length 個字元';
+  }
+
+  @override
+  String get translationSettings => '翻譯';
+
+  @override
+  String get enableTranslation => '啟用翻譯';
+
+  @override
+  String get translateMessagesAutomatically => '自動翻譯訊息';
+
+  @override
+  String get translationProvider => '翻譯服務';
+
+  @override
+  String get sourceLanguage => '來源語言';
+
+  @override
+  String get targetLanguage => '目標語言';
+
+  @override
+  String get autoDetect => '自動偵測';
+
+  @override
+  String get translateUserMessages => '翻譯使用者訊息';
+
+  @override
+  String get translateAiResponses => '翻譯 AI 回覆';
+
+  @override
+  String get textToSpeech => '文字轉語音';
+
+  @override
+  String get enableTts => '啟用文字轉語音';
+
+  @override
+  String get readAiResponsesAloud => '朗讀 AI 回覆';
+
+  @override
+  String get ttsProvider => '文字轉語音服務';
+
+  @override
+  String get voiceSettings => '語音設定';
+
+  @override
+  String get voice => '語音';
+
+  @override
+  String get speed => '語速';
+
+  @override
+  String get pitch => '音調';
+
+  @override
+  String get volume => '音量';
+
+  @override
+  String get autoPlay => '自動播放';
+
+  @override
+  String get automaticallyPlayResponses => '自動播放 AI 回覆';
+
+  @override
+  String get testVoice => '測試語音';
+
+  @override
+  String get chatVariables => '聊天變數';
+
+  @override
+  String get variableSystem => '變數系統';
+
+  @override
+  String get globalVariables => '全域變數';
+
+  @override
+  String globalVariablesCount(int count) {
+    return '$count 個全域變數';
+  }
+
+  @override
+  String get localVariables => '區域變數';
+
+  @override
+  String localVariablesCount(int count) {
+    return '$count 個區域變數';
+  }
+
+  @override
+  String get addVariable => '加入變數';
+
+  @override
+  String get variableName => '變數名稱';
+
+  @override
+  String get variableValue => '變數值';
 
   @override
   String get scope => '範圍';
@@ -5934,7 +8693,839 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get global => '全域';
 
   @override
+  String get vectorStorageRag => '向量儲存（RAG）';
+
+  @override
+  String get enableRag => '啟用 RAG';
+
+  @override
+  String get useVectorStorageForContext => '使用向量儲存檢索上下文';
+
+  @override
+  String get collections => '集合';
+
+  @override
+  String get createCollection => '建立集合';
+
+  @override
+  String get collectionName => '集合名稱';
+
+  @override
+  String get embeddingProvider => '嵌入服務';
+
+  @override
+  String get embeddingModel => '嵌入模型';
+
+  @override
+  String get chunkSize => '分塊大小';
+
+  @override
+  String get chunkOverlap => '分塊重疊';
+
+  @override
+  String get topKResults => 'Top K 結果';
+
+  @override
+  String get similarityThreshold => '相似度門檻';
+
+  @override
+  String get characterEditor => '角色編輯器';
+
+  @override
+  String get basic => '基本';
+
+  @override
+  String get prompts => '提示詞';
+
+  @override
+  String get meta => '中繼資料';
+
+  @override
+  String get nameRequired => '名稱 *';
+
+  @override
+  String get characterName => '角色名稱';
+
+  @override
+  String get nameIsRequired => '名稱不能為空';
+
+  @override
+  String get characterDescription => '角色描述、背景、外觀...';
+
+  @override
+  String get characterPersonalityTraits => '角色個性特徵...';
+
+  @override
+  String get currentCircumstancesContext => '目前情境與上下文...';
+
+  @override
+  String get customInstructionsSystemMessage => '作為系統訊息一部分傳送的自訂指令。';
+
+  @override
+  String systemPromptHint(Object char) {
+    return '你是 $char。你將...';
+  }
+
+  @override
+  String get instructionsInsertedAfterHistory => '插入在聊天記錄之後的指令（也稱為「越獄提示詞」）。';
+
+  @override
+  String postHistoryInstructionsHint(Object char) {
+    return '繼續扮演 $char...';
+  }
+
+  @override
+  String get firstMessageGreeting => '第一則訊息（問候語）';
+
+  @override
+  String get firstMessageSentByCharacter => '開始新聊天時由角色傳送的第一則訊息。';
+
+  @override
+  String firstMessageHint(Object user) {
+    return '*走進房間* 你好，$user！';
+  }
+
+  @override
+  String get alternateGreetingsCanSwipe => '可透過滑動切換的替代第一則訊息。';
+
+  @override
+  String greeting(int index) {
+    return '問候語 $index';
+  }
+
+  @override
+  String get alternativeGreetingMessage => '替代問候訊息...';
+
+  @override
+  String get removeGreeting => '移除問候語';
+
+  @override
+  String get moveUp => '上移';
+
+  @override
+  String get moveDown => '下移';
+
+  @override
+  String get noAlternateGreetings => '尚無替代問候語。點選 + 加入。';
+
+  @override
+  String exampleDialogueDemonstrate(Object char, Object user) {
+    return '用於展示角色說話方式的範例對話。\n格式：<START>\n$user：你好\n$char：你好！';
+  }
+
+  @override
+  String exampleMessagesHint(Object char, Object user) {
+    return '<START>\n$user：你好嗎？\n$char：我很好，謝謝關心！';
+  }
+
+  @override
+  String get creatorNotesNotSentToAi => '角色作者留下的註記（不會傳送給 AI）。';
+
+  @override
+  String get creatorNotesHint => '建議設定、背景註記...';
+
+  @override
+  String get tagsCommaSeparated => '以逗號分隔的標籤清單';
+
+  @override
+  String get tagsHint => '奇幻, 女性, 冒險';
+
+  @override
+  String get creator => '作者';
+
+  @override
+  String get yourNameOrUsername => '你的姓名或使用者名稱';
+
+  @override
+  String get versionNumber => '1.0.0';
+
+  @override
+  String get characterInfo => '角色資訊';
+
+  @override
+  String characterId(String id) {
+    return 'ID：$id';
+  }
+
+  @override
+  String created(String date) {
+    return '建立時間：$date';
+  }
+
+  @override
+  String modified(String date) {
+    return '修改時間：$date';
+  }
+
+  @override
+  String get characterSavedSuccessfully => '角色儲存成功';
+
+  @override
+  String failedToSaveCharacter(String error) {
+    return '儲存角色失敗：$error';
+  }
+
+  @override
+  String get addAlternateGreeting => '加入替代問候語';
+
+  @override
+  String get groupInfo => '群組資訊';
+
+  @override
+  String get responseMode => '回覆模式';
+
+  @override
+  String get howCharactersTakeTurns => '角色輪流回覆的方式';
+
+  @override
+  String get sequential => '依序';
+
+  @override
+  String get charactersRespondInOrder => '角色依序回覆';
+
+  @override
+  String get random => '隨機';
+
+  @override
+  String get randomCharacterResponds => '每輪由隨機角色回覆';
+
+  @override
+  String get allAtOnce => '全部同時回覆';
+
+  @override
+  String get allNonMutedCharactersRespond => '所有未靜音的角色都回覆';
+
+  @override
   String get manual => '手動';
+
+  @override
+  String get youSelectWhoResponds => '由你選擇回覆的角色';
+
+  @override
+  String get natural => '自然';
+
+  @override
+  String get aiDecidesBasedOnContext => 'AI 依上下文與觸發詞決定';
+
+  @override
+  String membersCount(int count) {
+    return '成員（$count）';
+  }
+
+  @override
+  String get noMembersYet => '尚無成員，請向群組加入角色。';
+
+  @override
+  String talkativenessPercent(int percent) {
+    return '活躍度：$percent%';
+  }
+
+  @override
+  String triggers(String words) {
+    return '觸發詞：$words';
+  }
+
+  @override
+  String get mute => '靜音';
+
+  @override
+  String get unmute => '取消靜音';
+
+  @override
+  String get memberSettings => '成員設定';
+
+  @override
+  String talkativenessLabel(int percent) {
+    return '活躍度：$percent%';
+  }
+
+  @override
+  String get higherValuesMoreLikely => '數值越高，角色回覆的可能性越大。';
+
+  @override
+  String get triggerWords => '觸發詞';
+
+  @override
+  String get triggerWordsHint => '詞語1, 詞語2, 詞語3';
+
+  @override
+  String get characterWillRespondWhenTriggered => '訊息中出現這些詞時，角色會回覆。';
+
+  @override
+  String get addMemberToGroup => '加入群組成員';
+
+  @override
+  String get noMoreCharactersAvailable => '沒有更多可加入的角色';
+
+  @override
+  String get groupSaved => '群組已儲存';
+
+  @override
+  String deleteGroupAndChats(String name) {
+    return '確定要刪除「$name」嗎？';
+  }
+
+  @override
+  String get startChatAction => '開始聊天';
+
+  @override
+  String get noTagsYet => '尚無標籤';
+
+  @override
+  String get createTagsToOrganize => '建立標籤以整理角色';
+
+  @override
+  String characterCount(int count, String plural) {
+    return '$count 個角色$plural';
+  }
+
+  @override
+  String deleteTagConfirmation(String name) {
+    return '確定要刪除標籤「$name」嗎？\n\n所有角色上的此標籤都會被移除。';
+  }
+
+  @override
+  String get enterTagName => '輸入標籤名稱';
+
+  @override
+  String get iconEmoji => '圖示（表情符號）';
+
+  @override
+  String get enterEmojiOptional => '輸入表情符號（選填）';
+
+  @override
+  String get pleaseEnterTagName => '請輸入標籤名稱';
+
+  @override
+  String get worldInfoLorebooks => '世界資訊 / 世界書';
+
+  @override
+  String get createLorebook => '建立世界書';
+
+  @override
+  String get noLorebooksYet => '尚無世界書';
+
+  @override
+  String get lorebooksInjectContext => '偵測到關鍵字時，世界書會向聊天注入上下文。';
+
+  @override
+  String entriesCount(int count) {
+    return '$count 個項目';
+  }
+
+  @override
+  String deleteLorebookConfirmation(String name) {
+    return '確定要刪除「$name」及其所有項目嗎？';
+  }
+
+  @override
+  String get enterLorebookName => '輸入世界書名稱';
+
+  @override
+  String get optionalDescriptionHint => '選填描述';
+
+  @override
+  String get globalScope => '全域';
+
+  @override
+  String get applyToAllChats => '套用至所有聊天';
+
+  @override
+  String get pleaseEnterName2 => '請輸入名稱';
+
+  @override
+  String get noEntriesYet => '尚無項目';
+
+  @override
+  String get addEntriesWithKeywords => '加入帶關鍵字的項目，以便向聊天注入上下文';
+
+  @override
+  String deleteEntryConfirmation(String keys) {
+    return '確定要刪除此項目嗎？\n\n關鍵字：$keys';
+  }
+
+  @override
+  String get constant => '常數';
+
+  @override
+  String get selective => '選擇性比對';
+
+  @override
+  String get keywordsCommaSeparated => '關鍵字（以逗號分隔）';
+
+  @override
+  String get keywordsHint => '龍, 巨龍, 蛇';
+
+  @override
+  String get entryActivatesWhenKeywordFound => '聊天中出現任一關鍵字時啟用項目';
+
+  @override
+  String get secondaryKeysOptional => '次要關鍵字（選填）';
+
+  @override
+  String get secondaryKeysHint => '火, 火焰';
+
+  @override
+  String get bothPrimaryAndSecondaryMustMatch => '啟用後，主要關鍵字與次要關鍵字必須同時符合（選擇性模式）';
+
+  @override
+  String get commentOptional => '註解（選填）';
+
+  @override
+  String get noteForThisEntry => '此項目的註記';
+
+  @override
+  String get contentLabel => '內容';
+
+  @override
+  String get contextToInjectWhenMatches => '關鍵字符合時要注入的上下文...';
+
+  @override
+  String get pleaseEnterAtLeastOneKeyword => '請至少輸入一個關鍵字';
+
+  @override
+  String get pleaseEnterContent => '請輸入內容';
+
+  @override
+  String get anthropic => 'Anthropic';
+
+  @override
+  String get cohere => 'Cohere';
+
+  @override
+  String get customProvider => '自訂';
+
+  @override
+  String get apiEndpointHint => 'https://api.example.com/v1';
+
+  @override
+  String get apiKeyHint => 'sk-...';
+
+  @override
+  String temperatureValue(String value) {
+    return '$value';
+  }
+
+  @override
+  String maxTokensValue(String value) {
+    return '$value';
+  }
+
+  @override
+  String topPValue(String value) {
+    return '$value';
+  }
+
+  @override
+  String frequencyPenaltyValue(String value) {
+    return '$value';
+  }
+
+  @override
+  String presencePenaltyValue(String value) {
+    return '$value';
+  }
+
+  @override
+  String get streamResponse => '串流回覆';
+
+  @override
+  String get streamTokensAsGenerated => '產生 Token 時即時傳輸';
+
+  @override
+  String get useSystemPrompt => '使用系統提示詞';
+
+  @override
+  String get includeSystemInstructions => '包含系統指令';
+
+  @override
+  String get configurationSavedSuccessfully => '設定儲存成功';
+
+  @override
+  String get errorSavingConfiguration => '儲存設定時發生錯誤';
+
+  @override
+  String get copyAll => '全部複製';
+
+  @override
+  String get showFavoritesOnly => '僅顯示收藏';
+
+  @override
+  String get sortBy => '排序方式';
+
+  @override
+  String get filterByTags => '依標籤篩選';
+
+  @override
+  String get favorites => '收藏';
+
+  @override
+  String get manage => '管理';
+
+  @override
+  String get noTagsCreatedYet => '尚未建立標籤';
+
+  @override
+  String get createTags => '建立標籤';
+
+  @override
+  String charactersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 個角色',
+      one: '1 個角色',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get characterTagsLegacy => '角色標籤（舊版）';
+
+  @override
+  String get done => '完成';
+
+  @override
+  String applyFiltersSelected(int count) {
+    return '套用（已選 $count 項）';
+  }
+
+  @override
+  String get enterPresetName => '輸入預設名稱';
+
+  @override
+  String get deleteScript => '刪除指令碼';
+
+  @override
+  String get aiConfig => 'AI 設定';
+
+  @override
+  String get authorsNoteDescription => '加入將在指定深度注入對話的上下文或指令。';
+
+  @override
+  String get enableAuthorsNote => '啟用作者註記';
+
+  @override
+  String get injectNoteIntoContext => '將註記注入對話上下文';
+
+  @override
+  String get injectionDepth => '注入深度';
+
+  @override
+  String get messagesFromEndWhereInserted => '從末尾數起插入註記的訊息位置';
+
+  @override
+  String get noteContent => '註記內容';
+
+  @override
+  String get authorsNoteHint =>
+      '在此輸入作者註記...\n\n範例：\n• [風格：使用詩意、富有描述性的方式寫作]\n• [著重情感深度與角色發展]\n• [角色今天心情憂鬱]';
+
+  @override
+  String get enterNameForCheckpoint => '輸入此檢查點的名稱';
+
+  @override
+  String get addDescription => '加入描述';
+
+  @override
+  String createCheckpointAtMessage(int index) {
+    return '將在訊息 $index 處建立檢查點。';
+  }
+
+  @override
+  String get longPressMessageToBookmark => '長按訊息可建立書籤';
+
+  @override
+  String get contextManagement => '上下文管理';
+
+  @override
+  String get autoSummarize => '自動摘要';
+
+  @override
+  String get autoSummarizeDescription => '上下文用量較高時，自動摘要並壓縮聊天記錄';
+
+  @override
+  String get autoSummarizeThreshold => '自動摘要門檻';
+
+  @override
+  String get autoSummarizeThresholdDescription => '上下文達到最大值的指定百分比時觸發摘要';
+
+  @override
+  String get branchFromBookmark => '從書籤建立分支';
+
+  @override
+  String branchFromBookmarkWarning(String name) {
+    return '這將刪除「$name」之後的所有訊息，並從該位置繼續。可先建立新書籤以儲存目前狀態。';
+  }
+
+  @override
+  String get branch => '分支';
+
+  @override
+  String branchedFrom(String name) {
+    return '分支起點：「$name」';
+  }
+
+  @override
+  String deleteBookmarkConfirmation(String name) {
+    return '確定要刪除「$name」嗎？';
+  }
+
+  @override
+  String messageIndexAndDate(int index, String date) {
+    return '訊息 $index · $date';
+  }
+
+  @override
+  String get branchFromHere => '從此處建立分支';
+
+  @override
+  String previewBookmark(String name) {
+    return '預覽：$name';
+  }
+
+  @override
+  String get messageNotFoundInChat => '目前聊天中找不到該訊息';
+
+  @override
+  String get you => '你';
+
+  @override
+  String get assistant => '助理';
+
+  @override
+  String get reasoningCopiedToClipboard => '推理內容已複製到剪貼簿';
+
+  @override
+  String charsCount(int count) {
+    return '$count 個字元';
+  }
+
+  @override
+  String get copyReasoning => '複製推理內容';
+
+  @override
+  String get commands => '命令';
+
+  @override
+  String aliasesLabel(String aliases) {
+    return '別名：$aliases';
+  }
+
+  @override
+  String get noSpritesAddedYet => '尚未加入立繪';
+
+  @override
+  String get errorLoadingSprites => '載入立繪時發生錯誤';
+
+  @override
+  String get insertionPosition => '插入位置';
+
+  @override
+  String get beforeCharacterDefinition => '角色定義之前';
+
+  @override
+  String get afterCharacterDefinition => '角色定義之後';
+
+  @override
+  String get beforeExampleMessages => '範例訊息之前';
+
+  @override
+  String get afterExampleMessages => '範例訊息之後';
+
+  @override
+  String get beforeAuthorNote => '作者註記之前';
+
+  @override
+  String get afterAuthorNote => '作者註記之後';
+
+  @override
+  String get atDepth => '指定深度';
+
+  @override
+  String get beforeSystemPrompt => '系統提示詞之前';
+
+  @override
+  String get afterSystemPrompt => '系統提示詞之後';
+
+  @override
+  String get insertionOrder => '插入順序';
+
+  @override
+  String get lowerOrderInsertsFirst => '順序值越小越先插入';
+
+  @override
+  String get alwaysIncludeInPrompt => '一律加入提示詞（忽略關鍵字）';
+
+  @override
+  String get requiresSecondaryKey => '主要關鍵字與次要關鍵字必須同時符合';
+
+  @override
+  String get debugLog => '偵錯記錄';
+
+  @override
+  String get debugLogDescription => '顯示浮動偵錯按鈕以檢視記錄';
+
+  @override
+  String get autoScroll => '自動捲動';
+
+  @override
+  String get clearLogs => '清除記錄';
+
+  @override
+  String get searchLogs => '搜尋記錄...';
+
+  @override
+  String get noLogsYet => '尚無記錄';
+
+  @override
+  String get allCharactersAvailable => '所有角色';
+
+  @override
+  String get availableToAllCharactersNotGlobal => '所有角色皆可使用（依上下文比對）';
+
+  @override
+  String get specificCharacter => '特定角色';
+
+  @override
+  String get linkToSpecificCharacter => '僅連結至特定角色';
+
+  @override
+  String get selectCharacter => '選擇角色';
+
+  @override
+  String get pleaseSelectCharacter => '請選擇角色';
+
+  @override
+  String get contextUsage => '上下文用量';
+
+  @override
+  String get maxContext => '最大上下文';
+
+  @override
+  String get remaining => '剩餘';
+
+  @override
+  String get breakdown => '明細';
+
+  @override
+  String get cloudBackup => '雲端備份';
+
+  @override
+  String get cloudBackupInfo => '雲端備份';
+
+  @override
+  String get cloudBackupDescription => '跨裝置同步資料';
+
+  @override
+  String get cloudBackupSubtitle => '備份至 iCloud 或 Google 雲端硬碟，並可在任何裝置上還原';
+
+  @override
+  String get enableICloudBackup => '啟用 iCloud 備份';
+
+  @override
+  String get enableICloudBackupDescription => '自動將備份同步至 iCloud';
+
+  @override
+  String get iCloudNotAvailable => 'iCloud 無法使用';
+
+  @override
+  String get iCloudNotAvailableDescription => '請先在「設定」中登入 iCloud';
+
+  @override
+  String get backupToICloud => '備份至 iCloud';
+
+  @override
+  String lastSync(String time) {
+    return '上次同步：$time';
+  }
+
+  @override
+  String get neverSynced => '從未同步';
+
+  @override
+  String get iCloudBackups => 'iCloud 備份';
+
+  @override
+  String get noCloudBackups => '尚無雲端備份';
+
+  @override
+  String get googleDriveExport => '匯出至 Google 雲端硬碟';
+
+  @override
+  String get googleDriveExportDescription => '將備份檔案儲存至 Google 雲端硬碟或其他位置';
+
+  @override
+  String get googleDriveImport => '從 Google 雲端硬碟匯入';
+
+  @override
+  String get googleDriveImportDescription => '從 Google 雲端硬碟或其他位置的備份檔案還原';
+
+  @override
+  String get import_action => '匯入';
+
+  @override
+  String get importBackup => '匯入備份';
+
+  @override
+  String get backupExported => '備份已成功匯出';
+
+  @override
+  String get restoreSettings => '還原設定';
+
+  @override
+  String get defaultRestoreMode => '預設還原模式';
+
+  @override
+  String get selectRestoreMode => '選擇資料還原方式：';
+
+  @override
+  String get restoreWarning => '依所選模式不同，還原資料可能會覆寫現有資料。請先備份目前資料。';
+
+  @override
+  String get restore => '還原';
+
+  @override
+  String restoreComplete(int added, int updated, int skipped) {
+    return '還原完成：新增 $added、更新 $updated、略過 $skipped';
+  }
+
+  @override
+  String get selectFileAndImport => '選擇檔案並匯入';
+
+  @override
+  String get aboutRestoreModes => '關於還原模式';
+
+  @override
+  String get aboutRestoreModesDescription =>
+      '取代：以備份資料覆寫所有本機資料。\n合併：同時保留兩者，發生衝突時以較新資料為準。\n僅新增：只加入新項目，保留所有現有資料。';
+
+  @override
+  String get signInToGoogleDrive => '登入 Google 雲端硬碟';
+
+  @override
+  String get signInToGoogleDriveDescription => '使用 Google 帳戶登入，以備份與還原資料';
+
+  @override
+  String get signIn => '登入';
+
+  @override
+  String get signOut => '登出';
+
+  @override
+  String get signedInSuccessfully => '登入成功';
+
+  @override
+  String get backupToGoogleDrive => '備份至 Google 雲端硬碟';
+
+  @override
+  String get googleDriveBackups => 'Google 雲端硬碟備份';
+
+  @override
+  String get bubbleOpacity => '訊息不透明度';
+
+  @override
+  String get bubbleOpacityHelp => '控制啟用背景時訊息泡泡的透明度。';
 
   @override
   String get swipes => '備選回覆';
@@ -6091,6 +9682,110 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get chatLorebooksHint => '僅在本聊天中生效的世界書';
+
+  @override
+  String get messagesCleared => '所有訊息已清除';
+
+  @override
+  String get selectCharacterCardFiles => '選擇角色卡檔案';
+
+  @override
+  String get supportedCharacterCardFormats => '支援批次匯入：PNG、CharX 與 JSON';
+
+  @override
+  String get importFromUrl => '從 URL 匯入';
+
+  @override
+  String get enterCharacterCardUrl => '輸入角色卡 URL...';
+
+  @override
+  String get pasteAndImport => '貼上並匯入';
+
+  @override
+  String get supportedCommunities => '支援的社群（點選開啟）：';
+
+  @override
+  String get publicCardLinksSupported => '亦支援公開的 PNG 與 JSON 連結';
+
+  @override
+  String get communityLinks => '社群連結';
+
+  @override
+  String importSummaryMixed(Object failed, Object success) {
+    return '已匯入 $success 張角色卡；$failed 張失敗';
+  }
+
+  @override
+  String importSummarySuccess(Object count) {
+    return '已匯入 $count 張角色卡';
+  }
+
+  @override
+  String get importSummaryFailed => '所有匯入皆失敗';
+
+  @override
+  String processingProgress(Object processed, Object total) {
+    return '處理中：$processed / $total';
+  }
+
+  @override
+  String get importSuccessLabel => '成功';
+
+  @override
+  String get importFailureLabel => '失敗';
+
+  @override
+  String get totalLabel => '總計';
+
+  @override
+  String importAllCharacters(Object count) {
+    return '全部匯入（$count）';
+  }
+
+  @override
+  String get switchLayout => '切換版面配置';
+
+  @override
+  String get stopGenerating => '停止產生';
+
+  @override
+  String get imageBackgroundSettings => '圖片背景設定';
+
+  @override
+  String get useCharacterImageAsBackground => '使用角色圖片作為背景';
+
+  @override
+  String get useCharacterImageAsBackgroundHint => '有角色頭像時自動使用';
+
+  @override
+  String get backgroundOpacity => '背景不透明度';
+
+  @override
+  String get backgroundOpacityHint => '套用至自訂背景與角色圖片背景';
+
+  @override
+  String get enableBackgroundBlur => '啟用背景模糊';
+
+  @override
+  String get enableBackgroundBlurHint => '對所有圖片背景套用模糊';
+
+  @override
+  String get backgroundPriorityHint => '優先順序：角色背景 > 全域背景 > 角色圖片 > 預設色彩';
+
+  @override
+  String get openRouterUpstreamProvider => 'OpenRouter 服務商';
+
+  @override
+  String get automaticRouting => '自動路由';
+
+  @override
+  String get openRouterProviderHint => '選擇此模型使用的上游服務商';
+
+  @override
+  String get useCurrentChatConnection => '使用目前聊天連線';
+
+  @override
+  String get chatConnectionAppliedToEmbeddings => '聊天端點與 API 金鑰已套用至嵌入服務';
 
   @override
   String get localFeatures => '本機功能';
@@ -7228,4 +10923,998 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get rpgQuestFailed => '失敗';
+
+  @override
+  String get rpgEnableMode => '開啟 RPG 模式';
+
+  @override
+  String get noImageGenerated => '未產生圖片';
+
+  @override
+  String failedToSaveImage(String error) {
+    return '儲存圖片失敗：$error';
+  }
+
+  @override
+  String imagesAdded(int count) {
+    return '已加入 $count 張圖片';
+  }
+
+  @override
+  String get addConnection => '加入關聯';
+
+  @override
+  String get group => '群組';
+
+  @override
+  String get lockType => '鎖定類型';
+
+  @override
+  String errorLoadingCharacters(String error) {
+    return '載入角色失敗：$error';
+  }
+
+  @override
+  String errorLoadingGroups(String error) {
+    return '載入群組失敗：$error';
+  }
+
+  @override
+  String get inSystemPrompt => '系統提示詞中';
+
+  @override
+  String get connectingGoogleDrive => '正在連線至 Google 雲端硬碟...';
+
+  @override
+  String get checkingICloud => '正在檢查 iCloud...';
+
+  @override
+  String get whatIsPromptManager => '什麼是提示詞管理器？';
+
+  @override
+  String get promptManagerHelpDescription =>
+      '提示詞管理器控制訊息傳送給 AI 前系統提示詞的組合方式。你可以調整各部分的順序，並啟用或停用它們。';
+
+  @override
+  String get promptSectionTypes => '提示詞部分類型';
+
+  @override
+  String get promptSectionTypesDescription =>
+      '提示詞可包含系統指令、使用者設定、角色資訊、場景、世界書上下文、範例訊息、作者註記、聊天記錄與歷史記錄後指令。';
+
+  @override
+  String get tips => '提示';
+
+  @override
+  String get promptManagerTips =>
+      '越靠上的部分優先級越高。停用不需要的部分可節省 Token，也可調整順序以獲得不同效果。';
+
+  @override
+  String get customImportedPrompt => '從預設匯入的自訂提示詞';
+
+  @override
+  String editPromptSection(String name) {
+    return '編輯$name';
+  }
+
+  @override
+  String get promptName => '提示詞名稱';
+
+  @override
+  String identifierLabel(String identifier) {
+    return 'ID：$identifier';
+  }
+
+  @override
+  String roleLabel(String role) {
+    return '角色：$role';
+  }
+
+  @override
+  String supportedPromptMacros(
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    return '支援 $userMacro、$charMacro、$timeMacro 與 $dateMacro 等巨集。';
+  }
+
+  @override
+  String get enterPromptContent => '輸入提示詞內容...';
+
+  @override
+  String updated(String name) {
+    return '已更新$name';
+  }
+
+  @override
+  String get customPrompt => '自訂提示詞';
+
+  @override
+  String get promptSectionSystemPrompt => '系統提示詞';
+
+  @override
+  String get promptSectionSystemPromptDescription => '基礎角色扮演指令';
+
+  @override
+  String get promptSectionPersona => '使用者設定';
+
+  @override
+  String get promptSectionPersonaDescription => '你的使用者設定資訊';
+
+  @override
+  String get promptSectionCharacterDescription => '角色描述';
+
+  @override
+  String get promptSectionCharacterDescriptionDescription => 'AI 角色的詳細資訊';
+
+  @override
+  String get promptSectionCharacterPersonality => '角色個性';
+
+  @override
+  String get promptSectionCharacterPersonalityDescription => '角色的個性特徵';
+
+  @override
+  String get promptSectionScenario => '場景';
+
+  @override
+  String get promptSectionScenarioDescription => '目前情境與背景設定';
+
+  @override
+  String get promptSectionExampleMessages => '範例訊息';
+
+  @override
+  String get promptSectionExampleMessagesDescription => '用來展示對話風格的範例';
+
+  @override
+  String get promptSectionWorldInfoBefore => '前置世界資訊';
+
+  @override
+  String get promptSectionWorldInfoBeforeDescription => '插入在角色資訊之前的世界書上下文';
+
+  @override
+  String get promptSectionWorldInfoAfter => '後置世界資訊';
+
+  @override
+  String get promptSectionWorldInfoAfterDescription => '插入在角色資訊之後的世界書上下文';
+
+  @override
+  String get promptSectionAuthorNote => '作者註記';
+
+  @override
+  String get promptSectionAuthorNoteDescription => '目前聊天使用的動態指令';
+
+  @override
+  String get promptSectionPostHistory => '歷史記錄後指令';
+
+  @override
+  String get promptSectionPostHistoryDescription => '插入在聊天記錄之後的指令';
+
+  @override
+  String get promptSectionNsfw => 'NSFW 提示詞';
+
+  @override
+  String get promptSectionNsfwDescription => '可選的成人內容指令';
+
+  @override
+  String get promptSectionChatHistory => '聊天記錄';
+
+  @override
+  String get promptSectionChatHistoryDescription => '對話中的近期訊息';
+
+  @override
+  String get promptSectionEnhanceDefinitions => '強化定義';
+
+  @override
+  String get promptSectionEnhanceDefinitionsDescription => '用於強化角色定義的附加指令';
+
+  @override
+  String get promptSectionCustomDescription => '自訂提示詞部分';
+
+  @override
+  String get reasoning => '推理內容';
+
+  @override
+  String get emotionNeutral => '平靜';
+
+  @override
+  String get emotionHappy => '開心';
+
+  @override
+  String get emotionSad => '悲傷';
+
+  @override
+  String get emotionAngry => '生氣';
+
+  @override
+  String get emotionSurprised => '驚訝';
+
+  @override
+  String get emotionScared => '害怕';
+
+  @override
+  String get emotionDisgusted => '厭惡';
+
+  @override
+  String get emotionConfused => '困惑';
+
+  @override
+  String get emotionEmbarrassed => '尷尬';
+
+  @override
+  String get emotionExcited => '興奮';
+
+  @override
+  String get emotionLoving => '喜愛';
+
+  @override
+  String get emotionThinking => '思考';
+
+  @override
+  String get emotionSmug => '得意';
+
+  @override
+  String get emotionTired => '疲憊';
+
+  @override
+  String get emotionBored => '無聊';
+
+  @override
+  String get tokenizerHelpContent =>
+      '分詞器用來估算模型可處理的文字量。請選擇與模型相符的分詞器，或使用「最佳匹配」自動選擇。';
+
+  @override
+  String get tokenizerNoneEstimate => '無（僅估算）';
+
+  @override
+  String get tokenizerBestMatchAuto => '最佳匹配（自動）';
+
+  @override
+  String get tokenizerEstimateDescription => '依字元數快速估算 Token';
+
+  @override
+  String get tokenizerGpt2Description => '適用於較舊 GPT 風格模型的 GPT-2 分詞器';
+
+  @override
+  String get tokenizerOaiDescription =>
+      '適用於 GPT 模型的 OAI Compatible tiktoken 分詞器';
+
+  @override
+  String get tokenizerLlamaDescription => '適用於 Llama 模型的 SentencePiece 分詞器';
+
+  @override
+  String get tokenizerLlama3Description => '適用於 Llama 3 模型的分詞器';
+
+  @override
+  String get tokenizerMistralDescription => '適用於 Mistral 模型的分詞器';
+
+  @override
+  String get tokenizerClaudeDescription => '適用於 Claude 模型的 Token 估算';
+
+  @override
+  String get tokenizerGemmaDescription => '適用於 Gemma 模型的分詞器';
+
+  @override
+  String get tokenizerQwenDescription => '適用於 Qwen 模型的分詞器';
+
+  @override
+  String get tokenizerDeepSeekDescription => '適用於 DeepSeek 模型的分詞器';
+
+  @override
+  String get tokenizerCommandRDescription => '適用於 Command R 模型的分詞器';
+
+  @override
+  String get tokenizerNemoDescription => '適用於 Mistral NeMo 模型的分詞器';
+
+  @override
+  String get tokenizerBestMatchDescription => '依目前模型自動選擇分詞器';
+
+  @override
+  String get showOriginal => '顯示原文';
+
+  @override
+  String get showOriginalDescription => '在譯文旁同時顯示原文';
+
+  @override
+  String get swapLanguages => '交換語言';
+
+  @override
+  String get aboutTranslation => '關於翻譯';
+
+  @override
+  String get aboutTranslationDescription => '可自動或按需翻譯訊息，協助你使用不同語言溝通。';
+
+  @override
+  String get googleTranslate => 'Google 翻譯';
+
+  @override
+  String get googleTranslateDescription =>
+      '使用 Google Cloud Translation API，需要 Google Cloud API 金鑰。';
+
+  @override
+  String get deepL => 'DeepL';
+
+  @override
+  String get deepLDescription => '高品質神經網路機器翻譯，需要 deepl.com 的 API 金鑰。';
+
+  @override
+  String get libreTranslate => 'LibreTranslate';
+
+  @override
+  String get libreTranslateDescription => '免費開源的翻譯服務，可自行託管或使用公共執行個體。';
+
+  @override
+  String get queueMessages => '訊息排隊';
+
+  @override
+  String get queueMessagesDescription => '將多則訊息加入佇列，而不中斷目前朗讀';
+
+  @override
+  String get loadingVoices => '正在載入語音...';
+
+  @override
+  String get failedToLoadVoices => '載入語音失敗';
+
+  @override
+  String get ttsTestPhrase => '你好！這是一段文字轉語音系統測試。歡迎使用 NativeTavern。';
+
+  @override
+  String get aboutTts => '關於文字轉語音';
+
+  @override
+  String get aboutTtsDescription => '文字轉語音可以朗讀訊息。你可以在角色設定中為不同角色設定不同語音。';
+
+  @override
+  String get systemTts => '系統文字轉語音';
+
+  @override
+  String get systemTtsDetails => '使用裝置內建的文字轉語音引擎，可用語音取決於系統設定。';
+
+  @override
+  String get elevenLabsDescription => '高品質 AI 語音，需要 elevenlabs.io 的 API 金鑰。';
+
+  @override
+  String get clearGlobalVariables => '清除全域變數';
+
+  @override
+  String get clearLocalVariables => '清除區域變數';
+
+  @override
+  String get aboutVariables => '關於變數';
+
+  @override
+  String get variableSystemDescription => '變數可在全域或目前聊天中儲存可重複使用的值，並透過巨集在提示詞中引用。';
+
+  @override
+  String get macroUsage => '巨集用法';
+
+  @override
+  String macroUsageDescription(String localMacro, String globalMacro) {
+    return '使用 $localMacro 引用區域變數，使用 $globalMacro 引用全域變數。也可透過變數巨集設定值。';
+  }
+
+  @override
+  String get noGlobalVariables => '尚無全域變數';
+
+  @override
+  String get noLocalVariables => '尚無區域變數';
+
+  @override
+  String editVariable(String name) {
+    return '編輯變數「$name」';
+  }
+
+  @override
+  String get deleteVariable => '刪除變數';
+
+  @override
+  String deleteVariableQuestion(String name) {
+    return '確定要刪除變數「$name」嗎？';
+  }
+
+  @override
+  String clearVariables(String scope) {
+    return '清除$scope變數';
+  }
+
+  @override
+  String clearVariablesConfirmation(String scope) {
+    return '確定要清除所有$scope變數嗎？此操作無法復原。';
+  }
+
+  @override
+  String get decrement => '減少';
+
+  @override
+  String get increment => '增加';
+
+  @override
+  String get testInput => '測試輸入';
+
+  @override
+  String get variableTestHint => '輸入包含變數巨集的文字...';
+
+  @override
+  String get processMacros => '處理巨集';
+
+  @override
+  String get result => '結果';
+
+  @override
+  String get emptyString => '（空字串）';
+
+  @override
+  String get retrievalAugmentedGeneration => '檢索增強生成（RAG）';
+
+  @override
+  String get searchSettings => '搜尋設定';
+
+  @override
+  String topKResultsDescription(int count) {
+    return '最多傳回 $count 筆符合結果';
+  }
+
+  @override
+  String minimumPercent(String percent) {
+    return '最低相似度：$percent%';
+  }
+
+  @override
+  String get promptIntegration => '提示詞整合';
+
+  @override
+  String get includeInPrompt => '加入提示詞';
+
+  @override
+  String get automaticallyAddContext => '自動將相關上下文加入提示詞';
+
+  @override
+  String get promptTemplate => '提示詞範本';
+
+  @override
+  String useContextPlaceholder(String contextMacro) {
+    return '使用 $contextMacro 指定檢索內容的插入位置';
+  }
+
+  @override
+  String get vectorStorageHelp => '向量儲存說明';
+
+  @override
+  String get vectorStorageHelpContent =>
+      '向量儲存會將文件轉換為嵌入向量，並為每則訊息檢索相關段落。請設定嵌入服務、建立集合、加入文件並啟用提示詞整合。';
+
+  @override
+  String get enterCollectionName => '輸入集合名稱';
+
+  @override
+  String get deleteCollection => '刪除集合';
+
+  @override
+  String get deleteCollectionConfirmation => '確定要刪除此集合及其中的所有文件嗎？';
+
+  @override
+  String get collectionExported => '集合已匯出';
+
+  @override
+  String get importCollection => '匯入集合';
+
+  @override
+  String get pasteCollectionJson => '貼上集合 JSON...';
+
+  @override
+  String get collectionImported => '集合已匯入';
+
+  @override
+  String get activeCollection => '目前集合';
+
+  @override
+  String collectionWithDocumentCount(String name, int count) {
+    return '$name（$count 份文件）';
+  }
+
+  @override
+  String documentsCount(int count) {
+    return '$count 份文件';
+  }
+
+  @override
+  String embeddedCount(String percent) {
+    return '已嵌入 $percent';
+  }
+
+  @override
+  String get addDocument => '加入文件';
+
+  @override
+  String get viewDocuments => '檢視文件';
+
+  @override
+  String get enterDocumentContent => '輸入文件內容';
+
+  @override
+  String get documentAdded => '文件已加入';
+
+  @override
+  String get noDocuments => '尚無文件';
+
+  @override
+  String documentEmbeddingStatus(int characters, String status) {
+    return '$characters 個字元 · $status';
+  }
+
+  @override
+  String get embedded => '已嵌入';
+
+  @override
+  String get notEmbedded => '未嵌入';
+
+  @override
+  String get tokenProbabilities => 'Token 機率';
+
+  @override
+  String get requestTokenProbabilities => '要求 Token 機率';
+
+  @override
+  String get requestTokenProbabilitiesDescription => '要求模型傳回生成 Token 的機率資料';
+
+  @override
+  String get topCandidatesCount => '候選項數量';
+
+  @override
+  String topCandidatesDescription(int count) {
+    return '每個 Token 最多顯示 $count 個候選項';
+  }
+
+  @override
+  String get showLogprobsPanel => '顯示 Token 機率面板';
+
+  @override
+  String get showLogprobsPanelDescription => '在支援的訊息下方顯示 Token 機率';
+
+  @override
+  String get colorIntensity => '顏色強度';
+
+  @override
+  String get aboutTokenProbabilities => '關於 Token 機率';
+
+  @override
+  String get tokenProbabilitiesDescription =>
+      'Token 機率可顯示模型的信心程度及其考慮過的候選項。是否可用取決於目前 API 與模型。';
+
+  @override
+  String get moreFormatting => '更多格式';
+
+  @override
+  String get readAloud => '朗讀';
+
+  @override
+  String get openInBrowser => '在瀏覽器中開啟';
+
+  @override
+  String get imageLoadFailed => '圖片載入失敗';
+
+  @override
+  String get pauseReading => '暫停朗讀';
+
+  @override
+  String get resumeReading => '繼續朗讀';
+
+  @override
+  String get stopReading => '停止朗讀';
+
+  @override
+  String get noTagsAvailable => '尚無可用標籤';
+
+  @override
+  String rerollAlternativeNotImplemented(String alternative) {
+    return '暫不支援使用「$alternative」重新產生';
+  }
+
+  @override
+  String get enableTokenProbabilitiesHint => '請在設定中啟用 Token 機率以檢視此資料';
+
+  @override
+  String get noTokenProbabilities => '尚無 Token 機率資料';
+
+  @override
+  String get noAlternativeTokens => '尚無候選 Token';
+
+  @override
+  String get alternativeTokens => '候選 Token';
+
+  @override
+  String get otherTokens => '其他 Token';
+
+  @override
+  String get chooseRpgScenario => '選擇 RPG 劇本';
+
+  @override
+  String get importScenario => '匯入劇本';
+
+  @override
+  String get noSavedScenarios => '尚無已儲存的劇本';
+
+  @override
+  String get rpgImportScenarioPackage => '匯入 RPG 劇本套件';
+
+  @override
+  String get rpgSelectedScenarioUnreadable => '無法讀取所選劇本檔案';
+
+  @override
+  String get favorite => '收藏';
+
+  @override
+  String get connections => '關聯';
+
+  @override
+  String get systemPromptOverride => '覆寫系統提示詞';
+
+  @override
+  String get systemPromptOverrideHint => '輸入此使用者設定專用的系統提示詞...';
+
+  @override
+  String get systemPromptOverrideDescription => '啟用此使用者設定時覆寫預設系統提示詞';
+
+  @override
+  String get instructionsAddedAfterHistory => '加入在聊天記錄之後的指令';
+
+  @override
+  String get bindPersonaDescription => '綁定使用者設定描述';
+
+  @override
+  String get noConnections => '尚無關聯';
+
+  @override
+  String connectionCharacter(String id) {
+    return '角色：$id';
+  }
+
+  @override
+  String connectionGroup(String id) {
+    return '群組：$id';
+  }
+
+  @override
+  String connectionChat(String id) {
+    return '聊天：$id';
+  }
+
+  @override
+  String lockLabel(String type) {
+    return '鎖定：$type';
+  }
+
+  @override
+  String get addTag => '加入標籤';
+
+  @override
+  String errorLoadingLorebooks(String error) {
+    return '載入世界書失敗：$error';
+  }
+
+  @override
+  String get personaLorebook => '使用者設定世界書';
+
+  @override
+  String get selectLorebook => '選擇世界書';
+
+  @override
+  String get personaLorebookDescription => '與此使用者設定關聯的世界書';
+
+  @override
+  String get descriptionPlacement => '描述插入位置';
+
+  @override
+  String get personaDescriptionPositionHelp => '選擇使用者設定描述在提示詞中的插入位置';
+
+  @override
+  String get depth => '深度';
+
+  @override
+  String get depthInChatHistory => '聊天記錄中的深度';
+
+  @override
+  String get messageRole => '訊息角色';
+
+  @override
+  String get roleForDescription => '使用者設定描述使用的角色';
+
+  @override
+  String get novelAiSettings => 'NovelAI 設定';
+
+  @override
+  String get anlasGuard => 'Anlas 保護';
+
+  @override
+  String get anlasGuardDescription => '預估 Anlas 消耗過高時阻止產生';
+
+  @override
+  String get smea => 'SMEA';
+
+  @override
+  String get smeaDescription => '啟用 SMEA 採樣以提升圖片一致性';
+
+  @override
+  String get smeaDynamic => '動態 SMEA';
+
+  @override
+  String get smeaDynamicDescription => '依圖片尺寸動態調整 SMEA';
+
+  @override
+  String get decrisper => '柔化細節';
+
+  @override
+  String get decrisperDescription => '減少圖片中過度銳利的細節';
+
+  @override
+  String get varietyPlus => 'Variety+';
+
+  @override
+  String get varietyPlusDescription => '提高產生圖片之間的差異性';
+
+  @override
+  String get gptImageApiDescription => '透過 OAI Compatible 圖片 API 產生圖片';
+
+  @override
+  String get oaiCompatibleChat => 'OAI Compatible Chat';
+
+  @override
+  String get oaiCompatibleChatDescription => '透過 OAI Compatible 聊天補全端點產生圖片';
+
+  @override
+  String get errorFetchingModels => '取得模型失敗';
+
+  @override
+  String generatedPrompt(String prompt) {
+    return '提示詞：$prompt';
+  }
+
+  @override
+  String generatedSeed(String seed) {
+    return '種子：$seed';
+  }
+
+  @override
+  String imagesGenerated(int count) {
+    return '已產生 $count 張圖片';
+  }
+
+  @override
+  String get myTheme => '我的主題';
+
+  @override
+  String get translate => '翻譯';
+
+  @override
+  String get stopSpeaking => '停止朗讀';
+
+  @override
+  String get insertion => '插入';
+
+  @override
+  String get filters => '篩選條件';
+
+  @override
+  String get scanDepth => '掃描深度';
+
+  @override
+  String get scanDepthDescription => '掃描最近多少則訊息以比對關鍵字';
+
+  @override
+  String get roleForInjectedContent => '注入內容使用的訊息角色';
+
+  @override
+  String get caseSensitive => '區分大小寫';
+
+  @override
+  String get matchKeywordsExactCase => '依完全一致的大小寫比對關鍵字';
+
+  @override
+  String get matchWholeWords => '比對完整單字';
+
+  @override
+  String get onlyMatchCompleteWords => '僅比對完整單字';
+
+  @override
+  String get recursionControl => '遞迴控制';
+
+  @override
+  String get preventRecursion => '阻止遞迴';
+
+  @override
+  String get preventRecursionDescription => '不允許此項目觸發其他項目';
+
+  @override
+  String get excludeRecursion => '從遞迴中排除';
+
+  @override
+  String get excludeRecursionDescription => '遞迴掃描時不啟用此項目';
+
+  @override
+  String get delayUntilRecursion => '延遲至遞迴';
+
+  @override
+  String get delayUntilRecursionDescription => '僅在遞迴掃描時啟用此項目';
+
+  @override
+  String get characterFilter => '角色篩選';
+
+  @override
+  String get groupSettings => '群組設定';
+
+  @override
+  String get groupMutuallyExclusive => '群組內互斥';
+
+  @override
+  String get useGroupScoring => '使用群組評分';
+
+  @override
+  String get groupWeight => '群組權重';
+
+  @override
+  String get groupWeightDescription => '從群組中選擇項目時使用的相對權重';
+
+  @override
+  String get groupOverride => '覆寫群組';
+
+  @override
+  String get groupPriority => '群組優先級';
+
+  @override
+  String get probability => '機率';
+
+  @override
+  String get useProbability => '使用機率';
+
+  @override
+  String get randomActivationProbability => '此項目隨機啟用的機率';
+
+  @override
+  String probabilityPercent(int percent) {
+    return '啟用機率：$percent%';
+  }
+
+  @override
+  String get timedEffects => '定時效果';
+
+  @override
+  String get filterType => '篩選類型';
+
+  @override
+  String get characterIds => '角色 ID';
+
+  @override
+  String get stickyDuration => '持續時間';
+
+  @override
+  String get stickyDurationDescription => '比對後此項目保持啟用的訊息數';
+
+  @override
+  String get cooldown => '冷卻';
+
+  @override
+  String get cooldownDescription => '此項目再次啟用前需經過的訊息數';
+
+  @override
+  String get delay => '延遲';
+
+  @override
+  String get delayDescription => '此項目可啟用前需經過的訊息數';
+
+  @override
+  String get outlet => '出口';
+
+  @override
+  String get include => '包含';
+
+  @override
+  String get exclude => '排除';
+
+  @override
+  String translatedFromLanguage(String language) {
+    return '譯自$language';
+  }
+
+  @override
+  String originalText(String text) {
+    return '原文：$text';
+  }
+
+  @override
+  String get loadingImage => '正在載入圖片...';
+
+  @override
+  String get backupIntervalNever => '從不';
+
+  @override
+  String get backupIntervalHourly => '每小時';
+
+  @override
+  String get backupIntervalDaily => '每天';
+
+  @override
+  String get backupIntervalWeekly => '每週';
+
+  @override
+  String get backupIntervalMonthly => '每月';
+
+  @override
+  String get restoreModeReplace => '取代';
+
+  @override
+  String get restoreModeReplaceDescription => '使用備份資料取代所有本機資料';
+
+  @override
+  String get restoreModeMerge => '合併';
+
+  @override
+  String get restoreModeMergeDescription => '合併備份與本機資料，發生衝突時以較新資料為準';
+
+  @override
+  String get restoreModeAddNewOnly => '僅加入新內容';
+
+  @override
+  String get restoreModeAddNewOnlyDescription => '僅加入備份中的新項目，並保留所有現有資料';
+
+  @override
+  String get sortNameAscending => '名稱（A-Z）';
+
+  @override
+  String get sortNameDescending => '名稱（Z-A）';
+
+  @override
+  String get sortNewestFirst => '最新建立優先';
+
+  @override
+  String get sortOldestFirst => '最早建立優先';
+
+  @override
+  String get sortRecentlyModified => '最近修改優先';
+
+  @override
+  String get sortLeastRecentlyModified => '最早修改優先';
+
+  @override
+  String get codeBlock => '程式碼區塊';
+
+  @override
+  String get quote => '引用';
+
+  @override
+  String get heading1 => '一級標題';
+
+  @override
+  String get heading2 => '二級標題';
+
+  @override
+  String get heading3 => '三級標題';
+
+  @override
+  String get bulletList => '項目符號清單';
+
+  @override
+  String get numberedList => '編號清單';
+
+  @override
+  String get horizontalRule => '分隔線';
+
+  @override
+  String get pageNotFound => '找不到頁面';
+
+  @override
+  String get goHome => '返回首頁';
+
+  @override
+  String get officialWebsite => '官方網站';
+
+  @override
+  String get mcpStreamableHttp => '可串流 HTTP';
+
+  @override
+  String get mcpLegacyHttpSse => '舊版 HTTP + SSE';
+
+  @override
+  String chatWithName(String name) {
+    return '與$name聊天';
+  }
+
+  @override
+  String get noValidCharactersInGroup => '群組中沒有有效角色';
 }

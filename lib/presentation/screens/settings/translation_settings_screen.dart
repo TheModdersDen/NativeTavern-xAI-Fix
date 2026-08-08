@@ -12,6 +12,7 @@ class TranslationSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(translationSettingsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,7 +24,9 @@ class TranslationSettingsScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(translationSettingsProvider.notifier).reset();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.settingsResetToDefaults)),
+                SnackBar(
+                    content: Text(
+                        AppLocalizations.of(context)!.settingsResetToDefaults)),
               );
             },
           ),
@@ -39,39 +42,51 @@ class TranslationSettingsScreen extends ConsumerWidget {
             children: [
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.enableTranslation),
-                subtitle: Text(AppLocalizations.of(context)!.translateMessagesAutomatically),
+                subtitle: Text(AppLocalizations.of(context)!
+                    .translateMessagesAutomatically),
                 value: settings.enabled,
                 onChanged: (value) {
-                  ref.read(translationSettingsProvider.notifier).setEnabled(value);
+                  ref
+                      .read(translationSettingsProvider.notifier)
+                      .setEnabled(value);
                 },
               ),
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.translateAiResponses),
-                subtitle: Text(AppLocalizations.of(context)!.translateAiResponses),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.translateAiResponses),
                 value: settings.autoTranslateIncoming,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(translationSettingsProvider.notifier).setAutoTranslateIncoming(value);
+                        ref
+                            .read(translationSettingsProvider.notifier)
+                            .setAutoTranslateIncoming(value);
                       }
                     : null,
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.translateUserMessages),
-                subtitle: Text(AppLocalizations.of(context)!.translateUserMessages),
+                title:
+                    Text(AppLocalizations.of(context)!.translateUserMessages),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.translateUserMessages),
                 value: settings.autoTranslateOutgoing,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(translationSettingsProvider.notifier).setAutoTranslateOutgoing(value);
+                        ref
+                            .read(translationSettingsProvider.notifier)
+                            .setAutoTranslateOutgoing(value);
                       }
                     : null,
               ),
               SwitchListTile(
-                title: const Text('Show Original'),
-                subtitle: const Text('Display original text alongside translation'),
+                title: Text(l10n.showOriginal),
+                subtitle: Text(l10n.showOriginalDescription),
                 value: settings.showOriginal,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(translationSettingsProvider.notifier).setShowOriginal(value);
+                        ref
+                            .read(translationSettingsProvider.notifier)
+                            .setShowOriginal(value);
                       }
                     : null,
               ),
@@ -93,7 +108,9 @@ class TranslationSettingsScreen extends ConsumerWidget {
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(translationSettingsProvider.notifier).setProvider(value);
+                            ref
+                                .read(translationSettingsProvider.notifier)
+                                .setProvider(value);
                           }
                         }
                       : null,
@@ -133,22 +150,23 @@ class TranslationSettingsScreen extends ConsumerWidget {
               ListTile(
                 title: Text(AppLocalizations.of(context)!.sourceLanguage),
                 subtitle: Text(
-                  TranslationLanguage.fromCode(settings.sourceLanguage)?.name ?? 
-                  settings.sourceLanguage,
+                  _translationLanguageName(settings.sourceLanguage, l10n),
                 ),
                 trailing: DropdownButton<String>(
                   value: settings.sourceLanguage,
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(translationSettingsProvider.notifier).setSourceLanguage(value);
+                            ref
+                                .read(translationSettingsProvider.notifier)
+                                .setSourceLanguage(value);
                           }
                         }
                       : null,
                   items: TranslationLanguage.supportedLanguages.map((lang) {
                     return DropdownMenuItem(
                       value: lang.code,
-                      child: Text(lang.name),
+                      child: Text(_translationLanguageName(lang.code, l10n)),
                     );
                   }).toList(),
                 ),
@@ -158,12 +176,15 @@ class TranslationSettingsScreen extends ConsumerWidget {
               Center(
                 child: IconButton(
                   icon: const Icon(Icons.swap_vert),
-                  tooltip: 'Swap languages',
-                  onPressed: settings.enabled && settings.sourceLanguage != 'auto'
-                      ? () {
-                          ref.read(translationSettingsProvider.notifier).swapLanguages();
-                        }
-                      : null,
+                  tooltip: l10n.swapLanguages,
+                  onPressed:
+                      settings.enabled && settings.sourceLanguage != 'auto'
+                          ? () {
+                              ref
+                                  .read(translationSettingsProvider.notifier)
+                                  .swapLanguages();
+                            }
+                          : null,
                 ),
               ),
 
@@ -171,22 +192,23 @@ class TranslationSettingsScreen extends ConsumerWidget {
               ListTile(
                 title: Text(AppLocalizations.of(context)!.targetLanguage),
                 subtitle: Text(
-                  TranslationLanguage.fromCode(settings.targetLanguage)?.name ?? 
-                  settings.targetLanguage,
+                  _translationLanguageName(settings.targetLanguage, l10n),
                 ),
                 trailing: DropdownButton<String>(
                   value: settings.targetLanguage,
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(translationSettingsProvider.notifier).setTargetLanguage(value);
+                            ref
+                                .read(translationSettingsProvider.notifier)
+                                .setTargetLanguage(value);
                           }
                         }
                       : null,
                   items: TranslationLanguage.targetLanguages.map((lang) {
                     return DropdownMenuItem(
                       value: lang.code,
-                      child: Text(lang.name),
+                      child: Text(_translationLanguageName(lang.code, l10n)),
                     );
                   }).toList(),
                 ),
@@ -212,40 +234,29 @@ class TranslationSettingsScreen extends ConsumerWidget {
             context,
             title: AppLocalizations.of(context)!.information,
             children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('About Translation'),
-                subtitle: Text(
-                  'Translation allows you to communicate in different languages. '
-                  'Messages can be automatically translated or translated on demand.',
-                ),
+              ListTile(
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                title: Text(l10n.aboutTranslation),
+                subtitle: Text(l10n.aboutTranslationDescription),
               ),
               if (settings.provider == TranslationProvider.google)
-                const ListTile(
-                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text('Google Translate'),
-                  subtitle: Text(
-                    'Uses Google Cloud Translation API. '
-                    'Requires an API key from Google Cloud Console.',
-                  ),
+                ListTile(
+                  leading: const Icon(Icons.cloud, color: AppTheme.textMuted),
+                  title: Text(l10n.googleTranslate),
+                  subtitle: Text(l10n.googleTranslateDescription),
                 ),
               if (settings.provider == TranslationProvider.deepl)
-                const ListTile(
-                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text('DeepL'),
-                  subtitle: Text(
-                    'High-quality neural machine translation. '
-                    'Requires an API key from deepl.com',
-                  ),
+                ListTile(
+                  leading: const Icon(Icons.cloud, color: AppTheme.textMuted),
+                  title: Text(l10n.deepL),
+                  subtitle: Text(l10n.deepLDescription),
                 ),
               if (settings.provider == TranslationProvider.libre)
-                const ListTile(
-                  leading: Icon(Icons.public, color: AppTheme.textMuted),
-                  title: Text('LibreTranslate'),
-                  subtitle: Text(
-                    'Free and open-source translation. '
-                    'Can be self-hosted or use public instances.',
-                  ),
+                ListTile(
+                  leading: const Icon(Icons.public, color: AppTheme.textMuted),
+                  title: Text(l10n.libreTranslate),
+                  subtitle: Text(l10n.libreTranslateDescription),
                 ),
             ],
           ),
@@ -281,13 +292,15 @@ class TranslationSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref, TranslationSettings settings) {
+  void _showApiKeyDialog(
+      BuildContext context, WidgetRef ref, TranslationSettings settings) {
     final controller = TextEditingController(text: settings.apiKey);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${settings.provider.displayName} ${AppLocalizations.of(context)!.apiKey}'),
+        title: Text(
+            '${settings.provider.displayName} ${AppLocalizations.of(context)!.apiKey}'),
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
@@ -303,7 +316,9 @@ class TranslationSettingsScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(translationSettingsProvider.notifier).setApiKey(controller.text);
+              ref
+                  .read(translationSettingsProvider.notifier)
+                  .setApiKey(controller.text);
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.save),
@@ -321,10 +336,12 @@ class _TranslationTestWidget extends ConsumerStatefulWidget {
   const _TranslationTestWidget({required this.enabled});
 
   @override
-  ConsumerState<_TranslationTestWidget> createState() => _TranslationTestWidgetState();
+  ConsumerState<_TranslationTestWidget> createState() =>
+      _TranslationTestWidgetState();
 }
 
-class _TranslationTestWidgetState extends ConsumerState<_TranslationTestWidget> {
+class _TranslationTestWidgetState
+    extends ConsumerState<_TranslationTestWidget> {
   final _controller = TextEditingController();
 
   @override
@@ -356,7 +373,9 @@ class _TranslationTestWidgetState extends ConsumerState<_TranslationTestWidget> 
           ElevatedButton.icon(
             onPressed: widget.enabled && _controller.text.isNotEmpty
                 ? () {
-                    ref.read(translationStateProvider.notifier).translate(_controller.text);
+                    ref
+                        .read(translationStateProvider.notifier)
+                        .translate(_controller.text);
                   }
                 : null,
             icon: translationState.isLoading
@@ -382,7 +401,8 @@ class _TranslationTestWidgetState extends ConsumerState<_TranslationTestWidget> 
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.check, size: 16, color: AppTheme.accentColor),
+                      const Icon(Icons.check,
+                          size: 16, color: AppTheme.accentColor),
                       const SizedBox(width: 8),
                       Text(
                         '${translationState.result!.sourceLanguage} → ${translationState.result!.targetLanguage}',
@@ -452,7 +472,7 @@ class TranslateButton extends ConsumerWidget {
 
     return IconButton(
       icon: Icon(Icons.translate, size: size),
-      tooltip: 'Translate',
+      tooltip: AppLocalizations.of(context).translate,
       onPressed: () async {
         final result = await ref.read(translateProvider)(text);
         if (result != null && onTranslated != null) {
@@ -476,6 +496,7 @@ class TranslationDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -488,10 +509,13 @@ class TranslationDisplay extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.translate, size: 14, color: AppTheme.accentColor),
+              const Icon(Icons.translate,
+                  size: 14, color: AppTheme.accentColor),
               const SizedBox(width: 4),
               Text(
-                'Translated from ${_getLanguageName(result.sourceLanguage)}',
+                l10n.translatedFromLanguage(
+                  _getLanguageName(result.sourceLanguage),
+                ),
                 style: const TextStyle(
                   fontSize: 11,
                   color: AppTheme.textMuted,
@@ -504,7 +528,7 @@ class TranslationDisplay extends StatelessWidget {
           if (showOriginal) ...[
             const SizedBox(height: 8),
             Text(
-              'Original: ${result.originalText}',
+              l10n.originalText(result.originalText),
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.textMuted,
@@ -520,4 +544,12 @@ class TranslationDisplay extends StatelessWidget {
   String _getLanguageName(String code) {
     return TranslationLanguage.fromCode(code)?.name ?? code;
   }
+}
+
+String _translationLanguageName(
+  String code,
+  AppLocalizations l10n,
+) {
+  if (code == 'auto') return l10n.autoDetect;
+  return TranslationLanguage.fromCode(code)?.nativeName ?? code;
 }

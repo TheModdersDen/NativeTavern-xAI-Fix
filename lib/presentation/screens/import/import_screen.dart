@@ -1231,28 +1231,28 @@ class _CharacterPreview extends StatelessWidget {
           // Description
           if (character.description.isNotEmpty)
             _ExpandableSection(
-              title: 'Description',
+              title: AppLocalizations.of(context)!.description,
               content: character.description,
             ),
 
           // Personality
           if (character.personality.isNotEmpty)
             _ExpandableSection(
-              title: 'Personality',
+              title: AppLocalizations.of(context)!.personality,
               content: character.personality,
             ),
 
           // Scenario
           if (character.scenario.isNotEmpty)
             _ExpandableSection(
-              title: 'Scenario',
+              title: AppLocalizations.of(context)!.scenario,
               content: character.scenario,
             ),
 
           // First message
           if (character.firstMessage.isNotEmpty)
             _ExpandableSection(
-              title: 'First Message',
+              title: AppLocalizations.of(context)!.firstMessage,
               content: character.firstMessage,
             ),
 
@@ -1337,7 +1337,7 @@ class _CharacterPreview extends StatelessWidget {
                     ],
                     const SizedBox(height: 8),
                     Text(
-                      'Keywords: ${character.characterBook!.entries.expand((e) => e.keys).take(10).join(", ")}${character.characterBook!.entries.expand((e) => e.keys).length > 10 ? "..." : ""}',
+                      '${AppLocalizations.of(context)!.keywords}: ${character.characterBook!.entries.expand((e) => e.keys).take(10).join(", ")}${character.characterBook!.entries.expand((e) => e.keys).length > 10 ? "..." : ""}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppTheme.textMuted,
                           ),
@@ -1352,7 +1352,7 @@ class _CharacterPreview extends StatelessWidget {
           // Example messages
           if (character.exampleMessages.isNotEmpty)
             _ExpandableSection(
-              title: 'Example Messages',
+              title: AppLocalizations.of(context)!.exampleMessages,
               content: character.exampleMessages,
             ),
 

@@ -22,14 +22,14 @@ import 'package:share_plus/share_plus.dart';
 void _log(String message, {String? error, StackTrace? stackTrace}) {
   final timestamp = DateTime.now().toIso8601String();
   final logMessage = '[$timestamp] WorldInfoScreen: $message';
-  
+
   if (kDebugMode) {
     debugPrint(logMessage);
     if (error != null) {
       debugPrint('  Error: $error');
     }
   }
-  
+
   developer.log(
     message,
     name: 'WorldInfoScreen',
@@ -70,10 +70,11 @@ class WorldInfoScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text('${AppLocalizations.of(context).error}: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(worldInfoNotifierProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(worldInfoNotifierProvider.notifier).refresh(),
                 child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
@@ -93,11 +94,12 @@ class WorldInfoScreen extends ConsumerWidget {
                 worldInfo: worldInfo,
                 onTap: () => _openWorldInfo(context, worldInfo),
                 onEdit: () => _showEditDialog(context, ref, worldInfo),
-                onDelete: () => _showDeleteConfirmation(context, ref, worldInfo),
+                onDelete: () =>
+                    _showDeleteConfirmation(context, ref, worldInfo),
                 onToggle: (enabled) {
                   ref.read(worldInfoNotifierProvider.notifier).updateWorldInfo(
-                    worldInfo.copyWith(enabled: enabled),
-                  );
+                        worldInfo.copyWith(enabled: enabled),
+                      );
                 },
               );
             },
@@ -152,19 +154,21 @@ class WorldInfoScreen extends ConsumerWidget {
         ref: ref,
         title: AppLocalizations.of(context)!.createLorebook,
         onSave: (name, description, isGlobal, characterId) async {
-          _log('Creating world info: name=$name, isGlobal=$isGlobal, characterId=$characterId');
+          _log(
+              'Creating world info: name=$name, isGlobal=$isGlobal, characterId=$characterId');
           await ref.read(worldInfoNotifierProvider.notifier).createWorldInfo(
-            name: name,
-            description: description,
-            isGlobal: isGlobal,
-            characterId: characterId,
-          );
+                name: name,
+                description: description,
+                isGlobal: isGlobal,
+                characterId: characterId,
+              );
         },
       ),
     );
   }
 
-  void _showEditDialog(BuildContext context, WidgetRef ref, WorldInfo worldInfo) {
+  void _showEditDialog(
+      BuildContext context, WidgetRef ref, WorldInfo worldInfo) {
     showDialog(
       context: context,
       builder: (context) => _WorldInfoDialog(
@@ -175,26 +179,29 @@ class WorldInfoScreen extends ConsumerWidget {
         initialIsGlobal: worldInfo.isGlobal,
         initialCharacterId: worldInfo.characterId,
         onSave: (name, description, isGlobal, characterId) async {
-          _log('Updating world info: name=$name, isGlobal=$isGlobal, characterId=$characterId');
+          _log(
+              'Updating world info: name=$name, isGlobal=$isGlobal, characterId=$characterId');
           await ref.read(worldInfoNotifierProvider.notifier).updateWorldInfo(
-            worldInfo.copyWith(
-              name: name,
-              description: description,
-              isGlobal: isGlobal,
-              characterId: characterId,
-            ),
-          );
+                worldInfo.copyWith(
+                  name: name,
+                  description: description,
+                  isGlobal: isGlobal,
+                  characterId: characterId,
+                ),
+              );
         },
       ),
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, WorldInfo worldInfo) {
+  void _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref, WorldInfo worldInfo) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteGroup),
-        content: Text(AppLocalizations.of(context)!.deleteLorebookConfirmation(worldInfo.name)),
+        content: Text(AppLocalizations.of(context)!
+            .deleteLorebookConfirmation(worldInfo.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -203,7 +210,9 @@ class WorldInfoScreen extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(worldInfoNotifierProvider.notifier).deleteWorldInfo(worldInfo.id);
+              ref
+                  .read(worldInfoNotifierProvider.notifier)
+                  .deleteWorldInfo(worldInfo.id);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(AppLocalizations.of(context)!.delete),
@@ -226,7 +235,7 @@ class WorldInfoScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     try {
       _log('Starting world info import...');
-      
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -250,32 +259,35 @@ class WorldInfoScreen extends ConsumerWidget {
       }
 
       _log('File content length: ${jsonString.length} chars');
-      
+
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
       _log('Parsed JSON keys: ${json.keys.toList()}');
 
       // Get world info name
       final name = json['name']?.toString() ??
-                   json['originalData']?['name']?.toString() ??
-                   file.name.replaceAll('.json', '');
+          json['originalData']?['name']?.toString() ??
+          file.name.replaceAll('.json', '');
       final description = json['description']?.toString();
 
       _log('Creating world info: $name');
 
       await ref.read(worldInfoNotifierProvider.notifier).createWorldInfo(
-        name: name,
-        description: description,
-        isGlobal: json['isGlobal'] == true,
-      );
+            name: name,
+            description: description,
+            isGlobal: json['isGlobal'] == true,
+          );
 
       // Import entries with full ST field fidelity (position, constant,
       // order, probability, timed effects, recursion flags, role, ...)
-      final createdWorldInfos = ref.read(worldInfoNotifierProvider).valueOrNull ?? [];
-      final createdWorldInfo = createdWorldInfos.firstWhere((w) => w.name == name);
+      final createdWorldInfos =
+          ref.read(worldInfoNotifierProvider).valueOrNull ?? [];
+      final createdWorldInfo =
+          createdWorldInfos.firstWhere((w) => w.name == name);
 
       final parsedEntries =
           WorldInfoImport.parseEntries(json, createdWorldInfo.id);
-      _log('Adding ${parsedEntries.length} entries to world info: ${createdWorldInfo.id}');
+      _log(
+          'Adding ${parsedEntries.length} entries to world info: ${createdWorldInfo.id}');
 
       for (final entry in parsedEntries) {
         try {
@@ -297,12 +309,13 @@ class WorldInfoScreen extends ConsumerWidget {
                 entry.copyWith(id: created.id),
               );
         } catch (e, st) {
-          _log('Failed to add entry: ${entry.keys}', error: e.toString(), stackTrace: st);
+          _log('Failed to add entry: ${entry.keys}',
+              error: e.toString(), stackTrace: st);
         }
       }
 
       _log('Import completed successfully');
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n!.importedAndApplied(name))),
@@ -312,12 +325,13 @@ class WorldInfoScreen extends ConsumerWidget {
       _log('Import failed', error: e.toString(), stackTrace: st);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context)!.importFailed(e.toString())}')),
+          SnackBar(
+              content: Text(
+                  '${AppLocalizations.of(context)!.importFailed(e.toString())}')),
         );
       }
     }
   }
-  
 }
 
 /// Card widget for displaying a World Info
@@ -360,7 +374,9 @@ class _WorldInfoCard extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.auto_stories,
-                  color: worldInfo.enabled ? AppTheme.primaryColor : AppTheme.textMuted,
+                  color: worldInfo.enabled
+                      ? AppTheme.primaryColor
+                      : AppTheme.textMuted,
                 ),
               ),
               const SizedBox(width: 16),
@@ -388,7 +404,8 @@ class _WorldInfoCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.accentColor.withValues(alpha: 0.2),
+                              color:
+                                  AppTheme.accentColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -404,7 +421,8 @@ class _WorldInfoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context)!.entriesCount(worldInfo.entries.length),
+                      AppLocalizations.of(context)!
+                          .entriesCount(worldInfo.entries.length),
                       style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 14,
@@ -467,7 +485,8 @@ class _WorldInfoCard extends StatelessWidget {
                     value: 'delete',
                     child: ListTile(
                       leading: const Icon(Icons.delete, color: Colors.red),
-                      title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                      title: Text(AppLocalizations.of(context)!.delete,
+                          style: const TextStyle(color: Colors.red)),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -480,14 +499,16 @@ class _WorldInfoCard extends StatelessWidget {
     );
   }
 
-  static Future<void> _exportWorldInfo(BuildContext context, WorldInfo worldInfo) async {
+  static Future<void> _exportWorldInfo(
+      BuildContext context, WorldInfo worldInfo) async {
     final shareOrigin = sharePositionOrigin(context);
     try {
       final json = worldInfo.toJson();
       final jsonString = const JsonEncoder.withIndent('  ').convert(json);
 
       final tempDir = await getTemporaryDirectory();
-      final fileName = '${worldInfo.name.replaceAll(RegExp(r'[^\w\s-]'), '_')}.json';
+      final fileName =
+          '${worldInfo.name.replaceAll(RegExp(r'[^\w\s-]'), '_')}.json';
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonString);
 
@@ -515,7 +536,9 @@ class _WorldInfoDialog extends StatefulWidget {
   final bool initialIsGlobal;
   final String? initialCharacterId;
   final WidgetRef ref;
-  final Future<void> Function(String name, String? description, bool isGlobal, String? characterId) onSave;
+  final Future<void> Function(
+          String name, String? description, bool isGlobal, String? characterId)
+      onSave;
 
   const _WorldInfoDialog({
     required this.ref,
@@ -533,8 +556,8 @@ class _WorldInfoDialog extends StatefulWidget {
 
 /// Scope type for World Info
 enum _WorldInfoScope {
-  global,         // Apply to all characters universally
-  allCharacters,  // Available to all characters (characterId = null)
+  global, // Apply to all characters universally
+  allCharacters, // Available to all characters (characterId = null)
   specificCharacter, // Bound to a specific character
 }
 
@@ -549,8 +572,9 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _descriptionController = TextEditingController(text: widget.initialDescription ?? '');
-    
+    _descriptionController =
+        TextEditingController(text: widget.initialDescription ?? '');
+
     // Determine initial scope
     if (widget.initialIsGlobal) {
       _scope = _WorldInfoScope.global;
@@ -572,10 +596,10 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Get character list from provider
     final charactersAsync = widget.ref.watch(characterListProvider);
-    
+
     return AlertDialog(
       title: Text(widget.title),
       content: SingleChildScrollView(
@@ -603,7 +627,7 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
               maxLines: 2,
             ),
             const SizedBox(height: 24),
-            
+
             // Scope selection
             Text(
               l10n.scope,
@@ -613,7 +637,7 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Global scope option
             RadioListTile<_WorldInfoScope>(
               title: Text(l10n.globalScope),
@@ -627,7 +651,7 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
               contentPadding: EdgeInsets.zero,
               dense: true,
             ),
-            
+
             // All characters option
             RadioListTile<_WorldInfoScope>(
               title: Text(l10n.allCharactersAvailable),
@@ -641,7 +665,7 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
               contentPadding: EdgeInsets.zero,
               dense: true,
             ),
-            
+
             // Specific character option
             RadioListTile<_WorldInfoScope>(
               title: Text(l10n.specificCharacter),
@@ -654,14 +678,14 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
               contentPadding: EdgeInsets.zero,
               dense: true,
             ),
-            
+
             // Character dropdown (when specific character is selected)
             if (_scope == _WorldInfoScope.specificCharacter)
               Padding(
                 padding: const EdgeInsets.only(left: 16, top: 8),
                 child: charactersAsync.when(
                   loading: () => const CircularProgressIndicator(),
-                  error: (error, stack) => Text('Error: $error'),
+                  error: (error, stack) => Text('${l10n.error}: $error'),
                   data: (characters) {
                     if (characters.isEmpty) {
                       return Text(
@@ -674,7 +698,8 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
                       decoration: InputDecoration(
                         labelText: l10n.selectCharacter,
                         border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                       ),
                       items: characters.map((char) {
                         return DropdownMenuItem(
@@ -721,9 +746,10 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
       );
       return;
     }
-    
+
     // Validate character selection if specific character is chosen
-    if (_scope == _WorldInfoScope.specificCharacter && _selectedCharacterId == null) {
+    if (_scope == _WorldInfoScope.specificCharacter &&
+        _selectedCharacterId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.pleaseSelectCharacter)),
       );
@@ -735,13 +761,18 @@ class _WorldInfoDialogState extends State<_WorldInfoDialog> {
     try {
       // Determine values based on scope
       final isGlobal = _scope == _WorldInfoScope.global;
-      final characterId = _scope == _WorldInfoScope.specificCharacter ? _selectedCharacterId : null;
-      
-      _log('Saving world info: name=$name, scope=$_scope, isGlobal=$isGlobal, characterId=$characterId');
-      
+      final characterId = _scope == _WorldInfoScope.specificCharacter
+          ? _selectedCharacterId
+          : null;
+
+      _log(
+          'Saving world info: name=$name, scope=$_scope, isGlobal=$isGlobal, characterId=$characterId');
+
       await widget.onSave(
         name,
-        _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
         isGlobal,
         characterId,
       );
@@ -766,10 +797,12 @@ class WorldInfoEntriesScreen extends ConsumerStatefulWidget {
   const WorldInfoEntriesScreen({super.key, required this.worldInfo});
 
   @override
-  ConsumerState<WorldInfoEntriesScreen> createState() => _WorldInfoEntriesScreenState();
+  ConsumerState<WorldInfoEntriesScreen> createState() =>
+      _WorldInfoEntriesScreenState();
 }
 
-class _WorldInfoEntriesScreenState extends ConsumerState<WorldInfoEntriesScreen> {
+class _WorldInfoEntriesScreenState
+    extends ConsumerState<WorldInfoEntriesScreen> {
   late WorldInfo _worldInfo;
 
   @override
@@ -819,11 +852,12 @@ class _WorldInfoEntriesScreenState extends ConsumerState<WorldInfoEntriesScreen>
                   key: ValueKey(entry.id),
                   entry: entry,
                   onTap: () => _showEntryDialog(context, ref, entry),
-                  onDelete: () => _showDeleteEntryConfirmation(context, ref, entry),
+                  onDelete: () =>
+                      _showDeleteEntryConfirmation(context, ref, entry),
                   onToggle: (enabled) {
                     ref.read(worldInfoNotifierProvider.notifier).updateEntry(
-                      entry.copyWith(enabled: enabled),
-                    );
+                          entry.copyWith(enabled: enabled),
+                        );
                   },
                 );
               },
@@ -865,7 +899,8 @@ class _WorldInfoEntriesScreenState extends ConsumerState<WorldInfoEntriesScreen>
     );
   }
 
-  void _showEntryDialog(BuildContext context, WidgetRef ref, WorldInfoEntry? entry) {
+  void _showEntryDialog(
+      BuildContext context, WidgetRef ref, WorldInfoEntry? entry) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -877,12 +912,14 @@ class _WorldInfoEntriesScreenState extends ConsumerState<WorldInfoEntriesScreen>
     );
   }
 
-  void _showDeleteEntryConfirmation(BuildContext context, WidgetRef ref, WorldInfoEntry entry) {
+  void _showDeleteEntryConfirmation(
+      BuildContext context, WidgetRef ref, WorldInfoEntry entry) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteEntry),
-        content: Text(AppLocalizations.of(context)!.deleteEntryConfirmation(entry.keys.join(", "))),
+        content: Text(AppLocalizations.of(context)!
+            .deleteEntryConfirmation(entry.keys.join(", "))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -891,7 +928,9 @@ class _WorldInfoEntriesScreenState extends ConsumerState<WorldInfoEntriesScreen>
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(worldInfoNotifierProvider.notifier).deleteEntry(entry.id);
+              ref
+                  .read(worldInfoNotifierProvider.notifier)
+                  .deleteEntry(entry.id);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(AppLocalizations.of(context)!.delete),
@@ -952,12 +991,17 @@ class _WorldInfoEntryCard extends StatelessWidget {
                     child: Wrap(
                       spacing: 4,
                       runSpacing: 4,
-                      children: entry.keys.map((key) => Chip(
-                        label: Text(key, style: const TextStyle(fontSize: 12)),
-                        backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-                        padding: EdgeInsets.zero,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      )).toList(),
+                      children: entry.keys
+                          .map((key) => Chip(
+                                label: Text(key,
+                                    style: const TextStyle(fontSize: 12)),
+                                backgroundColor: AppTheme.primaryColor
+                                    .withValues(alpha: 0.2),
+                                padding: EdgeInsets.zero,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ))
+                          .toList(),
                     ),
                   ),
                   IconButton(
@@ -1021,7 +1065,8 @@ class _WorldInfoEntryCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
+        style:
+            TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -1101,21 +1146,21 @@ class _WorldInfoEntryDialogState extends State<_WorldInfoEntryDialog> {
     final l10n = AppLocalizations.of(context)!;
     switch (position) {
       case WorldInfoPosition.before:
-        return l10n.beforeCharacterDefinition;  // ↑Char
+        return l10n.beforeCharacterDefinition; // ↑Char
       case WorldInfoPosition.after:
-        return l10n.afterCharacterDefinition;   // ↓Char
+        return l10n.afterCharacterDefinition; // ↓Char
       case WorldInfoPosition.ANTop:
-        return l10n.beforeAuthorNote;           // ↑AT
+        return l10n.beforeAuthorNote; // ↑AT
       case WorldInfoPosition.ANBottom:
-        return l10n.afterAuthorNote;            // ↓AT
+        return l10n.afterAuthorNote; // ↓AT
       case WorldInfoPosition.atDepth:
-        return l10n.atDepth;                    // @D
+        return l10n.atDepth; // @D
       case WorldInfoPosition.EMTop:
-        return l10n.beforeExampleMessages;      // ↑EM
+        return l10n.beforeExampleMessages; // ↑EM
       case WorldInfoPosition.EMBottom:
-        return l10n.afterExampleMessages;       // ↓EM
+        return l10n.afterExampleMessages; // ↓EM
       case WorldInfoPosition.outlet:
-        return 'Outlet';                        // Named outlet
+        return 'Outlet'; // Named outlet
     }
   }
 
@@ -1270,13 +1315,14 @@ class _WorldInfoEntryDialogState extends State<_WorldInfoEntryDialog> {
         .toList();
 
     final insertionOrder = int.tryParse(_orderController.text.trim()) ?? 0;
-    
+
     // If no keys provided, force constant to true
     final actualConstant = keys.isEmpty ? true : _constant;
 
     setState(() => _isSaving = true);
-    
-    _log('Saving entry: keys=$keys, constant=$actualConstant, selective=$_selective, position=$_position');
+
+    _log(
+        'Saving entry: keys=$keys, constant=$actualConstant, selective=$_selective, position=$_position');
 
     try {
       await widget.onSave(

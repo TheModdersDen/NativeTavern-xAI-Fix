@@ -60,7 +60,8 @@ class RegexSettingsScreen extends ConsumerWidget {
                 value: 'clear_all',
                 child: ListTile(
                   leading: const Icon(Icons.delete_sweep, color: Colors.red),
-                  title: Text(AppLocalizations.of(context)!.clearAll, style: const TextStyle(color: Colors.red)),
+                  title: Text(AppLocalizations.of(context)!.clearAll,
+                      style: const TextStyle(color: Colors.red)),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -78,7 +79,8 @@ class RegexSettingsScreen extends ConsumerWidget {
             children: [
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.enableRegexScripts),
-                subtitle: Text(AppLocalizations.of(context)!.applyFindReplacePatterns),
+                subtitle: Text(
+                    AppLocalizations.of(context)!.applyFindReplacePatterns),
                 value: settings.enabled,
                 onChanged: (value) {
                   ref.read(regexSettingsProvider.notifier).setEnabled(value);
@@ -96,41 +98,53 @@ class RegexSettingsScreen extends ConsumerWidget {
             children: [
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.userInput),
-                subtitle: Text(AppLocalizations.of(context)!.applyBeforeSending),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.applyBeforeSending),
                 value: settings.applyToUserInput,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(regexSettingsProvider.notifier).setApplyToUserInput(value);
+                        ref
+                            .read(regexSettingsProvider.notifier)
+                            .setApplyToUserInput(value);
                       }
                     : null,
               ),
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.aiOutput),
-                subtitle: Text(AppLocalizations.of(context)!.applyToAiResponses),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.applyToAiResponses),
                 value: settings.applyToAiOutput,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(regexSettingsProvider.notifier).setApplyToAiOutput(value);
+                        ref
+                            .read(regexSettingsProvider.notifier)
+                            .setApplyToAiOutput(value);
                       }
                     : null,
               ),
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.slashCommandsLabel),
-                subtitle: Text(AppLocalizations.of(context)!.applyDuringCommandProcessing),
+                subtitle: Text(
+                    AppLocalizations.of(context)!.applyDuringCommandProcessing),
                 value: settings.applyToSlashCommands,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(regexSettingsProvider.notifier).setApplyToSlashCommands(value);
+                        ref
+                            .read(regexSettingsProvider.notifier)
+                            .setApplyToSlashCommands(value);
                       }
                     : null,
               ),
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.worldInfoLabel),
-                subtitle: Text(AppLocalizations.of(context)!.applyToWorldInfoEntries),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.applyToWorldInfoEntries),
                 value: settings.applyToWorldInfo,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(regexSettingsProvider.notifier).setApplyToWorldInfo(value);
+                        ref
+                            .read(regexSettingsProvider.notifier)
+                            .setApplyToWorldInfo(value);
                       }
                     : null,
               ),
@@ -150,7 +164,8 @@ class RegexSettingsScreen extends ConsumerWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.find_replace, size: 48, color: AppTheme.textMuted),
+                        const Icon(Icons.find_replace,
+                            size: 48, color: AppTheme.textMuted),
                         const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context)!.noRegexScripts,
@@ -159,7 +174,8 @@ class RegexSettingsScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           AppLocalizations.of(context)!.tapToAddOrUseMenu,
-                          style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                          style: const TextStyle(
+                              color: AppTheme.textMuted, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -173,7 +189,9 @@ class RegexSettingsScreen extends ConsumerWidget {
                   itemCount: scripts.length,
                   onReorder: (oldIndex, newIndex) {
                     if (newIndex > oldIndex) newIndex--;
-                    ref.read(globalRegexScriptsProvider.notifier).reorderScripts(oldIndex, newIndex);
+                    ref
+                        .read(globalRegexScriptsProvider.notifier)
+                        .reorderScripts(oldIndex, newIndex);
                   },
                   itemBuilder: (context, index) {
                     final script = scripts[index];
@@ -182,7 +200,9 @@ class RegexSettingsScreen extends ConsumerWidget {
                       script: script,
                       onTap: () => _showScriptEditor(context, ref, script),
                       onToggle: () {
-                        ref.read(globalRegexScriptsProvider.notifier).toggleScript(script.id);
+                        ref
+                            .read(globalRegexScriptsProvider.notifier)
+                            .toggleScript(script.id);
                       },
                       onDelete: () => _confirmDelete(context, ref, script),
                     );
@@ -207,22 +227,21 @@ class RegexSettingsScreen extends ConsumerWidget {
           // Info section
           _buildSection(
             context: context,
-            title: 'Information',
+            title: AppLocalizations.of(context).information,
             children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('About Regex Scripts'),
+              ListTile(
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                title: Text(AppLocalizations.of(context).aboutRegexScripts),
                 subtitle: Text(
-                  'Regex scripts allow you to find and replace text patterns in messages. '
-                  'Use capture groups (\$1, \$2) in replacements.',
+                  AppLocalizations.of(context).aboutRegexScriptsDescription,
                 ),
               ),
-              const ListTile(
-                leading: Icon(Icons.code, color: AppTheme.textMuted),
-                title: Text('Pattern Format'),
+              ListTile(
+                leading: const Icon(Icons.code, color: AppTheme.textMuted),
+                title: Text(AppLocalizations.of(context).patternFormat),
                 subtitle: Text(
-                  'Use /pattern/flags format (e.g., /hello/gi) or plain patterns. '
-                  'Flags: i=case-insensitive, m=multiline, s=dotall',
+                  AppLocalizations.of(context).patternFormatDescription,
                 ),
               ),
             ],
@@ -264,7 +283,8 @@ class RegexSettingsScreen extends ConsumerWidget {
       case 'add_presets':
         ref.read(globalRegexScriptsProvider.notifier).addPresets();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.presetScriptsAdded)),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.presetScriptsAdded)),
         );
         break;
       case 'import':
@@ -279,7 +299,8 @@ class RegexSettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showScriptEditor(BuildContext context, WidgetRef ref, RegexScript? script) {
+  void _showScriptEditor(
+      BuildContext context, WidgetRef ref, RegexScript? script) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -290,7 +311,9 @@ class RegexSettingsScreen extends ConsumerWidget {
           if (script == null) {
             ref.read(globalRegexScriptsProvider.notifier).addScript(newScript);
           } else {
-            ref.read(globalRegexScriptsProvider.notifier).updateScript(newScript);
+            ref
+                .read(globalRegexScriptsProvider.notifier)
+                .updateScript(newScript);
           }
           Navigator.pop(context);
         },
@@ -303,7 +326,8 @@ class RegexSettingsScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteScript),
-        content: Text(AppLocalizations.of(context)!.deleteScriptQuestion(script.scriptName)),
+        content: Text(AppLocalizations.of(context)!
+            .deleteScriptQuestion(script.scriptName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -311,7 +335,9 @@ class RegexSettingsScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(globalRegexScriptsProvider.notifier).removeScript(script.id);
+              ref
+                  .read(globalRegexScriptsProvider.notifier)
+                  .removeScript(script.id);
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -357,19 +383,25 @@ class RegexSettingsScreen extends ConsumerWidget {
       if (result != null && result.files.single.path != null) {
         final file = File(result.files.single.path!);
         final jsonContent = await file.readAsString();
-        
-        final count = await ref.read(globalRegexScriptsProvider.notifier).importScripts(jsonContent);
-        
+
+        final count = await ref
+            .read(globalRegexScriptsProvider.notifier)
+            .importScripts(jsonContent);
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.importedCount(count))),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.importedCount(count))),
           );
         }
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).importFailed('$e')),
+          ),
         );
       }
     }
@@ -377,7 +409,7 @@ class RegexSettingsScreen extends ConsumerWidget {
 
   void _showExportDialog(BuildContext context, WidgetRef ref) {
     final json = ref.read(globalRegexScriptsProvider.notifier).exportScripts();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -407,7 +439,9 @@ class RegexSettingsScreen extends ConsumerWidget {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: json));
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
+                SnackBar(
+                    content:
+                        Text(AppLocalizations.of(context)!.copiedToClipboard)),
               );
             },
             icon: const Icon(Icons.copy),
@@ -436,6 +470,7 @@ class _RegexScriptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListTile(
       leading: Icon(
         Icons.find_replace,
@@ -464,7 +499,8 @@ class _RegexScriptTile extends StatelessWidget {
           IconButton(
             icon: Icon(
               script.disabled ? Icons.toggle_off : Icons.toggle_on,
-              color: script.disabled ? AppTheme.textMuted : AppTheme.accentColor,
+              color:
+                  script.disabled ? AppTheme.textMuted : AppTheme.accentColor,
             ),
             onPressed: onToggle,
           ),
@@ -508,10 +544,14 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.script?.scriptName ?? '');
-    _descriptionController = TextEditingController(text: widget.script?.description ?? '');
-    _findController = TextEditingController(text: widget.script?.findRegex ?? '');
-    _replaceController = TextEditingController(text: widget.script?.replaceString ?? '');
+    _nameController =
+        TextEditingController(text: widget.script?.scriptName ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.script?.description ?? '');
+    _findController =
+        TextEditingController(text: widget.script?.findRegex ?? '');
+    _replaceController =
+        TextEditingController(text: widget.script?.replaceString ?? '');
     _placement = widget.script?.placement ?? [RegexPlacement.aiOutput];
     _markdownOnly = widget.script?.markdownOnly ?? false;
     _promptOnly = widget.script?.promptOnly ?? false;
@@ -530,6 +570,7 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -559,7 +600,9 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.script == null ? AppLocalizations.of(context)!.newScript : AppLocalizations.of(context)!.editScript,
+                      widget.script == null
+                          ? AppLocalizations.of(context)!.newScript
+                          : AppLocalizations.of(context)!.editScript,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -581,43 +624,43 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
                   children: [
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Script Name',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.scriptName,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description (optional)',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.descriptionOptional,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _findController,
-                      decoration: const InputDecoration(
-                        labelText: 'Find Pattern',
-                        hintText: '/pattern/flags or plain pattern',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.findPattern,
+                        hintText: l10n.patternOrPlainPattern,
+                        border: const OutlineInputBorder(),
                       ),
                       style: const TextStyle(fontFamily: 'monospace'),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _replaceController,
-                      decoration: const InputDecoration(
-                        labelText: 'Replace With',
-                        hintText: r'Use $1, $2 for capture groups',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.replaceWith,
+                        hintText: l10n.replacementHint,
+                        border: const OutlineInputBorder(),
                       ),
                       style: const TextStyle(fontFamily: 'monospace'),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Apply To',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      l10n.applyTo,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -625,7 +668,7 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
                       children: RegexPlacement.values.map((p) {
                         final selected = _placement.contains(p);
                         return FilterChip(
-                          label: Text(p.displayName),
+                          label: Text(_regexPlacementName(p, l10n)),
                           selected: selected,
                           onSelected: (value) {
                             setState(() {
@@ -640,34 +683,35 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
                       }).toList(),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Options',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      l10n.options,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     SwitchListTile(
-                      title: const Text('Markdown Only'),
-                      subtitle: const Text('Only apply during markdown rendering'),
+                      title: Text(l10n.markdownOnly),
+                      subtitle: Text(l10n.onlyApplyDuringMarkdown),
                       value: _markdownOnly,
-                      onChanged: (value) => setState(() => _markdownOnly = value),
+                      onChanged: (value) =>
+                          setState(() => _markdownOnly = value),
                     ),
                     SwitchListTile(
-                      title: const Text('Prompt Only'),
-                      subtitle: const Text('Only apply during prompt generation'),
+                      title: Text(l10n.promptOnly),
+                      subtitle: Text(l10n.onlyApplyDuringPrompt),
                       value: _promptOnly,
                       onChanged: (value) => setState(() => _promptOnly = value),
                     ),
                     SwitchListTile(
-                      title: const Text('Run on Edit'),
-                      subtitle: const Text('Apply when editing messages'),
+                      title: Text(l10n.runOnEdit),
+                      subtitle: Text(l10n.applyWhenEditingMessages),
                       value: _runOnEdit,
                       onChanged: (value) => setState(() => _runOnEdit = value),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<SubstituteRegex>(
                       value: _substituteRegex,
-                      decoration: const InputDecoration(
-                        labelText: 'Macro Substitution',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.macroSubstitution,
+                        border: const OutlineInputBorder(),
                       ),
                       items: SubstituteRegex.values.map((s) {
                         return DropdownMenuItem(
@@ -694,14 +738,18 @@ class _RegexScriptEditorState extends State<_RegexScriptEditor> {
   void _save() {
     if (_nameController.text.isEmpty || _findController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name and pattern are required')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).nameAndPatternRequired),
+        ),
       );
       return;
     }
 
     final script = createRegexScript(
       scriptName: _nameController.text,
-      description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+      description: _descriptionController.text.isEmpty
+          ? null
+          : _descriptionController.text,
       findRegex: _findController.text,
       replaceString: _replaceController.text,
       placement: _placement,
@@ -758,6 +806,7 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -765,29 +814,29 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
         children: [
           TextField(
             controller: _patternController,
-            decoration: const InputDecoration(
-              labelText: 'Pattern',
+            decoration: InputDecoration(
+              labelText: l10n.pattern,
               hintText: '/pattern/flags',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             style: const TextStyle(fontFamily: 'monospace'),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _testController,
-            decoration: const InputDecoration(
-              labelText: 'Test String',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.testString,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _replaceController,
-            decoration: const InputDecoration(
-              labelText: 'Replacement',
+            decoration: InputDecoration(
+              labelText: l10n.replacement,
               hintText: r'$1, $2, {{match}}',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             style: const TextStyle(fontFamily: 'monospace'),
           ),
@@ -795,7 +844,7 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
           ElevatedButton.icon(
             onPressed: _test,
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Test'),
+            label: Text(l10n.test),
           ),
           if (_result != null) ...[
             const SizedBox(height: 16),
@@ -818,7 +867,9 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
                       Icon(
                         _result!.success ? Icons.check : Icons.error,
                         size: 16,
-                        color: _result!.success ? AppTheme.accentColor : Colors.red,
+                        color: _result!.success
+                            ? AppTheme.accentColor
+                            : Colors.red,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -826,7 +877,9 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
                             ? '${_result!.matches.length} match(es)'
                             : 'Error',
                         style: TextStyle(
-                          color: _result!.success ? AppTheme.accentColor : Colors.red,
+                          color: _result!.success
+                              ? AppTheme.accentColor
+                              : Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -841,9 +894,9 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
                   ],
                   if (_result!.success) ...[
                     const SizedBox(height: 8),
-                    const Text(
-                      'Result:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      l10n.result,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Container(
@@ -866,4 +919,17 @@ class _RegexTestWidgetState extends ConsumerState<_RegexTestWidget> {
       ),
     );
   }
+}
+
+String _regexPlacementName(
+  RegexPlacement placement,
+  AppLocalizations l10n,
+) {
+  return switch (placement) {
+    RegexPlacement.userInput => l10n.userInput,
+    RegexPlacement.aiOutput => l10n.aiOutput,
+    RegexPlacement.slashCommand => l10n.slashCommandsLabel,
+    RegexPlacement.worldInfo => l10n.worldInfoLabel,
+    RegexPlacement.reasoning => l10n.reasoning,
+  };
 }

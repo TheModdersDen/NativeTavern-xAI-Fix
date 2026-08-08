@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
-import 'package:native_tavern/domain/services/vector_storage_service.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/vector_storage_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
@@ -18,17 +17,17 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(vectorStorageSettingsProvider);
     final collections = ref.watch(vectorCollectionsProvider);
-    final service = ref.watch(vectorStorageServiceProvider);
     final chatConfig = ref.watch(llmConfigProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vector Storage / RAG'),
+        title: Text(l10n.vectorStorageRag),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
-            onPressed: () => _showHelpDialog(context, service),
-            tooltip: 'Help',
+            onPressed: () => _showHelpDialog(context),
+            tooltip: l10n.help,
           ),
         ],
       ),
@@ -37,27 +36,32 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
         children: [
           // Enable toggle
           SwitchListTile(
-            title: const Text('Enable RAG'),
-            subtitle: const Text('Retrieval-Augmented Generation'),
+            title: Text(l10n.enableRag),
+            subtitle: Text(l10n.retrievalAugmentedGeneration),
             value: settings.enabled,
             onChanged: (value) {
-              ref.read(vectorStorageSettingsProvider.notifier).setEnabled(value);
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setEnabled(value);
             },
           ),
           const Divider(height: 32),
 
           // Collections section
-          _buildSectionHeader(context, 'Collections'),
+          _buildSectionHeader(context, l10n.collections),
           const SizedBox(height: 8),
           _CollectionsSection(
             collections: collections,
             activeCollectionId: settings.activeCollectionId,
             enabled: settings.enabled,
             onCollectionSelected: (id) {
-              ref.read(vectorStorageSettingsProvider.notifier).setActiveCollection(id);
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setActiveCollection(id);
             },
             onCreateCollection: () => _showCreateCollectionDialog(context, ref),
-            onDeleteCollection: (id) => _confirmDeleteCollection(context, ref, id),
+            onDeleteCollection: (id) =>
+                _confirmDeleteCollection(context, ref, id),
             onExportCollection: (id) => _exportCollection(context, ref, id),
             onImportCollection: () => _importCollection(context, ref),
           ),
@@ -65,13 +69,13 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const Divider(height: 32),
 
           // Search settings
-          _buildSectionHeader(context, 'Search Settings'),
+          _buildSectionHeader(context, l10n.searchSettings),
           const SizedBox(height: 16),
-          
+
           // Top K slider
           ListTile(
-            title: const Text('Top K Results'),
-            subtitle: Text('Return top ${settings.topK} most similar documents'),
+            title: Text(l10n.topKResults),
+            subtitle: Text(l10n.topKResultsDescription(settings.topK)),
             trailing: SizedBox(
               width: 150,
               child: Slider(
@@ -82,7 +86,9 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
                 label: settings.topK.toString(),
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(vectorStorageSettingsProvider.notifier).setTopK(value.round());
+                        ref
+                            .read(vectorStorageSettingsProvider.notifier)
+                            .setTopK(value.round());
                       }
                     : null,
               ),
@@ -91,8 +97,10 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
 
           // Similarity threshold slider
           ListTile(
-            title: const Text('Similarity Threshold'),
-            subtitle: Text('Minimum: ${(settings.similarityThreshold * 100).toStringAsFixed(0)}%'),
+            title: Text(l10n.similarityThreshold),
+            subtitle: Text(l10n.minimumPercent(
+              (settings.similarityThreshold * 100).toStringAsFixed(0),
+            )),
             trailing: SizedBox(
               width: 150,
               child: Slider(
@@ -100,10 +108,13 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
                 min: 0,
                 max: 1,
                 divisions: 20,
-                label: '${(settings.similarityThreshold * 100).toStringAsFixed(0)}%',
+                label:
+                    '${(settings.similarityThreshold * 100).toStringAsFixed(0)}%',
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(vectorStorageSettingsProvider.notifier).setSimilarityThreshold(value);
+                        ref
+                            .read(vectorStorageSettingsProvider.notifier)
+                            .setSimilarityThreshold(value);
                       }
                     : null,
               ),
@@ -113,7 +124,7 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const Divider(height: 32),
 
           // Embedding settings
-          _buildSectionHeader(context, 'Embedding Provider'),
+          _buildSectionHeader(context, l10n.embeddingProvider),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             icon: const Icon(Icons.link),
@@ -138,9 +149,9 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           DropdownButtonFormField<EmbeddingProvider>(
             value: settings.embeddingProvider,
-            decoration: const InputDecoration(
-              labelText: 'Provider',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.provider,
+              border: const OutlineInputBorder(),
             ),
             items: EmbeddingProvider.values.map((provider) {
               return DropdownMenuItem(
@@ -151,7 +162,9 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
             onChanged: settings.enabled
                 ? (provider) {
                     if (provider != null) {
-                      ref.read(vectorStorageSettingsProvider.notifier).setEmbeddingProvider(provider);
+                      ref
+                          .read(vectorStorageSettingsProvider.notifier)
+                          .setEmbeddingProvider(provider);
                     }
                   }
                 : null,
@@ -160,14 +173,17 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           TextFormField(
             key: ValueKey(
                 'embedding-model-${settings.embeddingProvider.name}-${settings.embeddingModel}'),
-            initialValue: settings.embeddingModel ?? settings.embeddingProvider.defaultModel,
-            decoration: const InputDecoration(
-              labelText: 'Model',
-              border: OutlineInputBorder(),
+            initialValue: settings.embeddingModel ??
+                settings.embeddingProvider.defaultModel,
+            decoration: InputDecoration(
+              labelText: l10n.model,
+              border: const OutlineInputBorder(),
             ),
             enabled: settings.enabled,
             onChanged: (value) {
-              ref.read(vectorStorageSettingsProvider.notifier).setEmbeddingModel(value);
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setEmbeddingModel(value);
             },
           ),
           const SizedBox(height: 16),
@@ -220,8 +236,8 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
                               ? l10n.embeddedDocuments('$count')
                               : l10n.allDocumentsEmbedded)));
                     } catch (e) {
-                      messenger.showSnackBar(SnackBar(
-                          content: Text(l10n.embeddingFailed('$e'))));
+                      messenger.showSnackBar(
+                          SnackBar(content: Text(l10n.embeddingFailed('$e'))));
                     }
                   }
                 : null,
@@ -230,30 +246,34 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
           const Divider(height: 32),
 
           // Prompt settings
-          _buildSectionHeader(context, 'Prompt Integration'),
+          _buildSectionHeader(context, l10n.promptIntegration),
           const SizedBox(height: 8),
           SwitchListTile(
-            title: const Text('Include in Prompt'),
-            subtitle: const Text('Automatically add context to AI prompts'),
+            title: Text(l10n.includeInPrompt),
+            subtitle: Text(l10n.automaticallyAddContext),
             value: settings.includeInPrompt,
             onChanged: settings.enabled
                 ? (value) {
-                    ref.read(vectorStorageSettingsProvider.notifier).setIncludeInPrompt(value);
+                    ref
+                        .read(vectorStorageSettingsProvider.notifier)
+                        .setIncludeInPrompt(value);
                   }
                 : null,
           ),
           const SizedBox(height: 16),
           TextFormField(
             initialValue: settings.promptTemplate,
-            decoration: const InputDecoration(
-              labelText: 'Prompt Template',
-              hintText: 'Use {{context}} for retrieved content',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.promptTemplate,
+              hintText: l10n.useContextPlaceholder('{{context}}'),
+              border: const OutlineInputBorder(),
             ),
             maxLines: 5,
             enabled: settings.enabled && settings.includeInPrompt,
             onChanged: (value) {
-              ref.read(vectorStorageSettingsProvider.notifier).setPromptTemplate(value);
+              ref
+                  .read(vectorStorageSettingsProvider.notifier)
+                  .setPromptTemplate(value);
             },
           ),
 
@@ -273,18 +293,19 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showHelpDialog(BuildContext context, VectorStorageService service) {
+  void _showHelpDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Vector Storage Help'),
+        title: Text(l10n.vectorStorageHelp),
         content: SingleChildScrollView(
-          child: Text(service.getHelpText()),
+          child: Text(l10n.vectorStorageHelpContent),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -295,27 +316,28 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     final settings = ref.read(vectorStorageSettingsProvider);
+    final l10n = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Collection'),
+        title: Text(l10n.createCollection),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'Enter collection name',
+              decoration: InputDecoration(
+                labelText: l10n.name,
+                hintText: l10n.enterCollectionName,
               ),
               autofocus: true,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
+              decoration: InputDecoration(
+                labelText: l10n.descriptionOptional,
               ),
             ),
           ],
@@ -323,49 +345,59 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               if (nameController.text.trim().isNotEmpty) {
-                final collection = ref.read(vectorCollectionsProvider.notifier).createCollection(
-                  name: nameController.text.trim(),
-                  description: descController.text.trim().isEmpty ? null : descController.text.trim(),
-                  dimensions: settings.embeddingProvider.defaultDimensions,
-                );
-                ref.read(vectorStorageSettingsProvider.notifier).setActiveCollection(collection.id);
+                final collection = ref
+                    .read(vectorCollectionsProvider.notifier)
+                    .createCollection(
+                      name: nameController.text.trim(),
+                      description: descController.text.trim().isEmpty
+                          ? null
+                          : descController.text.trim(),
+                      dimensions: settings.embeddingProvider.defaultDimensions,
+                    );
+                ref
+                    .read(vectorStorageSettingsProvider.notifier)
+                    .setActiveCollection(collection.id);
                 Navigator.pop(context);
               }
             },
-            child: const Text('Create'),
+            child: Text(l10n.create),
           ),
         ],
       ),
     );
   }
 
-  void _confirmDeleteCollection(BuildContext context, WidgetRef ref, String id) {
+  void _confirmDeleteCollection(
+      BuildContext context, WidgetRef ref, String id) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Collection'),
-        content: const Text('Are you sure you want to delete this collection? This cannot be undone.'),
+        title: Text(l10n.deleteCollection),
+        content: Text(l10n.deleteCollectionConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               ref.read(vectorCollectionsProvider.notifier).deleteCollection(id);
               final settings = ref.read(vectorStorageSettingsProvider);
               if (settings.activeCollectionId == id) {
-                ref.read(vectorStorageSettingsProvider.notifier).setActiveCollection(null);
+                ref
+                    .read(vectorStorageSettingsProvider.notifier)
+                    .setActiveCollection(null);
               }
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -373,53 +405,58 @@ class VectorStorageSettingsScreen extends ConsumerWidget {
   }
 
   void _exportCollection(BuildContext context, WidgetRef ref, String id) {
+    final l10n = AppLocalizations.of(context);
     try {
-      final json = ref.read(vectorCollectionsProvider.notifier).exportCollection(id);
+      final json =
+          ref.read(vectorCollectionsProvider.notifier).exportCollection(id);
       Clipboard.setData(ClipboardData(text: json));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Collection exported to clipboard')),
+        SnackBar(content: Text(l10n.collectionExported)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export failed: $e')),
+        SnackBar(content: Text(l10n.exportFailed('$e'))),
       );
     }
   }
 
   void _importCollection(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Import Collection'),
+        title: Text(l10n.importCollection),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'JSON',
-            hintText: 'Paste collection JSON here',
+            hintText: l10n.pasteCollectionJson,
           ),
           maxLines: 5,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               try {
-                ref.read(vectorCollectionsProvider.notifier).importCollection(controller.text);
+                ref
+                    .read(vectorCollectionsProvider.notifier)
+                    .importCollection(controller.text);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Collection imported successfully')),
+                  SnackBar(content: Text(l10n.collectionImported)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Import failed: $e')),
+                  SnackBar(content: Text(l10n.importFailed('$e'))),
                 );
               }
             },
-            child: const Text('Import'),
+            child: Text(l10n.import),
           ),
         ],
       ),
@@ -453,6 +490,7 @@ class _CollectionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selectedCollectionId = collections.any(
       (collection) => collection.id == activeCollectionId,
     )
@@ -466,18 +504,21 @@ class _CollectionsSection extends StatelessWidget {
             Expanded(
               child: DropdownButtonFormField<String>(
                 value: selectedCollectionId ?? _noCollectionValue,
-                decoration: const InputDecoration(
-                  labelText: 'Active Collection',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.activeCollection,
+                  border: const OutlineInputBorder(),
                 ),
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: _noCollectionValue,
-                    child: Text('None'),
+                    child: Text(l10n.none),
                   ),
                   ...collections.map((c) => DropdownMenuItem(
                         value: c.id,
-                        child: Text('${c.name} (${c.documentCount} docs)'),
+                        child: Text(l10n.collectionWithDocumentCount(
+                          c.name,
+                          c.documentCount,
+                        )),
                       )),
                 ],
                 onChanged: enabled
@@ -491,7 +532,7 @@ class _CollectionsSection extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: enabled ? onCreateCollection : null,
-              tooltip: 'Create Collection',
+              tooltip: l10n.createCollection,
             ),
             AdaptivePopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
@@ -504,11 +545,11 @@ class _CollectionsSection extends StatelessWidget {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'import',
                   child: ListTile(
-                    leading: Icon(Icons.file_download),
-                    title: Text('Import Collection'),
+                    leading: const Icon(Icons.file_download),
+                    title: Text(l10n.importCollection),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -547,8 +588,11 @@ class _CollectionDetails extends ConsumerWidget {
     final collections = ref.watch(vectorCollectionsProvider);
     final collection = collections.firstWhere(
       (c) => c.id == collectionId,
-      orElse: () => VectorCollection.create(name: 'Unknown'),
+      orElse: () => VectorCollection.create(
+        name: AppLocalizations.of(context).unknown,
+      ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -568,12 +612,12 @@ class _CollectionDetails extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.file_upload, size: 20),
                       onPressed: onExport,
-                      tooltip: 'Export',
+                      tooltip: l10n.export,
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, size: 20),
                       onPressed: onDelete,
-                      tooltip: 'Delete',
+                      tooltip: l10n.delete,
                       color: Colors.red,
                     ),
                   ],
@@ -594,17 +638,17 @@ class _CollectionDetails extends ConsumerWidget {
               children: [
                 _StatChip(
                   icon: Icons.description,
-                  label: '${stats.documentCount} docs',
+                  label: l10n.documentsCount(stats.documentCount),
                 ),
                 const SizedBox(width: 8),
                 _StatChip(
                   icon: Icons.memory,
-                  label: '${stats.embeddingCoveragePercent} embedded',
+                  label: l10n.embeddedCount(stats.embeddingCoveragePercent),
                 ),
                 const SizedBox(width: 8),
                 _StatChip(
                   icon: Icons.text_fields,
-                  label: '${stats.totalCharacters} chars',
+                  label: l10n.charsCount(stats.totalCharacters),
                 ),
               ],
             ),
@@ -614,7 +658,7 @@ class _CollectionDetails extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add Document'),
+                    label: Text(l10n.addDocument),
                     onPressed: () => _showAddDocumentDialog(context, ref),
                   ),
                 ),
@@ -622,8 +666,9 @@ class _CollectionDetails extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.list, size: 18),
-                    label: const Text('View Documents'),
-                    onPressed: () => _showDocumentsDialog(context, ref, collection),
+                    label: Text(l10n.viewDocuments),
+                    onPressed: () =>
+                        _showDocumentsDialog(context, ref, collection),
                   ),
                 ),
               ],
@@ -636,53 +681,56 @@ class _CollectionDetails extends ConsumerWidget {
 
   void _showAddDocumentDialog(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Document'),
+        title: Text(l10n.addDocument),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Content',
-            hintText: 'Enter document content',
+          decoration: InputDecoration(
+            labelText: l10n.content,
+            hintText: l10n.enterDocumentContent,
           ),
           maxLines: 5,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
                 ref.read(vectorCollectionsProvider.notifier).addDocument(
-                  collectionId: collectionId,
-                  content: controller.text.trim(),
-                );
+                      collectionId: collectionId,
+                      content: controller.text.trim(),
+                    );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Document added')),
+                  SnackBar(content: Text(l10n.documentAdded)),
                 );
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.add),
           ),
         ],
       ),
     );
   }
 
-  void _showDocumentsDialog(BuildContext context, WidgetRef ref, VectorCollection collection) {
+  void _showDocumentsDialog(
+      BuildContext context, WidgetRef ref, VectorCollection collection) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Documents (${collection.documentCount})'),
+        title: Text(l10n.documentsCount(collection.documentCount)),
         content: SizedBox(
           width: double.maxFinite,
           height: 400,
           child: collection.documents.isEmpty
-              ? const Center(child: Text('No documents'))
+              ? Center(child: Text(l10n.noDocuments))
               : ListView.builder(
                   itemCount: collection.documents.length,
                   itemBuilder: (context, index) {
@@ -697,18 +745,29 @@ class _CollectionDetails extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
-                          '${doc.content.length} chars • ${doc.embedding != null ? "Embedded" : "Not embedded"}',
+                          l10n.documentEmbeddingStatus(
+                            doc.content.length,
+                            doc.embedding != null
+                                ? l10n.embedded
+                                : l10n.notEmbedded,
+                          ),
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, size: 20),
                           onPressed: () {
-                            ref.read(vectorCollectionsProvider.notifier).removeDocument(
-                              collectionId,
-                              doc.id,
-                            );
+                            ref
+                                .read(vectorCollectionsProvider.notifier)
+                                .removeDocument(
+                                  collectionId,
+                                  doc.id,
+                                );
                             Navigator.pop(context);
-                            _showDocumentsDialog(context, ref, 
-                              ref.read(vectorCollectionsProvider).firstWhere((c) => c.id == collectionId));
+                            _showDocumentsDialog(
+                                context,
+                                ref,
+                                ref
+                                    .read(vectorCollectionsProvider)
+                                    .firstWhere((c) => c.id == collectionId));
                           },
                         ),
                       ),
@@ -719,7 +778,7 @@ class _CollectionDetails extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),

@@ -11,10 +11,12 @@ class TokenizerSettingsScreen extends ConsumerStatefulWidget {
   const TokenizerSettingsScreen({super.key});
 
   @override
-  ConsumerState<TokenizerSettingsScreen> createState() => _TokenizerSettingsScreenState();
+  ConsumerState<TokenizerSettingsScreen> createState() =>
+      _TokenizerSettingsScreenState();
 }
 
-class _TokenizerSettingsScreenState extends ConsumerState<TokenizerSettingsScreen> {
+class _TokenizerSettingsScreenState
+    extends ConsumerState<TokenizerSettingsScreen> {
   final _textController = TextEditingController();
   String _inputText = '';
 
@@ -28,6 +30,7 @@ class _TokenizerSettingsScreenState extends ConsumerState<TokenizerSettingsScree
   Widget build(BuildContext context) {
     final settings = ref.watch(tokenizerSettingsProvider);
     final service = ref.watch(tokenizerServiceProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -44,31 +47,33 @@ class _TokenizerSettingsScreenState extends ConsumerState<TokenizerSettingsScree
         padding: const EdgeInsets.all(16),
         children: [
           // Settings section
-          _buildSectionHeader(context, 'Settings'),
+          _buildSectionHeader(context, l10n.settings),
           const SizedBox(height: 8),
-          
+
           // Tokenizer selector
           DropdownButtonFormField<TokenizerType>(
             value: settings.selectedTokenizer,
-            decoration: const InputDecoration(
-              labelText: 'Tokenizer',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.tokenizer,
+              border: const OutlineInputBorder(),
             ),
             items: TokenizerType.values.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(type.displayName),
+                child: Text(_tokenizerName(type, l10n)),
               );
             }).toList(),
             onChanged: (type) {
               if (type != null) {
-                ref.read(tokenizerSettingsProvider.notifier).setSelectedTokenizer(type);
+                ref
+                    .read(tokenizerSettingsProvider.notifier)
+                    .setSelectedTokenizer(type);
               }
             },
           ),
           const SizedBox(height: 8),
           Text(
-            settings.selectedTokenizer.description,
+            _tokenizerDescription(settings.selectedTokenizer, l10n),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
@@ -76,43 +81,49 @@ class _TokenizerSettingsScreenState extends ConsumerState<TokenizerSettingsScree
           const SizedBox(height: 16),
 
           SwitchListTile(
-            title: const Text('Show Token Count'),
-            subtitle: const Text('Display token count in chat input'),
+            title: Text(l10n.showTokenCount),
+            subtitle: Text(l10n.displayTokenCountInInput),
             value: settings.showTokenCount,
             onChanged: (value) {
-              ref.read(tokenizerSettingsProvider.notifier).setShowTokenCount(value);
+              ref
+                  .read(tokenizerSettingsProvider.notifier)
+                  .setShowTokenCount(value);
             },
           ),
           SwitchListTile(
-            title: const Text('Show Token Visualization'),
-            subtitle: const Text('Highlight individual tokens'),
+            title: Text(l10n.showTokenVisualization),
+            subtitle: Text(l10n.highlightIndividualTokens),
             value: settings.showTokenVisualization,
             onChanged: (value) {
-              ref.read(tokenizerSettingsProvider.notifier).setShowTokenVisualization(value);
+              ref
+                  .read(tokenizerSettingsProvider.notifier)
+                  .setShowTokenVisualization(value);
             },
           ),
           SwitchListTile(
-            title: const Text('Cache Results'),
-            subtitle: const Text('Cache tokenization for performance'),
+            title: Text(l10n.cacheResults),
+            subtitle: Text(l10n.cacheTokenizationForPerformance),
             value: settings.cacheResults,
             onChanged: (value) {
-              ref.read(tokenizerSettingsProvider.notifier).setCacheResults(value);
+              ref
+                  .read(tokenizerSettingsProvider.notifier)
+                  .setCacheResults(value);
             },
           ),
 
           const Divider(height: 32),
 
           // Visualization section
-          _buildSectionHeader(context, 'Token Visualization'),
+          _buildSectionHeader(context, l10n.tokenVisualization),
           const SizedBox(height: 16),
-          
+
           // Input text field
           TextField(
             controller: _textController,
-            decoration: const InputDecoration(
-              labelText: 'Enter text to tokenize',
-              hintText: 'Type or paste text here...',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.enterTextToTokenize,
+              hintText: l10n.typePasteTextHere,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 5,
             onChanged: (value) {
@@ -153,21 +164,48 @@ class _TokenizerSettingsScreenState extends ConsumerState<TokenizerSettingsScree
   }
 
   void _showHelpDialog(BuildContext context, TokenizerService service) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tokenizer Help'),
+        title: Text(l10n.tokenizerHelp),
         content: SingleChildScrollView(
-          child: Text(service.getHelpText()),
+          child: Text(l10n.tokenizerHelpContent),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
     );
+  }
+
+  String _tokenizerName(TokenizerType type, AppLocalizations l10n) {
+    return switch (type) {
+      TokenizerType.none => l10n.tokenizerNoneEstimate,
+      TokenizerType.bestMatch => l10n.tokenizerBestMatchAuto,
+      _ => type.displayName,
+    };
+  }
+
+  String _tokenizerDescription(TokenizerType type, AppLocalizations l10n) {
+    return switch (type) {
+      TokenizerType.none => l10n.tokenizerEstimateDescription,
+      TokenizerType.gpt2 => l10n.tokenizerGpt2Description,
+      TokenizerType.openai => l10n.tokenizerOaiDescription,
+      TokenizerType.llama => l10n.tokenizerLlamaDescription,
+      TokenizerType.llama3 => l10n.tokenizerLlama3Description,
+      TokenizerType.mistral => l10n.tokenizerMistralDescription,
+      TokenizerType.claude => l10n.tokenizerClaudeDescription,
+      TokenizerType.gemma => l10n.tokenizerGemmaDescription,
+      TokenizerType.qwen2 => l10n.tokenizerQwenDescription,
+      TokenizerType.deepseek => l10n.tokenizerDeepSeekDescription,
+      TokenizerType.commandR => l10n.tokenizerCommandRDescription,
+      TokenizerType.nemo => l10n.tokenizerNemoDescription,
+      TokenizerType.bestMatch => l10n.tokenizerBestMatchDescription,
+    };
   }
 }
 
@@ -180,6 +218,7 @@ class _QuickEstimate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estimate = ref.watch(tokenCountEstimateProvider(text));
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -195,9 +234,9 @@ class _QuickEstimate extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Quick Estimate'),
+                  Text(l10n.quickEstimate),
                   Text(
-                    '~$estimate tokens',
+                    l10n.approximateTokens(estimate),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -206,7 +245,7 @@ class _QuickEstimate extends ConsumerWidget {
               ),
             ),
             Text(
-              '${text.length} chars',
+              l10n.charsCount(text.length),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -244,7 +283,7 @@ class _TokenizationResultView extends ConsumerWidget {
         color: Theme.of(context).colorScheme.errorContainer,
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('Error: $error'),
+          child: Text('${AppLocalizations.of(context).error}: $error'),
         ),
       ),
       data: (result) => Column(
@@ -253,7 +292,7 @@ class _TokenizationResultView extends ConsumerWidget {
           // Statistics card
           _StatisticsCard(result: result),
           const SizedBox(height: 16),
-          
+
           // Token visualization
           _TokenVisualization(result: result),
         ],
@@ -272,6 +311,7 @@ class _StatisticsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final service = ref.watch(tokenizerServiceProvider);
     final stats = service.getStatistics(result);
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -280,24 +320,24 @@ class _StatisticsCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Statistics',
+              l10n.statistics,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 _StatItem(
-                  label: 'Total Tokens',
+                  label: l10n.totalTokens,
                   value: result.tokenCount.toString(),
                   icon: Icons.token,
                 ),
                 _StatItem(
-                  label: 'Unique',
+                  label: l10n.unique,
                   value: stats.uniqueTokens.toString(),
                   icon: Icons.fingerprint,
                 ),
                 _StatItem(
-                  label: 'Chars/Token',
+                  label: l10n.charsPerToken,
                   value: result.charToTokenRatio.toStringAsFixed(2),
                   icon: Icons.text_fields,
                 ),
@@ -307,18 +347,18 @@ class _StatisticsCard extends ConsumerWidget {
             Row(
               children: [
                 _StatItem(
-                  label: 'Avg Length',
+                  label: l10n.avgLength,
                   value: stats.avgTokenLength.toStringAsFixed(1),
                   icon: Icons.straighten,
                 ),
                 _StatItem(
-                  label: 'Longest',
-                  value: '${stats.longestToken} chars',
+                  label: l10n.longest,
+                  value: l10n.charsCount(stats.longestToken),
                   icon: Icons.expand,
                 ),
                 _StatItem(
-                  label: 'Shortest',
-                  value: '${stats.shortestToken} chars',
+                  label: l10n.shortest,
+                  value: l10n.charsCount(stats.shortestToken),
                   icon: Icons.compress,
                 ),
               ],
@@ -326,7 +366,7 @@ class _StatisticsCard extends ConsumerWidget {
             if (stats.tokenFrequency.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                'Most Common Tokens',
+                l10n.mostCommonTokens,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -403,6 +443,7 @@ class _TokenVisualization extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (result.tokens.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -417,11 +458,11 @@ class _TokenVisualization extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Token Breakdown',
+                  l10n.tokenBreakdown,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  '${result.tokens.length} tokens',
+                  l10n.tokensCount(result.tokens.length),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -471,7 +512,10 @@ class _TokenChip extends StatelessWidget {
     final color = colors[index % colors.length];
 
     return Tooltip(
-      message: 'Token ID: ${token.id}\nLength: ${token.text.length} chars',
+      message: AppLocalizations.of(context).tokenIdLength(
+        token.id.toString(),
+        token.text.length,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(

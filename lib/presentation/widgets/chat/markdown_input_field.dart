@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// A text input field with markdown formatting support
-/// 
+///
 /// Features:
 /// - Keyboard shortcuts for common markdown formatting
 /// - Optional formatting toolbar
@@ -13,31 +14,31 @@ import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.da
 class MarkdownInputField extends StatefulWidget {
   /// The text editing controller
   final TextEditingController controller;
-  
+
   /// The focus node for the input field
   final FocusNode? focusNode;
-  
+
   /// Hint text to display when empty
   final String? hintText;
-  
+
   /// Maximum number of lines
   final int? maxLines;
-  
+
   /// Minimum number of lines
   final int? minLines;
-  
+
   /// Callback when the user submits (e.g., presses Enter)
   final ValueChanged<String>? onSubmitted;
-  
+
   /// Text input action
   final TextInputAction? textInputAction;
-  
+
   /// Whether to show the formatting toolbar
   final bool showToolbar;
-  
+
   /// Callback when text changes
   final ValueChanged<String>? onChanged;
-  
+
   /// Input decoration
   final InputDecoration? decoration;
 
@@ -99,7 +100,7 @@ class _MarkdownInputFieldState extends State<MarkdownInputField> {
       );
       widget.controller.value = currentValue;
     }
-    
+
     final newValue = MarkdownHotkeyService.applyFormat(
       value: currentValue,
       format: format,
@@ -135,19 +136,20 @@ class _MarkdownInputFieldState extends State<MarkdownInputField> {
             focusNode: _focusNode,
             maxLines: widget.maxLines,
             minLines: widget.minLines,
-            decoration: widget.decoration ?? InputDecoration(
-              hintText: widget.hintText,
-              filled: true,
-              fillColor: AppTheme.darkBackground,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
+            decoration: widget.decoration ??
+                InputDecoration(
+                  hintText: widget.hintText,
+                  filled: true,
+                  fillColor: AppTheme.darkBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
             onSubmitted: widget.onSubmitted,
             textInputAction: widget.textInputAction,
             onChanged: widget.onChanged,
@@ -241,7 +243,8 @@ class _ToolbarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: '${format.displayName}${format.shortcutHint != null ? ' (${format.shortcutHint})' : ''}',
+      message:
+          '${_markdownFormatName(format, AppLocalizations.of(context))}${format.shortcutHint != null ? ' (${format.shortcutHint})' : ''}',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(4),
@@ -274,10 +277,10 @@ class _ToolbarDivider extends StatelessWidget {
 class MarkdownToolbar extends StatelessWidget {
   /// The text editing controller to apply formatting to
   final TextEditingController controller;
-  
+
   /// Focus node to return focus to after formatting
   final FocusNode? focusNode;
-  
+
   /// Whether to show the toolbar in a compact mode
   final bool compact;
 
@@ -299,7 +302,7 @@ class MarkdownToolbar extends StatelessWidget {
       );
       controller.value = currentValue;
     }
-    
+
     final newValue = MarkdownHotkeyService.applyFormat(
       value: currentValue,
       format: format,
@@ -311,7 +314,7 @@ class MarkdownToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (compact) {
-      return _buildCompactToolbar();
+      return _buildCompactToolbar(context);
     }
     return _buildFullToolbar();
   }
@@ -378,23 +381,24 @@ class MarkdownToolbar extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactToolbar() {
+  Widget _buildCompactToolbar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CompactToolbarButton(
           icon: Icons.format_bold,
-          tooltip: 'Bold (⌘B)',
+          tooltip: '${l10n.bold} (⌘B)',
           onTap: () => _applyFormat(MarkdownFormat.bold),
         ),
         _CompactToolbarButton(
           icon: Icons.format_italic,
-          tooltip: 'Italic (⌘I)',
+          tooltip: '${l10n.italic} (⌘I)',
           onTap: () => _applyFormat(MarkdownFormat.italic),
         ),
         _CompactToolbarButton(
           icon: Icons.code,
-          tooltip: 'Code (⌘`)',
+          tooltip: '${l10n.inlineCode} (⌘`)',
           onTap: () => _applyFormat(MarkdownFormat.inlineCode),
         ),
         AdaptivePopupMenuButton<MarkdownFormat>(
@@ -403,32 +407,35 @@ class MarkdownToolbar extends StatelessWidget {
             size: 18,
             color: AppTheme.textMuted,
           ),
-          tooltip: 'More formatting',
+          tooltip: l10n.moreFormatting,
           onSelected: _applyFormat,
           itemBuilder: (context) => [
-            _buildMenuItem(MarkdownFormat.underline),
-            _buildMenuItem(MarkdownFormat.strikethrough),
+            _buildMenuItem(MarkdownFormat.underline, l10n),
+            _buildMenuItem(MarkdownFormat.strikethrough, l10n),
             const PopupMenuDivider(),
-            _buildMenuItem(MarkdownFormat.codeBlock),
-            _buildMenuItem(MarkdownFormat.link),
-            _buildMenuItem(MarkdownFormat.quote),
+            _buildMenuItem(MarkdownFormat.codeBlock, l10n),
+            _buildMenuItem(MarkdownFormat.link, l10n),
+            _buildMenuItem(MarkdownFormat.quote, l10n),
             const PopupMenuDivider(),
-            _buildMenuItem(MarkdownFormat.bulletList),
-            _buildMenuItem(MarkdownFormat.numberedList),
+            _buildMenuItem(MarkdownFormat.bulletList, l10n),
+            _buildMenuItem(MarkdownFormat.numberedList, l10n),
           ],
         ),
       ],
     );
   }
 
-  PopupMenuItem<MarkdownFormat> _buildMenuItem(MarkdownFormat format) {
+  PopupMenuItem<MarkdownFormat> _buildMenuItem(
+    MarkdownFormat format,
+    AppLocalizations l10n,
+  ) {
     return PopupMenuItem<MarkdownFormat>(
       value: format,
       child: Row(
         children: [
           Icon(format.icon, size: 18),
           const SizedBox(width: 12),
-          Text(format.displayName),
+          Text(_markdownFormatName(format, l10n)),
           if (format.shortcutHint != null) ...[
             const Spacer(),
             Text(
@@ -444,6 +451,27 @@ class MarkdownToolbar extends StatelessWidget {
     );
   }
 }
+
+String _markdownFormatName(
+  MarkdownFormat format,
+  AppLocalizations l10n,
+) =>
+    switch (format) {
+      MarkdownFormat.bold => l10n.bold,
+      MarkdownFormat.italic => l10n.italic,
+      MarkdownFormat.underline => l10n.underline,
+      MarkdownFormat.strikethrough => l10n.strikethrough,
+      MarkdownFormat.inlineCode => l10n.inlineCode,
+      MarkdownFormat.codeBlock => l10n.codeBlock,
+      MarkdownFormat.link => l10n.link,
+      MarkdownFormat.quote => l10n.quote,
+      MarkdownFormat.heading1 => l10n.heading1,
+      MarkdownFormat.heading2 => l10n.heading2,
+      MarkdownFormat.heading3 => l10n.heading3,
+      MarkdownFormat.bulletList => l10n.bulletList,
+      MarkdownFormat.numberedList => l10n.numberedList,
+      MarkdownFormat.horizontalRule => l10n.horizontalRule,
+    };
 
 class _CompactToolbarButton extends StatelessWidget {
   final IconData icon;

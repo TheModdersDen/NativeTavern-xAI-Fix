@@ -37,7 +37,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 2.0,
             divisions: 40,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTemperature(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTemperature(v),
           ),
           _buildSliderTile(
             context: context,
@@ -47,7 +48,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 1.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTopP(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTopP(v),
           ),
           _buildIntSliderTile(
             context: context,
@@ -56,7 +58,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             value: config.topK,
             min: 0,
             max: 200,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTopK(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTopK(v),
           ),
 
           const Divider(height: 32),
@@ -69,7 +72,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 1.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateMinP(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateMinP(v),
           ),
           _buildSliderTile(
             context: context,
@@ -79,7 +83,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 1.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTypicalP(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTypicalP(v),
           ),
           _buildSliderTile(
             context: context,
@@ -89,7 +94,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 1.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTopA(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTopA(v),
           ),
           _buildSliderTile(
             context: context,
@@ -99,7 +105,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 1.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateTailFreeSampling(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateTailFreeSampling(v),
           ),
 
           const Divider(height: 32),
@@ -112,7 +119,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 1.0,
             max: 2.0,
             divisions: 20,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateRepetitionPenalty(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateRepetitionPenalty(v),
           ),
           _buildIntSliderTile(
             context: context,
@@ -121,7 +129,9 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             value: config.repetitionPenaltyRange,
             min: 0,
             max: 4096,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateRepetitionPenaltyRange(v),
+            onChanged: (v) => ref
+                .read(llmConfigProvider.notifier)
+                .updateRepetitionPenaltyRange(v),
           ),
           _buildSliderTile(
             context: context,
@@ -131,7 +141,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 2.0,
             divisions: 40,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateFrequencyPenalty(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateFrequencyPenalty(v),
           ),
           _buildSliderTile(
             context: context,
@@ -141,7 +152,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             min: 0.0,
             max: 2.0,
             divisions: 40,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updatePresencePenalty(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updatePresencePenalty(v),
           ),
 
           const Divider(height: 32),
@@ -156,7 +168,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
               min: 0.0,
               max: 10.0,
               divisions: 20,
-              onChanged: (v) => ref.read(llmConfigProvider.notifier).updateMirostatTau(v),
+              onChanged: (v) =>
+                  ref.read(llmConfigProvider.notifier).updateMirostatTau(v),
             ),
             _buildSliderTile(
               context: context,
@@ -166,7 +179,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
               min: 0.0,
               max: 1.0,
               divisions: 20,
-              onChanged: (v) => ref.read(llmConfigProvider.notifier).updateMirostatEta(v),
+              onChanged: (v) =>
+                  ref.read(llmConfigProvider.notifier).updateMirostatEta(v),
             ),
           ],
 
@@ -182,7 +196,9 @@ class AdvancedSettingsScreen extends ConsumerWidget {
               min: 0.5,
               max: 0.95,
               divisions: 9,
-              onChanged: (v) => ref.read(llmConfigProvider.notifier).updateAutoSummarizeThreshold(v),
+              onChanged: (v) => ref
+                  .read(llmConfigProvider.notifier)
+                  .updateAutoSummarizeThreshold(v),
             ),
 
           const Divider(height: 32),
@@ -193,7 +209,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             title: l10n.maxTokens,
             subtitle: l10n.maxTokensDescription,
             value: config.maxTokens,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateMaxTokens(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateMaxTokens(v),
           ),
           _buildIntInputTile(
             context: context,
@@ -201,7 +218,8 @@ class AdvancedSettingsScreen extends ConsumerWidget {
             title: l10n.seed,
             subtitle: l10n.seedDescription,
             value: config.seed,
-            onChanged: (v) => ref.read(llmConfigProvider.notifier).updateSeed(v),
+            onChanged: (v) =>
+                ref.read(llmConfigProvider.notifier).updateSeed(v),
           ),
           _buildStopSequencesTile(context, ref, config.stopSequences),
 
@@ -314,13 +332,16 @@ class AdvancedSettingsScreen extends ConsumerWidget {
         ],
         selected: {mode},
         onSelectionChanged: (selected) {
-          ref.read(llmConfigProvider.notifier).updateMirostatMode(selected.first);
+          ref
+              .read(llmConfigProvider.notifier)
+              .updateMirostatMode(selected.first);
         },
       ),
     );
   }
 
-  Widget _buildAutoSummarizeTile(BuildContext context, WidgetRef ref, bool enabled) {
+  Widget _buildAutoSummarizeTile(
+      BuildContext context, WidgetRef ref, bool enabled) {
     final l10n = AppLocalizations.of(context);
     return SwitchListTile(
       secondary: const Icon(Icons.compress),
@@ -366,6 +387,7 @@ class AdvancedSettingsScreen extends ConsumerWidget {
     ValueChanged<int> onChanged,
   ) {
     final controller = TextEditingController(text: currentValue.toString());
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -381,7 +403,7 @@ class AdvancedSettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -391,7 +413,7 @@ class AdvancedSettingsScreen extends ConsumerWidget {
               }
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -462,7 +484,9 @@ class AdvancedSettingsScreen extends ConsumerWidget {
                   .map((s) => s.trim())
                   .where((s) => s.isNotEmpty)
                   .toList();
-              ref.read(llmConfigProvider.notifier).updateStopSequences(sequences);
+              ref
+                  .read(llmConfigProvider.notifier)
+                  .updateStopSequences(sequences);
               Navigator.pop(context);
             },
             child: Text(l10n.save),

@@ -28,6 +28,7 @@ class PersonaEditorScreen extends ConsumerStatefulWidget {
 
 class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
     with SingleTickerProviderStateMixin {
+  AppLocalizations get _l10n => AppLocalizations.of(context);
   late TabController _tabController;
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
@@ -93,25 +94,27 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.persona == null ? 'Create Persona' : 'Edit Persona'),
+        title: Text(
+          widget.persona == null ? _l10n.createPersona : _l10n.editPersona,
+        ),
         actions: [
           IconButton(
             icon: Icon(_isFavorite ? Icons.star : Icons.star_border),
-            tooltip: 'Favorite',
+            tooltip: _l10n.favorite,
             onPressed: () => setState(() => _isFavorite = !_isFavorite),
           ),
           IconButton(
             icon: const Icon(Icons.check),
-            tooltip: 'Save',
+            tooltip: _l10n.save,
             onPressed: _isSaving ? null : _save,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Basic', icon: Icon(Icons.person)),
-            Tab(text: 'Advanced', icon: Icon(Icons.settings)),
-            Tab(text: 'Connections', icon: Icon(Icons.link)),
+          tabs: [
+            Tab(text: _l10n.basic, icon: const Icon(Icons.person)),
+            Tab(text: _l10n.advanced, icon: const Icon(Icons.settings)),
+            Tab(text: _l10n.connections, icon: const Icon(Icons.link)),
           ],
         ),
       ),
@@ -139,11 +142,11 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           // Name
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              hintText: 'Enter persona name',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.badge),
+            decoration: InputDecoration(
+              labelText: _l10n.name,
+              hintText: _l10n.enterPersonaName,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.badge),
             ),
           ),
           const SizedBox(height: 16),
@@ -151,12 +154,12 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           // Description
           TextField(
             controller: _descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              hintText: 'Describe this persona',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.description),
-              helperText: 'This describes you to the AI',
+            decoration: InputDecoration(
+              labelText: _l10n.description,
+              hintText: _l10n.describePersona,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.description),
+              helperText: _l10n.personaDescriptionHelp,
             ),
             maxLines: 5,
           ),
@@ -169,11 +172,11 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           // Creator Notes
           TextField(
             controller: _creatorNotesController,
-            decoration: const InputDecoration(
-              labelText: 'Creator Notes',
-              hintText: 'Internal notes (not sent to AI)',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.note),
+            decoration: InputDecoration(
+              labelText: _l10n.creatorNotes,
+              hintText: _l10n.creatorNotesNotSentToAi,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.note),
             ),
             maxLines: 3,
           ),
@@ -195,12 +198,12 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           // System Prompt Override
           TextField(
             controller: _systemPromptController,
-            decoration: const InputDecoration(
-              labelText: 'System Prompt Override',
-              hintText: 'Override system prompt when using this persona',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.code),
-              helperText: 'Replaces the default system prompt',
+            decoration: InputDecoration(
+              labelText: _l10n.systemPromptOverride,
+              hintText: _l10n.systemPromptOverrideHint,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.code),
+              helperText: _l10n.systemPromptOverrideDescription,
             ),
             maxLines: 5,
           ),
@@ -209,12 +212,12 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           // Post-History Instructions
           TextField(
             controller: _postHistoryController,
-            decoration: const InputDecoration(
-              labelText: 'Post-History Instructions',
-              hintText: 'Instructions added after chat history',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.history),
-              helperText: 'Inserted after chat messages',
+            decoration: InputDecoration(
+              labelText: _l10n.postHistoryInstructions,
+              hintText: _l10n.instructionsAddedAfterHistory,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.history),
+              helperText: _l10n.instructionsInsertedAfterHistory,
             ),
             maxLines: 5,
           ),
@@ -234,15 +237,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Bind this persona to specific characters or groups',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                  _l10n.bindPersonaDescription,
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.add),
-                tooltip: 'Add Connection',
+                tooltip: _l10n.addConnection,
                 onPressed: _showAddConnectionDialog,
               ),
             ],
@@ -250,10 +253,10 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         ),
         Expanded(
           child: _connections.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'No connections yet',
-                    style: TextStyle(color: AppTheme.textMuted),
+                    _l10n.noConnections,
+                    style: const TextStyle(color: AppTheme.textMuted),
                   ),
                 )
               : ListView.builder(
@@ -273,12 +276,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
                         ),
                         title: Text(
                           connection.characterId != null
-                              ? 'Character: ${connection.characterId}'
+                              ? _l10n
+                                  .connectionCharacter(connection.characterId!)
                               : connection.groupId != null
-                                  ? 'Group: ${connection.groupId}'
-                                  : 'Chat: ${connection.chatId}',
+                                  ? _l10n.connectionGroup(connection.groupId!)
+                                  : _l10n.connectionChat(connection.chatId!),
                         ),
-                        subtitle: Text('Lock: ${connection.lockType.name}'),
+                        subtitle: Text(_l10n.lockLabel(
+                          _personaLockName(connection.lockType, _l10n),
+                        )),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _removeConnection(index),
@@ -296,9 +302,9 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Tags',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          _l10n.tags,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -311,7 +317,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
                   deleteIcon: const Icon(Icons.close, size: 18),
                 )),
             ActionChip(
-              label: const Text('Add Tag'),
+              label: Text(_l10n.addTag),
               avatar: const Icon(Icons.add, size: 18),
               onPressed: _showAddTagDialog,
             ),
@@ -326,21 +332,21 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
 
     return lorebooksAsync.when(
       loading: () => const LinearProgressIndicator(),
-      error: (_, __) => const Text('Error loading lorebooks'),
+      error: (error, __) => Text(_l10n.errorLoadingLorebooks('$error')),
       data: (lorebooks) {
         return DropdownButtonFormField<String?>(
           value: _lorebookId,
-          decoration: const InputDecoration(
-            labelText: 'Persona Lorebook',
-            hintText: 'Select a lorebook',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.book),
-            helperText: 'Automatically activated when using this persona',
+          decoration: InputDecoration(
+            labelText: _l10n.personaLorebook,
+            hintText: _l10n.selectLorebook,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.book),
+            helperText: _l10n.personaLorebookDescription,
           ),
           items: [
-            const DropdownMenuItem<String?>(
+            DropdownMenuItem<String?>(
               value: null,
-              child: Text('None'),
+              child: Text(_l10n.none),
             ),
             ...lorebooks.map((lb) => DropdownMenuItem(
                   value: lb.id,
@@ -360,22 +366,22 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Description Placement',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              _l10n.descriptionPlacement,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<PersonaDescriptionPosition>(
               value: _descriptionSettings.position,
-              decoration: const InputDecoration(
-                labelText: 'Position',
-                border: OutlineInputBorder(),
-                helperText: 'Where to insert persona description',
+              decoration: InputDecoration(
+                labelText: _l10n.position,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.personaDescriptionPositionHelp,
               ),
               items: PersonaDescriptionPosition.values.map((pos) {
                 return DropdownMenuItem(
                   value: pos,
-                  child: Text(_formatEnumName(pos.name)),
+                  child: Text(_personaPositionName(pos, _l10n)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -391,10 +397,10 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
             if (_descriptionSettings.position ==
                 PersonaDescriptionPosition.atDepth)
               TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Depth',
-                  border: OutlineInputBorder(),
-                  helperText: 'Depth in chat history',
+                decoration: InputDecoration(
+                  labelText: _l10n.depth,
+                  border: const OutlineInputBorder(),
+                  helperText: _l10n.depthInChatHistory,
                 ),
                 keyboardType: TextInputType.number,
                 controller: TextEditingController(
@@ -411,15 +417,15 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
             const SizedBox(height: 12),
             DropdownButtonFormField<PersonaDescriptionRole>(
               value: _descriptionSettings.role,
-              decoration: const InputDecoration(
-                labelText: 'Message Role',
-                border: OutlineInputBorder(),
-                helperText: 'Role for the description message',
+              decoration: InputDecoration(
+                labelText: _l10n.messageRole,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.roleForDescription,
               ),
               items: PersonaDescriptionRole.values.map((role) {
                 return DropdownMenuItem(
                   value: role,
-                  child: Text(_formatEnumName(role.name)),
+                  child: Text(_personaRoleName(role, _l10n)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -489,7 +495,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
+              title: Text(_l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImageFromGallery();
@@ -497,7 +503,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
+              title: Text(_l10n.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 _takePhoto();
@@ -506,8 +512,8 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
             if (_avatarPath != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Remove Avatar',
-                    style: TextStyle(color: Colors.red)),
+                title: Text(_l10n.removeAvatar,
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() => _avatarPath = null);
@@ -529,7 +535,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         await _saveAvatarImage(result.files.first.path!);
       }
     } catch (e) {
-      _showError('Failed to pick image: $e');
+      _showError(_l10n.failedToPickImage('$e'));
     }
   }
 
@@ -545,7 +551,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         await _saveAvatarImage(image.path);
       }
     } catch (e) {
-      _showError('Failed to pick image: $e');
+      _showError(_l10n.failedToPickImage('$e'));
     }
   }
 
@@ -561,7 +567,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         await _saveAvatarImage(image.path);
       }
     } catch (e) {
-      _showError('Failed to take photo: $e');
+      _showError(_l10n.failedToTakePhoto('$e'));
     }
   }
 
@@ -580,7 +586,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
       await File(sourcePath).copy(newPath);
       setState(() => _avatarPath = newPath);
     } catch (e) {
-      _showError('Failed to save avatar: $e');
+      _showError(_l10n.failedToSaveAvatar('$e'));
     }
   }
 
@@ -588,12 +594,12 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Tag'),
+        title: Text(_l10n.addTag),
         content: TextField(
           controller: _tagInputController,
-          decoration: const InputDecoration(
-            hintText: 'Enter tag name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: _l10n.enterTagName,
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
           onSubmitted: (value) {
@@ -607,7 +613,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(_l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -618,7 +624,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
               }
               Navigator.pop(context);
             },
-            child: const Text('Add'),
+            child: Text(_l10n.add),
           ),
         ],
       ),
@@ -652,7 +658,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
   Future<void> _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      _showError('Please enter a name');
+      _showError(_l10n.pleaseEnterAName);
       return;
     }
 
@@ -692,7 +698,7 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         Navigator.pop(context);
       }
     } catch (e) {
-      _showError('Failed to save: $e');
+      _showError(_l10n.saveFailed('$e'));
       setState(() => _isSaving = false);
     }
   }
@@ -703,18 +709,6 @@ class _PersonaEditorScreenState extends ConsumerState<PersonaEditorScreen>
         SnackBar(content: Text(message)),
       );
     }
-  }
-
-  String _formatEnumName(String name) {
-    return name
-        .replaceAllMapped(
-          RegExp(r'([A-Z])'),
-          (match) => ' ${match.group(0)}',
-        )
-        .trim()
-        .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join(' ');
   }
 }
 
@@ -736,28 +730,29 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Add Connection'),
+      title: Text(l10n.addConnection),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Type selector
           SegmentedButton<_ConnectionTarget>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: _ConnectionTarget.character,
-                label: Text('Character'),
-                icon: Icon(Icons.person),
+                label: Text(l10n.character),
+                icon: const Icon(Icons.person),
               ),
               ButtonSegment(
                 value: _ConnectionTarget.group,
-                label: Text('Group'),
-                icon: Icon(Icons.group),
+                label: Text(l10n.group),
+                icon: const Icon(Icons.group),
               ),
               ButtonSegment(
                 value: _ConnectionTarget.chat,
-                label: Text('Chat'),
-                icon: Icon(Icons.chat),
+                label: Text(l10n.chat),
+                icon: const Icon(Icons.chat),
               ),
             ],
             selected: {_target},
@@ -781,14 +776,14 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
           // Lock type
           DropdownButtonFormField<PersonaLockType>(
             value: _lockType,
-            decoration: const InputDecoration(
-              labelText: 'Lock Type',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.lockType,
+              border: const OutlineInputBorder(),
             ),
             items: PersonaLockType.values.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(type.name),
+                child: Text(_personaLockName(type, l10n)),
               );
             }).toList(),
             onChanged: (value) =>
@@ -799,7 +794,7 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: _selectedId == null
@@ -821,7 +816,7 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
                   );
                   Navigator.pop(context);
                 },
-          child: const Text('Add'),
+          child: Text(l10n.add),
         ),
       ],
     );
@@ -829,14 +824,15 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
 
   Widget _buildCharacterSelector() {
     final charactersAsync = ref.watch(characterListProvider);
+    final l10n = AppLocalizations.of(context);
     return charactersAsync.when(
       loading: () => const CircularProgressIndicator(),
-      error: (_, __) => const Text('Error loading characters'),
+      error: (error, __) => Text(l10n.errorLoadingCharacters('$error')),
       data: (characters) => DropdownButtonFormField<String>(
         value: _selectedId,
-        decoration: const InputDecoration(
-          labelText: 'Character',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: l10n.character,
+          border: const OutlineInputBorder(),
         ),
         items: characters
             .map((char) => DropdownMenuItem(
@@ -851,14 +847,15 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
 
   Widget _buildGroupSelector() {
     final groupsAsync = ref.watch(groupListProvider);
+    final l10n = AppLocalizations.of(context);
     return groupsAsync.when(
       loading: () => const CircularProgressIndicator(),
-      error: (_, __) => const Text('Error loading groups'),
+      error: (error, __) => Text(l10n.errorLoadingGroups('$error')),
       data: (groups) => DropdownButtonFormField<String>(
         value: _selectedId,
-        decoration: const InputDecoration(
-          labelText: 'Group',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: l10n.group,
+          border: const OutlineInputBorder(),
         ),
         items: groups
             .map((group) => DropdownMenuItem(
@@ -873,15 +870,16 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
 
   Widget _buildChatSelector() {
     final chatsAsync = ref.watch(allChatsProvider);
+    final l10n = AppLocalizations.of(context);
     return chatsAsync.when(
       loading: () => const CircularProgressIndicator(),
-      error: (_, __) => const Text('Error loading chats'),
+      error: (error, __) => Text(l10n.errorLoadingChats('$error')),
       data: (chats) => DropdownButtonFormField<String>(
         value: _selectedId,
         isExpanded: true,
-        decoration: const InputDecoration(
-          labelText: 'Chat',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: l10n.chat,
+          border: const OutlineInputBorder(),
         ),
         items: chats
             .map((chat) => DropdownMenuItem(
@@ -896,3 +894,37 @@ class _AddConnectionDialogState extends ConsumerState<_AddConnectionDialog> {
 }
 
 enum _ConnectionTarget { character, group, chat }
+
+String _personaPositionName(
+  PersonaDescriptionPosition position,
+  AppLocalizations l10n,
+) {
+  return switch (position) {
+    PersonaDescriptionPosition.beforeChar => l10n.beforeCharacterDefinition,
+    PersonaDescriptionPosition.afterChar => l10n.afterCharacterDefinition,
+    PersonaDescriptionPosition.atDepth => l10n.atDepth,
+    PersonaDescriptionPosition.inSystemPrompt => l10n.inSystemPrompt,
+    PersonaDescriptionPosition.topAN => l10n.beforeAuthorNote,
+    PersonaDescriptionPosition.bottomAN => l10n.afterAuthorNote,
+  };
+}
+
+String _personaRoleName(
+  PersonaDescriptionRole role,
+  AppLocalizations l10n,
+) {
+  return switch (role) {
+    PersonaDescriptionRole.system => l10n.system,
+    PersonaDescriptionRole.user => l10n.user,
+    PersonaDescriptionRole.assistant => l10n.assistant,
+  };
+}
+
+String _personaLockName(PersonaLockType lock, AppLocalizations l10n) {
+  return switch (lock) {
+    PersonaLockType.none => l10n.none,
+    PersonaLockType.chat => l10n.chat,
+    PersonaLockType.character => l10n.character,
+    PersonaLockType.defaultLock => l10n.default_,
+  };
+}

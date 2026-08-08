@@ -26,7 +26,7 @@ extension TokenizerTypeExtension on TokenizerType {
       case TokenizerType.gpt2:
         return 'GPT-2';
       case TokenizerType.openai:
-        return 'OA Compatible (tiktoken)';
+        return 'OAI Compatible (tiktoken)';
       case TokenizerType.llama:
         return 'LLaMA';
       case TokenizerType.llama3:
@@ -57,7 +57,7 @@ extension TokenizerTypeExtension on TokenizerType {
       case TokenizerType.gpt2:
         return 'Original 2 tokenizer (50,257 vocab)';
       case TokenizerType.openai:
-        return 'OA Compatible tiktoken for 4 models';
+        return 'OAI Compatible tiktoken for GPT models';
       case TokenizerType.llama:
         return 'LLaMA 1/2 tokenizer (32,000 vocab)';
       case TokenizerType.llama3:
@@ -220,7 +220,8 @@ class TokenizerSettings {
     return TokenizerSettings(
       selectedTokenizer: selectedTokenizer ?? this.selectedTokenizer,
       showTokenCount: showTokenCount ?? this.showTokenCount,
-      showTokenVisualization: showTokenVisualization ?? this.showTokenVisualization,
+      showTokenVisualization:
+          showTokenVisualization ?? this.showTokenVisualization,
       cacheResults: cacheResults ?? this.cacheResults,
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// A widget that displays text with long-press to copy functionality.
 /// Shows a snackbar when text is copied to clipboard.
@@ -46,12 +47,14 @@ class CopyableText extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context) {
     if (text.isEmpty) return;
-    
+
     Clipboard.setData(ClipboardData(text: text));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(copyMessage ?? 'Copied to clipboard'),
+        content: Text(
+          copyMessage ?? AppLocalizations.of(context).copiedToClipboard,
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -105,12 +108,14 @@ class CopyableListTile extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context) {
     if (subtitle == null || subtitle!.isEmpty) return;
-    
+
     Clipboard.setData(ClipboardData(text: subtitle!));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(copyMessage ?? 'Copied: $subtitle'),
+        content: Text(
+          copyMessage ?? AppLocalizations.of(context).copiedToClipboard,
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -156,12 +161,14 @@ class CopyableSwitchListTile extends StatelessWidget {
   void _copyToClipboard(BuildContext context) {
     final textToCopy = subtitle ?? titleText ?? '';
     if (textToCopy.isEmpty) return;
-    
+
     Clipboard.setData(ClipboardData(text: textToCopy));
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(copyMessage ?? 'Copied: $textToCopy'),
+        content: Text(
+          copyMessage ?? AppLocalizations.of(context).copiedToClipboard,
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),

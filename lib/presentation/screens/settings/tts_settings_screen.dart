@@ -14,6 +14,7 @@ class TTSSettingsScreen extends ConsumerWidget {
     final settings = ref.watch(ttsSettingsProvider);
     final isSpeaking = ref.watch(ttsSpeakingProvider);
     final voicesAsync = ref.watch(availableVoicesProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,9 +65,8 @@ class TTSSettingsScreen extends ConsumerWidget {
                     : null,
               ),
               SwitchListTile(
-                title: const Text('Queue Messages'),
-                subtitle: const Text(
-                    'Queue multiple messages instead of interrupting'),
+                title: Text(l10n.queueMessages),
+                subtitle: Text(l10n.queueMessagesDescription),
                 value: settings.queueMessages,
                 onChanged: settings.enabled
                     ? (value) {
@@ -168,19 +168,19 @@ class TTSSettingsScreen extends ConsumerWidget {
                     }).toList(),
                   ),
                 ),
-                loading: () => const ListTile(
-                  title: Text('Voice'),
-                  subtitle: Text('Loading voices...'),
-                  trailing: SizedBox(
+                loading: () => ListTile(
+                  title: Text(l10n.voice),
+                  subtitle: Text(l10n.loadingVoices),
+                  trailing: const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-                error: (_, __) => const ListTile(
-                  title: Text('Voice'),
-                  subtitle: Text('Failed to load voices'),
-                  trailing: Icon(Icons.error, color: Colors.red),
+                error: (_, __) => ListTile(
+                  title: Text(l10n.voice),
+                  subtitle: Text(l10n.failedToLoadVoices),
+                  trailing: const Icon(Icons.error, color: Colors.red),
                 ),
               ),
             ],
@@ -283,10 +283,7 @@ class TTSSettingsScreen extends ConsumerWidget {
                         if (isSpeaking) {
                           await ref.read(ttsStopProvider)();
                         } else {
-                          await ref.read(ttsSpeakProvider)(
-                            'Hello! This is a test of the text-to-speech system. '
-                            'The quick brown fox jumps over the lazy dog.',
-                          );
+                          await ref.read(ttsSpeakProvider)(l10n.ttsTestPhrase);
                         }
                       }
                     : null,
@@ -301,31 +298,24 @@ class TTSSettingsScreen extends ConsumerWidget {
             context,
             title: AppLocalizations.of(context).information,
             children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('About TTS'),
-                subtitle: Text(
-                  'Text-to-Speech allows you to hear messages read aloud. '
-                  'You can configure different voices for different characters '
-                  'in the character settings.',
-                ),
+              ListTile(
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                title: Text(l10n.aboutTts),
+                subtitle: Text(l10n.aboutTtsDescription),
               ),
               if (settings.provider == TTSProvider.system)
-                const ListTile(
-                  leading: Icon(Icons.phone_android, color: AppTheme.textMuted),
-                  title: Text('System TTS'),
-                  subtitle: Text(
-                    'Using your device\'s built-in text-to-speech engine. '
-                    'Available voices depend on your system settings.',
-                  ),
+                ListTile(
+                  leading: const Icon(Icons.phone_android,
+                      color: AppTheme.textMuted),
+                  title: Text(l10n.systemTts),
+                  subtitle: Text(l10n.systemTtsDetails),
                 ),
               if (settings.provider == TTSProvider.elevenlabs)
-                const ListTile(
-                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text('ElevenLabs'),
-                  subtitle: Text(
-                    'High-quality AI voices. Requires an API key from elevenlabs.io',
-                  ),
+                ListTile(
+                  leading: const Icon(Icons.cloud, color: AppTheme.textMuted),
+                  title: const Text('ElevenLabs'),
+                  subtitle: Text(l10n.elevenLabsDescription),
                 ),
             ],
           ),
@@ -479,7 +469,9 @@ class TTSMessageButton extends ConsumerWidget {
         isSpeaking ? Icons.stop : Icons.volume_up,
         size: size,
       ),
-      tooltip: isSpeaking ? 'Stop' : 'Read aloud',
+      tooltip: isSpeaking
+          ? AppLocalizations.of(context).stopSpeaking
+          : AppLocalizations.of(context).readAloud,
       onPressed: () async {
         if (isSpeaking) {
           await ref.read(ttsStopProvider)();
@@ -508,7 +500,7 @@ class TTSControls extends ConsumerWidget {
         if (isSpeaking)
           IconButton(
             icon: const Icon(Icons.stop, size: 20),
-            tooltip: 'Stop speaking',
+            tooltip: AppLocalizations.of(context).stopSpeaking,
             onPressed: () => ref.read(ttsStopProvider)(),
           ),
         Icon(

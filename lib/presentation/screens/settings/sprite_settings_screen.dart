@@ -15,18 +15,19 @@ class SpriteSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(spriteSettingsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expression Sprites'),
+        title: Text(l10n.expressionSprites),
         actions: [
           IconButton(
             icon: const Icon(Icons.restore),
-            tooltip: 'Reset to defaults',
+            tooltip: l10n.resetToDefaults,
             onPressed: () {
               ref.read(spriteSettingsProvider.notifier).reset();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings reset to defaults')),
+                SnackBar(content: Text(l10n.settingsResetToDefaults)),
               );
             },
           ),
@@ -37,11 +38,11 @@ class SpriteSettingsScreen extends ConsumerWidget {
         children: [
           // Enable/Disable toggle
           _buildSection(
-            title: 'General',
+            title: l10n.general,
             children: [
               SwitchListTile(
-                title: const Text('Enable Sprites'),
-                subtitle: const Text('Show character expression images in chat'),
+                title: Text(l10n.enableSprites),
+                subtitle: Text(l10n.showCharacterExpressions),
                 value: settings.enabled,
                 onChanged: (value) {
                   ref.read(spriteSettingsProvider.notifier).setEnabled(value);
@@ -54,11 +55,11 @@ class SpriteSettingsScreen extends ConsumerWidget {
 
           // Display settings
           _buildSection(
-            title: 'Display',
+            title: l10n.display,
             children: [
               // Size slider
               ListTile(
-                title: const Text('Sprite Size'),
+                title: Text(l10n.spriteSize),
                 subtitle: Slider(
                   value: settings.size,
                   min: 50,
@@ -67,7 +68,9 @@ class SpriteSettingsScreen extends ConsumerWidget {
                   label: '${settings.size.round()}px',
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(spriteSettingsProvider.notifier).setSize(value);
+                          ref
+                              .read(spriteSettingsProvider.notifier)
+                              .setSize(value);
                         }
                       : null,
                 ),
@@ -79,21 +82,23 @@ class SpriteSettingsScreen extends ConsumerWidget {
 
               // Position dropdown
               ListTile(
-                title: const Text('Position'),
-                subtitle: const Text('Where to display sprites'),
+                title: Text(l10n.position),
+                subtitle: Text(l10n.whereToDisplaySprites),
                 trailing: DropdownButton<SpritePosition>(
                   value: settings.position,
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(spriteSettingsProvider.notifier).setPosition(value);
+                            ref
+                                .read(spriteSettingsProvider.notifier)
+                                .setPosition(value);
                           }
                         }
                       : null,
                   items: SpritePosition.values.map((pos) {
                     return DropdownMenuItem(
                       value: pos,
-                      child: Text(_getPositionName(pos)),
+                      child: Text(_getPositionName(pos, l10n)),
                     );
                   }).toList(),
                 ),
@@ -101,7 +106,7 @@ class SpriteSettingsScreen extends ConsumerWidget {
 
               // Opacity slider
               ListTile(
-                title: const Text('Opacity'),
+                title: Text(l10n.opacity),
                 subtitle: Slider(
                   value: settings.opacity,
                   min: 0.1,
@@ -110,7 +115,9 @@ class SpriteSettingsScreen extends ConsumerWidget {
                   label: '${(settings.opacity * 100).round()}%',
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(spriteSettingsProvider.notifier).setOpacity(value);
+                          ref
+                              .read(spriteSettingsProvider.notifier)
+                              .setOpacity(value);
                         }
                       : null,
                 ),
@@ -126,21 +133,22 @@ class SpriteSettingsScreen extends ConsumerWidget {
 
           // Animation settings
           _buildSection(
-            title: 'Animation',
+            title: l10n.animation,
             children: [
               SwitchListTile(
-                title: const Text('Animate Transitions'),
-                subtitle: const Text('Smooth fade when sprite changes'),
+                title: Text(l10n.animateTransitions),
+                subtitle: Text(l10n.smoothFadeWhenSpriteChanges),
                 value: settings.animateTransitions,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(spriteSettingsProvider.notifier).setAnimateTransitions(value);
+                        ref
+                            .read(spriteSettingsProvider.notifier)
+                            .setAnimateTransitions(value);
                       }
                     : null,
               ),
-
               ListTile(
-                title: const Text('Transition Duration'),
+                title: Text(l10n.transitionDuration),
                 subtitle: Slider(
                   value: settings.transitionDurationMs.toDouble(),
                   min: 0,
@@ -149,7 +157,8 @@ class SpriteSettingsScreen extends ConsumerWidget {
                   label: '${settings.transitionDurationMs}ms',
                   onChanged: settings.enabled && settings.animateTransitions
                       ? (value) {
-                          ref.read(spriteSettingsProvider.notifier)
+                          ref
+                              .read(spriteSettingsProvider.notifier)
                               .setTransitionDuration(value.round());
                         }
                       : null,
@@ -159,14 +168,15 @@ class SpriteSettingsScreen extends ConsumerWidget {
                   style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
-
               SwitchListTile(
-                title: const Text('Show During Streaming'),
-                subtitle: const Text('Display sprites while AI is generating'),
+                title: Text(l10n.showDuringStreaming),
+                subtitle: Text(l10n.displaySpritesWhileGenerating),
                 value: settings.showDuringStreaming,
                 onChanged: settings.enabled
                     ? (value) {
-                        ref.read(spriteSettingsProvider.notifier).setShowDuringStreaming(value);
+                        ref
+                            .read(spriteSettingsProvider.notifier)
+                            .setShowDuringStreaming(value);
                       }
                     : null,
               ),
@@ -177,23 +187,23 @@ class SpriteSettingsScreen extends ConsumerWidget {
 
           // Emotion detection info
           _buildSection(
-            title: 'Emotion Detection',
+            title: l10n.emotionDetection,
             children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('How it works'),
+              ListTile(
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                title: Text(l10n.howItWorks),
                 subtitle: Text(
-                  'Sprites are automatically selected based on emotion keywords detected in messages. '
-                  'Action text like *smiles* or *laughs* is prioritized.',
+                  l10n.spriteEmotionDetectionDescription,
                 ),
               ),
               const Divider(),
               ExpansionTile(
-                title: const Text('Supported Emotions'),
+                title: Text(l10n.supportedEmotions),
                 children: SpriteEmotion.values.map((emotion) {
                   return ListTile(
                     dense: true,
-                    title: Text(emotion.displayName),
+                    title: Text(_getEmotionName(emotion, l10n)),
                     subtitle: Text(
                       emotion.keywords.take(5).join(', ') +
                           (emotion.keywords.length > 5 ? '...' : ''),
@@ -238,20 +248,26 @@ class SpriteSettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getPositionName(SpritePosition position) {
+  String _getPositionName(
+    SpritePosition position,
+    AppLocalizations l10n,
+  ) {
     switch (position) {
       case SpritePosition.left:
-        return 'Left';
+        return l10n.left;
       case SpritePosition.right:
-        return 'Right';
+        return l10n.right;
       case SpritePosition.center:
-        return 'Center';
+        return l10n.center;
       case SpritePosition.floatingLeft:
-        return 'Floating Left';
+        return l10n.floatingLeft;
       case SpritePosition.floatingRight:
-        return 'Floating Right';
+        return l10n.floatingRight;
     }
   }
+
+  String _getEmotionName(SpriteEmotion emotion, AppLocalizations l10n) =>
+      _localizedEmotionName(emotion, l10n);
 }
 
 /// Screen for managing sprites for a specific character
@@ -266,33 +282,36 @@ class CharacterSpritesScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CharacterSpritesScreen> createState() => _CharacterSpritesScreenState();
+  ConsumerState<CharacterSpritesScreen> createState() =>
+      _CharacterSpritesScreenState();
 }
 
-class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen> {
+class _CharacterSpritesScreenState
+    extends ConsumerState<CharacterSpritesScreen> {
   final ImagePicker _picker = ImagePicker();
   String? _selectedEmotion;
 
   @override
   Widget build(BuildContext context) {
     final packAsync = ref.watch(spritePackNotifierProvider(widget.characterId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.characterName} Sprites'),
+        title: Text(l10n.characterSprites(widget.characterName)),
         actions: [
           IconButton(
             icon: const Icon(Icons.folder_open),
-            tooltip: 'Import from folder',
+            tooltip: l10n.importFromFolder,
             onPressed: _importFromFolder,
           ),
           PopupMenuButton(
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete_all',
                 child: ListTile(
-                  leading: Icon(Icons.delete_sweep, color: Colors.red),
-                  title: Text('Delete All Sprites'),
+                  leading: const Icon(Icons.delete_sweep, color: Colors.red),
+                  title: Text(l10n.deleteAllSprites),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -309,18 +328,20 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
         data: (pack) => _buildContent(pack),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+          child: Text('${l10n.error}: $error',
+              style: const TextStyle(color: Colors.red)),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addSprite,
         icon: const Icon(Icons.add_photo_alternate),
-        label: const Text('Add Sprite'),
+        label: Text(l10n.addSprite),
       ),
     );
   }
 
   Widget _buildContent(SpritePack pack) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -338,7 +359,7 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${pack.sprites.length} sprites',
+                        l10n.spritesCount(pack.sprites.length),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -346,7 +367,7 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
                       ),
                       if (pack.defaultEmotion != null)
                         Text(
-                          'Default: ${pack.defaultEmotion}',
+                          l10n.defaultEmotion(pack.defaultEmotion!),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.textMuted,
@@ -364,9 +385,9 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
 
         // Sprites grid
         if (pack.hasSprites) ...[
-          const Text(
-            'Sprites',
-            style: TextStyle(
+          Text(
+            l10n.sprites,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppTheme.textSecondary,
@@ -393,17 +414,17 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
                   color: AppTheme.textMuted.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'No sprites yet',
-                  style: TextStyle(
+                Text(
+                  l10n.noSpritesYet,
+                  style: const TextStyle(
                     fontSize: 18,
                     color: AppTheme.textMuted,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Add expression images for this character',
-                  style: TextStyle(
+                Text(
+                  l10n.addExpressionImages,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textMuted,
                   ),
@@ -428,21 +449,25 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
     if (image == null) return;
 
     // Add sprite
-    await ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+    await ref
+        .read(spritePackNotifierProvider(widget.characterId).notifier)
         .addSprite(emotion, File(image.path));
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added $emotion sprite')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context).addedSpriteEmotion(emotion))),
       );
     }
   }
 
   Future<String?> _selectEmotion() async {
+    final l10n = AppLocalizations.of(context);
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Emotion'),
+        title: Text(l10n.selectEmotion),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -451,10 +476,11 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
             itemBuilder: (context, index) {
               final emotion = SpriteEmotion.values[index];
               return ListTile(
-                title: Text(emotion.displayName),
+                title: Text(_localizedEmotionName(emotion, l10n)),
                 subtitle: Text(
                   emotion.keywords.take(3).join(', '),
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                  style:
+                      const TextStyle(fontSize: 12, color: AppTheme.textMuted),
                 ),
                 onTap: () => Navigator.pop(context, emotion.id),
               );
@@ -464,7 +490,7 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -472,6 +498,7 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
   }
 
   void _showSpriteOptions(Sprite sprite) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.darkCard,
@@ -492,52 +519,59 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Preview
             SpritePreview(
               sprite: sprite,
               size: 120,
               showLabel: true,
             ),
-            
+
             const SizedBox(height: 16),
             const Divider(),
-            
+
             ListTile(
               leading: const Icon(Icons.star, color: AppTheme.accentColor),
-              title: const Text('Set as Default'),
+              title: Text(l10n.setAsDefault),
               onTap: () {
                 Navigator.pop(context);
-                ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+                ref
+                    .read(
+                        spritePackNotifierProvider(widget.characterId).notifier)
                     .setDefaultEmotion(sprite.emotion);
               },
             ),
-            
+
             ListTile(
               leading: const Icon(Icons.swap_horiz),
-              title: const Text('Change Emotion'),
+              title: Text(l10n.changeEmotion),
               onTap: () async {
                 Navigator.pop(context);
                 final newEmotion = await _selectEmotion();
                 if (newEmotion != null && newEmotion != sprite.emotion) {
                   // Remove old and add new
-                  await ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+                  await ref
+                      .read(spritePackNotifierProvider(widget.characterId)
+                          .notifier)
                       .removeSprite(sprite.emotion);
-                  await ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+                  await ref
+                      .read(spritePackNotifierProvider(widget.characterId)
+                          .notifier)
                       .addSprite(newEmotion, File(sprite.imagePath));
                 }
               },
             ),
-            
+
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete', style: TextStyle(color: Colors.red)),
+              title:
+                  Text(l10n.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteSprite(sprite);
               },
             ),
-            
+
             const SizedBox(height: 8),
           ],
         ),
@@ -546,24 +580,26 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
   }
 
   void _confirmDeleteSprite(Sprite sprite) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Sprite'),
-        content: Text('Delete the ${sprite.emotion} sprite?'),
+        title: Text(l10n.deleteSprite),
+        content: Text(l10n.deleteSpriteConfirmation(sprite.emotion)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+              ref
+                  .read(spritePackNotifierProvider(widget.characterId).notifier)
                   .removeSprite(sprite.emotion);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -571,27 +607,26 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
   }
 
   void _confirmDeleteAll() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete All Sprites'),
-        content: const Text(
-          'Are you sure you want to delete all sprites for this character? '
-          'This cannot be undone.',
-        ),
+        title: Text(l10n.deleteAllSprites),
+        content: Text(l10n.deleteAllSpritesConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(spritePackNotifierProvider(widget.characterId).notifier)
+              ref
+                  .read(spritePackNotifierProvider(widget.characterId).notifier)
                   .deleteAll();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete All'),
+            child: Text(l10n.deleteAll),
           ),
         ],
       ),
@@ -599,38 +634,39 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
   }
 
   Future<void> _importFromFolder() async {
+    final l10n = AppLocalizations.of(context);
     // Show info dialog about import
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Import Sprites'),
-        content: const Column(
+        title: Text(l10n.importSprites),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(l10n.importSpritesDescription),
+            const SizedBox(height: 12),
+            const Text('• happy.png, smile.jpg',
+                style: TextStyle(fontSize: 12)),
+            const Text('• sad.png, cry.jpg', style: TextStyle(fontSize: 12)),
+            const Text('• angry.png, mad.jpg', style: TextStyle(fontSize: 12)),
+            const Text('• neutral.png, default.jpg',
+                style: TextStyle(fontSize: 12)),
+            const SizedBox(height: 12),
             Text(
-              'Import sprites from a folder. Files should be named with emotion keywords:',
-            ),
-            SizedBox(height: 12),
-            Text('• happy.png, smile.jpg', style: TextStyle(fontSize: 12)),
-            Text('• sad.png, cry.jpg', style: TextStyle(fontSize: 12)),
-            Text('• angry.png, mad.jpg', style: TextStyle(fontSize: 12)),
-            Text('• neutral.png, default.jpg', style: TextStyle(fontSize: 12)),
-            SizedBox(height: 12),
-            Text(
-              'Supported formats: PNG, JPG, GIF, WebP',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+              l10n.supportedFormatsSprites,
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Select Folder'),
+            child: Text(l10n.selectFolder),
           ),
         ],
       ),
@@ -642,11 +678,34 @@ class _CharacterSpritesScreenState extends ConsumerState<CharacterSpritesScreen>
     // For now, show a message that this feature requires additional setup
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Folder import requires file_picker package'),
-          duration: Duration(seconds: 3),
+        SnackBar(
+          content: Text(l10n.folderImportRequiresPackage),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
   }
+}
+
+String _localizedEmotionName(
+  SpriteEmotion emotion,
+  AppLocalizations l10n,
+) {
+  return switch (emotion) {
+    SpriteEmotion.neutral => l10n.emotionNeutral,
+    SpriteEmotion.happy => l10n.emotionHappy,
+    SpriteEmotion.sad => l10n.emotionSad,
+    SpriteEmotion.angry => l10n.emotionAngry,
+    SpriteEmotion.surprised => l10n.emotionSurprised,
+    SpriteEmotion.scared => l10n.emotionScared,
+    SpriteEmotion.disgusted => l10n.emotionDisgusted,
+    SpriteEmotion.confused => l10n.emotionConfused,
+    SpriteEmotion.embarrassed => l10n.emotionEmbarrassed,
+    SpriteEmotion.excited => l10n.emotionExcited,
+    SpriteEmotion.loving => l10n.emotionLoving,
+    SpriteEmotion.thinking => l10n.emotionThinking,
+    SpriteEmotion.smug => l10n.emotionSmug,
+    SpriteEmotion.tired => l10n.emotionTired,
+    SpriteEmotion.bored => l10n.emotionBored,
+  };
 }

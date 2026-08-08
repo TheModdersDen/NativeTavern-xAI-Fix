@@ -14,16 +14,20 @@ class LogitBiasSettingsScreen extends ConsumerStatefulWidget {
   const LogitBiasSettingsScreen({super.key});
 
   @override
-  ConsumerState<LogitBiasSettingsScreen> createState() => _LogitBiasSettingsScreenState();
+  ConsumerState<LogitBiasSettingsScreen> createState() =>
+      _LogitBiasSettingsScreenState();
 }
 
-class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScreen> {
+class _LogitBiasSettingsScreenState
+    extends ConsumerState<LogitBiasSettingsScreen> {
   @override
   void initState() {
     super.initState();
     // Create default preset if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(logitBiasSettingsProvider.notifier).createDefaultPresetIfNeeded();
+      ref
+          .read(logitBiasSettingsProvider.notifier)
+          .createDefaultPresetIfNeeded();
     });
   }
 
@@ -49,7 +53,8 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
           // Enable toggle
           SwitchListTile(
             title: Text(AppLocalizations.of(context)!.enableLogitBias),
-            subtitle: Text(AppLocalizations.of(context)!.adjustTokenProbabilities),
+            subtitle:
+                Text(AppLocalizations.of(context)!.adjustTokenProbabilities),
             value: settings.enabled,
             onChanged: (value) {
               ref.read(logitBiasSettingsProvider.notifier).setEnabled(value);
@@ -78,7 +83,8 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
 
           if (settings.activePreset != null) ...[
             const Divider(height: 32),
-            _buildSectionHeader(context, AppLocalizations.of(context)!.biasEntries),
+            _buildSectionHeader(
+                context, AppLocalizations.of(context)!.biasEntries),
             const SizedBox(height: 8),
             _BiasEntriesList(
               entries: settings.activePreset!.entries,
@@ -96,7 +102,9 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
                 ref.read(logitBiasSettingsProvider.notifier).toggleEntry(id);
               },
               onReorder: (oldIndex, newIndex) {
-                ref.read(logitBiasSettingsProvider.notifier).reorderEntries(oldIndex, newIndex);
+                ref
+                    .read(logitBiasSettingsProvider.notifier)
+                    .reorderEntries(oldIndex, newIndex);
               },
             ),
           ],
@@ -157,9 +165,12 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
           TextButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
-                final preset = LogitBiasPreset.create(name: controller.text.trim());
+                final preset =
+                    LogitBiasPreset.create(name: controller.text.trim());
                 ref.read(logitBiasSettingsProvider.notifier).addPreset(preset);
-                ref.read(logitBiasSettingsProvider.notifier).setActivePreset(preset.id);
+                ref
+                    .read(logitBiasSettingsProvider.notifier)
+                    .setActivePreset(preset.id);
                 Navigator.pop(context);
               }
             },
@@ -192,7 +203,9 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
                 final updated = preset.copyWith(name: controller.text.trim());
-                ref.read(logitBiasSettingsProvider.notifier).updatePreset(updated);
+                ref
+                    .read(logitBiasSettingsProvider.notifier)
+                    .updatePreset(updated);
                 Navigator.pop(context);
               }
             },
@@ -216,7 +229,9 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
           ),
           TextButton(
             onPressed: () {
-              ref.read(logitBiasSettingsProvider.notifier).deletePreset(presetId);
+              ref
+                  .read(logitBiasSettingsProvider.notifier)
+                  .deletePreset(presetId);
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -229,15 +244,20 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
 
   void _exportPreset(BuildContext context, String presetId) {
     try {
-      final json = ref.read(logitBiasSettingsProvider.notifier).exportPreset(presetId);
+      final json =
+          ref.read(logitBiasSettingsProvider.notifier).exportPreset(presetId);
       final jsonString = const JsonEncoder.withIndent('  ').convert(json);
       Clipboard.setData(ClipboardData(text: jsonString));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.presetCopiedToClipboard)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.presetCopiedToClipboard)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.exportPresetFailed(e.toString()))),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!
+                .exportPresetFailed(e.toString()))),
       );
     }
   }
@@ -264,15 +284,20 @@ class _LogitBiasSettingsScreenState extends ConsumerState<LogitBiasSettingsScree
           TextButton(
             onPressed: () {
               try {
-                final json = jsonDecode(controller.text) as Map<String, dynamic>;
+                final json =
+                    jsonDecode(controller.text) as Map<String, dynamic>;
                 ref.read(logitBiasSettingsProvider.notifier).importPreset(json);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.presetImportedSuccessfully)),
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .presetImportedSuccessfully)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.importPresetFailed(e.toString()))),
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .importPresetFailed(e.toString()))),
                 );
               }
             },
@@ -355,7 +380,8 @@ class _PresetSelector extends StatelessWidget {
                   value: 'import',
                   child: ListTile(
                     leading: const Icon(Icons.file_download),
-                    title: Text(AppLocalizations.of(context)!.importPresetLabel),
+                    title:
+                        Text(AppLocalizations.of(context)!.importPresetLabel),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -372,7 +398,8 @@ class _PresetSelector extends StatelessWidget {
                 icon: const Icon(Icons.edit, size: 18),
                 label: Text(AppLocalizations.of(context)!.rename),
                 onPressed: () {
-                  final preset = presets.firstWhere((p) => p.id == activePresetId);
+                  final preset =
+                      presets.firstWhere((p) => p.id == activePresetId);
                   onEditPreset(preset);
                 },
               ),
@@ -507,7 +534,8 @@ class _BiasEntryCardState extends ConsumerState<_BiasEntryCard> {
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.entry.text);
-    _valueController = TextEditingController(text: widget.entry.value.toString());
+    _valueController =
+        TextEditingController(text: widget.entry.value.toString());
   }
 
   @override
@@ -565,10 +593,13 @@ class _BiasEntryCardState extends ConsumerState<_BiasEntryCard> {
                     controller: _textController,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.textOrToken,
-                      hintText: 'word, {verbatim}, or [1234]',
+                      hintText: AppLocalizations.of(context)!
+                          .textTokenHint('{verbatim}'),
                       isDense: true,
                       border: const OutlineInputBorder(),
-                      errorText: validation.errors.isNotEmpty ? validation.errors.first : null,
+                      errorText: validation.errors.isNotEmpty
+                          ? validation.errors.first
+                          : null,
                     ),
                     enabled: widget.entry.enabled,
                     onChanged: (value) {

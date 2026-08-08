@@ -2044,7 +2044,7 @@ abstract class AppLocalizations {
   /// Instruct template description
   ///
   /// In en, this message translates to:
-  /// **'Instruct templates format prompts for different LLM models. Use \"None\" for API providers like OpenAI or Claude that handle formatting automatically.'**
+  /// **'Instruct templates format prompts for different LLM models. Use \"None\" for API providers such as OAI Compatible or Claude that handle formatting automatically.'**
   String get instructTemplateDescription;
 
   /// Prompt manager subtitle
@@ -3406,7 +3406,7 @@ abstract class AppLocalizations {
   /// DALL-E description
   ///
   /// In en, this message translates to:
-  /// **'OpenAI\'s DALL-E image generation. Requires an API key from OpenAI.'**
+  /// **'DALL-E image generation through an OAI Compatible endpoint. Requires an API key.'**
   String get dalleDescription;
 
   /// Prompt label
@@ -3796,8 +3796,8 @@ abstract class AppLocalizations {
   /// Supports macros help
   ///
   /// In en, this message translates to:
-  /// **'Supports macros like \'{user}\', \'{char}\''**
-  String supportsMacros(Object char, Object user);
+  /// **'Supports prompt macros'**
+  String get supportsMacros;
 
   /// Auto-send label
   ///
@@ -4132,8 +4132,8 @@ abstract class AppLocalizations {
   /// Replacement hint for testing
   ///
   /// In en, this message translates to:
-  /// **'\$1, \$2, \'{match}\''**
-  String replacementHint(Object match);
+  /// **'\$1, \$2, or the matched text'**
+  String get replacementHint;
 
   /// Test button
   ///
@@ -4714,7 +4714,7 @@ abstract class AppLocalizations {
   /// Whisper description
   ///
   /// In en, this message translates to:
-  /// **'OpenAI\'s Whisper model for high-accuracy transcription. Requires an API key.'**
+  /// **'Whisper transcription through an OAI Compatible endpoint. Requires an API key.'**
   String get whisperDescription;
 
   /// Voice input tooltip
@@ -9151,6 +9151,1837 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed'**
   String get rpgQuestFailed;
+
+  /// No description provided for @rpgEnableMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable RPG mode'**
+  String get rpgEnableMode;
+
+  /// No description provided for @noImageGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'No image was generated'**
+  String get noImageGenerated;
+
+  /// No description provided for @failedToSaveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save image: {error}'**
+  String failedToSaveImage(String error);
+
+  /// No description provided for @imagesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} image(s)'**
+  String imagesAdded(int count);
+
+  /// No description provided for @addConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add connection'**
+  String get addConnection;
+
+  /// No description provided for @group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get group;
+
+  /// No description provided for @lockType.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock type'**
+  String get lockType;
+
+  /// No description provided for @errorLoadingCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load characters: {error}'**
+  String errorLoadingCharacters(String error);
+
+  /// No description provided for @errorLoadingGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load groups: {error}'**
+  String errorLoadingGroups(String error);
+
+  /// No description provided for @inSystemPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'In system prompt'**
+  String get inSystemPrompt;
+
+  /// No description provided for @connectingGoogleDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to Google Drive...'**
+  String get connectingGoogleDrive;
+
+  /// No description provided for @checkingICloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking iCloud...'**
+  String get checkingICloud;
+
+  /// No description provided for @whatIsPromptManager.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the Prompt Manager?'**
+  String get whatIsPromptManager;
+
+  /// No description provided for @promptManagerHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The Prompt Manager controls how the system prompt is assembled before messages are sent to the AI. You can reorder sections and enable or disable them.'**
+  String get promptManagerHelpDescription;
+
+  /// No description provided for @promptSectionTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Section types'**
+  String get promptSectionTypes;
+
+  /// No description provided for @promptSectionTypesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sections can include system instructions, persona and character details, scenario, lorebook context, example messages, author\'s notes, chat history, and post-history instructions.'**
+  String get promptSectionTypesDescription;
+
+  /// No description provided for @tips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get tips;
+
+  /// No description provided for @promptManagerTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Sections near the top have higher priority. Disable sections you do not need to save tokens, and adjust their order for different results.'**
+  String get promptManagerTips;
+
+  /// No description provided for @customImportedPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom prompt from an imported preset'**
+  String get customImportedPrompt;
+
+  /// No description provided for @editPromptSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {name}'**
+  String editPromptSection(String name);
+
+  /// No description provided for @promptName.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt name'**
+  String get promptName;
+
+  /// No description provided for @identifierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {identifier}'**
+  String identifierLabel(String identifier);
+
+  /// No description provided for @roleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role: {role}'**
+  String roleLabel(String role);
+
+  /// No description provided for @supportedPromptMacros.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports macros such as {userMacro}, {charMacro}, {timeMacro}, and {dateMacro}.'**
+  String supportedPromptMacros(
+      String userMacro, String charMacro, String timeMacro, String dateMacro);
+
+  /// No description provided for @enterPromptContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter prompt content...'**
+  String get enterPromptContent;
+
+  /// No description provided for @updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {name}'**
+  String updated(String name);
+
+  /// No description provided for @customPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom prompt'**
+  String get customPrompt;
+
+  /// No description provided for @promptSectionSystemPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'System prompt'**
+  String get promptSectionSystemPrompt;
+
+  /// No description provided for @promptSectionSystemPromptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Base roleplay instructions'**
+  String get promptSectionSystemPromptDescription;
+
+  /// No description provided for @promptSectionPersona.
+  ///
+  /// In en, this message translates to:
+  /// **'User persona'**
+  String get promptSectionPersona;
+
+  /// No description provided for @promptSectionPersonaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your persona information'**
+  String get promptSectionPersonaDescription;
+
+  /// No description provided for @promptSectionCharacterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Character description'**
+  String get promptSectionCharacterDescription;
+
+  /// No description provided for @promptSectionCharacterDescriptionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI character\'s details'**
+  String get promptSectionCharacterDescriptionDescription;
+
+  /// No description provided for @promptSectionCharacterPersonality.
+  ///
+  /// In en, this message translates to:
+  /// **'Character personality'**
+  String get promptSectionCharacterPersonality;
+
+  /// No description provided for @promptSectionCharacterPersonalityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The character\'s personality traits'**
+  String get promptSectionCharacterPersonalityDescription;
+
+  /// No description provided for @promptSectionScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario'**
+  String get promptSectionScenario;
+
+  /// No description provided for @promptSectionScenarioDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Current situation and setting'**
+  String get promptSectionScenarioDescription;
+
+  /// No description provided for @promptSectionExampleMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Example messages'**
+  String get promptSectionExampleMessages;
+
+  /// No description provided for @promptSectionExampleMessagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample dialogue that demonstrates style'**
+  String get promptSectionExampleMessagesDescription;
+
+  /// No description provided for @promptSectionWorldInfoBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'World info before'**
+  String get promptSectionWorldInfoBefore;
+
+  /// No description provided for @promptSectionWorldInfoBeforeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorebook context inserted before character details'**
+  String get promptSectionWorldInfoBeforeDescription;
+
+  /// No description provided for @promptSectionWorldInfoAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'World info after'**
+  String get promptSectionWorldInfoAfter;
+
+  /// No description provided for @promptSectionWorldInfoAfterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorebook context inserted after character details'**
+  String get promptSectionWorldInfoAfterDescription;
+
+  /// No description provided for @promptSectionAuthorNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Author\'s note'**
+  String get promptSectionAuthorNote;
+
+  /// No description provided for @promptSectionAuthorNoteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic instructions for the current chat'**
+  String get promptSectionAuthorNoteDescription;
+
+  /// No description provided for @promptSectionPostHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-history instructions'**
+  String get promptSectionPostHistory;
+
+  /// No description provided for @promptSectionPostHistoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions inserted after chat history'**
+  String get promptSectionPostHistoryDescription;
+
+  /// No description provided for @promptSectionNsfw.
+  ///
+  /// In en, this message translates to:
+  /// **'NSFW prompt'**
+  String get promptSectionNsfw;
+
+  /// No description provided for @promptSectionNsfwDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional mature-content instructions'**
+  String get promptSectionNsfwDescription;
+
+  /// No description provided for @promptSectionChatHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat history'**
+  String get promptSectionChatHistory;
+
+  /// No description provided for @promptSectionChatHistoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent messages from the conversation'**
+  String get promptSectionChatHistoryDescription;
+
+  /// No description provided for @promptSectionEnhanceDefinitions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance definitions'**
+  String get promptSectionEnhanceDefinitions;
+
+  /// No description provided for @promptSectionEnhanceDefinitionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional instructions that reinforce character definitions'**
+  String get promptSectionEnhanceDefinitionsDescription;
+
+  /// No description provided for @promptSectionCustomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A custom prompt section'**
+  String get promptSectionCustomDescription;
+
+  /// No description provided for @reasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get reasoning;
+
+  /// No description provided for @emotionNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get emotionNeutral;
+
+  /// No description provided for @emotionHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get emotionHappy;
+
+  /// No description provided for @emotionSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get emotionSad;
+
+  /// No description provided for @emotionAngry.
+  ///
+  /// In en, this message translates to:
+  /// **'Angry'**
+  String get emotionAngry;
+
+  /// No description provided for @emotionSurprised.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprised'**
+  String get emotionSurprised;
+
+  /// No description provided for @emotionScared.
+  ///
+  /// In en, this message translates to:
+  /// **'Scared'**
+  String get emotionScared;
+
+  /// No description provided for @emotionDisgusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Disgusted'**
+  String get emotionDisgusted;
+
+  /// No description provided for @emotionConfused.
+  ///
+  /// In en, this message translates to:
+  /// **'Confused'**
+  String get emotionConfused;
+
+  /// No description provided for @emotionEmbarrassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Embarrassed'**
+  String get emotionEmbarrassed;
+
+  /// No description provided for @emotionExcited.
+  ///
+  /// In en, this message translates to:
+  /// **'Excited'**
+  String get emotionExcited;
+
+  /// No description provided for @emotionLoving.
+  ///
+  /// In en, this message translates to:
+  /// **'Loving'**
+  String get emotionLoving;
+
+  /// No description provided for @emotionThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get emotionThinking;
+
+  /// No description provided for @emotionSmug.
+  ///
+  /// In en, this message translates to:
+  /// **'Smug'**
+  String get emotionSmug;
+
+  /// No description provided for @emotionTired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tired'**
+  String get emotionTired;
+
+  /// No description provided for @emotionBored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bored'**
+  String get emotionBored;
+
+  /// No description provided for @tokenizerHelpContent.
+  ///
+  /// In en, this message translates to:
+  /// **'The tokenizer estimates how much text a model can process. Choose the tokenizer that matches your model, or use Best Match to select one automatically.'**
+  String get tokenizerHelpContent;
+
+  /// No description provided for @tokenizerNoneEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'None (estimate only)'**
+  String get tokenizerNoneEstimate;
+
+  /// No description provided for @tokenizerBestMatchAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Best match (automatic)'**
+  String get tokenizerBestMatchAuto;
+
+  /// No description provided for @tokenizerEstimateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick character-based token estimate'**
+  String get tokenizerEstimateDescription;
+
+  /// No description provided for @tokenizerGpt2Description.
+  ///
+  /// In en, this message translates to:
+  /// **'GPT-2 tokenizer for older GPT-style models'**
+  String get tokenizerGpt2Description;
+
+  /// No description provided for @tokenizerOaiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'OAI Compatible tiktoken tokenizer for GPT models'**
+  String get tokenizerOaiDescription;
+
+  /// No description provided for @tokenizerLlamaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'SentencePiece tokenizer for Llama models'**
+  String get tokenizerLlamaDescription;
+
+  /// No description provided for @tokenizerLlama3Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Llama 3 models'**
+  String get tokenizerLlama3Description;
+
+  /// No description provided for @tokenizerMistralDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Mistral models'**
+  String get tokenizerMistralDescription;
+
+  /// No description provided for @tokenizerClaudeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer estimate for Claude models'**
+  String get tokenizerClaudeDescription;
+
+  /// No description provided for @tokenizerGemmaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Gemma models'**
+  String get tokenizerGemmaDescription;
+
+  /// No description provided for @tokenizerQwenDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Qwen models'**
+  String get tokenizerQwenDescription;
+
+  /// No description provided for @tokenizerDeepSeekDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for DeepSeek models'**
+  String get tokenizerDeepSeekDescription;
+
+  /// No description provided for @tokenizerCommandRDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Command R models'**
+  String get tokenizerCommandRDescription;
+
+  /// No description provided for @tokenizerNemoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokenizer for Mistral NeMo models'**
+  String get tokenizerNemoDescription;
+
+  /// No description provided for @tokenizerBestMatchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically choose a tokenizer based on the active model'**
+  String get tokenizerBestMatchDescription;
+
+  /// No description provided for @showOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get showOriginal;
+
+  /// No description provided for @showOriginalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Display original text alongside the translation'**
+  String get showOriginalDescription;
+
+  /// No description provided for @swapLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap languages'**
+  String get swapLanguages;
+
+  /// No description provided for @aboutTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'About translation'**
+  String get aboutTranslation;
+
+  /// No description provided for @aboutTranslationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate messages automatically or on demand so you can communicate in different languages.'**
+  String get aboutTranslationDescription;
+
+  /// No description provided for @googleTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Translate'**
+  String get googleTranslate;
+
+  /// No description provided for @googleTranslateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses Google Cloud Translation API and requires a Google Cloud API key.'**
+  String get googleTranslateDescription;
+
+  /// No description provided for @deepL.
+  ///
+  /// In en, this message translates to:
+  /// **'DeepL'**
+  String get deepL;
+
+  /// No description provided for @deepLDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'High-quality neural machine translation. Requires an API key from deepl.com.'**
+  String get deepLDescription;
+
+  /// No description provided for @libreTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'LibreTranslate'**
+  String get libreTranslate;
+
+  /// No description provided for @libreTranslateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Free and open-source translation that can be self-hosted or use a public instance.'**
+  String get libreTranslateDescription;
+
+  /// No description provided for @queueMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue messages'**
+  String get queueMessages;
+
+  /// No description provided for @queueMessagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue multiple messages instead of interrupting the current speech'**
+  String get queueMessagesDescription;
+
+  /// No description provided for @loadingVoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading voices...'**
+  String get loadingVoices;
+
+  /// No description provided for @failedToLoadVoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load voices'**
+  String get failedToLoadVoices;
+
+  /// No description provided for @ttsTestPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! This is a test of the text-to-speech system. The quick brown fox jumps over the lazy dog.'**
+  String get ttsTestPhrase;
+
+  /// No description provided for @aboutTts.
+  ///
+  /// In en, this message translates to:
+  /// **'About text-to-speech'**
+  String get aboutTts;
+
+  /// No description provided for @aboutTtsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Text-to-speech reads messages aloud. You can configure different voices for individual characters in character settings.'**
+  String get aboutTtsDescription;
+
+  /// No description provided for @systemTts.
+  ///
+  /// In en, this message translates to:
+  /// **'System text-to-speech'**
+  String get systemTts;
+
+  /// No description provided for @systemTtsDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses your device\'s built-in text-to-speech engine. Available voices depend on system settings.'**
+  String get systemTtsDetails;
+
+  /// No description provided for @elevenLabsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'High-quality AI voices. Requires an API key from elevenlabs.io.'**
+  String get elevenLabsDescription;
+
+  /// No description provided for @clearGlobalVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear global variables'**
+  String get clearGlobalVariables;
+
+  /// No description provided for @clearLocalVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local variables'**
+  String get clearLocalVariables;
+
+  /// No description provided for @aboutVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'About variables'**
+  String get aboutVariables;
+
+  /// No description provided for @variableSystemDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Variables store reusable values globally or for the current chat. Reference them in prompts with macros.'**
+  String get variableSystemDescription;
+
+  /// No description provided for @macroUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Macro usage'**
+  String get macroUsage;
+
+  /// No description provided for @macroUsageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {localMacro} for local variables and {globalMacro} for global variables. You can also set values with variable macros.'**
+  String macroUsageDescription(String localMacro, String globalMacro);
+
+  /// No description provided for @noGlobalVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'No global variables'**
+  String get noGlobalVariables;
+
+  /// No description provided for @noLocalVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'No local variables'**
+  String get noLocalVariables;
+
+  /// No description provided for @editVariable.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {name}'**
+  String editVariable(String name);
+
+  /// No description provided for @deleteVariable.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete variable'**
+  String get deleteVariable;
+
+  /// No description provided for @deleteVariableQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete variable \"{name}\"?'**
+  String deleteVariableQuestion(String name);
+
+  /// No description provided for @clearVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {scope} variables'**
+  String clearVariables(String scope);
+
+  /// No description provided for @clearVariablesConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all {scope} variables? This cannot be undone.'**
+  String clearVariablesConfirmation(String scope);
+
+  /// No description provided for @decrement.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease'**
+  String get decrement;
+
+  /// No description provided for @increment.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase'**
+  String get increment;
+
+  /// No description provided for @testInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Test input'**
+  String get testInput;
+
+  /// No description provided for @variableTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text containing variable macros...'**
+  String get variableTestHint;
+
+  /// No description provided for @processMacros.
+  ///
+  /// In en, this message translates to:
+  /// **'Process macros'**
+  String get processMacros;
+
+  /// No description provided for @result.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get result;
+
+  /// No description provided for @emptyString.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty string)'**
+  String get emptyString;
+
+  /// No description provided for @retrievalAugmentedGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Retrieval-augmented generation (RAG)'**
+  String get retrievalAugmentedGeneration;
+
+  /// No description provided for @searchSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get searchSettings;
+
+  /// No description provided for @topKResultsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Return up to {count} matching results'**
+  String topKResultsDescription(int count);
+
+  /// No description provided for @minimumPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum similarity: {percent}%'**
+  String minimumPercent(String percent);
+
+  /// No description provided for @promptIntegration.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt integration'**
+  String get promptIntegration;
+
+  /// No description provided for @includeInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Include in prompt'**
+  String get includeInPrompt;
+
+  /// No description provided for @automaticallyAddContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically add relevant context to the prompt'**
+  String get automaticallyAddContext;
+
+  /// No description provided for @promptTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt template'**
+  String get promptTemplate;
+
+  /// No description provided for @useContextPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {contextMacro} where retrieved content should appear'**
+  String useContextPlaceholder(String contextMacro);
+
+  /// No description provided for @vectorStorageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Vector storage help'**
+  String get vectorStorageHelp;
+
+  /// No description provided for @vectorStorageHelpContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Vector storage converts documents into embeddings and retrieves relevant passages for each message. Configure an embedding provider, create a collection, add documents, and enable prompt integration.'**
+  String get vectorStorageHelpContent;
+
+  /// No description provided for @enterCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection name'**
+  String get enterCollectionName;
+
+  /// No description provided for @deleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection'**
+  String get deleteCollection;
+
+  /// No description provided for @deleteCollectionConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this collection and all of its documents?'**
+  String get deleteCollectionConfirmation;
+
+  /// No description provided for @collectionExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection exported'**
+  String get collectionExported;
+
+  /// No description provided for @importCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Import collection'**
+  String get importCollection;
+
+  /// No description provided for @pasteCollectionJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste collection JSON...'**
+  String get pasteCollectionJson;
+
+  /// No description provided for @collectionImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection imported'**
+  String get collectionImported;
+
+  /// No description provided for @activeCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active collection'**
+  String get activeCollection;
+
+  /// No description provided for @collectionWithDocumentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({count} documents)'**
+  String collectionWithDocumentCount(String name, int count);
+
+  /// No description provided for @documentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} documents'**
+  String documentsCount(int count);
+
+  /// No description provided for @embeddedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} embedded'**
+  String embeddedCount(String percent);
+
+  /// No description provided for @addDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Add document'**
+  String get addDocument;
+
+  /// No description provided for @viewDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'View documents'**
+  String get viewDocuments;
+
+  /// No description provided for @enterDocumentContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter document content'**
+  String get enterDocumentContent;
+
+  /// No description provided for @documentAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Document added'**
+  String get documentAdded;
+
+  /// No description provided for @noDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents'**
+  String get noDocuments;
+
+  /// No description provided for @documentEmbeddingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{characters} characters - {status}'**
+  String documentEmbeddingStatus(int characters, String status);
+
+  /// No description provided for @embedded.
+  ///
+  /// In en, this message translates to:
+  /// **'Embedded'**
+  String get embedded;
+
+  /// No description provided for @notEmbedded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not embedded'**
+  String get notEmbedded;
+
+  /// No description provided for @tokenProbabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Token probabilities'**
+  String get tokenProbabilities;
+
+  /// No description provided for @requestTokenProbabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Request token probabilities'**
+  String get requestTokenProbabilities;
+
+  /// No description provided for @requestTokenProbabilitiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the model to return probability data for generated tokens'**
+  String get requestTokenProbabilitiesDescription;
+
+  /// No description provided for @topCandidatesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Top candidates'**
+  String get topCandidatesCount;
+
+  /// No description provided for @topCandidatesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Show up to {count} alternatives per token'**
+  String topCandidatesDescription(int count);
+
+  /// No description provided for @showLogprobsPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show token probability panel'**
+  String get showLogprobsPanel;
+
+  /// No description provided for @showLogprobsPanelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Display token probabilities below supported messages'**
+  String get showLogprobsPanelDescription;
+
+  /// No description provided for @colorIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Color intensity'**
+  String get colorIntensity;
+
+  /// No description provided for @aboutTokenProbabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'About token probabilities'**
+  String get aboutTokenProbabilities;
+
+  /// No description provided for @tokenProbabilitiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Token probabilities show how confident the model was and which alternatives it considered. Availability depends on the active API and model.'**
+  String get tokenProbabilitiesDescription;
+
+  /// No description provided for @moreFormatting.
+  ///
+  /// In en, this message translates to:
+  /// **'More formatting'**
+  String get moreFormatting;
+
+  /// No description provided for @readAloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get readAloud;
+
+  /// No description provided for @openInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in browser'**
+  String get openInBrowser;
+
+  /// No description provided for @imageLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get imageLoadFailed;
+
+  /// No description provided for @pauseReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause reading'**
+  String get pauseReading;
+
+  /// No description provided for @resumeReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume reading'**
+  String get resumeReading;
+
+  /// No description provided for @stopReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get stopReading;
+
+  /// No description provided for @noTagsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags available'**
+  String get noTagsAvailable;
+
+  /// No description provided for @rerollAlternativeNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'Rerolling with \"{alternative}\" is not implemented yet'**
+  String rerollAlternativeNotImplemented(String alternative);
+
+  /// No description provided for @enableTokenProbabilitiesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable token probabilities in settings to view this data'**
+  String get enableTokenProbabilitiesHint;
+
+  /// No description provided for @noTokenProbabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'No token probability data available'**
+  String get noTokenProbabilities;
+
+  /// No description provided for @noAlternativeTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'No alternative tokens'**
+  String get noAlternativeTokens;
+
+  /// No description provided for @alternativeTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternative tokens'**
+  String get alternativeTokens;
+
+  /// No description provided for @otherTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Other tokens'**
+  String get otherTokens;
+
+  /// No description provided for @chooseRpgScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an RPG scenario'**
+  String get chooseRpgScenario;
+
+  /// No description provided for @importScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Import scenario'**
+  String get importScenario;
+
+  /// No description provided for @noSavedScenarios.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved scenarios'**
+  String get noSavedScenarios;
+
+  /// No description provided for @rpgImportScenarioPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import RPG scenario package'**
+  String get rpgImportScenarioPackage;
+
+  /// No description provided for @rpgSelectedScenarioUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected scenario file could not be read'**
+  String get rpgSelectedScenarioUnreadable;
+
+  /// No description provided for @favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get favorite;
+
+  /// No description provided for @connections.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get connections;
+
+  /// No description provided for @systemPromptOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'System prompt override'**
+  String get systemPromptOverride;
+
+  /// No description provided for @systemPromptOverrideHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a system prompt for this persona...'**
+  String get systemPromptOverrideHint;
+
+  /// No description provided for @systemPromptOverrideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Overrides the default system prompt while this persona is active'**
+  String get systemPromptOverrideDescription;
+
+  /// No description provided for @instructionsAddedAfterHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions added after chat history'**
+  String get instructionsAddedAfterHistory;
+
+  /// No description provided for @bindPersonaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind persona description'**
+  String get bindPersonaDescription;
+
+  /// No description provided for @noConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'No connections'**
+  String get noConnections;
+
+  /// No description provided for @connectionCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character: {id}'**
+  String connectionCharacter(String id);
+
+  /// No description provided for @connectionGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group: {id}'**
+  String connectionGroup(String id);
+
+  /// No description provided for @connectionChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat: {id}'**
+  String connectionChat(String id);
+
+  /// No description provided for @lockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock: {type}'**
+  String lockLabel(String type);
+
+  /// No description provided for @addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tag'**
+  String get addTag;
+
+  /// No description provided for @errorLoadingLorebooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load lorebooks: {error}'**
+  String errorLoadingLorebooks(String error);
+
+  /// No description provided for @personaLorebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Persona lorebook'**
+  String get personaLorebook;
+
+  /// No description provided for @selectLorebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a lorebook'**
+  String get selectLorebook;
+
+  /// No description provided for @personaLorebookDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorebook linked to this persona'**
+  String get personaLorebookDescription;
+
+  /// No description provided for @descriptionPlacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Description placement'**
+  String get descriptionPlacement;
+
+  /// No description provided for @personaDescriptionPositionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where the persona description is inserted in the prompt'**
+  String get personaDescriptionPositionHelp;
+
+  /// No description provided for @depth.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth'**
+  String get depth;
+
+  /// No description provided for @depthInChatHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth in chat history'**
+  String get depthInChatHistory;
+
+  /// No description provided for @messageRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Message role'**
+  String get messageRole;
+
+  /// No description provided for @roleForDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Role used for the persona description'**
+  String get roleForDescription;
+
+  /// No description provided for @novelAiSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'NovelAI settings'**
+  String get novelAiSettings;
+
+  /// No description provided for @anlasGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas guard'**
+  String get anlasGuard;
+
+  /// No description provided for @anlasGuardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent generation when the estimated Anlas cost is too high'**
+  String get anlasGuardDescription;
+
+  /// No description provided for @smea.
+  ///
+  /// In en, this message translates to:
+  /// **'SMEA'**
+  String get smea;
+
+  /// No description provided for @smeaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable SMEA sampling for improved image coherence'**
+  String get smeaDescription;
+
+  /// No description provided for @smeaDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic SMEA'**
+  String get smeaDynamic;
+
+  /// No description provided for @smeaDynamicDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamically adjust SMEA based on image dimensions'**
+  String get smeaDynamicDescription;
+
+  /// No description provided for @decrisper.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrisper'**
+  String get decrisper;
+
+  /// No description provided for @decrisperDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce overly sharp or crispy image details'**
+  String get decrisperDescription;
+
+  /// No description provided for @varietyPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Variety+'**
+  String get varietyPlus;
+
+  /// No description provided for @varietyPlusDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase variation between generated images'**
+  String get varietyPlusDescription;
+
+  /// No description provided for @gptImageApiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate images through an OAI Compatible image API'**
+  String get gptImageApiDescription;
+
+  /// No description provided for @oaiCompatibleChat.
+  ///
+  /// In en, this message translates to:
+  /// **'OAI Compatible Chat'**
+  String get oaiCompatibleChat;
+
+  /// No description provided for @oaiCompatibleChatDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate images through an OAI Compatible chat completion endpoint'**
+  String get oaiCompatibleChatDescription;
+
+  /// No description provided for @errorFetchingModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch models'**
+  String get errorFetchingModels;
+
+  /// No description provided for @generatedPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt: {prompt}'**
+  String generatedPrompt(String prompt);
+
+  /// No description provided for @generatedSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed: {seed}'**
+  String generatedSeed(String seed);
+
+  /// No description provided for @imagesGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {count} image(s)'**
+  String imagesGenerated(int count);
+
+  /// No description provided for @myTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'My theme'**
+  String get myTheme;
+
+  /// No description provided for @translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get translate;
+
+  /// No description provided for @stopSpeaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop speaking'**
+  String get stopSpeaking;
+
+  /// No description provided for @insertion.
+  ///
+  /// In en, this message translates to:
+  /// **'Insertion'**
+  String get insertion;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @scanDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan depth'**
+  String get scanDepth;
+
+  /// No description provided for @scanDepthDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of recent messages scanned for keywords'**
+  String get scanDepthDescription;
+
+  /// No description provided for @roleForInjectedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Role used for injected content'**
+  String get roleForInjectedContent;
+
+  /// No description provided for @caseSensitive.
+  ///
+  /// In en, this message translates to:
+  /// **'Case sensitive'**
+  String get caseSensitive;
+
+  /// No description provided for @matchKeywordsExactCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Match keywords using exact letter case'**
+  String get matchKeywordsExactCase;
+
+  /// No description provided for @matchWholeWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Match whole words'**
+  String get matchWholeWords;
+
+  /// No description provided for @onlyMatchCompleteWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Only match complete words'**
+  String get onlyMatchCompleteWords;
+
+  /// No description provided for @recursionControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Recursion control'**
+  String get recursionControl;
+
+  /// No description provided for @preventRecursion.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent recursion'**
+  String get preventRecursion;
+
+  /// No description provided for @preventRecursionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not let this entry trigger additional entries'**
+  String get preventRecursionDescription;
+
+  /// No description provided for @excludeRecursion.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude from recursion'**
+  String get excludeRecursion;
+
+  /// No description provided for @excludeRecursionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not activate this entry during recursive scans'**
+  String get excludeRecursionDescription;
+
+  /// No description provided for @delayUntilRecursion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay until recursion'**
+  String get delayUntilRecursion;
+
+  /// No description provided for @delayUntilRecursionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Only activate this entry during recursive scans'**
+  String get delayUntilRecursionDescription;
+
+  /// No description provided for @characterFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character filter'**
+  String get characterFilter;
+
+  /// No description provided for @groupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Group settings'**
+  String get groupSettings;
+
+  /// No description provided for @groupMutuallyExclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'Mutually exclusive group'**
+  String get groupMutuallyExclusive;
+
+  /// No description provided for @useGroupScoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Use group scoring'**
+  String get useGroupScoring;
+
+  /// No description provided for @groupWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Group weight'**
+  String get groupWeight;
+
+  /// No description provided for @groupWeightDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Relative weight when choosing an entry from the group'**
+  String get groupWeightDescription;
+
+  /// No description provided for @groupOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Group override'**
+  String get groupOverride;
+
+  /// No description provided for @groupPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Group priority'**
+  String get groupPriority;
+
+  /// No description provided for @probability.
+  ///
+  /// In en, this message translates to:
+  /// **'Probability'**
+  String get probability;
+
+  /// No description provided for @useProbability.
+  ///
+  /// In en, this message translates to:
+  /// **'Use probability'**
+  String get useProbability;
+
+  /// No description provided for @randomActivationProbability.
+  ///
+  /// In en, this message translates to:
+  /// **'Random chance for this entry to activate'**
+  String get randomActivationProbability;
+
+  /// No description provided for @probabilityPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Activation probability: {percent}%'**
+  String probabilityPercent(int percent);
+
+  /// No description provided for @timedEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed effects'**
+  String get timedEffects;
+
+  /// No description provided for @filterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter type'**
+  String get filterType;
+
+  /// No description provided for @characterIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Character IDs'**
+  String get characterIds;
+
+  /// No description provided for @stickyDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Sticky duration'**
+  String get stickyDuration;
+
+  /// No description provided for @stickyDurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of messages this entry remains active after matching'**
+  String get stickyDurationDescription;
+
+  /// No description provided for @cooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown'**
+  String get cooldown;
+
+  /// No description provided for @cooldownDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of messages before this entry can activate again'**
+  String get cooldownDescription;
+
+  /// No description provided for @delay.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay'**
+  String get delay;
+
+  /// No description provided for @delayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of messages before this entry becomes eligible'**
+  String get delayDescription;
+
+  /// No description provided for @outlet.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlet'**
+  String get outlet;
+
+  /// No description provided for @include.
+  ///
+  /// In en, this message translates to:
+  /// **'Include'**
+  String get include;
+
+  /// No description provided for @exclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude'**
+  String get exclude;
+
+  /// No description provided for @translatedFromLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Translated from {language}'**
+  String translatedFromLanguage(String language);
+
+  /// No description provided for @originalText.
+  ///
+  /// In en, this message translates to:
+  /// **'Original: {text}'**
+  String originalText(String text);
+
+  /// No description provided for @loadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading image...'**
+  String get loadingImage;
+
+  /// No description provided for @backupIntervalNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get backupIntervalNever;
+
+  /// No description provided for @backupIntervalHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get backupIntervalHourly;
+
+  /// No description provided for @backupIntervalDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get backupIntervalDaily;
+
+  /// No description provided for @backupIntervalWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get backupIntervalWeekly;
+
+  /// No description provided for @backupIntervalMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get backupIntervalMonthly;
+
+  /// No description provided for @restoreModeReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get restoreModeReplace;
+
+  /// No description provided for @restoreModeReplaceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all local data with backup data'**
+  String get restoreModeReplaceDescription;
+
+  /// No description provided for @restoreModeMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get restoreModeMerge;
+
+  /// No description provided for @restoreModeMergeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge backup with local data; newer data wins conflicts'**
+  String get restoreModeMergeDescription;
+
+  /// No description provided for @restoreModeAddNewOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new only'**
+  String get restoreModeAddNewOnly;
+
+  /// No description provided for @restoreModeAddNewOnlyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Only add new backup items and keep all existing data'**
+  String get restoreModeAddNewOnlyDescription;
+
+  /// No description provided for @sortNameAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (A-Z)'**
+  String get sortNameAscending;
+
+  /// No description provided for @sortNameDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Z-A)'**
+  String get sortNameDescending;
+
+  /// No description provided for @sortNewestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get sortNewestFirst;
+
+  /// No description provided for @sortOldestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get sortOldestFirst;
+
+  /// No description provided for @sortRecentlyModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently modified'**
+  String get sortRecentlyModified;
+
+  /// No description provided for @sortLeastRecentlyModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Least recently modified'**
+  String get sortLeastRecentlyModified;
+
+  /// No description provided for @codeBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Code block'**
+  String get codeBlock;
+
+  /// No description provided for @quote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get quote;
+
+  /// No description provided for @heading1.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 1'**
+  String get heading1;
+
+  /// No description provided for @heading2.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 2'**
+  String get heading2;
+
+  /// No description provided for @heading3.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading 3'**
+  String get heading3;
+
+  /// No description provided for @bulletList.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullet list'**
+  String get bulletList;
+
+  /// No description provided for @numberedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbered list'**
+  String get numberedList;
+
+  /// No description provided for @horizontalRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal rule'**
+  String get horizontalRule;
+
+  /// No description provided for @pageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get pageNotFound;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go home'**
+  String get goHome;
+
+  /// No description provided for @officialWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Official website'**
+  String get officialWebsite;
+
+  /// No description provided for @mcpStreamableHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Streamable HTTP'**
+  String get mcpStreamableHttp;
+
+  /// No description provided for @mcpLegacyHttpSse.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy HTTP + SSE'**
+  String get mcpLegacyHttpSse;
+
+  /// No description provided for @chatWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}'**
+  String chatWithName(String name);
+
+  /// No description provided for @noValidCharactersInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'No valid characters in group'**
+  String get noValidCharactersInGroup;
 }
 
 class _AppLocalizationsDelegate

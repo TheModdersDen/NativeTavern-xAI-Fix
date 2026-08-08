@@ -16,34 +16,37 @@ class VariablesSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final globalVars = ref.watch(globalVariablesProvider);
-    final localVars = chatId != null ? ref.watch(localVariablesProvider(chatId!)) : <String, dynamic>{};
+    final localVars = chatId != null
+        ? ref.watch(localVariablesProvider(chatId!))
+        : <String, dynamic>{};
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(chatId != null ? AppLocalizations.of(context)!.chatVariables : AppLocalizations.of(context)!.variables),
+        title: Text(chatId != null ? l10n.chatVariables : l10n.variables),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: AppLocalizations.of(context)!.addVariable,
+            tooltip: l10n.addVariable,
             onPressed: () => _showAddVariableDialog(context, ref),
           ),
           AdaptivePopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(context, ref, value),
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clear_global',
                 child: ListTile(
-                  leading: Icon(Icons.delete_sweep),
-                  title: Text('Clear Global Variables'),
+                  leading: const Icon(Icons.delete_sweep),
+                  title: Text(l10n.clearGlobalVariables),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
               if (chatId != null)
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'clear_local',
                   child: ListTile(
-                    leading: Icon(Icons.delete_sweep),
-                    title: Text('Clear Local Variables'),
+                    leading: const Icon(Icons.delete_sweep),
+                    title: Text(l10n.clearLocalVariables),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -56,24 +59,22 @@ class VariablesSettingsScreen extends ConsumerWidget {
         children: [
           // Info section
           _buildSection(
-            title: 'About Variables',
+            title: l10n.aboutVariables,
             children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('Variable System'),
-                subtitle: Text(
-                  'Variables store values that can be used in macros. '
-                  'Global variables persist across all chats, while local variables are per-chat.',
-                ),
+              ListTile(
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                title: Text(l10n.variableSystem),
+                subtitle: Text(l10n.variableSystemDescription),
               ),
-              const ListTile(
-                leading: Icon(Icons.code, color: AppTheme.textMuted),
-                title: Text('Macro Usage'),
+              ListTile(
+                leading: const Icon(Icons.code, color: AppTheme.textMuted),
+                title: Text(l10n.macroUsage),
                 subtitle: Text(
-                  '{{getvar::name}} - Get local variable\n'
-                  '{{setvar::name::value}} - Set local variable\n'
-                  '{{getglobalvar::name}} - Get global variable\n'
-                  '{{setglobalvar::name::value}} - Set global variable',
+                  l10n.macroUsageDescription(
+                    '{{getvar::name}}',
+                    '{{getglobalvar::name}}',
+                  ),
                 ),
               ),
             ],
@@ -83,19 +84,20 @@ class VariablesSettingsScreen extends ConsumerWidget {
 
           // Global variables
           _buildSection(
-            title: 'Global Variables (${globalVars.length})',
+            title: l10n.globalVariablesCount(globalVars.length),
             children: [
               if (globalVars.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(32),
+                Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.data_object, size: 48, color: AppTheme.textMuted),
-                        SizedBox(height: 16),
+                        const Icon(Icons.data_object,
+                            size: 48, color: AppTheme.textMuted),
+                        const SizedBox(height: 16),
                         Text(
-                          'No global variables',
-                          style: TextStyle(color: AppTheme.textMuted),
+                          l10n.noGlobalVariables,
+                          style: const TextStyle(color: AppTheme.textMuted),
                         ),
                       ],
                     ),
@@ -103,14 +105,20 @@ class VariablesSettingsScreen extends ConsumerWidget {
                 )
               else
                 ...globalVars.entries.map((entry) => _VariableTile(
-                  name: entry.key,
-                  value: entry.value,
-                  isGlobal: true,
-                  onEdit: () => _showEditVariableDialog(context, ref, entry.key, entry.value, true),
-                  onDelete: () => _confirmDeleteVariable(context, ref, entry.key, true),
-                  onIncrement: () => ref.read(globalVariablesProvider.notifier).increment(entry.key),
-                  onDecrement: () => ref.read(globalVariablesProvider.notifier).decrement(entry.key),
-                )),
+                      name: entry.key,
+                      value: entry.value,
+                      isGlobal: true,
+                      onEdit: () => _showEditVariableDialog(
+                          context, ref, entry.key, entry.value, true),
+                      onDelete: () =>
+                          _confirmDeleteVariable(context, ref, entry.key, true),
+                      onIncrement: () => ref
+                          .read(globalVariablesProvider.notifier)
+                          .increment(entry.key),
+                      onDecrement: () => ref
+                          .read(globalVariablesProvider.notifier)
+                          .decrement(entry.key),
+                    )),
             ],
           ),
 
@@ -119,19 +127,20 @@ class VariablesSettingsScreen extends ConsumerWidget {
 
             // Local variables
             _buildSection(
-              title: 'Local Variables (${localVars.length})',
+              title: l10n.localVariablesCount(localVars.length),
               children: [
                 if (localVars.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(32),
+                  Padding(
+                    padding: const EdgeInsets.all(32),
                     child: Center(
                       child: Column(
                         children: [
-                          Icon(Icons.data_object, size: 48, color: AppTheme.textMuted),
-                          SizedBox(height: 16),
+                          const Icon(Icons.data_object,
+                              size: 48, color: AppTheme.textMuted),
+                          const SizedBox(height: 16),
                           Text(
-                            'No local variables for this chat',
-                            style: TextStyle(color: AppTheme.textMuted),
+                            l10n.noLocalVariables,
+                            style: const TextStyle(color: AppTheme.textMuted),
                           ),
                         ],
                       ),
@@ -139,14 +148,20 @@ class VariablesSettingsScreen extends ConsumerWidget {
                   )
                 else
                   ...localVars.entries.map((entry) => _VariableTile(
-                    name: entry.key,
-                    value: entry.value,
-                    isGlobal: false,
-                    onEdit: () => _showEditVariableDialog(context, ref, entry.key, entry.value, false),
-                    onDelete: () => _confirmDeleteVariable(context, ref, entry.key, false),
-                    onIncrement: () => ref.read(localVariablesProvider(chatId!).notifier).increment(entry.key),
-                    onDecrement: () => ref.read(localVariablesProvider(chatId!).notifier).decrement(entry.key),
-                  )),
+                        name: entry.key,
+                        value: entry.value,
+                        isGlobal: false,
+                        onEdit: () => _showEditVariableDialog(
+                            context, ref, entry.key, entry.value, false),
+                        onDelete: () => _confirmDeleteVariable(
+                            context, ref, entry.key, false),
+                        onIncrement: () => ref
+                            .read(localVariablesProvider(chatId!).notifier)
+                            .increment(entry.key),
+                        onDecrement: () => ref
+                            .read(localVariablesProvider(chatId!).notifier)
+                            .decrement(entry.key),
+                      )),
               ],
             ),
           ],
@@ -155,7 +170,7 @@ class VariablesSettingsScreen extends ConsumerWidget {
 
           // Test section
           _buildSection(
-            title: 'Test',
+            title: l10n.test,
             children: [
               _VariableTestWidget(chatId: chatId),
             ],
@@ -208,45 +223,47 @@ class VariablesSettingsScreen extends ConsumerWidget {
     final nameController = TextEditingController();
     final valueController = TextEditingController();
     bool isGlobal = true;
+    final l10n = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Add Variable'),
+          title: Text(l10n.addVariable),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Variable Name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.variableName,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: valueController,
-                decoration: const InputDecoration(
-                  labelText: 'Value',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.variableValue,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               if (chatId != null)
                 Row(
                   children: [
-                    const Text('Scope: '),
+                    Text('${l10n.scope}: '),
                     ChoiceChip(
-                      label: const Text('Global'),
+                      label: Text(l10n.global),
                       selected: isGlobal,
                       onSelected: (selected) => setState(() => isGlobal = true),
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
-                      label: const Text('Local'),
+                      label: Text(l10n.local),
                       selected: !isGlobal,
-                      onSelected: (selected) => setState(() => isGlobal = false),
+                      onSelected: (selected) =>
+                          setState(() => isGlobal = false),
                     ),
                   ],
                 ),
@@ -255,7 +272,7 @@ class VariablesSettingsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -263,14 +280,18 @@ class VariablesSettingsScreen extends ConsumerWidget {
                 final value = valueController.text;
                 if (name.isNotEmpty) {
                   if (isGlobal) {
-                    ref.read(globalVariablesProvider.notifier).setVariable(name, value);
+                    ref
+                        .read(globalVariablesProvider.notifier)
+                        .setVariable(name, value);
                   } else if (chatId != null) {
-                    ref.read(localVariablesProvider(chatId!).notifier).setVariable(name, value);
+                    ref
+                        .read(localVariablesProvider(chatId!).notifier)
+                        .setVariable(name, value);
                   }
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Add'),
+              child: Text(l10n.add),
             ),
           ],
         ),
@@ -278,81 +299,95 @@ class VariablesSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditVariableDialog(BuildContext context, WidgetRef ref, String name, dynamic value, bool isGlobal) {
-    final valueController = TextEditingController(text: value?.toString() ?? '');
+  void _showEditVariableDialog(BuildContext context, WidgetRef ref, String name,
+      dynamic value, bool isGlobal) {
+    final valueController =
+        TextEditingController(text: value?.toString() ?? '');
+    final l10n = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit "$name"'),
+        title: Text(l10n.editVariable(name)),
         content: TextField(
           controller: valueController,
-          decoration: const InputDecoration(
-            labelText: 'Value',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.variableValue,
+            border: const OutlineInputBorder(),
           ),
           maxLines: 3,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               final newValue = valueController.text;
               if (isGlobal) {
-                ref.read(globalVariablesProvider.notifier).setVariable(name, newValue);
+                ref
+                    .read(globalVariablesProvider.notifier)
+                    .setVariable(name, newValue);
               } else if (chatId != null) {
-                ref.read(localVariablesProvider(chatId!).notifier).setVariable(name, newValue);
+                ref
+                    .read(localVariablesProvider(chatId!).notifier)
+                    .setVariable(name, newValue);
               }
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
     );
   }
 
-  void _confirmDeleteVariable(BuildContext context, WidgetRef ref, String name, bool isGlobal) {
+  void _confirmDeleteVariable(
+      BuildContext context, WidgetRef ref, String name, bool isGlobal) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Variable'),
-        content: Text('Delete "$name"?'),
+        title: Text(l10n.deleteVariable),
+        content: Text(l10n.deleteVariableQuestion(name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               if (isGlobal) {
                 ref.read(globalVariablesProvider.notifier).deleteVariable(name);
               } else if (chatId != null) {
-                ref.read(localVariablesProvider(chatId!).notifier).deleteVariable(name);
+                ref
+                    .read(localVariablesProvider(chatId!).notifier)
+                    .deleteVariable(name);
               }
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
   }
 
-  void _confirmClearVariables(BuildContext context, WidgetRef ref, bool isGlobal) {
+  void _confirmClearVariables(
+      BuildContext context, WidgetRef ref, bool isGlobal) {
+    final l10n = AppLocalizations.of(context);
+    final scope = isGlobal ? l10n.global : l10n.local;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Clear ${isGlobal ? 'Global' : 'Local'} Variables'),
-        content: Text('This will delete all ${isGlobal ? 'global' : 'local'} variables. This cannot be undone.'),
+        title: Text(l10n.clearVariables(scope)),
+        content: Text(l10n.clearVariablesConfirmation(scope.toLowerCase())),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -364,7 +399,7 @@ class VariablesSettingsScreen extends ConsumerWidget {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Clear All'),
+            child: Text(l10n.clearAll),
           ),
         ],
       ),
@@ -409,6 +444,7 @@ class _VariableTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListTile(
       leading: Icon(
         isGlobal ? Icons.public : Icons.chat_bubble_outline,
@@ -449,22 +485,22 @@ class _VariableTile extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.remove, size: 18),
             onPressed: onDecrement,
-            tooltip: 'Decrement',
+            tooltip: l10n.decrement,
           ),
           IconButton(
             icon: const Icon(Icons.add, size: 18),
             onPressed: onIncrement,
-            tooltip: 'Increment',
+            tooltip: l10n.increment,
           ),
           IconButton(
             icon: const Icon(Icons.edit, size: 18),
             onPressed: onEdit,
-            tooltip: 'Edit',
+            tooltip: l10n.edit,
           ),
           IconButton(
             icon: const Icon(Icons.delete, size: 18, color: Colors.red),
             onPressed: onDelete,
-            tooltip: 'Delete',
+            tooltip: l10n.delete,
           ),
         ],
       ),
@@ -480,7 +516,8 @@ class _VariableTestWidget extends ConsumerStatefulWidget {
   const _VariableTestWidget({this.chatId});
 
   @override
-  ConsumerState<_VariableTestWidget> createState() => _VariableTestWidgetState();
+  ConsumerState<_VariableTestWidget> createState() =>
+      _VariableTestWidgetState();
 }
 
 class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
@@ -511,6 +548,7 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -518,10 +556,10 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
         children: [
           TextField(
             controller: _inputController,
-            decoration: const InputDecoration(
-              labelText: 'Test Input',
-              hintText: '{{setvar::counter::0}} Counter: {{getvar::counter}}',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.testInput,
+              hintText: l10n.variableTestHint,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
           ),
@@ -529,7 +567,7 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
           ElevatedButton.icon(
             onPressed: _test,
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Process Macros'),
+            label: Text(l10n.processMacros),
           ),
           if (_result != null) ...[
             const SizedBox(height: 16),
@@ -543,13 +581,14 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.check, size: 16, color: AppTheme.accentColor),
-                      SizedBox(width: 8),
+                      const Icon(Icons.check,
+                          size: 16, color: AppTheme.accentColor),
+                      const SizedBox(width: 8),
                       Text(
-                        'Result',
-                        style: TextStyle(
+                        l10n.result,
+                        style: const TextStyle(
                           color: AppTheme.accentColor,
                           fontWeight: FontWeight.bold,
                         ),
@@ -564,7 +603,7 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: SelectableText(
-                      _result!.isEmpty ? '(empty string)' : _result!,
+                      _result!.isEmpty ? l10n.emptyString : _result!,
                       style: const TextStyle(fontFamily: 'monospace'),
                     ),
                   ),
@@ -575,11 +614,11 @@ class _VariableTestWidgetState extends ConsumerState<_VariableTestWidget> {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: _result!));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Copied to clipboard')),
+                            SnackBar(content: Text(l10n.copiedToClipboard)),
                           );
                         },
                         icon: const Icon(Icons.copy, size: 16),
-                        label: const Text('Copy'),
+                        label: Text(l10n.copy),
                       ),
                     ],
                   ),

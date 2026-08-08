@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/bookmark.dart';
@@ -20,11 +21,13 @@ import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/macro_service.dart';
 import 'package:native_tavern/domain/services/chat_summarization_service.dart';
 import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_context_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
+import 'package:native_tavern/presentation/providers/locale_provider.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
@@ -44,13 +47,13 @@ class ActiveChatState {
   final Character? character;
   final Group? group; // For group chats
   final Map<String, Character>
-  groupCharacters; // Character cache for group chats
+      groupCharacters; // Character cache for group chats
   final List<ChatMessage> messages;
   final bool isLoading;
   final bool isGenerating;
   final String? error;
   final String?
-  currentResponderId; // Which character is currently responding (group chat)
+      currentResponderId; // Which character is currently responding (group chat)
 
   const ActiveChatState({
     this.chat,
@@ -121,15 +124,26 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     required ChatSummarizationService summarizationService,
     required ChatGenerationPipeline generationPipeline,
     required Ref ref,
-  }) : _chatRepository = chatRepository,
-       _characterRepository = characterRepository,
-       _personaRepository = personaRepository,
-       _llmService = llmService,
-       _worldInfoMatcher = worldInfoMatcher,
-       _summarizationService = summarizationService,
-       _generationPipeline = generationPipeline,
-       _ref = ref,
-       super(const ActiveChatState());
+  })  : _chatRepository = chatRepository,
+        _characterRepository = characterRepository,
+        _personaRepository = personaRepository,
+        _llmService = llmService,
+        _worldInfoMatcher = worldInfoMatcher,
+        _summarizationService = summarizationService,
+        _generationPipeline = generationPipeline,
+        _ref = ref,
+        super(const ActiveChatState());
+
+  AppLocalizations get _l10n {
+    final requestedLocale =
+        _ref.read(localeProvider) ?? PlatformDispatcher.instance.locale;
+    final isSupported = AppLocalizations.supportedLocales.any(
+      (locale) => locale.languageCode == requestedLocale.languageCode,
+    );
+    return lookupAppLocalizations(
+      isSupported ? requestedLocale : const Locale('en'),
+    );
+  }
 
   Future<Persona?> _resolvePersona({
     String? characterId,
@@ -225,9 +239,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     );
     final dataBankContext = _ref.read(lastDataBankContextProvider);
     if (dataBankContext?.sessionId == session.sessionId) {
-      _pendingDataBankContext = dataBankContext!.sources.isEmpty
-          ? null
-          : dataBankContext;
+      _pendingDataBankContext =
+          dataBankContext!.sources.isEmpty ? null : dataBankContext;
     }
     if (result.cancelled) {
       throw ChatGenerationCancelledException(
@@ -567,14 +580,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     try {
       final character = await _characterRepository.getCharacter(characterId);
       if (character == null) {
-        state = state.copyWith(isLoading: false, error: 'Character not found');
+        state = state.copyWith(
+          isLoading: false,
+          error: _l10n.characterNotFoundMessage,
+        );
         return null;
       }
 
       final chat = Chat(
         id: _generateId(),
         characterId: characterId,
-        title: 'Chat with ${character.name}',
+        title: _l10n.chatWithName(character.name),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -662,7 +678,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       if (groupChars.isEmpty) {
         state = state.copyWith(
           isLoading: false,
-          error: 'No valid characters in group',
+          error: _l10n.noValidCharactersInGroup,
         );
         return null;
       }
@@ -678,7 +694,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         id: _generateId(),
         characterId: firstCharId,
         groupId: group.id,
-        title: 'Chat with ${group.name}',
+        title: _l10n.chatWithName(group.name),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -824,9 +840,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           final updatedMessage = assistantMessage.copyWith(
             content: contentBuffer.toString(),
             swipes: [contentBuffer.toString()],
-            reasoning: reasoningBuffer.isNotEmpty
-                ? reasoningBuffer.toString()
-                : null,
+            reasoning:
+                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
             reasoningSwipes: reasoningBuffer.isNotEmpty
                 ? [reasoningBuffer.toString()]
                 : null,
@@ -837,9 +852,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
-        finalReasoning = reasoningBuffer.isNotEmpty
-            ? reasoningBuffer.toString()
-            : null;
+        finalReasoning =
+            reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response = await _generateWithPrefill(context, config);
@@ -868,9 +882,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       state = state.copyWith(isGenerating: false);
       if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled) {
         unawaited(
-          _ref
-              .read(memoryInboxProvider.notifier)
-              .extractChat(
+          _ref.read(memoryInboxProvider.notifier).extractChat(
                 state.chat!.id,
                 automatic: true,
                 turnMessages: [userMessage, finalMessage],
@@ -947,12 +959,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             content: contentBuffer.toString(),
             swipes: newSwipes,
             currentSwipeIndex: newSwipeIndex,
-            reasoning: reasoningBuffer.isNotEmpty
-                ? reasoningBuffer.toString()
-                : null,
-            reasoningSwipes: newReasoningSwipes.isNotEmpty
-                ? newReasoningSwipes
-                : null,
+            reasoning:
+                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
+            reasoningSwipes:
+                newReasoningSwipes.isNotEmpty ? newReasoningSwipes : null,
             metadata: responseMetadata,
           );
 
@@ -961,9 +971,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
-        finalReasoning = reasoningBuffer.isNotEmpty
-            ? reasoningBuffer.toString()
-            : null;
+        finalReasoning =
+            reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming mode with reasoning support
         final response = await _generateWithPrefill(context, config);
@@ -991,9 +1000,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         swipes: newSwipes,
         currentSwipeIndex: newSwipes.length - 1,
         reasoning: finalReasoning,
-        reasoningSwipes: newReasoningSwipes.isNotEmpty
-            ? newReasoningSwipes
-            : null,
+        reasoningSwipes:
+            newReasoningSwipes.isNotEmpty ? newReasoningSwipes : null,
         metadata: responseMetadata,
       );
       await _chatRepository.updateMessage(finalMessage);
@@ -1208,8 +1216,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             if (newReasoningSwipes.length < newSwipes.length) {
               newReasoningSwipes.add(reasoningBuffer.toString());
             } else {
-              newReasoningSwipes[newSwipes.length - 1] = reasoningBuffer
-                  .toString();
+              newReasoningSwipes[newSwipes.length - 1] =
+                  reasoningBuffer.toString();
             }
           }
 
@@ -1217,12 +1225,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             content: contentBuffer.toString(),
             swipes: newSwipes,
             currentSwipeIndex: newSwipes.length - 1,
-            reasoning: reasoningBuffer.isNotEmpty
-                ? reasoningBuffer.toString()
-                : null,
-            reasoningSwipes: newReasoningSwipes.isNotEmpty
-                ? newReasoningSwipes
-                : null,
+            reasoning:
+                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
+            reasoningSwipes:
+                newReasoningSwipes.isNotEmpty ? newReasoningSwipes : null,
             metadata: responseMetadata,
           );
 
@@ -1231,9 +1237,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
-        finalReasoning = reasoningBuffer.isNotEmpty
-            ? reasoningBuffer.toString()
-            : null;
+        finalReasoning =
+            reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming mode with reasoning support
         final response = await _generateWithPrefill(context, config);
@@ -1261,9 +1266,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         swipes: newSwipes,
         currentSwipeIndex: newSwipes.length - 1,
         reasoning: finalReasoning,
-        reasoningSwipes: newReasoningSwipes.isNotEmpty
-            ? newReasoningSwipes
-            : null,
+        reasoningSwipes:
+            newReasoningSwipes.isNotEmpty ? newReasoningSwipes : null,
         metadata: responseMetadata,
       );
       await _chatRepository.updateMessage(finalMessage);
@@ -1355,8 +1359,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       final context = [...await _buildContext()];
       context.add({
         'role': 'system',
-        'content':
-            '[Write the next reply from the point of view of the user '
+        'content': '[Write the next reply from the point of view of the user '
             'persona. Write only what the user says and does, in the '
             'same style as their previous messages. Do not write for '
             'any other character. Do not add any commentary.]',
@@ -1426,9 +1429,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           final updatedMessage = assistantMessage.copyWith(
             content: contentBuffer.toString(),
             swipes: [contentBuffer.toString()],
-            reasoning: reasoningBuffer.isNotEmpty
-                ? reasoningBuffer.toString()
-                : null,
+            reasoning:
+                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
             reasoningSwipes: reasoningBuffer.isNotEmpty
                 ? [reasoningBuffer.toString()]
                 : null,
@@ -1439,9 +1441,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
-        finalReasoning = reasoningBuffer.isNotEmpty
-            ? reasoningBuffer.toString()
-            : null;
+        finalReasoning =
+            reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response = await _generateWithPrefill(context, config);
@@ -1647,9 +1648,9 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     final personaDepth = personaPosition == PersonaDescriptionPosition.atDepth
         ? persona!.descriptionSettings.depth
         : (personaPosition == PersonaDescriptionPosition.topAN ||
-              personaPosition == PersonaDescriptionPosition.bottomAN)
-        ? authorNoteDepth
-        : null;
+                personaPosition == PersonaDescriptionPosition.bottomAN)
+            ? authorNoteDepth
+            : null;
 
     // RAG: retrieve relevant knowledge for the latest user message
     if (chatMessages.isNotEmpty) {
@@ -1812,9 +1813,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       final content = msg['content'];
       String preview;
       if (content is String) {
-        preview = content.length > 100
-            ? '${content.substring(0, 100)}...'
-            : content;
+        preview =
+            content.length > 100 ? '${content.substring(0, 100)}...' : content;
       } else if (content is List) {
         preview = '[Multimodal: ${content.length} parts]';
       } else {
@@ -1848,14 +1848,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final baseContent = persona?.systemPromptOverride?.isNotEmpty == true
             ? persona!.systemPromptOverride!
             : section.content?.isNotEmpty == true
-            ? section.content!
-            : (character?.systemPrompt.isNotEmpty == true
-                  ? character!.systemPrompt
-                  : PromptSection.getDefaultContent(
-                      PromptSectionType.systemPrompt,
-                    ));
-        final embeddedPersona =
-            persona != null &&
+                ? section.content!
+                : (character?.systemPrompt.isNotEmpty == true
+                    ? character!.systemPrompt
+                    : PromptSection.getDefaultContent(
+                        PromptSectionType.systemPrompt,
+                      ));
+        final embeddedPersona = persona != null &&
                 persona.descriptionSettings.position ==
                     PersonaDescriptionPosition.inSystemPrompt
             ? _personaPromptText(persona, processMacros)
@@ -2044,12 +2043,12 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final content = persona?.postHistoryInstructions?.isNotEmpty == true
             ? persona!.postHistoryInstructions!
             : section.content?.isNotEmpty == true
-            ? section.content!
-            : (character?.postHistoryInstructions.isNotEmpty == true
-                  ? character!.postHistoryInstructions
-                  : PromptSection.getDefaultContent(
-                      PromptSectionType.postHistoryInstructions,
-                    ));
+                ? section.content!
+                : (character?.postHistoryInstructions.isNotEmpty == true
+                    ? character!.postHistoryInstructions
+                    : PromptSection.getDefaultContent(
+                        PromptSectionType.postHistoryInstructions,
+                      ));
         if (content.isNotEmpty) {
           messages.add({'role': role, 'content': processMacros(content)});
         }
@@ -2529,8 +2528,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final name = entry.comment.isNotEmpty
             ? entry.comment
             : (entry.keys.isEmpty
-                  ? "(constant, no keys)"
-                  : entry.keys.join(", "));
+                ? "(constant, no keys)"
+                : entry.keys.join(", "));
         final isConstant = entry.constant || entry.keys.isEmpty;
         debugPrint('║   • [${entry.position.name}] $name');
         debugPrint(
@@ -2621,8 +2620,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
       // Determine which messages to summarize
       final messagesToSummarize = chat.summaries.isEmpty
-          ? state
-                .messages // First summary: summarize all messages
+          ? state.messages // First summary: summarize all messages
           : _summarizationService.getRecentMessages(
               allMessages: state.messages,
               latestSummary: chat.summaries.last,
@@ -2871,9 +2869,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled &&
         turnMessages.any((message) => message.role == MessageRole.assistant)) {
       unawaited(
-        _ref
-            .read(memoryInboxProvider.notifier)
-            .extractChat(
+        _ref.read(memoryInboxProvider.notifier).extractChat(
               state.chat!.id,
               automatic: true,
               turnMessages: turnMessages,
@@ -3051,9 +3047,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           final updatedMessage = assistantMessage.copyWith(
             content: contentBuffer.toString(),
             swipes: [contentBuffer.toString()],
-            reasoning: reasoningBuffer.isNotEmpty
-                ? reasoningBuffer.toString()
-                : null,
+            reasoning:
+                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
             reasoningSwipes: reasoningBuffer.isNotEmpty
                 ? [reasoningBuffer.toString()]
                 : null,
@@ -3064,9 +3059,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
-        finalReasoning = reasoningBuffer.isNotEmpty
-            ? reasoningBuffer.toString()
-            : null;
+        finalReasoning =
+            reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
         // Non-streaming: get complete response at once with reasoning support
         final response = await _generateWithPrefill(context, config);
@@ -3277,27 +3271,27 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 /// Provider for active chat
 final activeChatProvider =
     StateNotifierProvider<ActiveChatNotifier, ActiveChatState>((ref) {
-      ref.watch(dataBankContextRegistrationProvider);
-      ref.watch(longTermMemoryContextRegistrationProvider);
-      final chatRepo = ref.watch(chatRepositoryProvider);
-      final characterRepo = ref.watch(characterRepositoryProvider);
-      final personaRepo = ref.watch(personaRepositoryProvider);
-      final llmService = ref.watch(llmServiceProvider);
-      final worldInfoMatcher = ref.watch(worldInfoMatcherProvider);
-      final summarizationService = ref.watch(chatSummarizationServiceProvider);
-      final generationPipeline = ref.watch(chatGenerationPipelineProvider);
+  ref.watch(dataBankContextRegistrationProvider);
+  ref.watch(longTermMemoryContextRegistrationProvider);
+  final chatRepo = ref.watch(chatRepositoryProvider);
+  final characterRepo = ref.watch(characterRepositoryProvider);
+  final personaRepo = ref.watch(personaRepositoryProvider);
+  final llmService = ref.watch(llmServiceProvider);
+  final worldInfoMatcher = ref.watch(worldInfoMatcherProvider);
+  final summarizationService = ref.watch(chatSummarizationServiceProvider);
+  final generationPipeline = ref.watch(chatGenerationPipelineProvider);
 
-      return ActiveChatNotifier(
-        chatRepository: chatRepo,
-        characterRepository: characterRepo,
-        personaRepository: personaRepo,
-        llmService: llmService,
-        worldInfoMatcher: worldInfoMatcher,
-        summarizationService: summarizationService,
-        generationPipeline: generationPipeline,
-        ref: ref,
-      );
-    });
+  return ActiveChatNotifier(
+    chatRepository: chatRepo,
+    characterRepository: characterRepo,
+    personaRepository: personaRepo,
+    llmService: llmService,
+    worldInfoMatcher: worldInfoMatcher,
+    summarizationService: summarizationService,
+    generationPipeline: generationPipeline,
+    ref: ref,
+  );
+});
 
 /// Chat list for a character
 final characterChatsProvider = FutureProvider.family<List<Chat>, String>((

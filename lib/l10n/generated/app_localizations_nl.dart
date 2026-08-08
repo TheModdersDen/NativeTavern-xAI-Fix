@@ -1035,7 +1035,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get instructTemplateDescription =>
-      'Instruct templates format prompts for different LLM models. Use \"None\" for API providers like OpenAI or Claude that handle formatting automatically.';
+      'Instruct templates format prompts for different LLM models. Use \"None\" for API providers such as OAI Compatible or Claude that handle formatting automatically.';
 
   @override
   String get orderAndTogglePromptSections => 'Order and toggle prompt sections';
@@ -1808,7 +1808,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get dalleDescription =>
-      'OpenAI\'s DALL-E image generation. Requires an API key from OpenAI.';
+      'DALL-E image generation through an OAI Compatible endpoint. Requires an API key.';
 
   @override
   String get prompt => 'Prompt';
@@ -2028,9 +2028,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get leaveEmptyForContinue => 'Leave empty for continue action';
 
   @override
-  String supportsMacros(Object char, Object user) {
-    return 'Supports macros like \'$user\', \'$char\'';
-  }
+  String get supportsMacros => 'Supports prompt macros';
 
   @override
   String get autoSendLabel => 'Auto-send';
@@ -2209,9 +2207,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get replacementLabel => 'Replacement';
 
   @override
-  String replacementHint(Object match) {
-    return '\$1, \$2, \'$match\'';
-  }
+  String get replacementHint => '\$1, \$2, or the matched text';
 
   @override
   String get testButton => 'Test';
@@ -2526,7 +2522,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get whisperDescription =>
-      'OpenAI\'s Whisper model for high-accuracy transcription. Requires an API key.';
+      'Whisper transcription through an OAI Compatible endpoint. Requires an API key.';
 
   @override
   String get voiceInput => 'Voice input';
@@ -5140,4 +5136,1055 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get rpgQuestFailed => 'Failed';
+
+  @override
+  String get rpgEnableMode => 'Enable RPG mode';
+
+  @override
+  String get noImageGenerated => 'No image was generated';
+
+  @override
+  String failedToSaveImage(String error) {
+    return 'Failed to save image: $error';
+  }
+
+  @override
+  String imagesAdded(int count) {
+    return 'Added $count image(s)';
+  }
+
+  @override
+  String get addConnection => 'Add connection';
+
+  @override
+  String get group => 'Group';
+
+  @override
+  String get lockType => 'Lock type';
+
+  @override
+  String errorLoadingCharacters(String error) {
+    return 'Failed to load characters: $error';
+  }
+
+  @override
+  String errorLoadingGroups(String error) {
+    return 'Failed to load groups: $error';
+  }
+
+  @override
+  String get inSystemPrompt => 'In system prompt';
+
+  @override
+  String get connectingGoogleDrive => 'Connecting to Google Drive...';
+
+  @override
+  String get checkingICloud => 'Checking iCloud...';
+
+  @override
+  String get whatIsPromptManager => 'What is the Prompt Manager?';
+
+  @override
+  String get promptManagerHelpDescription =>
+      'The Prompt Manager controls how the system prompt is assembled before messages are sent to the AI. You can reorder sections and enable or disable them.';
+
+  @override
+  String get promptSectionTypes => 'Section types';
+
+  @override
+  String get promptSectionTypesDescription =>
+      'Sections can include system instructions, persona and character details, scenario, lorebook context, example messages, author\'s notes, chat history, and post-history instructions.';
+
+  @override
+  String get tips => 'Tips';
+
+  @override
+  String get promptManagerTips =>
+      'Sections near the top have higher priority. Disable sections you do not need to save tokens, and adjust their order for different results.';
+
+  @override
+  String get customImportedPrompt => 'Custom prompt from an imported preset';
+
+  @override
+  String editPromptSection(String name) {
+    return 'Edit $name';
+  }
+
+  @override
+  String get promptName => 'Prompt name';
+
+  @override
+  String identifierLabel(String identifier) {
+    return 'ID: $identifier';
+  }
+
+  @override
+  String roleLabel(String role) {
+    return 'Role: $role';
+  }
+
+  @override
+  String supportedPromptMacros(
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    return 'Supports macros such as $userMacro, $charMacro, $timeMacro, and $dateMacro.';
+  }
+
+  @override
+  String get enterPromptContent => 'Enter prompt content...';
+
+  @override
+  String updated(String name) {
+    return 'Updated $name';
+  }
+
+  @override
+  String get customPrompt => 'Custom prompt';
+
+  @override
+  String get promptSectionSystemPrompt => 'System prompt';
+
+  @override
+  String get promptSectionSystemPromptDescription =>
+      'Base roleplay instructions';
+
+  @override
+  String get promptSectionPersona => 'User persona';
+
+  @override
+  String get promptSectionPersonaDescription => 'Your persona information';
+
+  @override
+  String get promptSectionCharacterDescription => 'Character description';
+
+  @override
+  String get promptSectionCharacterDescriptionDescription =>
+      'The AI character\'s details';
+
+  @override
+  String get promptSectionCharacterPersonality => 'Character personality';
+
+  @override
+  String get promptSectionCharacterPersonalityDescription =>
+      'The character\'s personality traits';
+
+  @override
+  String get promptSectionScenario => 'Scenario';
+
+  @override
+  String get promptSectionScenarioDescription =>
+      'Current situation and setting';
+
+  @override
+  String get promptSectionExampleMessages => 'Example messages';
+
+  @override
+  String get promptSectionExampleMessagesDescription =>
+      'Sample dialogue that demonstrates style';
+
+  @override
+  String get promptSectionWorldInfoBefore => 'World info before';
+
+  @override
+  String get promptSectionWorldInfoBeforeDescription =>
+      'Lorebook context inserted before character details';
+
+  @override
+  String get promptSectionWorldInfoAfter => 'World info after';
+
+  @override
+  String get promptSectionWorldInfoAfterDescription =>
+      'Lorebook context inserted after character details';
+
+  @override
+  String get promptSectionAuthorNote => 'Author\'s note';
+
+  @override
+  String get promptSectionAuthorNoteDescription =>
+      'Dynamic instructions for the current chat';
+
+  @override
+  String get promptSectionPostHistory => 'Post-history instructions';
+
+  @override
+  String get promptSectionPostHistoryDescription =>
+      'Instructions inserted after chat history';
+
+  @override
+  String get promptSectionNsfw => 'NSFW prompt';
+
+  @override
+  String get promptSectionNsfwDescription =>
+      'Optional mature-content instructions';
+
+  @override
+  String get promptSectionChatHistory => 'Chat history';
+
+  @override
+  String get promptSectionChatHistoryDescription =>
+      'Recent messages from the conversation';
+
+  @override
+  String get promptSectionEnhanceDefinitions => 'Enhance definitions';
+
+  @override
+  String get promptSectionEnhanceDefinitionsDescription =>
+      'Additional instructions that reinforce character definitions';
+
+  @override
+  String get promptSectionCustomDescription => 'A custom prompt section';
+
+  @override
+  String get reasoning => 'Reasoning';
+
+  @override
+  String get emotionNeutral => 'Neutral';
+
+  @override
+  String get emotionHappy => 'Happy';
+
+  @override
+  String get emotionSad => 'Sad';
+
+  @override
+  String get emotionAngry => 'Angry';
+
+  @override
+  String get emotionSurprised => 'Surprised';
+
+  @override
+  String get emotionScared => 'Scared';
+
+  @override
+  String get emotionDisgusted => 'Disgusted';
+
+  @override
+  String get emotionConfused => 'Confused';
+
+  @override
+  String get emotionEmbarrassed => 'Embarrassed';
+
+  @override
+  String get emotionExcited => 'Excited';
+
+  @override
+  String get emotionLoving => 'Loving';
+
+  @override
+  String get emotionThinking => 'Thinking';
+
+  @override
+  String get emotionSmug => 'Smug';
+
+  @override
+  String get emotionTired => 'Tired';
+
+  @override
+  String get emotionBored => 'Bored';
+
+  @override
+  String get tokenizerHelpContent =>
+      'The tokenizer estimates how much text a model can process. Choose the tokenizer that matches your model, or use Best Match to select one automatically.';
+
+  @override
+  String get tokenizerNoneEstimate => 'None (estimate only)';
+
+  @override
+  String get tokenizerBestMatchAuto => 'Best match (automatic)';
+
+  @override
+  String get tokenizerEstimateDescription =>
+      'Quick character-based token estimate';
+
+  @override
+  String get tokenizerGpt2Description =>
+      'GPT-2 tokenizer for older GPT-style models';
+
+  @override
+  String get tokenizerOaiDescription =>
+      'OAI Compatible tiktoken tokenizer for GPT models';
+
+  @override
+  String get tokenizerLlamaDescription =>
+      'SentencePiece tokenizer for Llama models';
+
+  @override
+  String get tokenizerLlama3Description => 'Tokenizer for Llama 3 models';
+
+  @override
+  String get tokenizerMistralDescription => 'Tokenizer for Mistral models';
+
+  @override
+  String get tokenizerClaudeDescription =>
+      'Tokenizer estimate for Claude models';
+
+  @override
+  String get tokenizerGemmaDescription => 'Tokenizer for Gemma models';
+
+  @override
+  String get tokenizerQwenDescription => 'Tokenizer for Qwen models';
+
+  @override
+  String get tokenizerDeepSeekDescription => 'Tokenizer for DeepSeek models';
+
+  @override
+  String get tokenizerCommandRDescription => 'Tokenizer for Command R models';
+
+  @override
+  String get tokenizerNemoDescription => 'Tokenizer for Mistral NeMo models';
+
+  @override
+  String get tokenizerBestMatchDescription =>
+      'Automatically choose a tokenizer based on the active model';
+
+  @override
+  String get showOriginal => 'Show original';
+
+  @override
+  String get showOriginalDescription =>
+      'Display original text alongside the translation';
+
+  @override
+  String get swapLanguages => 'Swap languages';
+
+  @override
+  String get aboutTranslation => 'About translation';
+
+  @override
+  String get aboutTranslationDescription =>
+      'Translate messages automatically or on demand so you can communicate in different languages.';
+
+  @override
+  String get googleTranslate => 'Google Translate';
+
+  @override
+  String get googleTranslateDescription =>
+      'Uses Google Cloud Translation API and requires a Google Cloud API key.';
+
+  @override
+  String get deepL => 'DeepL';
+
+  @override
+  String get deepLDescription =>
+      'High-quality neural machine translation. Requires an API key from deepl.com.';
+
+  @override
+  String get libreTranslate => 'LibreTranslate';
+
+  @override
+  String get libreTranslateDescription =>
+      'Free and open-source translation that can be self-hosted or use a public instance.';
+
+  @override
+  String get queueMessages => 'Queue messages';
+
+  @override
+  String get queueMessagesDescription =>
+      'Queue multiple messages instead of interrupting the current speech';
+
+  @override
+  String get loadingVoices => 'Loading voices...';
+
+  @override
+  String get failedToLoadVoices => 'Failed to load voices';
+
+  @override
+  String get ttsTestPhrase =>
+      'Hello! This is a test of the text-to-speech system. The quick brown fox jumps over the lazy dog.';
+
+  @override
+  String get aboutTts => 'About text-to-speech';
+
+  @override
+  String get aboutTtsDescription =>
+      'Text-to-speech reads messages aloud. You can configure different voices for individual characters in character settings.';
+
+  @override
+  String get systemTts => 'System text-to-speech';
+
+  @override
+  String get systemTtsDetails =>
+      'Uses your device\'s built-in text-to-speech engine. Available voices depend on system settings.';
+
+  @override
+  String get elevenLabsDescription =>
+      'High-quality AI voices. Requires an API key from elevenlabs.io.';
+
+  @override
+  String get clearGlobalVariables => 'Clear global variables';
+
+  @override
+  String get clearLocalVariables => 'Clear local variables';
+
+  @override
+  String get aboutVariables => 'About variables';
+
+  @override
+  String get variableSystemDescription =>
+      'Variables store reusable values globally or for the current chat. Reference them in prompts with macros.';
+
+  @override
+  String get macroUsage => 'Macro usage';
+
+  @override
+  String macroUsageDescription(String localMacro, String globalMacro) {
+    return 'Use $localMacro for local variables and $globalMacro for global variables. You can also set values with variable macros.';
+  }
+
+  @override
+  String get noGlobalVariables => 'No global variables';
+
+  @override
+  String get noLocalVariables => 'No local variables';
+
+  @override
+  String editVariable(String name) {
+    return 'Edit $name';
+  }
+
+  @override
+  String get deleteVariable => 'Delete variable';
+
+  @override
+  String deleteVariableQuestion(String name) {
+    return 'Delete variable \"$name\"?';
+  }
+
+  @override
+  String clearVariables(String scope) {
+    return 'Clear $scope variables';
+  }
+
+  @override
+  String clearVariablesConfirmation(String scope) {
+    return 'Clear all $scope variables? This cannot be undone.';
+  }
+
+  @override
+  String get decrement => 'Decrease';
+
+  @override
+  String get increment => 'Increase';
+
+  @override
+  String get testInput => 'Test input';
+
+  @override
+  String get variableTestHint => 'Enter text containing variable macros...';
+
+  @override
+  String get processMacros => 'Process macros';
+
+  @override
+  String get result => 'Result';
+
+  @override
+  String get emptyString => '(empty string)';
+
+  @override
+  String get retrievalAugmentedGeneration =>
+      'Retrieval-augmented generation (RAG)';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String topKResultsDescription(int count) {
+    return 'Return up to $count matching results';
+  }
+
+  @override
+  String minimumPercent(String percent) {
+    return 'Minimum similarity: $percent%';
+  }
+
+  @override
+  String get promptIntegration => 'Prompt integration';
+
+  @override
+  String get includeInPrompt => 'Include in prompt';
+
+  @override
+  String get automaticallyAddContext =>
+      'Automatically add relevant context to the prompt';
+
+  @override
+  String get promptTemplate => 'Prompt template';
+
+  @override
+  String useContextPlaceholder(String contextMacro) {
+    return 'Use $contextMacro where retrieved content should appear';
+  }
+
+  @override
+  String get vectorStorageHelp => 'Vector storage help';
+
+  @override
+  String get vectorStorageHelpContent =>
+      'Vector storage converts documents into embeddings and retrieves relevant passages for each message. Configure an embedding provider, create a collection, add documents, and enable prompt integration.';
+
+  @override
+  String get enterCollectionName => 'Enter collection name';
+
+  @override
+  String get deleteCollection => 'Delete collection';
+
+  @override
+  String get deleteCollectionConfirmation =>
+      'Delete this collection and all of its documents?';
+
+  @override
+  String get collectionExported => 'Collection exported';
+
+  @override
+  String get importCollection => 'Import collection';
+
+  @override
+  String get pasteCollectionJson => 'Paste collection JSON...';
+
+  @override
+  String get collectionImported => 'Collection imported';
+
+  @override
+  String get activeCollection => 'Active collection';
+
+  @override
+  String collectionWithDocumentCount(String name, int count) {
+    return '$name ($count documents)';
+  }
+
+  @override
+  String documentsCount(int count) {
+    return '$count documents';
+  }
+
+  @override
+  String embeddedCount(String percent) {
+    return '$percent embedded';
+  }
+
+  @override
+  String get addDocument => 'Add document';
+
+  @override
+  String get viewDocuments => 'View documents';
+
+  @override
+  String get enterDocumentContent => 'Enter document content';
+
+  @override
+  String get documentAdded => 'Document added';
+
+  @override
+  String get noDocuments => 'No documents';
+
+  @override
+  String documentEmbeddingStatus(int characters, String status) {
+    return '$characters characters - $status';
+  }
+
+  @override
+  String get embedded => 'Embedded';
+
+  @override
+  String get notEmbedded => 'Not embedded';
+
+  @override
+  String get tokenProbabilities => 'Token probabilities';
+
+  @override
+  String get requestTokenProbabilities => 'Request token probabilities';
+
+  @override
+  String get requestTokenProbabilitiesDescription =>
+      'Ask the model to return probability data for generated tokens';
+
+  @override
+  String get topCandidatesCount => 'Top candidates';
+
+  @override
+  String topCandidatesDescription(int count) {
+    return 'Show up to $count alternatives per token';
+  }
+
+  @override
+  String get showLogprobsPanel => 'Show token probability panel';
+
+  @override
+  String get showLogprobsPanelDescription =>
+      'Display token probabilities below supported messages';
+
+  @override
+  String get colorIntensity => 'Color intensity';
+
+  @override
+  String get aboutTokenProbabilities => 'About token probabilities';
+
+  @override
+  String get tokenProbabilitiesDescription =>
+      'Token probabilities show how confident the model was and which alternatives it considered. Availability depends on the active API and model.';
+
+  @override
+  String get moreFormatting => 'More formatting';
+
+  @override
+  String get readAloud => 'Read aloud';
+
+  @override
+  String get openInBrowser => 'Open in browser';
+
+  @override
+  String get imageLoadFailed => 'Failed to load image';
+
+  @override
+  String get pauseReading => 'Pause reading';
+
+  @override
+  String get resumeReading => 'Resume reading';
+
+  @override
+  String get stopReading => 'Stop reading';
+
+  @override
+  String get noTagsAvailable => 'No tags available';
+
+  @override
+  String rerollAlternativeNotImplemented(String alternative) {
+    return 'Rerolling with \"$alternative\" is not implemented yet';
+  }
+
+  @override
+  String get enableTokenProbabilitiesHint =>
+      'Enable token probabilities in settings to view this data';
+
+  @override
+  String get noTokenProbabilities => 'No token probability data available';
+
+  @override
+  String get noAlternativeTokens => 'No alternative tokens';
+
+  @override
+  String get alternativeTokens => 'Alternative tokens';
+
+  @override
+  String get otherTokens => 'Other tokens';
+
+  @override
+  String get chooseRpgScenario => 'Choose an RPG scenario';
+
+  @override
+  String get importScenario => 'Import scenario';
+
+  @override
+  String get noSavedScenarios => 'No saved scenarios';
+
+  @override
+  String get rpgImportScenarioPackage => 'Import RPG scenario package';
+
+  @override
+  String get rpgSelectedScenarioUnreadable =>
+      'The selected scenario file could not be read';
+
+  @override
+  String get favorite => 'Favorite';
+
+  @override
+  String get connections => 'Connections';
+
+  @override
+  String get systemPromptOverride => 'System prompt override';
+
+  @override
+  String get systemPromptOverrideHint =>
+      'Enter a system prompt for this persona...';
+
+  @override
+  String get systemPromptOverrideDescription =>
+      'Overrides the default system prompt while this persona is active';
+
+  @override
+  String get instructionsAddedAfterHistory =>
+      'Instructions added after chat history';
+
+  @override
+  String get bindPersonaDescription => 'Bind persona description';
+
+  @override
+  String get noConnections => 'No connections';
+
+  @override
+  String connectionCharacter(String id) {
+    return 'Character: $id';
+  }
+
+  @override
+  String connectionGroup(String id) {
+    return 'Group: $id';
+  }
+
+  @override
+  String connectionChat(String id) {
+    return 'Chat: $id';
+  }
+
+  @override
+  String lockLabel(String type) {
+    return 'Lock: $type';
+  }
+
+  @override
+  String get addTag => 'Add tag';
+
+  @override
+  String errorLoadingLorebooks(String error) {
+    return 'Failed to load lorebooks: $error';
+  }
+
+  @override
+  String get personaLorebook => 'Persona lorebook';
+
+  @override
+  String get selectLorebook => 'Select a lorebook';
+
+  @override
+  String get personaLorebookDescription => 'Lorebook linked to this persona';
+
+  @override
+  String get descriptionPlacement => 'Description placement';
+
+  @override
+  String get personaDescriptionPositionHelp =>
+      'Choose where the persona description is inserted in the prompt';
+
+  @override
+  String get depth => 'Depth';
+
+  @override
+  String get depthInChatHistory => 'Depth in chat history';
+
+  @override
+  String get messageRole => 'Message role';
+
+  @override
+  String get roleForDescription => 'Role used for the persona description';
+
+  @override
+  String get novelAiSettings => 'NovelAI settings';
+
+  @override
+  String get anlasGuard => 'Anlas guard';
+
+  @override
+  String get anlasGuardDescription =>
+      'Prevent generation when the estimated Anlas cost is too high';
+
+  @override
+  String get smea => 'SMEA';
+
+  @override
+  String get smeaDescription =>
+      'Enable SMEA sampling for improved image coherence';
+
+  @override
+  String get smeaDynamic => 'Dynamic SMEA';
+
+  @override
+  String get smeaDynamicDescription =>
+      'Dynamically adjust SMEA based on image dimensions';
+
+  @override
+  String get decrisper => 'Decrisper';
+
+  @override
+  String get decrisperDescription =>
+      'Reduce overly sharp or crispy image details';
+
+  @override
+  String get varietyPlus => 'Variety+';
+
+  @override
+  String get varietyPlusDescription =>
+      'Increase variation between generated images';
+
+  @override
+  String get gptImageApiDescription =>
+      'Generate images through an OAI Compatible image API';
+
+  @override
+  String get oaiCompatibleChat => 'OAI Compatible Chat';
+
+  @override
+  String get oaiCompatibleChatDescription =>
+      'Generate images through an OAI Compatible chat completion endpoint';
+
+  @override
+  String get errorFetchingModels => 'Failed to fetch models';
+
+  @override
+  String generatedPrompt(String prompt) {
+    return 'Prompt: $prompt';
+  }
+
+  @override
+  String generatedSeed(String seed) {
+    return 'Seed: $seed';
+  }
+
+  @override
+  String imagesGenerated(int count) {
+    return 'Generated $count image(s)';
+  }
+
+  @override
+  String get myTheme => 'My theme';
+
+  @override
+  String get translate => 'Translate';
+
+  @override
+  String get stopSpeaking => 'Stop speaking';
+
+  @override
+  String get insertion => 'Insertion';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get scanDepth => 'Scan depth';
+
+  @override
+  String get scanDepthDescription =>
+      'Number of recent messages scanned for keywords';
+
+  @override
+  String get roleForInjectedContent => 'Role used for injected content';
+
+  @override
+  String get caseSensitive => 'Case sensitive';
+
+  @override
+  String get matchKeywordsExactCase => 'Match keywords using exact letter case';
+
+  @override
+  String get matchWholeWords => 'Match whole words';
+
+  @override
+  String get onlyMatchCompleteWords => 'Only match complete words';
+
+  @override
+  String get recursionControl => 'Recursion control';
+
+  @override
+  String get preventRecursion => 'Prevent recursion';
+
+  @override
+  String get preventRecursionDescription =>
+      'Do not let this entry trigger additional entries';
+
+  @override
+  String get excludeRecursion => 'Exclude from recursion';
+
+  @override
+  String get excludeRecursionDescription =>
+      'Do not activate this entry during recursive scans';
+
+  @override
+  String get delayUntilRecursion => 'Delay until recursion';
+
+  @override
+  String get delayUntilRecursionDescription =>
+      'Only activate this entry during recursive scans';
+
+  @override
+  String get characterFilter => 'Character filter';
+
+  @override
+  String get groupSettings => 'Group settings';
+
+  @override
+  String get groupMutuallyExclusive => 'Mutually exclusive group';
+
+  @override
+  String get useGroupScoring => 'Use group scoring';
+
+  @override
+  String get groupWeight => 'Group weight';
+
+  @override
+  String get groupWeightDescription =>
+      'Relative weight when choosing an entry from the group';
+
+  @override
+  String get groupOverride => 'Group override';
+
+  @override
+  String get groupPriority => 'Group priority';
+
+  @override
+  String get probability => 'Probability';
+
+  @override
+  String get useProbability => 'Use probability';
+
+  @override
+  String get randomActivationProbability =>
+      'Random chance for this entry to activate';
+
+  @override
+  String probabilityPercent(int percent) {
+    return 'Activation probability: $percent%';
+  }
+
+  @override
+  String get timedEffects => 'Timed effects';
+
+  @override
+  String get filterType => 'Filter type';
+
+  @override
+  String get characterIds => 'Character IDs';
+
+  @override
+  String get stickyDuration => 'Sticky duration';
+
+  @override
+  String get stickyDurationDescription =>
+      'Number of messages this entry remains active after matching';
+
+  @override
+  String get cooldown => 'Cooldown';
+
+  @override
+  String get cooldownDescription =>
+      'Number of messages before this entry can activate again';
+
+  @override
+  String get delay => 'Delay';
+
+  @override
+  String get delayDescription =>
+      'Number of messages before this entry becomes eligible';
+
+  @override
+  String get outlet => 'Outlet';
+
+  @override
+  String get include => 'Include';
+
+  @override
+  String get exclude => 'Exclude';
+
+  @override
+  String translatedFromLanguage(String language) {
+    return 'Translated from $language';
+  }
+
+  @override
+  String originalText(String text) {
+    return 'Original: $text';
+  }
+
+  @override
+  String get loadingImage => 'Loading image...';
+
+  @override
+  String get backupIntervalNever => 'Never';
+
+  @override
+  String get backupIntervalHourly => 'Hourly';
+
+  @override
+  String get backupIntervalDaily => 'Daily';
+
+  @override
+  String get backupIntervalWeekly => 'Weekly';
+
+  @override
+  String get backupIntervalMonthly => 'Monthly';
+
+  @override
+  String get restoreModeReplace => 'Replace';
+
+  @override
+  String get restoreModeReplaceDescription =>
+      'Replace all local data with backup data';
+
+  @override
+  String get restoreModeMerge => 'Merge';
+
+  @override
+  String get restoreModeMergeDescription =>
+      'Merge backup with local data; newer data wins conflicts';
+
+  @override
+  String get restoreModeAddNewOnly => 'Add new only';
+
+  @override
+  String get restoreModeAddNewOnlyDescription =>
+      'Only add new backup items and keep all existing data';
+
+  @override
+  String get sortNameAscending => 'Name (A-Z)';
+
+  @override
+  String get sortNameDescending => 'Name (Z-A)';
+
+  @override
+  String get sortNewestFirst => 'Newest first';
+
+  @override
+  String get sortOldestFirst => 'Oldest first';
+
+  @override
+  String get sortRecentlyModified => 'Recently modified';
+
+  @override
+  String get sortLeastRecentlyModified => 'Least recently modified';
+
+  @override
+  String get codeBlock => 'Code block';
+
+  @override
+  String get quote => 'Quote';
+
+  @override
+  String get heading1 => 'Heading 1';
+
+  @override
+  String get heading2 => 'Heading 2';
+
+  @override
+  String get heading3 => 'Heading 3';
+
+  @override
+  String get bulletList => 'Bullet list';
+
+  @override
+  String get numberedList => 'Numbered list';
+
+  @override
+  String get horizontalRule => 'Horizontal rule';
+
+  @override
+  String get pageNotFound => 'Page not found';
+
+  @override
+  String get goHome => 'Go home';
+
+  @override
+  String get officialWebsite => 'Official website';
+
+  @override
+  String get mcpStreamableHttp => 'Streamable HTTP';
+
+  @override
+  String get mcpLegacyHttpSse => 'Legacy HTTP + SSE';
+
+  @override
+  String chatWithName(String name) {
+    return 'Chat with $name';
+  }
+
+  @override
+  String get noValidCharactersInGroup => 'No valid characters in group';
 }

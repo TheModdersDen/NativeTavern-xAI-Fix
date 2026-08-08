@@ -9,7 +9,7 @@ class LogitBiasService {
   /// Parse a logit bias entry text to determine its format
   ParsedLogitBiasEntry parseEntry(LogitBiasEntry entry) {
     final text = entry.text.trim();
-    
+
     if (text.isEmpty) {
       return ParsedLogitBiasEntry(
         format: LogitBiasInputFormat.text,
@@ -65,7 +65,7 @@ class LogitBiasService {
     List<int> Function(String text, TokenizerType type) tokenizeFunction,
   ) {
     final cacheKey = _generateCacheKey(entries, tokenizerType);
-    
+
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey]!;
     }
@@ -162,12 +162,14 @@ class LogitBiasService {
   }
 
   /// Clear cache for specific entries
-  void invalidateCache(List<LogitBiasEntry> entries, TokenizerType tokenizerType) {
+  void invalidateCache(
+      List<LogitBiasEntry> entries, TokenizerType tokenizerType) {
     final cacheKey = _generateCacheKey(entries, tokenizerType);
     _cache.remove(cacheKey);
   }
 
-  String _generateCacheKey(List<LogitBiasEntry> entries, TokenizerType tokenizerType) {
+  String _generateCacheKey(
+      List<LogitBiasEntry> entries, TokenizerType tokenizerType) {
     final entriesHash = entries
         .where((e) => e.enabled)
         .map((e) => '${e.text}:${e.value}')
@@ -290,7 +292,7 @@ extension TokenizerTypeExtension on TokenizerType {
       case TokenizerType.gpt2:
         return 'OA-Compatible-2';
       case TokenizerType.openai:
-        return 'OA Compatible (tiktoken)';
+        return 'OAI Compatible (tiktoken)';
       case TokenizerType.llama:
         return 'LLaMA';
       case TokenizerType.llama3:

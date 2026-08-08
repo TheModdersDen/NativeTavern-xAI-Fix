@@ -18,18 +18,21 @@ class WorldInfoEntryEditorScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WorldInfoEntryEditorScreen> createState() => _WorldInfoEntryEditorScreenState();
+  ConsumerState<WorldInfoEntryEditorScreen> createState() =>
+      _WorldInfoEntryEditorScreenState();
 }
 
-class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEditorScreen>
+class _WorldInfoEntryEditorScreenState
+    extends ConsumerState<WorldInfoEntryEditorScreen>
     with SingleTickerProviderStateMixin {
+  AppLocalizations get _l10n => AppLocalizations.of(context);
   late TabController _tabController;
   late TextEditingController _keysController;
   late TextEditingController _secondaryKeysController;
   late TextEditingController _contentController;
   late TextEditingController _commentController;
   late TextEditingController _groupController;
-  
+
   // Settings
   WorldInfoPosition _position = WorldInfoPosition.before;
   int _depth = 4;
@@ -49,27 +52,28 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
   bool _useProbability = false;
   int _probability = 100;
   bool _isFavorite = false;
-  
+
   // Advanced fields
   WorldInfoRole _role = WorldInfoRole.system;
   WorldInfoTimedEffects _timedEffects = const WorldInfoTimedEffects();
   WorldInfoCharacterFilter _characterFilter = const WorldInfoCharacterFilter();
-  
+
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Initialize controllers with existing data
     final entry = widget.entry;
     _keysController = TextEditingController(text: entry?.keys.join(', ') ?? '');
-    _secondaryKeysController = TextEditingController(text: entry?.secondaryKeys.join(', ') ?? '');
+    _secondaryKeysController =
+        TextEditingController(text: entry?.secondaryKeys.join(', ') ?? '');
     _contentController = TextEditingController(text: entry?.content ?? '');
     _commentController = TextEditingController(text: entry?.comment ?? '');
     _groupController = TextEditingController(text: entry?.group ?? '');
-    
+
     if (entry != null) {
       _position = entry.position;
       _depth = entry.depth;
@@ -110,11 +114,11 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.entry == null ? 'Create Entry' : 'Edit Entry'),
+        title: Text(widget.entry == null ? _l10n.createEntry : _l10n.editEntry),
         actions: [
           IconButton(
             icon: Icon(_isFavorite ? Icons.star : Icons.star_border),
-            tooltip: 'Favorite',
+            tooltip: _l10n.favorites,
             onPressed: () => setState(() => _isFavorite = !_isFavorite),
           ),
           Switch(
@@ -123,18 +127,18 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           ),
           IconButton(
             icon: const Icon(Icons.check),
-            tooltip: 'Save',
+            tooltip: _l10n.save,
             onPressed: _isSaving ? null : _save,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Basic', icon: Icon(Icons.edit)),
-            Tab(text: 'Insertion', icon: Icon(Icons.settings)),
-            Tab(text: 'Filters', icon: Icon(Icons.filter_list)),
-            Tab(text: 'Advanced', icon: Icon(Icons.tune)),
+          tabs: [
+            Tab(text: _l10n.basic, icon: const Icon(Icons.edit)),
+            Tab(text: _l10n.insertion, icon: const Icon(Icons.settings)),
+            Tab(text: _l10n.filters, icon: const Icon(Icons.filter_list)),
+            Tab(text: _l10n.advanced, icon: const Icon(Icons.tune)),
           ],
         ),
       ),
@@ -158,53 +162,53 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
         children: [
           TextField(
             controller: _keysController,
-            decoration: const InputDecoration(
-              labelText: 'Keywords (comma-separated)',
-              hintText: 'dragon, magic, sword',
-              border: OutlineInputBorder(),
-              helperText: 'Entry activates when these keywords are found',
+            decoration: InputDecoration(
+              labelText: _l10n.keywordsCommaSeparated,
+              hintText: _l10n.keywordsHint,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.entryActivatesWhenKeywordFound,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _secondaryKeysController,
-            decoration: const InputDecoration(
-              labelText: 'Secondary Keys (optional)',
-              hintText: 'fire, ice',
-              border: OutlineInputBorder(),
-              helperText: 'Both primary and secondary must match for selective',
+            decoration: InputDecoration(
+              labelText: _l10n.secondaryKeysOptional,
+              hintText: _l10n.secondaryKeysHint,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.bothPrimaryAndSecondaryMustMatch,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _commentController,
-            decoration: const InputDecoration(
-              labelText: 'Comment (optional)',
-              hintText: 'Note for this entry',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: _l10n.commentOptional,
+              hintText: _l10n.noteForThisEntry,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _contentController,
-            decoration: const InputDecoration(
-              labelText: 'Content',
-              hintText: 'Context to inject when matches',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: _l10n.content,
+              hintText: _l10n.contextToInjectWhenMatches,
+              border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 10,
           ),
           const SizedBox(height: 16),
           SwitchListTile(
-            title: const Text('Constant'),
-            subtitle: const Text('Always include in prompt'),
+            title: Text(_l10n.constant),
+            subtitle: Text(_l10n.alwaysIncludeInPrompt),
             value: _constant,
             onChanged: (v) => setState(() => _constant = v),
           ),
           SwitchListTile(
-            title: const Text('Selective'),
-            subtitle: const Text('Requires secondary key'),
+            title: Text(_l10n.selective),
+            subtitle: Text(_l10n.requiresSecondaryKey),
             value: _selective,
             onChanged: (v) => setState(() => _selective = v),
           ),
@@ -221,14 +225,14 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
         children: [
           DropdownButtonFormField<WorldInfoPosition>(
             value: _position,
-            decoration: const InputDecoration(
-              labelText: 'Position',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: _l10n.position,
+              border: const OutlineInputBorder(),
             ),
             items: WorldInfoPosition.values.map((pos) {
               return DropdownMenuItem(
                 value: pos,
-                child: Text(_formatEnumName(pos.name)),
+                child: Text(_positionName(pos)),
               );
             }).toList(),
             onChanged: (v) => setState(() => _position = v!),
@@ -236,10 +240,10 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           const SizedBox(height: 16),
           if (_position == WorldInfoPosition.atDepth) ...[
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Depth',
-                border: OutlineInputBorder(),
-                helperText: 'Depth in chat history',
+              decoration: InputDecoration(
+                labelText: _l10n.depth,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.depthInChatHistory,
               ),
               keyboardType: TextInputType.number,
               controller: TextEditingController(text: _depth.toString()),
@@ -248,10 +252,10 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
             const SizedBox(height: 16),
           ],
           TextField(
-            decoration: const InputDecoration(
-              labelText: 'Insertion Order',
-              border: OutlineInputBorder(),
-              helperText: 'Lower values insert first',
+            decoration: InputDecoration(
+              labelText: _l10n.insertionOrder,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.lowerOrderInsertsFirst,
             ),
             keyboardType: TextInputType.number,
             controller: TextEditingController(text: _insertionOrder.toString()),
@@ -259,10 +263,10 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           ),
           const SizedBox(height: 16),
           TextField(
-            decoration: const InputDecoration(
-              labelText: 'Scan Depth',
-              border: OutlineInputBorder(),
-              helperText: 'How many messages to scan (0 = use default)',
+            decoration: InputDecoration(
+              labelText: _l10n.scanDepth,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.scanDepthDescription,
             ),
             keyboardType: TextInputType.number,
             controller: TextEditingController(text: _scanDepth.toString()),
@@ -271,15 +275,15 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           const SizedBox(height: 16),
           DropdownButtonFormField<WorldInfoRole>(
             value: _role,
-            decoration: const InputDecoration(
-              labelText: 'Message Role',
-              border: OutlineInputBorder(),
-              helperText: 'Role for the injected content',
+            decoration: InputDecoration(
+              labelText: _l10n.messageRole,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.roleForInjectedContent,
             ),
             items: WorldInfoRole.values.map((role) {
               return DropdownMenuItem(
                 value: role,
-                child: Text(_formatEnumName(role.name)),
+                child: Text(_roleName(role)),
               );
             }).toList(),
             onChanged: (v) => setState(() => _role = v!),
@@ -296,45 +300,45 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SwitchListTile(
-            title: const Text('Case Sensitive'),
-            subtitle: const Text('Match keywords with exact case'),
+            title: Text(_l10n.caseSensitive),
+            subtitle: Text(_l10n.matchKeywordsExactCase),
             value: _caseSensitive,
             onChanged: (v) => setState(() => _caseSensitive = v),
           ),
           SwitchListTile(
-            title: const Text('Match Whole Words'),
-            subtitle: const Text('Only match complete words'),
+            title: Text(_l10n.matchWholeWords),
+            subtitle: Text(_l10n.onlyMatchCompleteWords),
             value: _matchWholeWords,
             onChanged: (v) => setState(() => _matchWholeWords = v),
           ),
           const Divider(height: 32),
-          const Text(
-            'Recursion Control',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            _l10n.recursionControl,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           SwitchListTile(
-            title: const Text('Prevent Recursion'),
-            subtitle: const Text("Don't scan this entry's content"),
+            title: Text(_l10n.preventRecursion),
+            subtitle: Text(_l10n.preventRecursionDescription),
             value: _preventRecursion,
             onChanged: (v) => setState(() => _preventRecursion = v),
           ),
           SwitchListTile(
-            title: const Text('Exclude Recursion'),
-            subtitle: const Text("Don't trigger from other entries"),
+            title: Text(_l10n.excludeRecursion),
+            subtitle: Text(_l10n.excludeRecursionDescription),
             value: _excludeRecursion,
             onChanged: (v) => setState(() => _excludeRecursion = v),
           ),
           SwitchListTile(
-            title: const Text('Delay Until Recursion'),
-            subtitle: const Text('Only activate after recursive scan'),
+            title: Text(_l10n.delayUntilRecursion),
+            subtitle: Text(_l10n.delayUntilRecursionDescription),
             value: _delayUntilRecursion,
             onChanged: (v) => setState(() => _delayUntilRecursion = v),
           ),
           const Divider(height: 32),
-          const Text(
-            'Character Filter',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            _l10n.characterFilter,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           _buildCharacterFilterSection(),
@@ -349,31 +353,31 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Group Settings',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            _l10n.groupSettings,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _groupController,
-            decoration: const InputDecoration(
-              labelText: 'Group Name',
-              border: OutlineInputBorder(),
-              helperText: 'Entries with same group are mutually exclusive',
+            decoration: InputDecoration(
+              labelText: _l10n.groupName,
+              border: const OutlineInputBorder(),
+              helperText: _l10n.groupMutuallyExclusive,
             ),
           ),
           const SizedBox(height: 16),
           SwitchListTile(
-            title: const Text('Use Group Scoring'),
+            title: Text(_l10n.useGroupScoring),
             value: _useGroupScoring,
             onChanged: (v) => setState(() => _useGroupScoring = v),
           ),
           if (_useGroupScoring) ...[
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Group Weight',
-                border: OutlineInputBorder(),
-                helperText: 'Weight for group selection',
+              decoration: InputDecoration(
+                labelText: _l10n.groupWeight,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.groupWeightDescription,
               ),
               keyboardType: TextInputType.number,
               controller: TextEditingController(text: _groupWeight.toString()),
@@ -381,25 +385,26 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Group Override',
-                border: OutlineInputBorder(),
-                helperText: 'Priority within group (higher = more priority)',
+              decoration: InputDecoration(
+                labelText: _l10n.groupOverride,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.groupPriority,
               ),
               keyboardType: TextInputType.number,
-              controller: TextEditingController(text: _groupOverride.toString()),
+              controller:
+                  TextEditingController(text: _groupOverride.toString()),
               onChanged: (v) => _groupOverride = int.tryParse(v) ?? 0,
             ),
           ],
           const Divider(height: 32),
-          const Text(
-            'Probability',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            _l10n.probability,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           SwitchListTile(
-            title: const Text('Use Probability'),
-            subtitle: const Text('Randomly activate based on probability'),
+            title: Text(_l10n.useProbability),
+            subtitle: Text(_l10n.randomActivationProbability),
             value: _useProbability,
             onChanged: (v) => setState(() => _useProbability = v),
           ),
@@ -413,14 +418,14 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
               onChanged: (v) => setState(() => _probability = v.toInt()),
             ),
             Text(
-              'Probability: $_probability%',
+              _l10n.probabilityPercent(_probability),
               style: const TextStyle(color: AppTheme.textSecondary),
             ),
           ],
           const Divider(height: 32),
-          const Text(
-            'Timed Effects',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            _l10n.timedEffects,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           _buildTimedEffectsSection(),
@@ -438,14 +443,14 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           children: [
             DropdownButtonFormField<WorldInfoCharacterFilterType>(
               value: _characterFilter.type,
-              decoration: const InputDecoration(
-                labelText: 'Filter Type',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: _l10n.filterType,
+                border: const OutlineInputBorder(),
               ),
               items: WorldInfoCharacterFilterType.values.map((type) {
                 return DropdownMenuItem(
                   value: type,
-                  child: Text(_formatEnumName(type.name)),
+                  child: Text(_filterTypeName(type)),
                 );
               }).toList(),
               onChanged: (v) {
@@ -456,9 +461,10 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
             ),
             if (_characterFilter.type != WorldInfoCharacterFilterType.none) ...[
               const SizedBox(height: 16),
-              const Text(
-                'Character IDs (comma-separated):',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              Text(
+                _l10n.characterIds,
+                style: const TextStyle(
+                    fontSize: 12, color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -470,9 +476,14 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
                   text: _characterFilter.characterIds.join(', '),
                 ),
                 onChanged: (v) {
-                  final ids = v.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+                  final ids = v
+                      .split(',')
+                      .map((s) => s.trim())
+                      .where((s) => s.isNotEmpty)
+                      .toList();
                   setState(() {
-                    _characterFilter = _characterFilter.copyWith(characterIds: ids);
+                    _characterFilter =
+                        _characterFilter.copyWith(characterIds: ids);
                   });
                 },
               ),
@@ -491,46 +502,52 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Sticky Duration',
-                border: OutlineInputBorder(),
-                helperText: 'Messages to stay active after trigger (0 = not sticky)',
+              decoration: InputDecoration(
+                labelText: _l10n.stickyDuration,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.stickyDurationDescription,
               ),
               keyboardType: TextInputType.number,
-              controller: TextEditingController(text: _timedEffects.sticky.toString()),
+              controller:
+                  TextEditingController(text: _timedEffects.sticky.toString()),
               onChanged: (v) {
                 setState(() {
-                  _timedEffects = _timedEffects.copyWith(sticky: int.tryParse(v) ?? 0);
+                  _timedEffects =
+                      _timedEffects.copyWith(sticky: int.tryParse(v) ?? 0);
                 });
               },
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Cooldown',
-                border: OutlineInputBorder(),
-                helperText: 'Messages to wait before can trigger again (0 = no cooldown)',
+              decoration: InputDecoration(
+                labelText: _l10n.cooldown,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.cooldownDescription,
               ),
               keyboardType: TextInputType.number,
-              controller: TextEditingController(text: _timedEffects.cooldown.toString()),
+              controller: TextEditingController(
+                  text: _timedEffects.cooldown.toString()),
               onChanged: (v) {
                 setState(() {
-                  _timedEffects = _timedEffects.copyWith(cooldown: int.tryParse(v) ?? 0);
+                  _timedEffects =
+                      _timedEffects.copyWith(cooldown: int.tryParse(v) ?? 0);
                 });
               },
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Delay',
-                border: OutlineInputBorder(),
-                helperText: 'Messages before entry can trigger (0 = no delay)',
+              decoration: InputDecoration(
+                labelText: _l10n.delay,
+                border: const OutlineInputBorder(),
+                helperText: _l10n.delayDescription,
               ),
               keyboardType: TextInputType.number,
-              controller: TextEditingController(text: _timedEffects.delay.toString()),
+              controller:
+                  TextEditingController(text: _timedEffects.delay.toString()),
               onChanged: (v) {
                 setState(() {
-                  _timedEffects = _timedEffects.copyWith(delay: int.tryParse(v) ?? 0);
+                  _timedEffects =
+                      _timedEffects.copyWith(delay: int.tryParse(v) ?? 0);
                 });
               },
             ),
@@ -549,7 +566,7 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
 
     final content = _contentController.text.trim();
     if (content.isEmpty) {
-      _showError('Please enter content');
+      _showError(_l10n.pleaseEnterContent);
       return;
     }
 
@@ -601,16 +618,16 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
 
       if (widget.entry == null) {
         await ref.read(worldInfoNotifierProvider.notifier).addEntry(
-          worldInfoId: widget.worldInfoId,
-          keys: entry.keys,
-          content: entry.content,
-          comment: entry.comment,
-          secondaryKeys: entry.secondaryKeys,
-          position: entry.position,
-          constant: entry.constant,
-          selective: entry.selective,
-          insertionOrder: entry.insertionOrder,
-        );
+              worldInfoId: widget.worldInfoId,
+              keys: entry.keys,
+              content: entry.content,
+              comment: entry.comment,
+              secondaryKeys: entry.secondaryKeys,
+              position: entry.position,
+              constant: entry.constant,
+              selective: entry.selective,
+              insertionOrder: entry.insertionOrder,
+            );
       } else {
         await ref.read(worldInfoNotifierProvider.notifier).updateEntry(entry);
       }
@@ -619,7 +636,7 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
         Navigator.pop(context);
       }
     } catch (e) {
-      _showError('Failed to save: $e');
+      _showError(_l10n.saveFailed('$e'));
       setState(() => _isSaving = false);
     }
   }
@@ -632,15 +649,26 @@ class _WorldInfoEntryEditorScreenState extends ConsumerState<WorldInfoEntryEdito
     }
   }
 
-  String _formatEnumName(String name) {
-    return name
-        .replaceAllMapped(
-          RegExp(r'([A-Z])'),
-          (match) => ' ${match.group(0)}',
-        )
-        .trim()
-        .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join(' ');
-  }
+  String _positionName(WorldInfoPosition position) => switch (position) {
+        WorldInfoPosition.before => _l10n.beforeCharacterDefinition,
+        WorldInfoPosition.after => _l10n.afterCharacterDefinition,
+        WorldInfoPosition.ANTop => _l10n.beforeAuthorNote,
+        WorldInfoPosition.ANBottom => _l10n.afterAuthorNote,
+        WorldInfoPosition.atDepth => _l10n.atDepth,
+        WorldInfoPosition.EMTop => _l10n.beforeExampleMessages,
+        WorldInfoPosition.EMBottom => _l10n.afterExampleMessages,
+        WorldInfoPosition.outlet => _l10n.outlet,
+      };
+
+  String _roleName(WorldInfoRole role) => switch (role) {
+        WorldInfoRole.system => _l10n.system,
+        WorldInfoRole.user => _l10n.user,
+        WorldInfoRole.assistant => _l10n.assistant,
+      };
+
+  String _filterTypeName(WorldInfoCharacterFilterType type) => switch (type) {
+        WorldInfoCharacterFilterType.none => _l10n.none,
+        WorldInfoCharacterFilterType.include => _l10n.include,
+        WorldInfoCharacterFilterType.exclude => _l10n.exclude,
+      };
 }

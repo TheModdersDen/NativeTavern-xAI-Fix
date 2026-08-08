@@ -18,30 +18,57 @@ class BackupSettingsScreen extends ConsumerStatefulWidget {
   const BackupSettingsScreen({super.key});
 
   @override
-  ConsumerState<BackupSettingsScreen> createState() => _BackupSettingsScreenState();
+  ConsumerState<BackupSettingsScreen> createState() =>
+      _BackupSettingsScreenState();
 }
+
+String _autoBackupIntervalName(
+  AutoBackupInterval interval,
+  AppLocalizations l10n,
+) =>
+    switch (interval) {
+      AutoBackupInterval.never => l10n.backupIntervalNever,
+      AutoBackupInterval.hourly => l10n.backupIntervalHourly,
+      AutoBackupInterval.daily => l10n.backupIntervalDaily,
+      AutoBackupInterval.weekly => l10n.backupIntervalWeekly,
+      AutoBackupInterval.monthly => l10n.backupIntervalMonthly,
+    };
+
+String _restoreModeName(RestoreMode mode, AppLocalizations l10n) =>
+    switch (mode) {
+      RestoreMode.replace => l10n.restoreModeReplace,
+      RestoreMode.merge => l10n.restoreModeMerge,
+      RestoreMode.addNewOnly => l10n.restoreModeAddNewOnly,
+    };
+
+String _restoreModeDescription(RestoreMode mode, AppLocalizations l10n) =>
+    switch (mode) {
+      RestoreMode.replace => l10n.restoreModeReplaceDescription,
+      RestoreMode.merge => l10n.restoreModeMergeDescription,
+      RestoreMode.addNewOnly => l10n.restoreModeAddNewOnlyDescription,
+    };
 
 class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
   bool _isAutoLoggingIn = false;
-  
+
   @override
   void initState() {
     super.initState();
     // Try to auto-login to Google Drive if previously signed in
     _tryAutoLoginGoogleDrive();
   }
-  
+
   Future<void> _tryAutoLoginGoogleDrive() async {
     // If already signed in, no need to do anything
     if (ref.read(googleDriveSignedInProvider)) return;
-    
+
     setState(() => _isAutoLoggingIn = true);
-    
+
     try {
       // Try silent sign-in only (won't show UI if no cached credentials)
       final service = GoogleDriveService.instance;
       final success = await service.trySilentSignIn();
-      
+
       if (success && mounted) {
         ref.read(googleDriveSignedInProvider.notifier).state = true;
         ref.invalidate(googleDriveUserProvider);
@@ -70,9 +97,11 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
     final iCloudBackupsAsync = ref.watch(iCloudBackupsProvider);
     final isGoogleDriveSignedIn = ref.watch(googleDriveSignedInProvider);
     final googleDriveBackupsAsync = ref.watch(googleDriveBackupsProvider);
-    
-    final isLoading = localOperationState.isLoading || cloudOperationState.isLoading;
-    final currentOperation = localOperationState.currentOperation ?? cloudOperationState.currentOperation;
+
+    final isLoading =
+        localOperationState.isLoading || cloudOperationState.isLoading;
+    final currentOperation = localOperationState.currentOperation ??
+        cloudOperationState.currentOperation;
 
     return Scaffold(
       appBar: AppBar(
@@ -107,13 +136,15 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       child: LinearProgressIndicator(
                         value: cloudOperationState.progress,
                         backgroundColor: AppTheme.darkCard,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentColor),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${(cloudOperationState.progress! * 100).toInt()}%',
-                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                      style: const TextStyle(
+                          color: AppTheme.textMuted, fontSize: 12),
                     ),
                   ],
                 ],
@@ -133,28 +164,38 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       subtitle: Text(l10n.automaticallyBackupChats),
                       value: localSettings.autoBackupEnabled,
                       onChanged: (value) {
-                        ref.read(backupSettingsProvider.notifier).setAutoBackupEnabled(value);
+                        ref
+                            .read(backupSettingsProvider.notifier)
+                            .setAutoBackupEnabled(value);
                         // Also sync to cloud settings
-                        ref.read(cloudBackupSettingsProvider.notifier).setAutoSyncEnabled(value);
+                        ref
+                            .read(cloudBackupSettingsProvider.notifier)
+                            .setAutoSyncEnabled(value);
                       },
                     ),
                     ListTile(
                       leading: const Icon(Icons.schedule),
                       title: Text(l10n.backupInterval),
-                      subtitle: Text(localSettings.autoBackupInterval.displayName),
+                      subtitle: Text(_autoBackupIntervalName(
+                        localSettings.autoBackupInterval,
+                        l10n,
+                      )),
                       trailing: DropdownButton<AutoBackupInterval>(
                         value: localSettings.autoBackupInterval,
                         onChanged: localSettings.autoBackupEnabled
                             ? (value) {
                                 if (value != null) {
-                                  ref.read(backupSettingsProvider.notifier).setAutoBackupInterval(value);
+                                  ref
+                                      .read(backupSettingsProvider.notifier)
+                                      .setAutoBackupInterval(value);
                                 }
                               }
                             : null,
                         items: AutoBackupInterval.values.map((interval) {
                           return DropdownMenuItem(
                             value: interval,
-                            child: Text(interval.displayName),
+                            child:
+                                Text(_autoBackupIntervalName(interval, l10n)),
                           );
                         }).toList(),
                       ),
@@ -165,14 +206,18 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       subtitle: Text(l10n.createBackupWhenClosingApp),
                       value: localSettings.backupOnExit,
                       onChanged: (value) {
-                        ref.read(backupSettingsProvider.notifier).setBackupOnExit(value);
+                        ref
+                            .read(backupSettingsProvider.notifier)
+                            .setBackupOnExit(value);
                       },
                     ),
                     if (localSettings.lastAutoBackup != null)
                       ListTile(
-                        leading: const Icon(Icons.access_time, color: AppTheme.textMuted),
+                        leading: const Icon(Icons.access_time,
+                            color: AppTheme.textMuted),
                         title: Text(l10n.lastAutoBackup),
-                        subtitle: Text(_formatDateTime(context, localSettings.lastAutoBackup!)),
+                        subtitle: Text(_formatDateTime(
+                            context, localSettings.lastAutoBackup!)),
                       ),
                   ],
                 ),
@@ -185,13 +230,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                   title: 'Google Drive',
                   children: [
                     if (_isAutoLoggingIn)
-                      const ListTile(
-                        leading: SizedBox(
+                      ListTile(
+                        leading: const SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                        title: Text('Connecting to Google Drive...'),
+                        title: Text(l10n.connectingGoogleDrive),
                       )
                     else if (!isGoogleDriveSignedIn) ...[
                       ListTile(
@@ -212,10 +257,12 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                           return ListTile(
                             leading: userInfo['photoUrl'] != null
                                 ? CircleAvatar(
-                                    backgroundImage: NetworkImage(userInfo['photoUrl']!),
+                                    backgroundImage:
+                                        NetworkImage(userInfo['photoUrl']!),
                                   )
                                 : const CircleAvatar(child: Icon(Icons.person)),
-                            title: Text(userInfo['displayName'] ?? 'Google User'),
+                            title:
+                                Text(userInfo['displayName'] ?? 'Google User'),
                             subtitle: Text(userInfo['email'] ?? ''),
                             trailing: TextButton(
                               onPressed: () => _signOutFromGoogleDrive(ref),
@@ -226,10 +273,12 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       ),
                       // Backup button
                       ListTile(
-                        leading: const Icon(Icons.cloud_upload, color: Colors.green),
+                        leading:
+                            const Icon(Icons.cloud_upload, color: Colors.green),
                         title: Text(l10n.backupToGoogleDrive),
                         subtitle: cloudSettings.lastGoogleDriveSync != null
-                            ? Text(l10n.lastSync(_formatDateTime(context, cloudSettings.lastGoogleDriveSync!)))
+                            ? Text(l10n.lastSync(_formatDateTime(
+                                context, cloudSettings.lastGoogleDriveSync!)))
                             : Text(l10n.neverSynced),
                         trailing: ElevatedButton.icon(
                           icon: const Icon(Icons.backup, size: 18),
@@ -246,7 +295,8 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                         error: (error, _) => Padding(
                           padding: const EdgeInsets.all(16),
                           child: Center(
-                            child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+                            child: Text('${l10n.error}: $error',
+                                style: const TextStyle(color: Colors.red)),
                           ),
                         ),
                         data: (backups) {
@@ -256,17 +306,25 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                               child: Center(
                                 child: Text(
                                   l10n.noCloudBackups,
-                                  style: const TextStyle(color: AppTheme.textMuted),
+                                  style: const TextStyle(
+                                      color: AppTheme.textMuted),
                                 ),
                               ),
                             );
                           }
                           return Column(
-                            children: backups.take(3).map((backup) => _GoogleDriveBackupTile(
-                              backup: backup,
-                              onRestore: () => _showGoogleDriveRestoreDialog(context, ref, backup),
-                              onDelete: () => _confirmDeleteGoogleDriveBackup(context, ref, backup),
-                            )).toList(),
+                            children: backups
+                                .take(3)
+                                .map((backup) => _GoogleDriveBackupTile(
+                                      backup: backup,
+                                      onRestore: () =>
+                                          _showGoogleDriveRestoreDialog(
+                                              context, ref, backup),
+                                      onDelete: () =>
+                                          _confirmDeleteGoogleDriveBackup(
+                                              context, ref, backup),
+                                    ))
+                                .toList(),
                           );
                         },
                       ),
@@ -283,13 +341,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                     title: 'iCloud',
                     children: [
                       iCloudAvailable.when(
-                        loading: () => const ListTile(
-                          leading: SizedBox(
+                        loading: () => ListTile(
+                          leading: const SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          title: Text('Checking iCloud availability...'),
+                          title: Text(l10n.checkingICloud),
                         ),
                         error: (_, __) => ListTile(
                           leading: const Icon(Icons.error, color: Colors.red),
@@ -299,9 +357,11 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                         data: (available) {
                           if (!available) {
                             return ListTile(
-                              leading: const Icon(Icons.cloud_off, color: AppTheme.textMuted),
+                              leading: const Icon(Icons.cloud_off,
+                                  color: AppTheme.textMuted),
                               title: Text(l10n.iCloudNotAvailable),
-                              subtitle: Text(l10n.iCloudNotAvailableDescription),
+                              subtitle:
+                                  Text(l10n.iCloudNotAvailableDescription),
                             );
                           }
 
@@ -309,34 +369,45 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                             children: [
                               SwitchListTile(
                                 title: Text(l10n.enableICloudBackup),
-                                subtitle: Text(l10n.enableICloudBackupDescription),
+                                subtitle:
+                                    Text(l10n.enableICloudBackupDescription),
                                 value: cloudSettings.iCloudEnabled,
                                 onChanged: (value) {
-                                  ref.read(cloudBackupSettingsProvider.notifier).setICloudEnabled(value);
+                                  ref
+                                      .read(
+                                          cloudBackupSettingsProvider.notifier)
+                                      .setICloudEnabled(value);
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.cloud_upload, color: Colors.blue),
+                                leading: const Icon(Icons.cloud_upload,
+                                    color: Colors.blue),
                                 title: Text(l10n.backupToICloud),
                                 subtitle: cloudSettings.lastICloudSync != null
-                                    ? Text(l10n.lastSync(_formatDateTime(context, cloudSettings.lastICloudSync!)))
+                                    ? Text(l10n.lastSync(_formatDateTime(
+                                        context,
+                                        cloudSettings.lastICloudSync!)))
                                     : Text(l10n.neverSynced),
                                 trailing: ElevatedButton.icon(
                                   icon: const Icon(Icons.backup, size: 18),
                                   label: Text(l10n.backup),
-                                  onPressed: () => _backupToICloud(context, ref),
+                                  onPressed: () =>
+                                      _backupToICloud(context, ref),
                                 ),
                               ),
                               // iCloud backups list
                               iCloudBackupsAsync.when(
                                 loading: () => const Padding(
                                   padding: EdgeInsets.all(16),
-                                  child: Center(child: CircularProgressIndicator()),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
                                 ),
                                 error: (error, _) => Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Center(
-                                    child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+                                    child: Text('${l10n.error}: $error',
+                                        style:
+                                            const TextStyle(color: Colors.red)),
                                   ),
                                 ),
                                 data: (backups) {
@@ -346,17 +417,25 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                                       child: Center(
                                         child: Text(
                                           l10n.noCloudBackups,
-                                          style: const TextStyle(color: AppTheme.textMuted),
+                                          style: const TextStyle(
+                                              color: AppTheme.textMuted),
                                         ),
                                       ),
                                     );
                                   }
                                   return Column(
-                                    children: backups.take(3).map((backup) => _CloudBackupTile(
-                                      backup: backup,
-                                      onRestore: () => _showRestoreDialog(context, ref, backup),
-                                      onDelete: () => _confirmDeleteCloudBackup(context, ref, backup),
-                                    )).toList(),
+                                    children: backups
+                                        .take(3)
+                                        .map((backup) => _CloudBackupTile(
+                                              backup: backup,
+                                              onRestore: () =>
+                                                  _showRestoreDialog(
+                                                      context, ref, backup),
+                                              onDelete: () =>
+                                                  _confirmDeleteCloudBackup(
+                                                      context, ref, backup),
+                                            ))
+                                        .toList(),
                                   );
                                 },
                               ),
@@ -376,12 +455,14 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                   title: l10n.storage,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.storage, color: AppTheme.accentColor),
+                      leading: const Icon(Icons.storage,
+                          color: AppTheme.accentColor),
                       title: Text(l10n.totalBackupSize),
                       subtitle: totalSizeAsync.when(
                         loading: () => Text(l10n.calculating),
                         error: (_, __) => Text(l10n.error),
-                        data: (size) => Text(BackupService.instance.formatFileSize(size)),
+                        data: (size) =>
+                            Text(BackupService.instance.formatFileSize(size)),
                       ),
                     ),
                   ],
@@ -396,21 +477,26 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                   children: [
                     ListTile(
                       title: Text(l10n.maxChatBackups),
-                      subtitle: Text(l10n.keepUpToChatBackups(localSettings.maxChatBackups)),
+                      subtitle: Text(l10n
+                          .keepUpToChatBackups(localSettings.maxChatBackups)),
                       trailing: SizedBox(
                         width: 80,
                         child: TextField(
-                          controller: TextEditingController(text: localSettings.maxChatBackups.toString()),
+                          controller: TextEditingController(
+                              text: localSettings.maxChatBackups.toString()),
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
                           ),
                           onSubmitted: (value) {
                             final num = int.tryParse(value);
                             if (num != null && num > 0) {
-                              ref.read(backupSettingsProvider.notifier).setMaxChatBackups(num);
+                              ref
+                                  .read(backupSettingsProvider.notifier)
+                                  .setMaxChatBackups(num);
                             }
                           },
                         ),
@@ -418,21 +504,26 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                     ),
                     ListTile(
                       title: Text(l10n.maxFullBackups),
-                      subtitle: Text(l10n.keepUpToFullBackups(localSettings.maxFullBackups)),
+                      subtitle: Text(l10n
+                          .keepUpToFullBackups(localSettings.maxFullBackups)),
                       trailing: SizedBox(
                         width: 80,
                         child: TextField(
-                          controller: TextEditingController(text: localSettings.maxFullBackups.toString()),
+                          controller: TextEditingController(
+                              text: localSettings.maxFullBackups.toString()),
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
                           ),
                           onSubmitted: (value) {
                             final num = int.tryParse(value);
                             if (num != null && num > 0) {
-                              ref.read(backupSettingsProvider.notifier).setMaxFullBackups(num);
+                              ref
+                                  .read(backupSettingsProvider.notifier)
+                                  .setMaxFullBackups(num);
                             }
                           },
                         ),
@@ -444,10 +535,14 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       subtitle: Text(l10n.deleteBackupsExceedingLimits),
                       trailing: ElevatedButton(
                         onPressed: () async {
-                          final deleted = await ref.read(backupOperationProvider.notifier).cleanupOldBackups();
+                          final deleted = await ref
+                              .read(backupOperationProvider.notifier)
+                              .cleanupOldBackups();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.deletedOldBackups(deleted))),
+                              SnackBar(
+                                  content:
+                                      Text(l10n.deletedOldBackups(deleted))),
                             );
                           }
                         },
@@ -472,7 +567,8 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       error: (error, _) => Padding(
                         padding: const EdgeInsets.all(32),
                         child: Center(
-                          child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+                          child: Text('${l10n.error}: $error',
+                              style: const TextStyle(color: Colors.red)),
                         ),
                       ),
                       data: (backups) {
@@ -482,11 +578,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                             child: Center(
                               child: Column(
                                 children: [
-                                  const Icon(Icons.backup, size: 48, color: AppTheme.textMuted),
+                                  const Icon(Icons.backup,
+                                      size: 48, color: AppTheme.textMuted),
                                   const SizedBox(height: 16),
                                   Text(
                                     l10n.noChatBackups,
-                                    style: const TextStyle(color: AppTheme.textMuted),
+                                    style: const TextStyle(
+                                        color: AppTheme.textMuted),
                                   ),
                                 ],
                               ),
@@ -494,19 +592,26 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                           );
                         }
                         return Column(
-                          children: backups.take(10).map((backup) => _BackupTile(
-                            backup: backup,
-                            onView: () => _viewBackup(context, ref, backup),
-                            onDelete: () => _confirmDeleteBackup(context, ref, backup),
-                          )).toList(),
+                          children: backups
+                              .take(10)
+                              .map((backup) => _BackupTile(
+                                    backup: backup,
+                                    onView: () =>
+                                        _viewBackup(context, ref, backup),
+                                    onDelete: () => _confirmDeleteBackup(
+                                        context, ref, backup),
+                                  ))
+                              .toList(),
                         );
                       },
                     ),
                     if (chatBackupsAsync.valueOrNull?.isNotEmpty == true &&
                         chatBackupsAsync.valueOrNull!.length > 10)
                       TextButton(
-                        onPressed: () => _showAllBackups(context, ref, BackupType.chat),
-                        child: Text(l10n.viewAllBackups(chatBackupsAsync.valueOrNull!.length)),
+                        onPressed: () =>
+                            _showAllBackups(context, ref, BackupType.chat),
+                        child: Text(l10n.viewAllBackups(
+                            chatBackupsAsync.valueOrNull!.length)),
                       ),
                   ],
                 ),
@@ -526,7 +631,8 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                       error: (error, _) => Padding(
                         padding: const EdgeInsets.all(32),
                         child: Center(
-                          child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+                          child: Text('${l10n.error}: $error',
+                              style: const TextStyle(color: Colors.red)),
                         ),
                       ),
                       data: (backups) {
@@ -536,11 +642,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                             child: Center(
                               child: Column(
                                 children: [
-                                  const Icon(Icons.backup, size: 48, color: AppTheme.textMuted),
+                                  const Icon(Icons.backup,
+                                      size: 48, color: AppTheme.textMuted),
                                   const SizedBox(height: 16),
                                   Text(
                                     l10n.noFullBackups,
-                                    style: const TextStyle(color: AppTheme.textMuted),
+                                    style: const TextStyle(
+                                        color: AppTheme.textMuted),
                                   ),
                                 ],
                               ),
@@ -548,11 +656,15 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                           );
                         }
                         return Column(
-                          children: backups.map((backup) => _BackupTile(
-                            backup: backup,
-                            onView: () => _viewBackup(context, ref, backup),
-                            onDelete: () => _confirmDeleteBackup(context, ref, backup),
-                          )).toList(),
+                          children: backups
+                              .map((backup) => _BackupTile(
+                                    backup: backup,
+                                    onView: () =>
+                                        _viewBackup(context, ref, backup),
+                                    onDelete: () => _confirmDeleteBackup(
+                                        context, ref, backup),
+                                  ))
+                              .toList(),
                         );
                       },
                     ),
@@ -568,18 +680,23 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                   children: [
                     ListTile(
                       title: Text(l10n.defaultRestoreMode),
-                      subtitle: Text(cloudSettings.defaultRestoreMode.description),
+                      subtitle: Text(_restoreModeDescription(
+                        cloudSettings.defaultRestoreMode,
+                        l10n,
+                      )),
                       trailing: DropdownButton<RestoreMode>(
                         value: cloudSettings.defaultRestoreMode,
                         onChanged: (value) {
                           if (value != null) {
-                            ref.read(cloudBackupSettingsProvider.notifier).setDefaultRestoreMode(value);
+                            ref
+                                .read(cloudBackupSettingsProvider.notifier)
+                                .setDefaultRestoreMode(value);
                           }
                         },
                         items: RestoreMode.values.map((mode) {
                           return DropdownMenuItem(
                             value: mode,
-                            child: Text(mode.displayName),
+                            child: Text(_restoreModeName(mode, l10n)),
                           );
                         }).toList(),
                       ),
@@ -595,12 +712,14 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                   title: l10n.information,
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                      leading: const Icon(Icons.info_outline,
+                          color: AppTheme.accentColor),
                       title: Text(l10n.aboutBackups),
                       subtitle: Text(l10n.aboutBackupsDescription),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.folder, color: AppTheme.textMuted),
+                      leading:
+                          const Icon(Icons.folder, color: AppTheme.textMuted),
                       title: Text(l10n.backupLocation),
                       subtitle: const Text('Documents/NativeTavern/backups/'),
                     ),
@@ -608,7 +727,8 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                 ),
 
                 // Error display
-                if (localOperationState.error != null || cloudOperationState.error != null) ...[
+                if (localOperationState.error != null ||
+                    cloudOperationState.error != null) ...[
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -623,15 +743,20 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            localOperationState.error ?? cloudOperationState.error!,
+                            localOperationState.error ??
+                                cloudOperationState.error!,
                             style: const TextStyle(color: Colors.red),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close, color: Colors.red),
                           onPressed: () {
-                            ref.read(backupOperationProvider.notifier).clearError();
-                            ref.read(cloudBackupOperationProvider.notifier).clearError();
+                            ref
+                                .read(backupOperationProvider.notifier)
+                                .clearError();
+                            ref
+                                .read(cloudBackupOperationProvider.notifier)
+                                .clearError();
                           },
                         ),
                       ],
@@ -683,9 +808,10 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
     return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
   }
 
-  void _viewBackup(BuildContext context, WidgetRef ref, BackupInfo backup) async {
+  void _viewBackup(
+      BuildContext context, WidgetRef ref, BackupInfo backup) async {
     final service = ref.read(backupServiceProvider);
-    
+
     try {
       if (backup.type == BackupType.chat) {
         final data = await service.readChatBackup(backup.path);
@@ -701,16 +827,19 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).errorReadingBackup(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)
+                  .errorReadingBackup(e.toString()))),
         );
       }
     }
   }
 
-  void _showBackupContent(BuildContext context, BackupInfo backup, List<dynamic> content) {
+  void _showBackupContent(
+      BuildContext context, BackupInfo backup, List<dynamic> content) {
     final encoder = JsonEncoder.withIndent('  ');
     final jsonContent = encoder.convert(content);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -734,7 +863,9 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: jsonContent));
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context).copiedToClipboard)),
+                SnackBar(
+                    content:
+                        Text(AppLocalizations.of(context).copiedToClipboard)),
               );
             },
             icon: const Icon(Icons.copy),
@@ -745,7 +876,8 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
     );
   }
 
-  void _confirmDeleteBackup(BuildContext context, WidgetRef ref, BackupInfo backup) {
+  void _confirmDeleteBackup(
+      BuildContext context, WidgetRef ref, BackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
@@ -761,9 +893,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
             onPressed: () async {
               Navigator.pop(context);
               if (backup.type == BackupType.chat) {
-                await ref.read(backupOperationProvider.notifier).deleteChatBackup(backup.path);
+                await ref
+                    .read(backupOperationProvider.notifier)
+                    .deleteChatBackup(backup.path);
               } else {
-                await ref.read(backupOperationProvider.notifier).deleteFullBackup(backup.path);
+                await ref
+                    .read(backupOperationProvider.notifier)
+                    .deleteFullBackup(backup.path);
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -775,6 +911,7 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
   }
 
   void _showAllBackups(BuildContext context, WidgetRef ref, BackupType type) {
+    final l10n = AppLocalizations.of(context);
     final backupsAsync = type == BackupType.chat
         ? ref.read(chatBackupsProvider)
         : ref.read(fullBackupsProvider);
@@ -803,7 +940,7 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  '${type == BackupType.chat ? 'Chat' : 'Full'} Backups (${backups.length})',
+                  '${type == BackupType.chat ? l10n.chatBackups : l10n.fullBackups} (${backups.length})',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -839,28 +976,31 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
   }
 
   // ============ Cloud Backup Methods ============
-  
+
   void _backupToICloud(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    
+
     // Get actual data from database
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
     final data = await dbBackupService.exportAllData();
 
-    final result = await ref.read(cloudBackupOperationProvider.notifier).uploadToICloud(data);
-    
+    final result = await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .uploadToICloud(data);
+
     if (result != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.backupCreated)),
       );
     }
   }
-  
-  void _showRestoreDialog(BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
+
+  void _showRestoreDialog(
+      BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.read(cloudBackupSettingsProvider);
-    
+
     showDialog(
       context: context,
       builder: (context) => _RestoreDialog(
@@ -868,28 +1008,31 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
         defaultMode: settings.defaultRestoreMode,
         onRestore: (mode) async {
           Navigator.pop(context);
-          
+
           // Get database service
           final db = ref.read(databaseProvider);
           final dbBackupService = DatabaseBackupService(db);
           final localData = await dbBackupService.exportAllData();
-          
-          final result = await ref.read(cloudBackupOperationProvider.notifier).downloadFromICloud(
-            backup: backup,
-            mode: mode,
-            localData: localData,
-            restoreCallback: (data, restoreMode) async {
-              // Actually restore data to database
-              final importMode = _convertToImportMode(restoreMode);
-              final actualData = data['data'] as Map<String, dynamic>? ?? data;
-              
-              await dbBackupService.importData(
-                data: actualData,
-                mode: importMode,
+
+          final result = await ref
+              .read(cloudBackupOperationProvider.notifier)
+              .downloadFromICloud(
+                backup: backup,
+                mode: mode,
+                localData: localData,
+                restoreCallback: (data, restoreMode) async {
+                  // Actually restore data to database
+                  final importMode = _convertToImportMode(restoreMode);
+                  final actualData =
+                      data['data'] as Map<String, dynamic>? ?? data;
+
+                  await dbBackupService.importData(
+                    data: actualData,
+                    mode: importMode,
+                  );
+                },
               );
-            },
-          );
-          
+
           if (result != null && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -905,8 +1048,9 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
       ),
     );
   }
-  
-  void _confirmDeleteCloudBackup(BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
+
+  void _confirmDeleteCloudBackup(
+      BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
@@ -921,7 +1065,9 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await ref.read(cloudBackupOperationProvider.notifier).deleteICloudBackup(backup);
+              await ref
+                  .read(cloudBackupOperationProvider.notifier)
+                  .deleteICloudBackup(backup);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.delete),
@@ -930,45 +1076,52 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
       ),
     );
   }
-  
+
   // ============ Google Drive Methods ============
-  
+
   void _signInToGoogleDrive(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final success = await ref.read(cloudBackupOperationProvider.notifier).signInToGoogleDrive();
-    
+    final success = await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .signInToGoogleDrive();
+
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.signedInSuccessfully)),
       );
     }
   }
-  
+
   void _signOutFromGoogleDrive(WidgetRef ref) async {
-    await ref.read(cloudBackupOperationProvider.notifier).signOutFromGoogleDrive();
+    await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .signOutFromGoogleDrive();
   }
-  
+
   void _backupToGoogleDrive(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    
+
     // Get actual data from database
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
     final data = await dbBackupService.exportAllData();
 
-    final result = await ref.read(cloudBackupOperationProvider.notifier).uploadToGoogleDrive(data);
-    
+    final result = await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .uploadToGoogleDrive(data);
+
     if (result != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.backupCreated)),
       );
     }
   }
-  
-  void _showGoogleDriveRestoreDialog(BuildContext context, WidgetRef ref, GoogleDriveBackupInfo backup) {
+
+  void _showGoogleDriveRestoreDialog(
+      BuildContext context, WidgetRef ref, GoogleDriveBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.read(cloudBackupSettingsProvider);
-    
+
     showDialog(
       context: context,
       builder: (context) => _RestoreDialog(
@@ -976,28 +1129,31 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
         defaultMode: settings.defaultRestoreMode,
         onRestore: (mode) async {
           Navigator.pop(context);
-          
+
           // Get database service
           final db = ref.read(databaseProvider);
           final dbBackupService = DatabaseBackupService(db);
           final localData = await dbBackupService.exportAllData();
-          
-          final result = await ref.read(cloudBackupOperationProvider.notifier).downloadFromGoogleDrive(
-            fileId: backup.id,
-            mode: mode,
-            localData: localData,
-            restoreCallback: (data, restoreMode) async {
-              // Actually restore data to database
-              final importMode = _convertToImportMode(restoreMode);
-              final actualData = data['data'] as Map<String, dynamic>? ?? data;
-              
-              await dbBackupService.importData(
-                data: actualData,
-                mode: importMode,
+
+          final result = await ref
+              .read(cloudBackupOperationProvider.notifier)
+              .downloadFromGoogleDrive(
+                fileId: backup.id,
+                mode: mode,
+                localData: localData,
+                restoreCallback: (data, restoreMode) async {
+                  // Actually restore data to database
+                  final importMode = _convertToImportMode(restoreMode);
+                  final actualData =
+                      data['data'] as Map<String, dynamic>? ?? data;
+
+                  await dbBackupService.importData(
+                    data: actualData,
+                    mode: importMode,
+                  );
+                },
               );
-            },
-          );
-          
+
           if (result != null && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -1013,8 +1169,9 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
       ),
     );
   }
-  
-  void _confirmDeleteGoogleDriveBackup(BuildContext context, WidgetRef ref, GoogleDriveBackupInfo backup) {
+
+  void _confirmDeleteGoogleDriveBackup(
+      BuildContext context, WidgetRef ref, GoogleDriveBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
@@ -1029,7 +1186,9 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await ref.read(cloudBackupOperationProvider.notifier).deleteGoogleDriveBackup(backup.id);
+              await ref
+                  .read(cloudBackupOperationProvider.notifier)
+                  .deleteGoogleDriveBackup(backup.id);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.delete),
@@ -1038,7 +1197,7 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
       ),
     );
   }
-  
+
   /// Convert cloud RestoreMode to database ImportMode
   ImportMode _convertToImportMode(RestoreMode mode) {
     switch (mode) {
@@ -1115,11 +1274,13 @@ class _CloudBackupTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return ListTile(
       leading: Icon(
         backup.provider == CloudProvider.iCloud ? Icons.cloud : Icons.folder,
-        color: backup.provider == CloudProvider.iCloud ? Colors.blue : Colors.orange,
+        color: backup.provider == CloudProvider.iCloud
+            ? Colors.blue
+            : Colors.orange,
       ),
       title: Text(
         backup.name,
@@ -1177,7 +1338,7 @@ class _GoogleDriveBackupTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return ListTile(
       leading: const Icon(Icons.cloud, color: Colors.green),
       title: Text(
@@ -1256,19 +1417,19 @@ class _RestoreDialogState extends ConsumerState<_RestoreDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${l10n.selectRestoreMode}:'),
+          Text(l10n.selectRestoreMode),
           const SizedBox(height: 16),
           ...RestoreMode.values.map((mode) => RadioListTile<RestoreMode>(
-            title: Text(mode.displayName),
-            subtitle: Text(mode.description),
-            value: mode,
-            groupValue: _selectedMode,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => _selectedMode = value);
-              }
-            },
-          )),
+                title: Text(_restoreModeName(mode, l10n)),
+                subtitle: Text(_restoreModeDescription(mode, l10n)),
+                value: mode,
+                groupValue: _selectedMode,
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedMode = value);
+                  }
+                },
+              )),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),

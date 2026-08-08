@@ -544,14 +544,14 @@ class _McpServerEditorDialogState extends State<_McpServerEditorDialog> {
                 key: const Key('mcp-server-transport'),
                 initialValue: _transport,
                 decoration: InputDecoration(labelText: l10n.mcpTransport),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: McpTransportType.streamableHttp,
-                    child: Text('Streamable HTTP'),
+                    child: Text(l10n.mcpStreamableHttp),
                   ),
                   DropdownMenuItem(
                     value: McpTransportType.legacySse,
-                    child: Text('Legacy HTTP + SSE'),
+                    child: Text(l10n.mcpLegacyHttpSse),
                   ),
                 ],
                 onChanged: (value) {

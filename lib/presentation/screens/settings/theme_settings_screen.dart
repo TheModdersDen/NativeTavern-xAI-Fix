@@ -37,19 +37,21 @@ class ThemeSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Built-in themes
-          _buildSectionHeader(context, AppLocalizations.of(context)!.builtInThemes),
+          _buildSectionHeader(
+              context, AppLocalizations.of(context)!.builtInThemes),
           const SizedBox(height: 12),
           _buildThemeGrid(context, ref, builtInThemes, activeThemeId),
-          
+
           if (userThemes.isNotEmpty) ...[
             const SizedBox(height: 24),
             _buildSectionHeader(context, 'Custom Themes'),
             const SizedBox(height: 12),
-            _buildThemeGrid(context, ref, userThemes, activeThemeId, isCustom: true),
+            _buildThemeGrid(context, ref, userThemes, activeThemeId,
+                isCustom: true),
           ],
-          
+
           const SizedBox(height: 32),
-          
+
           // Theme preview
           _buildSectionHeader(context, 'Preview'),
           const SizedBox(height: 12),
@@ -63,9 +65,9 @@ class ThemeSettingsScreen extends ConsumerWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: AppTheme.accentColor,
-        fontWeight: FontWeight.bold,
-      ),
+            color: AppTheme.accentColor,
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
@@ -89,7 +91,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
       itemBuilder: (context, index) {
         final theme = themes[index];
         final isActive = theme.id == activeThemeId;
-        
+
         return _ThemeCard(
           theme: theme,
           isActive: isActive,
@@ -97,8 +99,11 @@ class ThemeSettingsScreen extends ConsumerWidget {
           onTap: () {
             ref.read(activeThemeIdProvider.notifier).setActiveTheme(theme.id);
           },
-          onEdit: isCustom ? () => _showEditThemeDialog(context, ref, theme) : null,
-          onDelete: isCustom ? () => _showDeleteConfirmation(context, ref, theme) : null,
+          onEdit:
+              isCustom ? () => _showEditThemeDialog(context, ref, theme) : null,
+          onDelete: isCustom
+              ? () => _showDeleteConfirmation(context, ref, theme)
+              : null,
         );
       },
     );
@@ -106,7 +111,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
 
   Widget _buildThemePreview(BuildContext context, WidgetRef ref) {
     final activeTheme = ref.watch(activeThemeConfigProvider);
-    
+    final l10n = AppLocalizations.of(context);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Container(
@@ -120,17 +126,19 @@ class ThemeSettingsScreen extends ConsumerWidget {
               color: activeTheme.surface,
               child: Row(
                 children: [
-                  Icon(Icons.arrow_back, color: activeTheme.textPrimary, size: 20),
+                  Icon(Icons.arrow_back,
+                      color: activeTheme.textPrimary, size: 20),
                   const SizedBox(width: 16),
                   Text(
-                    'Chat Preview',
+                    l10n.chatPreview,
                     style: TextStyle(
                       color: activeTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.more_vert, color: activeTheme.textPrimary, size: 20),
+                  Icon(Icons.more_vert,
+                      color: activeTheme.textPrimary, size: 20),
                 ],
               ),
             ),
@@ -143,14 +151,16 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   children: [
                     // Assistant message
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: activeTheme.card,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Hello! How can I help you today?',
-                        style: TextStyle(color: activeTheme.textPrimary, fontSize: 13),
+                        l10n.sampleMessage1,
+                        style: TextStyle(
+                            color: activeTheme.textPrimary, fontSize: 13),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -158,14 +168,18 @@ class ThemeSettingsScreen extends ConsumerWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: activeTheme.accent,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
-                          'Tell me a story!',
-                          style: TextStyle(color: Colors.white, fontSize: 13),
+                        child: Text(
+                          l10n.sampleMessage2,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -181,14 +195,16 @@ class ThemeSettingsScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: activeTheme.background,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Type a message...',
-                        style: TextStyle(color: activeTheme.textSecondary, fontSize: 13),
+                        l10n.typeMessage,
+                        style: TextStyle(
+                            color: activeTheme.textSecondary, fontSize: 13),
                       ),
                     ),
                   ),
@@ -199,7 +215,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                       color: activeTheme.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.send, color: Colors.white, size: 16),
+                    child:
+                        const Icon(Icons.send, color: Colors.white, size: 16),
                   ),
                 ],
               ),
@@ -222,7 +239,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditThemeDialog(BuildContext context, WidgetRef ref, AppThemeConfig theme) {
+  void _showEditThemeDialog(
+      BuildContext context, WidgetRef ref, AppThemeConfig theme) {
     showDialog<void>(
       context: context,
       builder: (context) => _ThemeEditorDialog(
@@ -234,27 +252,31 @@ class ThemeSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, AppThemeConfig theme) {
+  void _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref, AppThemeConfig theme) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Theme'),
-        content: Text('Are you sure you want to delete "${theme.name}"?'),
+        title: Text(l10n.deleteTheme),
+        content: Text(l10n.deleteThemeConfirmation(theme.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               final activeId = ref.read(activeThemeIdProvider);
               if (activeId == theme.id) {
-                ref.read(activeThemeIdProvider.notifier).setActiveTheme(BuiltInThemes.defaultDark.id);
+                ref
+                    .read(activeThemeIdProvider.notifier)
+                    .setActiveTheme(BuiltInThemes.defaultDark.id);
               }
               ref.read(customThemesProvider.notifier).deleteTheme(theme.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -281,6 +303,7 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -373,15 +396,17 @@ class _ThemeCard extends StatelessWidget {
                     ),
                   ),
                   if (isActive)
-                    const Icon(Icons.check_circle, size: 14, color: AppTheme.accentColor),
+                    const Icon(Icons.check_circle,
+                        size: 14, color: AppTheme.accentColor),
                   if (isCustom && !isActive)
                     AdaptivePopupMenuButton<String>(
                       padding: EdgeInsets.zero,
                       iconSize: 14,
                       icon: const Icon(Icons.more_vert, size: 14),
                       itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                        PopupMenuItem(
+                            value: 'delete', child: Text(l10n.delete)),
                       ],
                       onSelected: (value) {
                         if (value == 'edit') onEdit?.call();
@@ -419,18 +444,28 @@ class _ThemeEditorDialogState extends State<_ThemeEditorDialog> {
   late String _backgroundColor;
   late String _surfaceColor;
   late String _cardColor;
+  bool _initializedDefaultName = false;
 
   @override
   void initState() {
     super.initState();
     final theme = widget.theme ?? BuiltInThemes.defaultDark;
-    _nameController = TextEditingController(text: widget.theme?.name ?? 'My Theme');
+    _nameController = TextEditingController(text: widget.theme?.name ?? '');
     _isDark = theme.isDark;
     _primaryColor = theme.primaryColor;
     _accentColor = theme.accentColor;
     _backgroundColor = theme.backgroundColor;
     _surfaceColor = theme.surfaceColor;
     _cardColor = theme.cardColor;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.theme == null && !_initializedDefaultName) {
+      _nameController.text = AppLocalizations.of(context).myTheme;
+      _initializedDefaultName = true;
+    }
   }
 
   @override
@@ -442,50 +477,51 @@ class _ThemeEditorDialogState extends State<_ThemeEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.theme != null;
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
-      title: Text(isEditing ? 'Edit Theme' : 'Create Theme'),
+      title: Text(isEditing ? l10n.editTheme : l10n.createTheme),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Theme Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.themeName,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Dark Mode'),
+              title: Text(l10n.darkMode),
               value: _isDark,
               onChanged: (value) => setState(() => _isDark = value),
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: 8),
             _ColorPickerTile(
-              label: 'Primary Color',
+              label: l10n.primaryColor,
               color: _primaryColor,
               onChanged: (color) => setState(() => _primaryColor = color),
             ),
             _ColorPickerTile(
-              label: 'Accent Color',
+              label: l10n.accentColor,
               color: _accentColor,
               onChanged: (color) => setState(() => _accentColor = color),
             ),
             _ColorPickerTile(
-              label: 'Background',
+              label: l10n.background,
               color: _backgroundColor,
               onChanged: (color) => setState(() => _backgroundColor = color),
             ),
             _ColorPickerTile(
-              label: 'Surface',
+              label: l10n.surface,
               color: _surfaceColor,
               onChanged: (color) => setState(() => _surfaceColor = color),
             ),
             _ColorPickerTile(
-              label: 'Card',
+              label: l10n.card,
               color: _cardColor,
               onChanged: (color) => setState(() => _cardColor = color),
             ),
@@ -495,7 +531,7 @@ class _ThemeEditorDialogState extends State<_ThemeEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
@@ -516,7 +552,7 @@ class _ThemeEditorDialogState extends State<_ThemeEditorDialog> {
             widget.onSave(theme);
             Navigator.pop(context);
           },
-          child: Text(isEditing ? 'Save' : 'Create'),
+          child: Text(isEditing ? l10n.save : l10n.create),
         ),
       ],
     );
@@ -561,20 +597,21 @@ class _ColorPickerTile extends StatelessWidget {
 
   void _showColorPicker(BuildContext context) {
     final controller = TextEditingController(text: color);
-    
+    final l10n = AppLocalizations.of(context);
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select $label'),
+        title: Text(l10n.selectThemeColor(label)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Hex Color',
+              decoration: InputDecoration(
+                labelText: l10n.hexColor,
                 hintText: '#RRGGBB',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -582,37 +619,48 @@ class _ColorPickerTile extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                '#6366F1', '#8B5CF6', '#EC4899', '#EF4444',
-                '#F97316', '#EAB308', '#22C55E', '#06B6D4',
-                '#3B82F6', '#000000', '#1A1A1A', '#FFFFFF',
-              ].map((c) => GestureDetector(
-                onTap: () {
-                  controller.text = c;
-                },
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppThemeConfig.hexToColor(c),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                ),
-              )).toList(),
+                '#6366F1',
+                '#8B5CF6',
+                '#EC4899',
+                '#EF4444',
+                '#F97316',
+                '#EAB308',
+                '#22C55E',
+                '#06B6D4',
+                '#3B82F6',
+                '#000000',
+                '#1A1A1A',
+                '#FFFFFF',
+              ]
+                  .map((c) => GestureDetector(
+                        onTap: () {
+                          controller.text = c;
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppThemeConfig.hexToColor(c),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                        ),
+                      ))
+                  .toList(),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               onChanged(controller.text);
               Navigator.pop(context);
             },
-            child: const Text('Apply'),
+            child: Text(l10n.apply),
           ),
         ],
       ),

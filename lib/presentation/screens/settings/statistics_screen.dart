@@ -13,14 +13,15 @@ class StatisticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(chatId != null ? 'Chat Statistics' : 'App Statistics'),
+        title: Text(chatId != null ? l10n.chatStatistics : l10n.appStatistics),
         actions: [
           if (chatId == null)
             IconButton(
               icon: const Icon(Icons.refresh),
-              tooltip: 'Reset statistics',
+              tooltip: l10n.resetStatistics,
               onPressed: () => _showResetConfirmation(context, ref),
             ),
         ],
@@ -32,27 +33,26 @@ class StatisticsScreen extends ConsumerWidget {
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Statistics'),
-        content: const Text(
-          'Are you sure you want to reset all statistics? This cannot be undone.',
-        ),
+        title: Text(l10n.resetStatistics),
+        content: Text(l10n.resetStatisticsConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               ref.read(appStatisticsProvider.notifier).reset();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Statistics reset')),
+                SnackBar(content: Text(l10n.statisticsReset)),
               );
             },
-            child: const Text('Reset'),
+            child: Text(l10n.reset),
           ),
         ],
       ),
@@ -67,31 +67,32 @@ class _AppStatisticsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(appStatisticsProvider);
     final summary = ref.watch(statisticsSummaryProvider);
+    final l10n = AppLocalizations.of(context);
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         // Overview card
         _StatisticsCard(
-          title: 'Overview',
+          title: l10n.overview,
           icon: Icons.dashboard,
           children: [
             _StatRow(
-              label: 'First Used',
+              label: l10n.firstUsed,
               value: stats.appFirstUsed != null
                   ? _formatDate(stats.appFirstUsed!)
-                  : 'Unknown',
+                  : l10n.unknown,
             ),
             _StatRow(
-              label: 'Total Characters',
+              label: l10n.totalCharacters,
               value: summary.characterCount.toString(),
             ),
             _StatRow(
-              label: 'Total Chats',
+              label: l10n.totalChats,
               value: stats.totalChats.toString(),
             ),
             _StatRow(
-              label: 'Total Groups',
+              label: l10n.totalGroups,
               value: stats.totalGroups.toString(),
             ),
           ],
@@ -100,15 +101,15 @@ class _AppStatisticsView extends ConsumerWidget {
 
         // Messages card
         _StatisticsCard(
-          title: 'Messages',
+          title: l10n.messages,
           icon: Icons.message,
           children: [
             _StatRow(
-              label: 'Total Messages',
+              label: l10n.totalMessages,
               value: _formatNumber(stats.totalMessages),
             ),
             _StatRow(
-              label: 'Total Generations',
+              label: l10n.totalGenerations,
               value: _formatNumber(stats.totalGenerations),
             ),
           ],
@@ -117,15 +118,15 @@ class _AppStatisticsView extends ConsumerWidget {
 
         // Tokens card
         _StatisticsCard(
-          title: 'Token Usage',
+          title: l10n.tokenUsage,
           icon: Icons.token,
           children: [
             _StatRow(
-              label: 'Total Tokens Used',
+              label: l10n.totalTokensUsed,
               value: _formatNumber(stats.totalTokensUsed),
             ),
             _StatRow(
-              label: 'Avg Tokens/Generation',
+              label: l10n.avgTokensPerGeneration,
               value: stats.averageTokensPerGeneration.toStringAsFixed(1),
             ),
           ],
@@ -134,15 +135,15 @@ class _AppStatisticsView extends ConsumerWidget {
 
         // Performance card
         _StatisticsCard(
-          title: 'Performance',
+          title: l10n.performance,
           icon: Icons.speed,
           children: [
             _StatRow(
-              label: 'Total Generation Time',
+              label: l10n.totalGenerationTime,
               value: _formatDuration(stats.totalGenerationTime),
             ),
             _StatRow(
-              label: 'Avg Generation Time',
+              label: l10n.avgGenerationTime,
               value: _formatDuration(stats.averageGenerationTime),
             ),
           ],
@@ -164,33 +165,36 @@ class _ChatStatisticsView extends ConsumerWidget {
     return statsAsync.when(
       data: (stats) => _buildStatsList(context, stats),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(
+        child: Text('${AppLocalizations.of(context).error}: $e'),
+      ),
     );
   }
 
   Widget _buildStatsList(BuildContext context, ChatStatistics stats) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         // Messages card
         _StatisticsCard(
-          title: 'Messages',
+          title: l10n.messages,
           icon: Icons.message,
           children: [
             _StatRow(
-              label: 'Total Messages',
+              label: l10n.totalMessages,
               value: stats.totalMessages.toString(),
             ),
             _StatRow(
-              label: 'User Messages',
+              label: l10n.userMessages,
               value: stats.userMessages.toString(),
             ),
             _StatRow(
-              label: 'Assistant Messages',
+              label: l10n.assistantMessages,
               value: stats.assistantMessages.toString(),
             ),
             _StatRow(
-              label: 'System Messages',
+              label: l10n.systemMessages,
               value: stats.systemMessages.toString(),
             ),
           ],
@@ -199,23 +203,23 @@ class _ChatStatisticsView extends ConsumerWidget {
 
         // Timeline card
         _StatisticsCard(
-          title: 'Timeline',
+          title: l10n.timeline,
           icon: Icons.timeline,
           children: [
             _StatRow(
-              label: 'First Message',
+              label: l10n.firstMessage,
               value: stats.firstMessageAt != null
                   ? _formatDateTime(stats.firstMessageAt!)
-                  : 'N/A',
+                  : l10n.unknown,
             ),
             _StatRow(
-              label: 'Last Message',
+              label: l10n.lastMessage,
               value: stats.lastMessageAt != null
                   ? _formatDateTime(stats.lastMessageAt!)
-                  : 'N/A',
+                  : l10n.unknown,
             ),
             _StatRow(
-              label: 'Chat Duration',
+              label: l10n.chatDuration,
               value: _formatDuration(stats.chatDuration),
             ),
           ],
@@ -224,23 +228,23 @@ class _ChatStatisticsView extends ConsumerWidget {
 
         // Tokens card
         _StatisticsCard(
-          title: 'Token Usage',
+          title: l10n.tokenUsage,
           icon: Icons.token,
           children: [
             _StatRow(
-              label: 'Total Tokens',
+              label: l10n.totalTokens,
               value: _formatNumber(stats.totalTokensUsed),
             ),
             _StatRow(
-              label: 'Prompt Tokens',
+              label: l10n.promptTokens,
               value: _formatNumber(stats.promptTokens),
             ),
             _StatRow(
-              label: 'Completion Tokens',
+              label: l10n.completionTokens,
               value: _formatNumber(stats.completionTokens),
             ),
             _StatRow(
-              label: 'Avg Tokens/Message',
+              label: l10n.avgTokensPerMessage,
               value: stats.averageTokensPerMessage.toStringAsFixed(1),
             ),
           ],
@@ -249,19 +253,19 @@ class _ChatStatisticsView extends ConsumerWidget {
 
         // Performance card
         _StatisticsCard(
-          title: 'Generation Performance',
+          title: l10n.generationPerformance,
           icon: Icons.speed,
           children: [
             _StatRow(
-              label: 'Total Generations',
+              label: l10n.totalGenerations,
               value: stats.generationCount.toString(),
             ),
             _StatRow(
-              label: 'Total Generation Time',
+              label: l10n.totalGenerationTime,
               value: _formatDuration(stats.totalGenerationTime),
             ),
             _StatRow(
-              label: 'Avg Generation Time',
+              label: l10n.avgGenerationTime,
               value: _formatDuration(stats.averageGenerationTime),
             ),
           ],
@@ -297,8 +301,8 @@ class _StatisticsCard extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -330,14 +334,14 @@ class _StatRow extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textMuted,
-            ),
+                  color: AppTheme.textMuted,
+                ),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),

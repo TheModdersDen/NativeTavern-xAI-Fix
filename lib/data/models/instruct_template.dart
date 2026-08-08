@@ -7,8 +7,10 @@ part 'instruct_template.g.dart';
 enum InstructNamesBehavior {
   /// Don't include names
   none,
+
   /// Force names in all messages
   force,
+
   /// Always include names (even in system)
   always,
 }
@@ -20,110 +22,117 @@ class InstructTemplate with _$InstructTemplate {
     required String id,
     required String name,
     @Default('') String description,
-    
+
     // === System prompt wrapping ===
     @Default('') String systemPrefix,
     @Default('') String systemSuffix,
-    
+
     // === User message wrapping ===
     @Default('') String userPrefix,
     @Default('') String userSuffix,
-    
+
     // === Assistant message wrapping ===
     @Default('') String assistantPrefix,
     @Default('') String assistantSuffix,
-    
+
     // === First message handling ===
     /// Different format for first user message
     String? firstUserPrefix,
     String? firstUserSuffix,
-    
+
     /// Different format for first assistant message
     String? firstAssistantPrefix,
     String? firstAssistantSuffix,
-    
+
     // === Last message handling ===
     /// Different format for last user message (before generation)
     String? lastUserPrefix,
     String? lastUserSuffix,
-    
+
     /// Different format for last assistant message
     String? lastAssistantPrefix,
     String? lastAssistantSuffix,
-    
+
     // === Input/Output sequences (SillyTavern compatibility) ===
     /// Input sequence (alternative to userPrefix)
     @Default('') String inputSequence,
+
     /// Output sequence (alternative to assistantPrefix)
     @Default('') String outputSequence,
+
     /// First input sequence
     @Default('') String firstInputSequence,
+
     /// First output sequence
     @Default('') String firstOutputSequence,
+
     /// Last input sequence
     @Default('') String lastInputSequence,
+
     /// Last output sequence
     @Default('') String lastOutputSequence,
-    
+
     // === Story string formatting ===
     /// Prefix for story string (character description, scenario, etc.)
     @Default('') String storyStringPrefix,
+
     /// Suffix for story string
     @Default('') String storyStringSuffix,
-    
+
     // === Chat formatting ===
     /// Separator between chat messages
     @Default('') String chatSeparator,
+
     /// String to mark start of chat
     @Default('') String chatStart,
-    
+
     // === User alignment message ===
     /// Message to align user expectations (inserted before first user message)
     @Default('') String userAlignmentMessage,
-    
+
     // === Stop sequences ===
     @Default([]) List<String> stopSequences,
-    
+
     // === Behavior options ===
     /// Whether this is a built-in template
     @Default(false) bool isBuiltIn,
-    
+
     /// Whether this is the default template
     @Default(false) bool isDefault,
-    
+
     /// Regex pattern for auto-activation based on model name
     String? activationRegex,
-    
+
     /// Whether to bind to context (use context template settings)
     @Default(false) bool bindToContext,
-    
+
     /// Whether to skip example messages
     @Default(false) bool skipExamples,
-    
+
     /// Names behavior (none, force, always)
     @Default(InstructNamesBehavior.none) InstructNamesBehavior namesBehavior,
-    
+
     /// Whether system messages use same format as user
     @Default(false) bool systemSameAsUser,
-    
+
     /// Whether to use sequences as stop strings
     @Default(true) bool sequencesAsStopStrings,
-    
+
     /// Whether to enable macro substitution in sequences
     @Default(true) bool macroSubstitution,
-    
+
     /// Whether to wrap sequences in newlines
     @Default(true) bool wrapInNewlines,
-    
+
     /// Whether to include names in prompts
     @Default(false) bool includeNames,
-    
+
     /// Format string for names (e.g., "{{name}}: ")
     @Default('{{name}}: ') String nameFormat,
-    
+
     /// Whether to force names for all messages
     @Default(false) bool forceNames,
-    
+
     // === Timestamps ===
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -148,7 +157,7 @@ extension InstructTemplateExtension on InstructTemplate {
     }
     return userPrefix;
   }
-  
+
   /// Get effective user suffix (considering first/last message)
   String getEffectiveUserSuffix({bool isFirst = false, bool isLast = false}) {
     if (isFirst && firstUserSuffix != null && firstUserSuffix!.isNotEmpty) {
@@ -159,13 +168,18 @@ extension InstructTemplateExtension on InstructTemplate {
     }
     return userSuffix;
   }
-  
+
   /// Get effective assistant prefix (considering first/last message)
-  String getEffectiveAssistantPrefix({bool isFirst = false, bool isLast = false}) {
-    if (isFirst && firstAssistantPrefix != null && firstAssistantPrefix!.isNotEmpty) {
+  String getEffectiveAssistantPrefix(
+      {bool isFirst = false, bool isLast = false}) {
+    if (isFirst &&
+        firstAssistantPrefix != null &&
+        firstAssistantPrefix!.isNotEmpty) {
       return firstAssistantPrefix!;
     }
-    if (isLast && lastAssistantPrefix != null && lastAssistantPrefix!.isNotEmpty) {
+    if (isLast &&
+        lastAssistantPrefix != null &&
+        lastAssistantPrefix!.isNotEmpty) {
       return lastAssistantPrefix!;
     }
     if (outputSequence.isNotEmpty) {
@@ -173,18 +187,23 @@ extension InstructTemplateExtension on InstructTemplate {
     }
     return assistantPrefix;
   }
-  
+
   /// Get effective assistant suffix (considering first/last message)
-  String getEffectiveAssistantSuffix({bool isFirst = false, bool isLast = false}) {
-    if (isFirst && firstAssistantSuffix != null && firstAssistantSuffix!.isNotEmpty) {
+  String getEffectiveAssistantSuffix(
+      {bool isFirst = false, bool isLast = false}) {
+    if (isFirst &&
+        firstAssistantSuffix != null &&
+        firstAssistantSuffix!.isNotEmpty) {
       return firstAssistantSuffix!;
     }
-    if (isLast && lastAssistantSuffix != null && lastAssistantSuffix!.isNotEmpty) {
+    if (isLast &&
+        lastAssistantSuffix != null &&
+        lastAssistantSuffix!.isNotEmpty) {
       return lastAssistantSuffix!;
     }
     return assistantSuffix;
   }
-  
+
   /// Get effective system prefix (considering systemSameAsUser)
   String getEffectiveSystemPrefix() {
     if (systemSameAsUser) {
@@ -192,7 +211,7 @@ extension InstructTemplateExtension on InstructTemplate {
     }
     return systemPrefix;
   }
-  
+
   /// Get effective system suffix (considering systemSameAsUser)
   String getEffectiveSystemSuffix() {
     if (systemSameAsUser) {
@@ -200,7 +219,7 @@ extension InstructTemplateExtension on InstructTemplate {
     }
     return systemSuffix;
   }
-  
+
   /// Check if this template should be auto-activated for a model
   bool shouldActivateForModel(String modelName) {
     if (activationRegex == null || activationRegex!.isEmpty) {
@@ -213,7 +232,7 @@ extension InstructTemplateExtension on InstructTemplate {
       return false;
     }
   }
-  
+
   /// Get all stop sequences (including sequences if enabled)
   List<String> getAllStopSequences() {
     final stops = List<String>.from(stopSequences);
@@ -233,7 +252,7 @@ class BuiltInTemplates {
   static final chatML = InstructTemplate(
     id: 'chatml',
     name: 'ChatML',
-    description: 'OA Compatible ChatML format used by many models',
+    description: 'OAI Compatible ChatML format used by many models',
     systemPrefix: '<|im_start|>system\n',
     systemSuffix: '<|im_end|>\n',
     userPrefix: '<|im_start|>user\n',
@@ -286,7 +305,8 @@ class BuiltInTemplates {
     id: 'llama3',
     name: 'Llama 3',
     description: 'Meta Llama 3 instruct format',
-    systemPrefix: '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n',
+    systemPrefix:
+        '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n',
     systemSuffix: '<|eot_id|>',
     userPrefix: '<|start_header_id|>user<|end_header_id|>\n\n',
     userSuffix: '<|eot_id|>',
@@ -387,7 +407,8 @@ class BuiltInTemplates {
   static final none = InstructTemplate(
     id: 'none',
     name: 'None (API Default)',
-    description: 'No formatting - use API default (for OACompatible, Claude, etc.)',
+    description:
+        'No formatting - use API default (for OACompatible, Claude, etc.)',
     systemPrefix: '',
     systemSuffix: '',
     userPrefix: '',
@@ -421,7 +442,7 @@ class BuiltInTemplates {
       return null;
     }
   }
-  
+
   /// Find best matching template for a model name
   static InstructTemplate? findForModel(String modelName) {
     for (final template in all) {
@@ -441,8 +462,12 @@ class InstructTemplateExport with _$InstructTemplateExport {
     @JsonKey(name: 'system_prompt') @Default('') String systemPrompt,
     @JsonKey(name: 'input_sequence') @Default('') String inputSequence,
     @JsonKey(name: 'output_sequence') @Default('') String outputSequence,
-    @JsonKey(name: 'first_output_sequence') @Default('') String firstOutputSequence,
-    @JsonKey(name: 'last_output_sequence') @Default('') String lastOutputSequence,
+    @JsonKey(name: 'first_output_sequence')
+    @Default('')
+    String firstOutputSequence,
+    @JsonKey(name: 'last_output_sequence')
+    @Default('')
+    String lastOutputSequence,
     @JsonKey(name: 'system_sequence') @Default('') String systemSequence,
     @JsonKey(name: 'stop_sequence') @Default('') String stopSequence,
     @JsonKey(name: 'separator_sequence') @Default('') String separatorSequence,
@@ -455,10 +480,16 @@ class InstructTemplateExport with _$InstructTemplateExport {
     @JsonKey(name: 'output_suffix') @Default('') String outputSuffix,
     @JsonKey(name: 'input_suffix') @Default('') String inputSuffix,
     @JsonKey(name: 'system_suffix') @Default('') String systemSuffix,
-    @JsonKey(name: 'user_alignment_message') @Default('') String userAlignmentMessage,
+    @JsonKey(name: 'user_alignment_message')
+    @Default('')
+    String userAlignmentMessage,
     @JsonKey(name: 'system_same_as_user') @Default(false) bool systemSameAsUser,
-    @JsonKey(name: 'last_system_sequence') @Default('') String lastSystemSequence,
-    @JsonKey(name: 'first_input_sequence') @Default('') String firstInputSequence,
+    @JsonKey(name: 'last_system_sequence')
+    @Default('')
+    String lastSystemSequence,
+    @JsonKey(name: 'first_input_sequence')
+    @Default('')
+    String firstInputSequence,
     @JsonKey(name: 'last_input_sequence') @Default('') String lastInputSequence,
   }) = _InstructTemplateExport;
 
@@ -470,11 +501,11 @@ class InstructTemplateExport with _$InstructTemplateExport {
 InstructTemplateExport instructTemplateToExport(InstructTemplate template) {
   return InstructTemplateExport(
     name: template.name,
-    inputSequence: template.inputSequence.isNotEmpty 
-        ? template.inputSequence 
+    inputSequence: template.inputSequence.isNotEmpty
+        ? template.inputSequence
         : template.userPrefix,
-    outputSequence: template.outputSequence.isNotEmpty 
-        ? template.outputSequence 
+    outputSequence: template.outputSequence.isNotEmpty
+        ? template.outputSequence
         : template.assistantPrefix,
     firstOutputSequence: template.firstAssistantPrefix ?? '',
     lastOutputSequence: template.lastAssistantPrefix ?? '',
@@ -512,10 +543,15 @@ InstructTemplate instructTemplateFromExport(
     userSuffix: export.inputSuffix,
     assistantPrefix: export.outputSequence,
     assistantSuffix: export.outputSuffix,
-    firstUserPrefix: export.firstInputSequence.isNotEmpty ? export.firstInputSequence : null,
-    lastUserPrefix: export.lastInputSequence.isNotEmpty ? export.lastInputSequence : null,
-    firstAssistantPrefix: export.firstOutputSequence.isNotEmpty ? export.firstOutputSequence : null,
-    lastAssistantPrefix: export.lastOutputSequence.isNotEmpty ? export.lastOutputSequence : null,
+    firstUserPrefix:
+        export.firstInputSequence.isNotEmpty ? export.firstInputSequence : null,
+    lastUserPrefix:
+        export.lastInputSequence.isNotEmpty ? export.lastInputSequence : null,
+    firstAssistantPrefix: export.firstOutputSequence.isNotEmpty
+        ? export.firstOutputSequence
+        : null,
+    lastAssistantPrefix:
+        export.lastOutputSequence.isNotEmpty ? export.lastOutputSequence : null,
     inputSequence: export.inputSequence,
     outputSequence: export.outputSequence,
     firstInputSequence: export.firstInputSequence,
@@ -524,10 +560,15 @@ InstructTemplate instructTemplateFromExport(
     lastOutputSequence: export.lastOutputSequence,
     chatSeparator: export.separatorSequence,
     userAlignmentMessage: export.userAlignmentMessage,
-    stopSequences: export.stopSequence.isNotEmpty 
-        ? export.stopSequence.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList()
+    stopSequences: export.stopSequence.isNotEmpty
+        ? export.stopSequence
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList()
         : [],
-    activationRegex: export.activationRegex.isNotEmpty ? export.activationRegex : null,
+    activationRegex:
+        export.activationRegex.isNotEmpty ? export.activationRegex : null,
     skipExamples: export.skipExamples,
     systemSameAsUser: export.systemSameAsUser,
     wrapInNewlines: export.wrap,

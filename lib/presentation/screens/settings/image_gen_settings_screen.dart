@@ -24,7 +24,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(imageGenSettingsProvider.notifier).reset();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.settingsResetToDefaults)),
+                SnackBar(
+                    content: Text(
+                        AppLocalizations.of(context)!.settingsResetToDefaults)),
               );
             },
           ),
@@ -39,8 +41,10 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             title: AppLocalizations.of(context)!.general,
             children: [
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableImageGeneration),
-                subtitle: Text(AppLocalizations.of(context)!.generateImagesUsingAi),
+                title:
+                    Text(AppLocalizations.of(context)!.enableImageGeneration),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.generateImagesUsingAi),
                 value: settings.enabled,
                 onChanged: (value) {
                   ref.read(imageGenSettingsProvider.notifier).setEnabled(value);
@@ -57,14 +61,17 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             title: AppLocalizations.of(context)!.provider,
             children: [
               ListTile(
-                title: Text(AppLocalizations.of(context)!.imageGenerationProvider),
+                title:
+                    Text(AppLocalizations.of(context)!.imageGenerationProvider),
                 subtitle: Text(settings.provider.displayName),
                 trailing: DropdownButton<ImageGenProvider>(
                   value: settings.provider,
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(imageGenSettingsProvider.notifier).setProvider(value);
+                            ref
+                                .read(imageGenSettingsProvider.notifier)
+                                .setProvider(value);
                           }
                         }
                       : null,
@@ -116,17 +123,24 @@ class ImageGenSettingsScreen extends ConsumerWidget {
               // Size presets
               ListTile(
                 title: Text(AppLocalizations.of(context)!.imageSize),
-                subtitle: Text('${settings.defaultWidth} × ${settings.defaultHeight}'),
+                subtitle: Text(
+                    '${settings.defaultWidth} × ${settings.defaultHeight}'),
                 trailing: DropdownButton<ImageAspectRatio>(
                   value: ImageAspectRatio.presets.firstWhere(
-                    (p) => p.width == settings.defaultWidth && p.height == settings.defaultHeight,
+                    (p) =>
+                        p.width == settings.defaultWidth &&
+                        p.height == settings.defaultHeight,
                     orElse: () => ImageAspectRatio.presets.first,
                   ),
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(imageGenSettingsProvider.notifier).setDefaultWidth(value.width);
-                            ref.read(imageGenSettingsProvider.notifier).setDefaultHeight(value.height);
+                            ref
+                                .read(imageGenSettingsProvider.notifier)
+                                .setDefaultWidth(value.width);
+                            ref
+                                .read(imageGenSettingsProvider.notifier)
+                                .setDefaultHeight(value.height);
                           }
                         }
                       : null,
@@ -150,7 +164,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                   label: '${settings.defaultSteps}',
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setDefaultSteps(value.round());
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setDefaultSteps(value.round());
                         }
                       : null,
                 ),
@@ -171,7 +187,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                   label: settings.defaultCfgScale.toStringAsFixed(1),
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setDefaultCfgScale(value);
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setDefaultCfgScale(value);
                         }
                       : null,
                 ),
@@ -197,7 +215,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                   onChanged: settings.enabled
                       ? (value) {
                           if (value != null) {
-                            ref.read(imageGenSettingsProvider.notifier).setDefaultSampler(value);
+                            ref
+                                .read(imageGenSettingsProvider.notifier)
+                                .setDefaultSampler(value);
                           }
                         }
                       : null,
@@ -222,16 +242,20 @@ class ImageGenSettingsScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: TextField(
-                  controller: TextEditingController(text: settings.defaultNegativePrompt),
+                  controller: TextEditingController(
+                      text: settings.defaultNegativePrompt),
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.defaultNegativePrompt,
+                    labelText:
+                        AppLocalizations.of(context)!.defaultNegativePrompt,
                     hintText: AppLocalizations.of(context)!.enterTermsToAvoid,
                     border: const OutlineInputBorder(),
                   ),
                   maxLines: 3,
                   enabled: settings.enabled,
                   onChanged: (value) {
-                    ref.read(imageGenSettingsProvider.notifier).setDefaultNegativePrompt(value);
+                    ref
+                        .read(imageGenSettingsProvider.notifier)
+                        .setDefaultNegativePrompt(value);
                   },
                 ),
               ),
@@ -243,56 +267,74 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildSection(
               context: context,
-              title: 'NovelAI Settings',
+              title: AppLocalizations.of(context).novelAiSettings,
               children: [
                 SwitchListTile(
-                  title: const Text('Anlas Guard'),
-                  subtitle: const Text('Limit image size and steps to reduce costs'),
+                  title: Text(AppLocalizations.of(context).anlasGuard),
+                  subtitle: Text(
+                    AppLocalizations.of(context).anlasGuardDescription,
+                  ),
                   value: settings.novelaiAnlasGuard,
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setNovelaiAnlasGuard(value);
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setNovelaiAnlasGuard(value);
                         }
                       : null,
                 ),
                 SwitchListTile(
-                  title: const Text('SM (SMEA)'),
-                  subtitle: const Text('Enhanced sampling for better details'),
+                  title: Text(AppLocalizations.of(context).smea),
+                  subtitle: Text(AppLocalizations.of(context).smeaDescription),
                   value: settings.novelaiSm,
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setNovelaiSm(value);
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setNovelaiSm(value);
                         }
                       : null,
                 ),
                 if (settings.novelaiSm)
                   SwitchListTile(
-                    title: const Text('SM DYN'),
-                    subtitle: const Text('Dynamic SMEA (more creative)'),
+                    title: Text(AppLocalizations.of(context).smeaDynamic),
+                    subtitle: Text(
+                      AppLocalizations.of(context).smeaDynamicDescription,
+                    ),
                     value: settings.novelaiSmDyn,
                     onChanged: settings.enabled
                         ? (value) {
-                            ref.read(imageGenSettingsProvider.notifier).setNovelaiSmDyn(value);
+                            ref
+                                .read(imageGenSettingsProvider.notifier)
+                                .setNovelaiSmDyn(value);
                           }
                         : null,
                   ),
                 SwitchListTile(
-                  title: const Text('Decrisper'),
-                  subtitle: const Text('Reduce over-saturation in images'),
+                  title: Text(AppLocalizations.of(context).decrisper),
+                  subtitle: Text(
+                    AppLocalizations.of(context).decrisperDescription,
+                  ),
                   value: settings.novelaiDecrisper,
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setNovelaiDecrisper(value);
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setNovelaiDecrisper(value);
                         }
                       : null,
                 ),
                 SwitchListTile(
-                  title: const Text('Variety+'),
-                  subtitle: const Text('Higher variety in generated images'),
+                  title: Text(AppLocalizations.of(context).varietyPlus),
+                  subtitle: Text(
+                    AppLocalizations.of(context).varietyPlusDescription,
+                  ),
                   value: settings.novelaiVarietyBoost,
                   onChanged: settings.enabled
                       ? (value) {
-                          ref.read(imageGenSettingsProvider.notifier).setNovelaiVarietyBoost(value);
+                          ref
+                              .read(imageGenSettingsProvider.notifier)
+                              .setNovelaiVarietyBoost(value);
                         }
                       : null,
                 ),
@@ -317,19 +359,21 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                     onChanged: settings.enabled
                         ? (value) {
                             if (value != null) {
-                              ref.read(imageGenSettingsProvider.notifier).setOpenaiQuality(value);
+                              ref
+                                  .read(imageGenSettingsProvider.notifier)
+                                  .setOpenaiQuality(value);
                             }
                           }
                         : null,
                     items: [
                       DropdownMenuItem(
                           value: 'standard',
-                          child: Text(
-                              AppLocalizations.of(context)!.effortAuto)),
+                          child:
+                              Text(AppLocalizations.of(context)!.effortAuto)),
                       DropdownMenuItem(
                           value: 'hd',
-                          child: Text(
-                              AppLocalizations.of(context)!.effortHigh)),
+                          child:
+                              Text(AppLocalizations.of(context)!.effortHigh)),
                     ],
                   ),
                 ),
@@ -356,33 +400,41 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             title: AppLocalizations.of(context)!.information,
             children: [
               ListTile(
-                leading: const Icon(Icons.info_outline, color: AppTheme.accentColor),
+                leading:
+                    const Icon(Icons.info_outline, color: AppTheme.accentColor),
                 title: Text(AppLocalizations.of(context)!.aboutImageGeneration),
-                subtitle: Text(AppLocalizations.of(context)!.aboutImageGenerationDescription),
+                subtitle: Text(AppLocalizations.of(context)!
+                    .aboutImageGenerationDescription),
               ),
               ListTile(
                 leading: const Icon(Icons.terminal, color: AppTheme.textMuted),
                 title: Text(AppLocalizations.of(context)!.imagineCommand),
-                subtitle: Text(AppLocalizations.of(context)!.imagineCommandUsage),
+                subtitle:
+                    Text(AppLocalizations.of(context)!.imagineCommandUsage),
               ),
               if (settings.provider == ImageGenProvider.automatic1111)
                 ListTile(
-                  leading: const Icon(Icons.computer, color: AppTheme.textMuted),
+                  leading:
+                      const Icon(Icons.computer, color: AppTheme.textMuted),
                   title: Text(AppLocalizations.of(context)!.stableDiffusion),
-                  subtitle: Text(AppLocalizations.of(context)!.stableDiffusionDescription),
+                  subtitle: Text(
+                      AppLocalizations.of(context)!.stableDiffusionDescription),
                 ),
               if (settings.provider == ImageGenProvider.openai)
-                const ListTile(
-                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text('GPT-Image'),
+                ListTile(
+                  leading: const Icon(Icons.cloud, color: AppTheme.textMuted),
+                  title: const Text('GPT-Image'),
                   subtitle: Text(
-                      'OAI Compatible /v1/images/generations API (gpt-image-2)'),
+                    AppLocalizations.of(context).gptImageApiDescription,
+                  ),
                 ),
               if (settings.provider == ImageGenProvider.openaiChat)
-                const ListTile(
-                  leading: Icon(Icons.chat, color: AppTheme.textMuted),
-                  title: Text('OAI Compatible Chat'),
-                  subtitle: Text('Uses chat/completions API for image generation. Works with compatible APIs that return images via chat format.'),
+                ListTile(
+                  leading: const Icon(Icons.chat, color: AppTheme.textMuted),
+                  title: Text(AppLocalizations.of(context).oaiCompatibleChat),
+                  subtitle: Text(
+                    AppLocalizations.of(context).oaiCompatibleChatDescription,
+                  ),
                 ),
             ],
           ),
@@ -417,17 +469,20 @@ class ImageGenSettingsScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildModelSelector(BuildContext context, WidgetRef ref, ImageGenSettings settings) {
+
+  Widget _buildModelSelector(
+      BuildContext context, WidgetRef ref, ImageGenSettings settings) {
     final availableModels = ref.watch(availableModelsProvider);
     final fetchedState = ref.watch(fetchedModelsProvider);
     final supportsFetching = settings.provider.supportsFetchingModels;
-    
+
     // Determine the current model value
-    final currentModel = availableModels.contains(settings.model) 
-        ? settings.model 
-        : (availableModels.isNotEmpty ? availableModels.first : settings.provider.defaultModel);
-    
+    final currentModel = availableModels.contains(settings.model)
+        ? settings.model
+        : (availableModels.isNotEmpty
+            ? availableModels.first
+            : settings.provider.defaultModel);
+
     return ListTile(
       title: Text(AppLocalizations.of(context)!.model),
       subtitle: Column(
@@ -436,8 +491,8 @@ class ImageGenSettingsScreen extends ConsumerWidget {
           Text(ImageGenProvider.getModelDisplayName(currentModel)),
           if (fetchedState.error != null)
             Text(
-              'Error fetching models',
-              style: TextStyle(color: Colors.orange, fontSize: 12),
+              AppLocalizations.of(context).errorFetchingModels,
+              style: const TextStyle(color: Colors.orange, fontSize: 12),
             ),
         ],
       ),
@@ -453,7 +508,7 @@ class ImageGenSettingsScreen extends ConsumerWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.refresh, size: 20),
-              tooltip: 'Refresh models',
+              tooltip: AppLocalizations.of(context).refreshModels,
               onPressed: settings.enabled && !fetchedState.isLoading
                   ? () => ref.read(fetchedModelsProvider.notifier).fetchModels()
                   : null,
@@ -464,7 +519,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
             onChanged: settings.enabled
                 ? (value) {
                     if (value != null) {
-                      ref.read(imageGenSettingsProvider.notifier).setModel(value);
+                      ref
+                          .read(imageGenSettingsProvider.notifier)
+                          .setModel(value);
                     }
                   }
                 : null,
@@ -483,9 +540,10 @@ class ImageGenSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref, ImageGenSettings settings) {
+  void _showApiKeyDialog(
+      BuildContext context, WidgetRef ref, ImageGenSettings settings) {
     final controller = TextEditingController(text: settings.apiKey);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -505,7 +563,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(imageGenSettingsProvider.notifier).setApiKey(controller.text);
+              ref
+                  .read(imageGenSettingsProvider.notifier)
+                  .setApiKey(controller.text);
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.save),
@@ -515,9 +575,10 @@ class ImageGenSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEndpointDialog(BuildContext context, WidgetRef ref, ImageGenSettings settings) {
+  void _showEndpointDialog(
+      BuildContext context, WidgetRef ref, ImageGenSettings settings) {
     final controller = TextEditingController(text: settings.apiEndpoint);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -536,7 +597,9 @@ class ImageGenSettingsScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(imageGenSettingsProvider.notifier).setApiEndpoint(controller.text);
+              ref
+                  .read(imageGenSettingsProvider.notifier)
+                  .setApiEndpoint(controller.text);
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.save),
@@ -559,7 +622,8 @@ class _ImageGenTestWidget extends ConsumerStatefulWidget {
   const _ImageGenTestWidget({required this.enabled});
 
   @override
-  ConsumerState<_ImageGenTestWidget> createState() => _ImageGenTestWidgetState();
+  ConsumerState<_ImageGenTestWidget> createState() =>
+      _ImageGenTestWidgetState();
 }
 
 class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
@@ -607,20 +671,22 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: widget.enabled && _controller.text.isNotEmpty && !genState.isGenerating
+            onPressed: widget.enabled &&
+                    _controller.text.isNotEmpty &&
+                    !genState.isGenerating
                 ? () {
                     final settings = ref.read(imageGenSettingsProvider);
                     ref.read(imageGenStateProvider.notifier).generate(
-                      ImageGenRequest(
-                        prompt: _controller.text,
-                        negativePrompt: settings.defaultNegativePrompt,
-                        width: settings.defaultWidth,
-                        height: settings.defaultHeight,
-                        steps: settings.defaultSteps,
-                        cfgScale: settings.defaultCfgScale,
-                        sampler: settings.defaultSampler,
-                      ),
-                    );
+                          ImageGenRequest(
+                            prompt: _controller.text,
+                            negativePrompt: settings.defaultNegativePrompt,
+                            width: settings.defaultWidth,
+                            height: settings.defaultHeight,
+                            steps: settings.defaultSteps,
+                            cfgScale: settings.defaultCfgScale,
+                            sampler: settings.defaultSampler,
+                          ),
+                        );
                   }
                 : null,
             icon: genState.isGenerating
@@ -630,9 +696,11 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.image),
-            label: Text(genState.isGenerating ? AppLocalizations.of(context)!.generating : AppLocalizations.of(context)!.generate),
+            label: Text(genState.isGenerating
+                ? AppLocalizations.of(context)!.generating
+                : AppLocalizations.of(context)!.generate),
           ),
-          
+
           // Progress bar
           if (genState.isGenerating) ...[
             const SizedBox(height: 16),
@@ -660,7 +728,8 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.check, size: 16, color: AppTheme.accentColor),
+                      const Icon(Icons.check,
+                          size: 16, color: AppTheme.accentColor),
                       const SizedBox(width: 8),
                       Text(
                         AppLocalizations.of(context)!.generationComplete,
@@ -672,9 +741,11 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text('Prompt: ${genState.result!.prompt}'),
+                  Text(AppLocalizations.of(context)
+                      .generatedPrompt(genState.result!.prompt)),
                   Text(
-                    'Seed: ${genState.result!.seed}',
+                    AppLocalizations.of(context)
+                        .generatedSeed(genState.result!.seed.toString()),
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppTheme.textMuted,
@@ -683,7 +754,8 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                   if (genState.result!.images.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(
-                      '${genState.result!.images.length} image(s) generated',
+                      AppLocalizations.of(context)
+                          .imagesGenerated(genState.result!.images.length),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppTheme.textMuted,
@@ -701,7 +773,8 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: GestureDetector(
-                              onTap: () => _showFullScreenImage(context, imageData),
+                              onTap: () =>
+                                  _showFullScreenImage(context, imageData),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.memory(
@@ -713,7 +786,8 @@ class _ImageGenTestWidgetState extends ConsumerState<_ImageGenTestWidget> {
                                       height: 200,
                                       color: AppTheme.darkCard,
                                       child: const Center(
-                                        child: Icon(Icons.broken_image, color: AppTheme.textMuted),
+                                        child: Icon(Icons.broken_image,
+                                            color: AppTheme.textMuted),
                                       ),
                                     );
                                   },

@@ -458,9 +458,10 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           const SizedBox(height: 8),
           TextFormField(
             controller: _systemPromptController,
-            decoration: const InputDecoration(
-              hintText: 'You are {char}. You will...',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText:
+                  AppLocalizations.of(context)!.systemPromptHint('{char}'),
+              border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 8,
@@ -480,9 +481,10 @@ class _CharacterEditorScreenState extends ConsumerState<CharacterEditorScreen>
           const SizedBox(height: 8),
           TextFormField(
             controller: _postHistoryController,
-            decoration: const InputDecoration(
-              hintText: 'Continue the roleplay as {char}...',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!
+                  .postHistoryInstructionsHint('{char}'),
+              border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 6,

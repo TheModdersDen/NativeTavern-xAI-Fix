@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/presentation/providers/tts_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 class ChatTTSMessageButton extends ConsumerWidget {
   const ChatTTSMessageButton({
@@ -97,7 +98,9 @@ class ChatTTSPlaybackControls extends ConsumerWidget {
           icon: Icon(
             playback.isPaused ? Icons.play_arrow : Icons.pause,
           ),
-          tooltip: playback.isPaused ? 'Resume reading' : 'Pause reading',
+          tooltip: playback.isPaused
+              ? AppLocalizations.of(context).resumeReading
+              : AppLocalizations.of(context).pauseReading,
           onPressed: () {
             unawaited(
               playback.isPaused
@@ -108,7 +111,7 @@ class ChatTTSPlaybackControls extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.stop),
-          tooltip: 'Stop reading',
+          tooltip: AppLocalizations.of(context).stopReading,
           onPressed: () {
             unawaited(ref.read(ttsStopProvider)(ownerId: ownerId));
           },

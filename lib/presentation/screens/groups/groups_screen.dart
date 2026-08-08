@@ -254,7 +254,8 @@ class _GroupCard extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Tooltip(
-                  message: character?.name ?? 'Unknown',
+                  message:
+                      character?.name ?? AppLocalizations.of(context).unknown,
                   child: Stack(
                     children: [
                       character?.assets?.avatarPath != null
@@ -472,7 +473,9 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+                error: (e, _) => Center(
+                  child: Text('${AppLocalizations.of(context).error}: $e'),
+                ),
               ),
             ),
             if (_selectedCharacterIds.isNotEmpty)

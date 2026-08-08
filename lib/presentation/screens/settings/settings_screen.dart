@@ -37,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.language),
-                    label: const Text('Official Website'),
+                    label: Text(l10n.officialWebsite),
                     onPressed: () => launchUrl(
                       Uri.parse('https://nativetavern.com'),
                       mode: LaunchMode.externalApplication,

@@ -913,7 +913,7 @@ class ImageGenerationService {
   }) async {
     final apiKey = _settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('OpenAI API key is required');
+      throw Exception('OAI Compatible API key is required');
     }
 
     onProgress?.call(0.1);
@@ -961,7 +961,7 @@ class ImageGenerationService {
     onProgress?.call(0.9);
 
     if (response.statusCode != 200) {
-      throw Exception('OpenAI error: ${response.statusCode} ${response.data}');
+      throw Exception('OAI Compatible error: ${response.statusCode} ${response.data}');
     }
 
     final data = response.data as Map<String, dynamic>;
@@ -1052,7 +1052,7 @@ class ImageGenerationService {
     onProgress?.call(0.7);
 
     if (response.statusCode != 200) {
-      throw Exception('OpenAI-Chat error: ${response.statusCode} ${response.data}');
+      throw Exception('OAI Compatible Chat error: ${response.statusCode} ${response.data}');
     }
 
     final data = response.data as Map<String, dynamic>;

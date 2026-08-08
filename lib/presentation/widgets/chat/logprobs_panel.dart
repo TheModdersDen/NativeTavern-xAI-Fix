@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/logprobs.dart';
 import 'package:native_tavern/presentation/providers/logprobs_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Panel for displaying token log probabilities
 class LogprobsPanel extends ConsumerWidget {
@@ -41,7 +42,7 @@ class LogprobsPanel extends ConsumerWidget {
           // Header
           _buildHeader(context, logprobs),
           const Divider(height: 1),
-          
+
           // Token output view
           Expanded(
             flex: 2,
@@ -49,12 +50,12 @@ class LogprobsPanel extends ConsumerWidget {
               logprobs: logprobs,
               selectedToken: selectedToken,
               onTokenSelected: (token) {
-                ref.read(selectedTokenLogprobProvider.notifier).state = 
+                ref.read(selectedTokenLogprobProvider.notifier).state =
                     selectedToken == token ? null : token;
               },
             ),
           ),
-          
+
           // Top candidates view
           if (selectedToken != null) ...[
             const Divider(height: 1),
@@ -65,7 +66,10 @@ class LogprobsPanel extends ConsumerWidget {
                 onAlternativeSelected: (alternative) {
                   // TODO: Implement reroll with alternative token
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Reroll with "$alternative" not yet implemented')),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)
+                          .rerollAlternativeNotImplemented(alternative)),
+                    ),
                   );
                 },
               ),
@@ -88,12 +92,12 @@ class LogprobsPanel extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'Token Probabilities',
+            AppLocalizations.of(context).tokenProbabilities,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const Spacer(),
           Text(
-            '${logprobs.tokenCount} tokens',
+            AppLocalizations.of(context).tokensCount(logprobs.tokenCount),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
@@ -115,9 +119,9 @@ class LogprobsPanel extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, LogprobsSettings settings) {
     String message;
     if (!settings.requestTokenProbabilities) {
-      message = 'Enable "Request token probabilities" in settings to use this feature.';
+      message = AppLocalizations.of(context).enableTokenProbabilitiesHint;
     } else {
-      message = 'No token probabilities available for this message.';
+      message = AppLocalizations.of(context).noTokenProbabilities;
     }
 
     return Container(
@@ -165,9 +169,10 @@ class _TokenOutputView extends ConsumerWidget {
       child: Wrap(
         children: [
           // Continue prefix if present
-          if (logprobs.continueFrom != null && logprobs.continueFrom!.isNotEmpty)
+          if (logprobs.continueFrom != null &&
+              logprobs.continueFrom!.isNotEmpty)
             ..._buildPrefixTokens(context, logprobs.continueFrom!),
-          
+
           // Token spans
           ...logprobs.tokenLogprobs.asMap().entries.map((entry) {
             final index = entry.key;
@@ -227,7 +232,7 @@ class _TokenSpan extends StatelessWidget {
   Widget build(BuildContext context) {
     // Convert special whitespace to visible characters
     final displayText = _toVisibleWhitespace(token.token);
-    
+
     // Get tint color based on index
     final tintColor = _getTintColor(tintIndex);
 
@@ -236,7 +241,7 @@ class _TokenSpan extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? AppTheme.accentColor.withValues(alpha: 0.3)
               : tintColor.withValues(alpha: 0.15),
           border: isSelected
@@ -291,7 +296,7 @@ class _TopCandidatesView extends StatelessWidget {
     if (tokenLogprob.topCandidates.isEmpty) {
       return Center(
         child: Text(
-          'No alternative tokens available',
+          AppLocalizations.of(context).noAlternativeTokens,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
@@ -300,8 +305,9 @@ class _TopCandidatesView extends StatelessWidget {
     }
 
     // Sort candidates by probability (highest first)
-    final sortedCandidates = List<TokenCandidate>.from(tokenLogprob.topCandidates)
-      ..sort((a, b) => b.logprob.compareTo(a.logprob));
+    final sortedCandidates =
+        List<TokenCandidate>.from(tokenLogprob.topCandidates)
+          ..sort((a, b) => b.logprob.compareTo(a.logprob));
 
     // Calculate total probability for "others"
     double totalProb = 0;
@@ -320,7 +326,7 @@ class _TopCandidatesView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
             child: Text(
-              'Alternative Tokens',
+              AppLocalizations.of(context).alternativeTokens,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -333,7 +339,7 @@ class _TopCandidatesView extends StatelessWidget {
               ...sortedCandidates.map((candidate) {
                 final isSelected = candidate.token == tokenLogprob.token ||
                     _normalizeToken(candidate.token) == tokenLogprob.token;
-                
+
                 return _CandidateChip(
                   candidate: candidate,
                   isSelected: isSelected,
@@ -426,14 +432,17 @@ class _OthersChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '<others>',
+            AppLocalizations.of(context).otherTokens,
             style: TextStyle(
               fontFamily: 'monospace',
               color: Theme.of(context).colorScheme.outline,
@@ -460,26 +469,31 @@ class LogprobsSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(logprobsSettingsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Token Probabilities'),
+        title: Text(l10n.tokenProbabilities),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text('Request Token Probabilities'),
-            subtitle: const Text('Ask the AI to return probability data'),
+            title: Text(l10n.requestTokenProbabilities),
+            subtitle: Text(l10n.requestTokenProbabilitiesDescription),
             value: settings.requestTokenProbabilities,
             onChanged: (value) {
-              ref.read(logprobsSettingsProvider.notifier).setRequestTokenProbabilities(value);
+              ref
+                  .read(logprobsSettingsProvider.notifier)
+                  .setRequestTokenProbabilities(value);
             },
           ),
           const Divider(),
           ListTile(
-            title: const Text('Top Candidates Count'),
-            subtitle: Text('Show top ${settings.topLogprobsCount} alternative tokens'),
+            title: Text(l10n.topCandidatesCount),
+            subtitle: Text(
+              l10n.topCandidatesDescription(settings.topLogprobsCount),
+            ),
             trailing: SizedBox(
               width: 100,
               child: Slider(
@@ -490,7 +504,9 @@ class LogprobsSettingsScreen extends ConsumerWidget {
                 label: settings.topLogprobsCount.toString(),
                 onChanged: settings.requestTokenProbabilities
                     ? (value) {
-                        ref.read(logprobsSettingsProvider.notifier).setTopLogprobsCount(value.round());
+                        ref
+                            .read(logprobsSettingsProvider.notifier)
+                            .setTopLogprobsCount(value.round());
                       }
                     : null,
               ),
@@ -498,18 +514,20 @@ class LogprobsSettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
           SwitchListTile(
-            title: const Text('Show Logprobs Panel'),
-            subtitle: const Text('Display probability panel in chat'),
+            title: Text(l10n.showLogprobsPanel),
+            subtitle: Text(l10n.showLogprobsPanelDescription),
             value: settings.showLogprobsPanel,
             onChanged: settings.requestTokenProbabilities
                 ? (value) {
-                    ref.read(logprobsSettingsProvider.notifier).setShowLogprobsPanel(value);
+                    ref
+                        .read(logprobsSettingsProvider.notifier)
+                        .setShowLogprobsPanel(value);
                   }
                 : null,
           ),
           const Divider(),
           ListTile(
-            title: const Text('Color Intensity'),
+            title: Text(l10n.colorIntensity),
             subtitle: Text('${(settings.colorIntensity * 100).round()}%'),
             trailing: SizedBox(
               width: 150,
@@ -519,7 +537,9 @@ class LogprobsSettingsScreen extends ConsumerWidget {
                 max: 1,
                 onChanged: settings.requestTokenProbabilities
                     ? (value) {
-                        ref.read(logprobsSettingsProvider.notifier).setColorIntensity(value);
+                        ref
+                            .read(logprobsSettingsProvider.notifier)
+                            .setColorIntensity(value);
                       }
                     : null,
               ),
@@ -540,21 +560,13 @@ class LogprobsSettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'About Token Probabilities',
+                        l10n.aboutTokenProbabilities,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Token probabilities show how confident the AI was about each word or token '
-                    'in its response. You can:\n\n'
-                    '• Click on tokens to see alternatives\n'
-                    '• View probability percentages\n'
-                    '• Understand model confidence\n\n'
-                    'Note: Not all AI backends support this feature. '
-                    'Smooth streaming must be disabled to use logprobs.',
-                  ),
+                  Text(l10n.tokenProbabilitiesDescription),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Widget to display images extracted from text content
@@ -21,7 +22,7 @@ class ExtractedImagesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final urls = ImageGenerationService.extractImageUrls(text);
-    
+
     // Filter out URLs that are already in Markdown image syntax (they will be rendered by markdown)
     final standAloneUrls = urls.where((url) {
       // Skip if URL is part of Markdown image syntax
@@ -30,7 +31,7 @@ class ExtractedImagesWidget extends StatelessWidget {
       if (url.startsWith('data:')) return false;
       return true;
     }).toList();
-    
+
     if (standAloneUrls.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -67,15 +68,18 @@ class ExtractedImagesWidget extends StatelessWidget {
             placeholder: (context, url) => Container(
               height: 200,
               color: AppTheme.darkBackground,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(strokeWidth: 2),
-                    SizedBox(height: 8),
+                    const CircularProgressIndicator(strokeWidth: 2),
+                    const SizedBox(height: 8),
                     Text(
-                      'Loading image...',
-                      style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                      AppLocalizations.of(context).loadingImage,
+                      style: const TextStyle(
+                        color: AppTheme.textMuted,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -90,17 +94,18 @@ class ExtractedImagesWidget extends StatelessWidget {
                   const Icon(Icons.broken_image, color: AppTheme.textMuted),
                   const SizedBox(height: 8),
                   Text(
-                    'Failed to load image',
+                    AppLocalizations.of(context).imageLoadFailed,
                     style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                   ),
                   TextButton(
                     onPressed: () async {
                       final uri = Uri.tryParse(url);
                       if (uri != null) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(uri,
+                            mode: LaunchMode.externalApplication);
                       }
                     },
-                    child: const Text('Open in browser'),
+                    child: Text(AppLocalizations.of(context).openInBrowser),
                   ),
                 ],
               ),
@@ -150,7 +155,8 @@ class _FullScreenImageDialog extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 ),
                 errorWidget: (context, url, error) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white, size: 64),
+                  child:
+                      Icon(Icons.broken_image, color: Colors.white, size: 64),
                 ),
               ),
             ),
@@ -172,7 +178,10 @@ class _FullScreenImageDialog extends StatelessWidget {
             child: Center(
               child: TextButton.icon(
                 icon: const Icon(Icons.open_in_new, color: Colors.white),
-                label: const Text('Open in browser', style: TextStyle(color: Colors.white)),
+                label: Text(
+                  AppLocalizations.of(context).openInBrowser,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onPressed: () async {
                   final uri = Uri.tryParse(imageUrl);
                   if (uri != null) {

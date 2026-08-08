@@ -36,10 +36,13 @@ class QuickReplyScreen extends ConsumerWidget {
               children: [
                 SwitchListTile(
                   title: Text(AppLocalizations.of(context)!.showQuickReplies),
-                  subtitle: Text(AppLocalizations.of(context)!.displayQuickReplyButtons),
+                  subtitle: Text(
+                      AppLocalizations.of(context)!.displayQuickReplyButtons),
                   value: config.showQuickReplies,
                   onChanged: (_) {
-                    ref.read(quickReplyConfigProvider.notifier).toggleShowQuickReplies();
+                    ref
+                        .read(quickReplyConfigProvider.notifier)
+                        .toggleShowQuickReplies();
                   },
                 ),
                 const Divider(height: 1),
@@ -49,14 +52,18 @@ class QuickReplyScreen extends ConsumerWidget {
                       ? AppLocalizations.of(context)!.quickRepliesAboveInput
                       : AppLocalizations.of(context)!.quickRepliesBelowInput),
                   value: config.showAboveInput,
-                  onChanged: config.showQuickReplies ? (_) {
-                    ref.read(quickReplyConfigProvider.notifier).togglePosition();
-                  } : null,
+                  onChanged: config.showQuickReplies
+                      ? (_) {
+                          ref
+                              .read(quickReplyConfigProvider.notifier)
+                              .togglePosition();
+                        }
+                      : null,
                 ),
               ],
             ),
           ),
-          
+
           // Quick replies list header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -75,9 +82,9 @@ class QuickReplyScreen extends ConsumerWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Reorderable list of quick replies
           Expanded(
             child: sortedReplies.isEmpty
@@ -93,14 +100,18 @@ class QuickReplyScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context)!.noQuickReplies,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         TextButton(
                           onPressed: () => _showEditDialog(context, ref, null),
-                          child: Text(AppLocalizations.of(context)!.addYourFirstQuickReply),
+                          child: Text(AppLocalizations.of(context)!
+                              .addYourFirstQuickReply),
                         ),
                       ],
                     ),
@@ -110,7 +121,9 @@ class QuickReplyScreen extends ConsumerWidget {
                     itemCount: sortedReplies.length,
                     onReorder: (oldIndex, newIndex) {
                       if (newIndex > oldIndex) newIndex--;
-                      ref.read(quickReplyConfigProvider.notifier).reorder(oldIndex, newIndex);
+                      ref
+                          .read(quickReplyConfigProvider.notifier)
+                          .reorder(oldIndex, newIndex);
                     },
                     itemBuilder: (context, index) {
                       final reply = sortedReplies[index];
@@ -119,7 +132,9 @@ class QuickReplyScreen extends ConsumerWidget {
                         reply: reply,
                         onEdit: () => _showEditDialog(context, ref, reply),
                         onToggle: () {
-                          ref.read(quickReplyConfigProvider.notifier).toggleReply(reply.id);
+                          ref
+                              .read(quickReplyConfigProvider.notifier)
+                              .toggleReply(reply.id);
                         },
                         onDelete: () => _showDeleteDialog(context, ref, reply),
                       );
@@ -147,12 +162,14 @@ class QuickReplyScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, WidgetRef ref, QuickReply reply) {
+  void _showDeleteDialog(
+      BuildContext context, WidgetRef ref, QuickReply reply) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteQuickReply),
-        content: Text(AppLocalizations.of(context)!.deleteQuickReplyQuestion(reply.label)),
+        content: Text(AppLocalizations.of(context)!
+            .deleteQuickReplyQuestion(reply.label)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -211,7 +228,7 @@ class _QuickReplyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -229,12 +246,14 @@ class _QuickReplyTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          reply.message.isEmpty ? AppLocalizations.of(context)!.continueOrEmpty : reply.message,
+          reply.message.isEmpty
+              ? AppLocalizations.of(context)!.continueOrEmpty
+              : reply.message,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: reply.enabled 
-                ? theme.colorScheme.onSurfaceVariant 
+            color: reply.enabled
+                ? theme.colorScheme.onSurfaceVariant
                 : theme.colorScheme.outline,
           ),
         ),
@@ -243,7 +262,7 @@ class _QuickReplyTile extends StatelessWidget {
           children: [
             if (reply.autoSend)
               Tooltip(
-                message: 'Auto-send',
+                message: AppLocalizations.of(context).autoSendTooltip,
                 child: Icon(
                   Icons.send,
                   size: 16,
@@ -311,7 +330,8 @@ class _QuickReplyEditDialogState extends State<_QuickReplyEditDialog> {
   void initState() {
     super.initState();
     _labelController = TextEditingController(text: widget.reply?.label ?? '');
-    _messageController = TextEditingController(text: widget.reply?.message ?? '');
+    _messageController =
+        TextEditingController(text: widget.reply?.message ?? '');
     _autoSend = widget.reply?.autoSend ?? true;
   }
 
@@ -325,9 +345,12 @@ class _QuickReplyEditDialogState extends State<_QuickReplyEditDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.reply != null;
-    
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: Text(isEditing ? AppLocalizations.of(context)!.editQuickReplyLabel : AppLocalizations.of(context)!.addQuickReply),
+      title: Text(isEditing
+          ? AppLocalizations.of(context)!.editQuickReplyLabel
+          : AppLocalizations.of(context)!.addQuickReply),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -335,30 +358,30 @@ class _QuickReplyEditDialogState extends State<_QuickReplyEditDialog> {
           children: [
             TextField(
               controller: _labelController,
-              decoration: const InputDecoration(
-                labelText: 'Button Label',
-                hintText: 'e.g., Yes, Continue, Think...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.buttonLabel,
+                hintText: l10n.buttonLabelHint,
+                border: const OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _messageController,
-              decoration: const InputDecoration(
-                labelText: 'Message',
-                hintText: 'Leave empty for continue action',
-                helperText: 'Supports macros like {{user}}, {{char}}',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.message,
+                hintText: l10n.leaveEmptyForContinue,
+                helperText: l10n.supportsMacros,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Auto-send'),
-              subtitle: Text(_autoSend 
-                  ? 'Message will be sent immediately'
-                  : 'Message will fill the input field'),
+              title: Text(l10n.autoSendTooltip),
+              subtitle: Text(_autoSend
+                  ? l10n.messageSentImmediately
+                  : l10n.messageFillsInput),
               value: _autoSend,
               onChanged: (value) => setState(() => _autoSend = value),
               contentPadding: EdgeInsets.zero,
@@ -386,7 +409,9 @@ class _QuickReplyEditDialogState extends State<_QuickReplyEditDialog> {
                   widget.onSave(newReply);
                   Navigator.pop(context);
                 },
-          child: Text(isEditing ? AppLocalizations.of(context)!.save : AppLocalizations.of(context)!.add),
+          child: Text(isEditing
+              ? AppLocalizations.of(context)!.save
+              : AppLocalizations.of(context)!.add),
         ),
       ],
     );

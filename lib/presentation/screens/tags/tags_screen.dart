@@ -39,10 +39,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text('${AppLocalizations.of(context).error}: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(tagNotifierProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(tagNotifierProvider.notifier).refresh(),
                 child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
@@ -144,7 +145,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteTag),
-        content: Text(AppLocalizations.of(context)!.deleteTagConfirmation(tag.name)),
+        content:
+            Text(AppLocalizations.of(context)!.deleteTagConfirmation(tag.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -204,7 +206,8 @@ class _TagListItem extends StatelessWidget {
         ),
         title: Text(tag.name),
         subtitle: Text(
-          AppLocalizations.of(context)!.characterCount(usageCount, usageCount == 1 ? '' : 's'),
+          AppLocalizations.of(context)!
+              .characterCount(usageCount, usageCount == 1 ? '' : 's'),
           style: const TextStyle(color: AppTheme.textMuted),
         ),
         trailing: Row(
@@ -243,7 +246,8 @@ class _TagListItem extends StatelessWidget {
                   value: 'delete',
                   child: ListTile(
                     leading: const Icon(Icons.delete, color: Colors.red),
-                    title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                    title: Text(AppLocalizations.of(context)!.delete,
+                        style: const TextStyle(color: Colors.red)),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -296,7 +300,9 @@ class _TagEditDialogState extends State<_TagEditDialog> {
     final isEditing = widget.tag != null;
 
     return AlertDialog(
-      title: Text(isEditing ? AppLocalizations.of(context)!.editTag : AppLocalizations.of(context)!.createTag),
+      title: Text(isEditing
+          ? AppLocalizations.of(context)!.editTag
+          : AppLocalizations.of(context)!.createTag),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -333,7 +339,8 @@ class _TagEditDialogState extends State<_TagEditDialog> {
               spacing: 8,
               runSpacing: 8,
               children: TagColors.presetColors.map((color) {
-                final isSelected = color.toARGB32() == _selectedColor.toARGB32();
+                final isSelected =
+                    color.toARGB32() == _selectedColor.toARGB32();
                 return GestureDetector(
                   onTap: () => setState(() => _selectedColor = color),
                   child: Container(
@@ -394,7 +401,9 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(isEditing ? AppLocalizations.of(context)!.save : AppLocalizations.of(context)!.create),
+              : Text(isEditing
+                  ? AppLocalizations.of(context)!.save
+                  : AppLocalizations.of(context)!.create),
         ),
       ],
     );
@@ -434,7 +443,8 @@ class _TagEditDialogState extends State<_TagEditDialog> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseEnterTagName)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseEnterTagName)),
       );
       return;
     }
@@ -491,7 +501,9 @@ class TagChip extends StatelessWidget {
               : tag.colorValue.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? tag.colorValue : tag.colorValue.withValues(alpha: 0.5),
+            color: selected
+                ? tag.colorValue
+                : tag.colorValue.withValues(alpha: 0.5),
             width: selected ? 2 : 1,
           ),
         ),
@@ -546,15 +558,15 @@ class TagSelector extends ConsumerWidget {
 
     return allTagsAsync.when<Widget>(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Text('Error: $e'),
+      error: (e, _) => Text('${AppLocalizations.of(context).error}: $e'),
       data: (List<Tag> allTags) {
         if (allTags.isEmpty) {
-          return const Text('No tags available');
+          return Text(AppLocalizations.of(context).noTagsAvailable);
         }
 
         return characterTagsAsync.when<Widget>(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Error: $e'),
+          error: (e, _) => Text('${AppLocalizations.of(context).error}: $e'),
           data: (List<Tag> characterTags) {
             final selectedIds = characterTags.map((Tag t) => t.id).toSet();
 
@@ -579,7 +591,8 @@ class TagSelector extends ConsumerWidget {
                     final List<Tag> newTags = await ref
                         .read(tagRepositoryProvider)
                         .getTagsForCharacter(characterId);
-                    final List<String> tagIds = newTags.map((Tag t) => t.id).toList();
+                    final List<String> tagIds =
+                        newTags.map((Tag t) => t.id).toList();
                     onChanged?.call(tagIds);
                   },
                 );

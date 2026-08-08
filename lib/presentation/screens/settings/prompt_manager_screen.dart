@@ -138,7 +138,9 @@ class PromptManagerScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: sortedSections.length,
               onReorder: (oldIndex, newIndex) {
-                ref.read(promptManagerProvider.notifier).reorder(oldIndex, newIndex);
+                ref
+                    .read(promptManagerProvider.notifier)
+                    .reorder(oldIndex, newIndex);
               },
               itemBuilder: (context, index) {
                 final section = sortedSections[index];
@@ -153,13 +155,18 @@ class PromptManagerScreen extends ConsumerWidget {
                   onToggle: () {
                     // Use index-based toggle for custom prompts
                     if (section.isCustom) {
-                      ref.read(promptManagerProvider.notifier).toggleSectionByIndex(index);
+                      ref
+                          .read(promptManagerProvider.notifier)
+                          .toggleSectionByIndex(index);
                     } else {
-                      ref.read(promptManagerProvider.notifier).toggleSection(section.type);
+                      ref
+                          .read(promptManagerProvider.notifier)
+                          .toggleSection(section.type);
                     }
                   },
                   onEdit: section.isEditable
-                      ? () => _showEditContentDialog(context, ref, section, index)
+                      ? () =>
+                          _showEditContentDialog(context, ref, section, index)
                       : null,
                 );
               },
@@ -170,7 +177,8 @@ class PromptManagerScreen extends ConsumerWidget {
     );
   }
 
-  void _showPresetsDialog(BuildContext context, WidgetRef ref, List<PromptManagerPreset> presets) {
+  void _showPresetsDialog(
+      BuildContext context, WidgetRef ref, List<PromptManagerPreset> presets) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -189,7 +197,8 @@ class PromptManagerScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     AppLocalizations.of(context)!.loadPreset,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
@@ -209,29 +218,42 @@ class PromptManagerScreen extends ConsumerWidget {
                   return ListTile(
                     leading: Icon(
                       preset.isBuiltIn ? Icons.lock : Icons.edit,
-                      color: preset.isBuiltIn ? AppTheme.textMuted : AppTheme.accentColor,
+                      color: preset.isBuiltIn
+                          ? AppTheme.textMuted
+                          : AppTheme.accentColor,
                     ),
                     title: Text(preset.name),
                     subtitle: preset.description != null
-                        ? Text(preset.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                        ? Text(preset.description!,
+                            maxLines: 1, overflow: TextOverflow.ellipsis)
                         : null,
                     trailing: preset.isBuiltIn
                         ? null
                         : IconButton(
                             icon: const Icon(Icons.delete, size: 20),
                             onPressed: () {
-                              ref.read(customPresetsProvider.notifier).deletePreset(preset.id);
+                              ref
+                                  .read(customPresetsProvider.notifier)
+                                  .deletePreset(preset.id);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(AppLocalizations.of(context)!.deleted(preset.name))),
+                                SnackBar(
+                                    content: Text(AppLocalizations.of(context)!
+                                        .deleted(preset.name))),
                               );
                             },
                           ),
                     onTap: () {
-                      ref.read(promptManagerProvider.notifier).applyPreset(preset);
-                      ref.read(activePresetIdProvider.notifier).setActivePreset(preset.id);
+                      ref
+                          .read(promptManagerProvider.notifier)
+                          .applyPreset(preset);
+                      ref
+                          .read(activePresetIdProvider.notifier)
+                          .setActivePreset(preset.id);
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.applied(preset.name))),
+                        SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .applied(preset.name))),
                       );
                     },
                   );
@@ -267,24 +289,31 @@ class PromptManagerScreen extends ConsumerWidget {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
 
       // Check if it's a valid preset format
-      if (json['sections'] != null || json['format'] == 'native_tavern_prompt_preset') {
+      if (json['sections'] != null ||
+          json['format'] == 'native_tavern_prompt_preset') {
         // Import as preset
-        final preset = await ref.read(customPresetsProvider.notifier).importPreset(json);
+        final preset =
+            await ref.read(customPresetsProvider.notifier).importPreset(json);
         ref.read(promptManagerProvider.notifier).applyPreset(preset);
         ref.read(activePresetIdProvider.notifier).setActivePreset(preset.id);
-        
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.imported(preset.name))),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.imported(preset.name))),
           );
         }
       } else {
-        throw Exception(AppLocalizations.of(context)!.invalidPresetFormatMessage);
+        throw Exception(
+            AppLocalizations.of(context)!.invalidPresetFormatMessage);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.importPresetFailed(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .importPresetFailed(e.toString()))),
         );
       }
     }
@@ -339,7 +368,9 @@ class PromptManagerScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.exportPresetFailed(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .exportPresetFailed(e.toString()))),
         );
       }
     }
@@ -384,7 +415,9 @@ class PromptManagerScreen extends ConsumerWidget {
             onPressed: () {
               if (nameController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.pleaseEnterNameMessage)),
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .pleaseEnterNameMessage)),
                 );
                 return;
               }
@@ -403,22 +436,26 @@ class PromptManagerScreen extends ConsumerWidget {
 
     try {
       final config = ref.read(promptManagerProvider);
-      final preset = await ref.read(customPresetsProvider.notifier).saveCurrentAsPreset(
-        config,
-        result['name']!,
-        result['description']!.isEmpty ? null : result['description'],
-      );
+      final preset =
+          await ref.read(customPresetsProvider.notifier).saveCurrentAsPreset(
+                config,
+                result['name']!,
+                result['description']!.isEmpty ? null : result['description'],
+              );
       ref.read(activePresetIdProvider.notifier).setActivePreset(preset.id);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.saved(preset.name))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.saved(preset.name))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.saveFailedMessage(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .saveFailedMessage(e.toString()))),
         );
       }
     }
@@ -441,7 +478,9 @@ class PromptManagerScreen extends ConsumerWidget {
               ref.read(activePresetIdProvider.notifier).setActivePreset(null);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.resetToDefaultConfig)),
+                SnackBar(
+                    content: Text(
+                        AppLocalizations.of(context)!.resetToDefaultConfig)),
               );
             },
             child: Text(AppLocalizations.of(context)!.reset),
@@ -452,6 +491,7 @@ class PromptManagerScreen extends ConsumerWidget {
   }
 
   void _showHelpDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -462,44 +502,31 @@ class PromptManagerScreen extends ConsumerWidget {
             Text(AppLocalizations.of(context)!.promptManagerHelp),
           ],
         ),
-        content: const SingleChildScrollView(
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'What is the Prompt Manager?',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                l10n.whatIsPromptManager,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
+              Text(l10n.promptManagerHelpDescription),
+              const SizedBox(height: 16),
               Text(
-                'The Prompt Manager controls how the system prompt is built when sending messages to the AI. '
-                'You can customize the order of different sections and enable/disable them.',
+                l10n.promptSectionTypes,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 8),
+              Text(l10n.promptSectionTypesDescription),
+              const SizedBox(height: 16),
               Text(
-                'Section Types:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                l10n.tips,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
-              Text('• System Prompt: Base roleplay instructions'),
-              Text('• User Persona: Your character information'),
-              Text('• Character Description: The AI character\'s details'),
-              Text('• Character Personality: Personality traits'),
-              Text('• Scenario: Current situation and setting'),
-              Text('• World Info: Contextual lore from lorebooks'),
-              Text('• Example Messages: Sample dialogue for style'),
-              Text('• Author\'s Note: Dynamic instructions'),
-              Text('• Post-History: Instructions after chat'),
-              SizedBox(height: 16),
-              Text(
-                'Tips:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• Sections at the top have higher priority'),
-              Text('• Disable sections you don\'t need to save tokens'),
-              Text('• Experiment with order for different results'),
+              const SizedBox(height: 8),
+              Text(l10n.promptManagerTips),
             ],
           ),
         ),
@@ -513,16 +540,20 @@ class PromptManagerScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditContentDialog(BuildContext context, WidgetRef ref, PromptSection section, int index) {
+  void _showEditContentDialog(
+      BuildContext context, WidgetRef ref, PromptSection section, int index) {
+    final l10n = AppLocalizations.of(context);
     final contentController = TextEditingController(
       text: section.content ?? PromptSection.getDefaultContent(section.type),
     );
     final nameController = TextEditingController(text: section.name);
 
-    final displayName = section.isCustom ? section.name : PromptSection.getDisplayName(section.type);
+    final displayName = section.isCustom
+        ? section.name
+        : _promptSectionName(section.type, l10n);
     final description = section.isCustom
-        ? 'Custom prompt from imported preset'
-        : PromptSection.getDescription(section.type);
+        ? l10n.customImportedPrompt
+        : _promptSectionDescription(section.type, l10n);
 
     showDialog(
       context: context,
@@ -531,12 +562,14 @@ class PromptManagerScreen extends ConsumerWidget {
           children: [
             Icon(
               section.isCustom ? Icons.code : Icons.edit,
-              color: section.isCustom ? AppTheme.accentColor : AppTheme.primaryColor,
+              color: section.isCustom
+                  ? AppTheme.accentColor
+                  : AppTheme.primaryColor,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Edit $displayName',
+                l10n.editPromptSection(displayName),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -553,9 +586,9 @@ class PromptManagerScreen extends ConsumerWidget {
                 if (section.isCustom) ...[
                   TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Prompt Name',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.promptName,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -570,7 +603,7 @@ class PromptManagerScreen extends ConsumerWidget {
                 if (section.identifier != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'ID: ${section.identifier}',
+                    l10n.identifierLabel(section.identifier!),
                     style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 10,
@@ -581,7 +614,7 @@ class PromptManagerScreen extends ConsumerWidget {
                 if (section.role != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Role: ${section.role}',
+                    l10n.roleLabel(section.role!),
                     style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 10,
@@ -590,7 +623,12 @@ class PromptManagerScreen extends ConsumerWidget {
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  'Supports macros: {{user}}, {{char}}, {{time}}, {{date}}, etc.',
+                  l10n.supportedPromptMacros(
+                    '{{user}}',
+                    '{{char}}',
+                    '{{time}}',
+                    '{{date}}',
+                  ),
                   style: TextStyle(
                     color: AppTheme.textMuted,
                     fontSize: 11,
@@ -604,9 +642,9 @@ class PromptManagerScreen extends ConsumerWidget {
                     controller: contentController,
                     maxLines: null,
                     minLines: 5,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter prompt content...',
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: l10n.enterPromptContent,
                     ),
                   ),
                 ),
@@ -619,9 +657,10 @@ class PromptManagerScreen extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 // Reset to default
-                contentController.text = PromptSection.getDefaultContent(section.type);
+                contentController.text =
+                    PromptSection.getDefaultContent(section.type);
               },
-              child: const Text('Reset to Default'),
+              child: Text(l10n.resetToDefault),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -631,27 +670,29 @@ class PromptManagerScreen extends ConsumerWidget {
             onPressed: () {
               final newContent = contentController.text.trim();
               final newName = nameController.text.trim();
-              
+
               if (section.isCustom) {
                 // Update custom prompt with new name and content
                 ref.read(promptManagerProvider.notifier).updateSectionByIndex(
-                  index,
-                  section.copyWith(
-                    name: newName.isNotEmpty ? newName : section.name,
-                    content: newContent,
-                  ),
-                );
+                      index,
+                      section.copyWith(
+                        name: newName.isNotEmpty ? newName : section.name,
+                        content: newContent,
+                      ),
+                    );
               } else {
                 // Update built-in prompt content
                 ref.read(promptManagerProvider.notifier).updateSectionContent(
-                  section.type,
-                  newContent,
-                );
+                      section.type,
+                      newContent,
+                    );
               }
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Updated ${section.isCustom ? newName : displayName}'),
+                  content: Text(l10n.updated(
+                    section.isCustom ? newName : displayName,
+                  )),
                 ),
               );
             },
@@ -681,16 +722,17 @@ class _PromptSectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     // Determine display name and description
     final displayName = section.isCustom
         ? section.name
-        : PromptSection.getDisplayName(section.type);
+        : _promptSectionName(section.type, l10n);
     final description = section.isCustom
         ? (section.content?.isNotEmpty == true
             ? '${section.content!.substring(0, section.content!.length.clamp(0, 50))}...'
-            : 'Custom prompt')
-        : PromptSection.getDescription(section.type);
+            : l10n.customPrompt)
+        : _promptSectionDescription(section.type, l10n);
 
     // Determine icon based on type
     IconData typeIcon;
@@ -751,15 +793,21 @@ class _PromptSectionTile extends StatelessWidget {
             children: [
               Icon(
                 Icons.drag_handle,
-                color: section.enabled ? AppTheme.textSecondary : AppTheme.textMuted,
+                color: section.enabled
+                    ? AppTheme.textSecondary
+                    : AppTheme.textMuted,
               ),
               const SizedBox(width: 8),
               Icon(
                 typeIcon,
                 size: 20,
                 color: section.isCustom
-                    ? (section.enabled ? AppTheme.accentColor : AppTheme.textMuted)
-                    : (section.enabled ? AppTheme.primaryColor : AppTheme.textMuted),
+                    ? (section.enabled
+                        ? AppTheme.accentColor
+                        : AppTheme.textMuted)
+                    : (section.enabled
+                        ? AppTheme.primaryColor
+                        : AppTheme.textMuted),
               ),
             ],
           ),
@@ -770,8 +818,11 @@ class _PromptSectionTile extends StatelessWidget {
               child: Text(
                 displayName,
                 style: TextStyle(
-                  color: section.enabled ? AppTheme.textPrimary : AppTheme.textMuted,
-                  fontWeight: section.enabled ? FontWeight.w500 : FontWeight.normal,
+                  color: section.enabled
+                      ? AppTheme.textPrimary
+                      : AppTheme.textMuted,
+                  fontWeight:
+                      section.enabled ? FontWeight.w500 : FontWeight.normal,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -786,10 +837,12 @@ class _PromptSectionTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'Custom',
+                  l10n.customPrompt,
                   style: TextStyle(
                     fontSize: 10,
-                    color: section.enabled ? AppTheme.accentColor : AppTheme.textMuted,
+                    color: section.enabled
+                        ? AppTheme.accentColor
+                        : AppTheme.textMuted,
                   ),
                 ),
               ),
@@ -799,7 +852,9 @@ class _PromptSectionTile extends StatelessWidget {
                 child: Icon(
                   Icons.edit_note,
                   size: 16,
-                  color: section.enabled ? AppTheme.accentColor : AppTheme.textMuted,
+                  color: section.enabled
+                      ? AppTheme.accentColor
+                      : AppTheme.textMuted,
                 ),
               ),
           ],
@@ -807,7 +862,8 @@ class _PromptSectionTile extends StatelessWidget {
         subtitle: Text(
           description,
           style: TextStyle(
-            color: section.enabled ? AppTheme.textSecondary : AppTheme.textMuted,
+            color:
+                section.enabled ? AppTheme.textSecondary : AppTheme.textMuted,
             fontSize: 12,
           ),
           maxLines: 1,
@@ -821,7 +877,9 @@ class _PromptSectionTile extends StatelessWidget {
                 icon: Icon(
                   Icons.edit,
                   size: 20,
-                  color: section.enabled ? AppTheme.accentColor : AppTheme.textMuted,
+                  color: section.enabled
+                      ? AppTheme.accentColor
+                      : AppTheme.textMuted,
                 ),
                 onPressed: section.enabled ? onEdit : null,
                 tooltip: AppLocalizations.of(context)!.edit,
@@ -837,4 +895,58 @@ class _PromptSectionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+String _promptSectionName(
+  PromptSectionType type,
+  AppLocalizations l10n,
+) {
+  return switch (type) {
+    PromptSectionType.systemPrompt => l10n.promptSectionSystemPrompt,
+    PromptSectionType.persona => l10n.promptSectionPersona,
+    PromptSectionType.characterDescription =>
+      l10n.promptSectionCharacterDescription,
+    PromptSectionType.characterPersonality =>
+      l10n.promptSectionCharacterPersonality,
+    PromptSectionType.characterScenario => l10n.promptSectionScenario,
+    PromptSectionType.exampleMessages => l10n.promptSectionExampleMessages,
+    PromptSectionType.worldInfo => l10n.promptSectionWorldInfoBefore,
+    PromptSectionType.worldInfoAfter => l10n.promptSectionWorldInfoAfter,
+    PromptSectionType.authorNote => l10n.promptSectionAuthorNote,
+    PromptSectionType.postHistoryInstructions => l10n.promptSectionPostHistory,
+    PromptSectionType.nsfw => l10n.promptSectionNsfw,
+    PromptSectionType.chatHistory => l10n.promptSectionChatHistory,
+    PromptSectionType.enhanceDefinitions =>
+      l10n.promptSectionEnhanceDefinitions,
+    PromptSectionType.custom => l10n.customPrompt,
+  };
+}
+
+String _promptSectionDescription(
+  PromptSectionType type,
+  AppLocalizations l10n,
+) {
+  return switch (type) {
+    PromptSectionType.systemPrompt => l10n.promptSectionSystemPromptDescription,
+    PromptSectionType.persona => l10n.promptSectionPersonaDescription,
+    PromptSectionType.characterDescription =>
+      l10n.promptSectionCharacterDescriptionDescription,
+    PromptSectionType.characterPersonality =>
+      l10n.promptSectionCharacterPersonalityDescription,
+    PromptSectionType.characterScenario =>
+      l10n.promptSectionScenarioDescription,
+    PromptSectionType.exampleMessages =>
+      l10n.promptSectionExampleMessagesDescription,
+    PromptSectionType.worldInfo => l10n.promptSectionWorldInfoBeforeDescription,
+    PromptSectionType.worldInfoAfter =>
+      l10n.promptSectionWorldInfoAfterDescription,
+    PromptSectionType.authorNote => l10n.promptSectionAuthorNoteDescription,
+    PromptSectionType.postHistoryInstructions =>
+      l10n.promptSectionPostHistoryDescription,
+    PromptSectionType.nsfw => l10n.promptSectionNsfwDescription,
+    PromptSectionType.chatHistory => l10n.promptSectionChatHistoryDescription,
+    PromptSectionType.enhanceDefinitions =>
+      l10n.promptSectionEnhanceDefinitionsDescription,
+    PromptSectionType.custom => l10n.promptSectionCustomDescription,
+  };
 }

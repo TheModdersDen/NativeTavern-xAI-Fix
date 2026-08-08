@@ -41,10 +41,11 @@ class PersonasScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text('${AppLocalizations.of(context).error}: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(personaNotifierProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(personaNotifierProvider.notifier).refresh(),
                 child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
@@ -126,7 +127,8 @@ class PersonasScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditPersonaDialog(BuildContext context, WidgetRef ref, Persona persona) {
+  void _showEditPersonaDialog(
+      BuildContext context, WidgetRef ref, Persona persona) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -135,12 +137,14 @@ class PersonasScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, Persona persona) {
+  void _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref, Persona persona) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deletePersona),
-        content: Text(AppLocalizations.of(context)!.deletePersonaConfirmation(persona.name)),
+        content: Text(AppLocalizations.of(context)!
+            .deletePersonaConfirmation(persona.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -149,7 +153,9 @@ class PersonasScreen extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(personaNotifierProvider.notifier).deletePersona(persona.id);
+              ref
+                  .read(personaNotifierProvider.notifier)
+                  .deletePersona(persona.id);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(AppLocalizations.of(context)!.delete),
@@ -190,7 +196,9 @@ class _PersonaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: isActive ? AppTheme.primaryColor.withValues(alpha: 0.15) : AppTheme.darkCard,
+      color: isActive
+          ? AppTheme.primaryColor.withValues(alpha: 0.15)
+          : AppTheme.darkCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isActive
@@ -207,7 +215,7 @@ class _PersonaCard extends StatelessWidget {
               // Avatar
               _buildAvatar(),
               const SizedBox(width: 16),
-              
+
               // Info
               Expanded(
                 child: Column(
@@ -231,12 +239,13 @@ class _PersonaCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.accentColor.withValues(alpha: 0.2),
+                              color:
+                                  AppTheme.accentColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'Default',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).default_,
+                              style: const TextStyle(
                                 fontSize: 10,
                                 color: AppTheme.accentColor,
                                 fontWeight: FontWeight.bold,
@@ -250,12 +259,13 @@ class _PersonaCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                              color:
+                                  AppTheme.primaryColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'Active',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).active,
+                              style: const TextStyle(
                                 fontSize: 10,
                                 color: AppTheme.primaryColor,
                                 fontWeight: FontWeight.bold,
@@ -279,7 +289,7 @@ class _PersonaCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Actions
               AdaptivePopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: AppTheme.textMuted),
@@ -319,7 +329,8 @@ class _PersonaCard extends StatelessWidget {
                       value: 'delete',
                       child: ListTile(
                         leading: const Icon(Icons.delete, color: Colors.red),
-                        title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                        title: Text(AppLocalizations.of(context)!.delete,
+                            style: const TextStyle(color: Colors.red)),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -360,7 +371,8 @@ class _PersonaDialog extends StatefulWidget {
   final String? initialName;
   final String? initialDescription;
   final String? initialAvatarPath;
-  final Future<void> Function(String name, String description, String? avatarPath) onSave;
+  final Future<void> Function(
+      String name, String description, String? avatarPath) onSave;
 
   const _PersonaDialog({
     required this.title,
@@ -385,7 +397,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _descriptionController = TextEditingController(text: widget.initialDescription ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.initialDescription ?? '');
     _avatarPath = widget.initialAvatarPath;
   }
 
@@ -469,9 +482,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
             child: CircleAvatar(
               radius: 50,
               backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-              backgroundImage: _avatarPath != null
-                  ? FileImage(File(_avatarPath!))
-                  : null,
+              backgroundImage:
+                  _avatarPath != null ? FileImage(File(_avatarPath!)) : null,
               child: _avatarPath == null
                   ? const Icon(
                       Icons.person,
@@ -515,7 +527,7 @@ class _PersonaDialogState extends State<_PersonaDialog> {
       _pickImageFromFiles();
       return;
     }
-    
+
     // On mobile, show options sheet
     showModalBottomSheet(
       context: context,
@@ -538,7 +550,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: AppTheme.primaryColor),
+              leading:
+                  const Icon(Icons.photo_library, color: AppTheme.primaryColor),
               title: Text(AppLocalizations.of(context)!.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
@@ -546,7 +559,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: AppTheme.accentColor),
+              leading:
+                  const Icon(Icons.camera_alt, color: AppTheme.accentColor),
               title: Text(AppLocalizations.of(context)!.takePhoto),
               onTap: () {
                 Navigator.pop(context);
@@ -556,7 +570,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
             if (_avatarPath != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: Text(AppLocalizations.of(context)!.removeAvatar, style: const TextStyle(color: Colors.red)),
+                title: Text(AppLocalizations.of(context)!.removeAvatar,
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() => _avatarPath = null);
@@ -577,14 +592,18 @@ class _PersonaDialogState extends State<_PersonaDialog> {
         allowMultiple: false,
         dialogTitle: 'Select Avatar Image',
       );
-      
-      if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
+
+      if (result != null &&
+          result.files.isNotEmpty &&
+          result.files.first.path != null) {
         await _saveAvatarImage(result.files.first.path!);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToPickImage(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToPickImage(e.toString()))),
         );
       }
     }
@@ -599,14 +618,16 @@ class _PersonaDialogState extends State<_PersonaDialog> {
         maxHeight: 512,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         await _saveAvatarImage(image.path);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToPickImage(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToPickImage(e.toString()))),
         );
       }
     }
@@ -621,14 +642,16 @@ class _PersonaDialogState extends State<_PersonaDialog> {
         maxHeight: 512,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         await _saveAvatarImage(image.path);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToTakePhoto(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToTakePhoto(e.toString()))),
         );
       }
     }
@@ -639,25 +662,28 @@ class _PersonaDialogState extends State<_PersonaDialog> {
     try {
       // Copy file to app's documents directory for persistence
       final appDir = await getApplicationDocumentsDirectory();
-      final avatarsDir = Directory(p.join(appDir.path, 'NativeTavern', 'avatars', 'personas'));
+      final avatarsDir =
+          Directory(p.join(appDir.path, 'NativeTavern', 'avatars', 'personas'));
       await avatarsDir.create(recursive: true);
-      
+
       const uuid = Uuid();
       final extension = p.extension(sourcePath);
       final newFileName = '${uuid.v4()}$extension';
       final newPath = p.join(avatarsDir.path, newFileName);
-      
+
       // Copy file
       final sourceFile = File(sourcePath);
       await sourceFile.copy(newPath);
-      
+
       setState(() {
         _avatarPath = newPath;
       });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveAvatar(e.toString()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!
+                  .failedToSaveAvatar(e.toString()))),
         );
       }
     }
@@ -675,7 +701,8 @@ class _PersonaDialogState extends State<_PersonaDialog> {
     setState(() => _isSaving = true);
 
     try {
-      await widget.onSave(name, _descriptionController.text.trim(), _avatarPath);
+      await widget.onSave(
+          name, _descriptionController.text.trim(), _avatarPath);
       if (mounted) {
         Navigator.pop(context);
       }
