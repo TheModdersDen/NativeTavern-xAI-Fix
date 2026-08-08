@@ -1,31 +1,34 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/stt_service.dart';
+import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/stt_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
-import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
-/// Screen for STT settings
 class STTSettingsScreen extends ConsumerWidget {
   const STTSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(sttSettingsProvider);
-    final isListening = ref.watch(sttListeningProvider);
-    final availableAsync = ref.watch(sttAvailableProvider);
+    final session = ref.watch(sttSessionProvider);
+    final available = ref.watch(sttAvailableProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.speechToText),
+        title: Text(l10n.speechToText),
         actions: [
           IconButton(
             icon: const Icon(Icons.restore),
-            tooltip: AppLocalizations.of(context)!.resetToDefaults,
+            tooltip: l10n.resetToDefaults,
             onPressed: () {
               ref.read(sttSettingsProvider.notifier).reset();
+              ref.read(sttSessionProvider.notifier).clear();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.settingsResetToDefaults)),
+                SnackBar(content: Text(l10n.settingsResetToDefaults)),
               );
             },
           ),
@@ -34,266 +37,216 @@ class STTSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Availability status
-          availableAsync.when(
-            data: (available) => available
-                ? const SizedBox.shrink()
-                : Card(
-                    color: Colors.orange.withValues(alpha: 0.2),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warning, color: Colors.orange),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context)!.speechRecognitionNotAvailable,
-                              style: const TextStyle(color: Colors.orange),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-
-          // Enable/Disable toggle
-          _buildSection(
-            context,
-            title: AppLocalizations.of(context)!.general,
+          if (session.message != null && _isFailure(session.phase))
+            _StatusPanel(
+              message: session.message!,
+              actionLabel:
+                  session.phase == STTSessionPhase.permissionPermanentlyDenied
+                      ? l10n.openSystemSettings
+                      : null,
+              onAction:
+                  session.phase == STTSessionPhase.permissionPermanentlyDenied
+                      ? () => unawaited(
+                            ref
+                                .read(sttSessionProvider.notifier)
+                                .openPermissionSettings(),
+                          )
+                      : null,
+            ),
+          if (settings.provider.isRemote && !settings.isConfigured)
+            _StatusPanel(message: l10n.sttConfigurationRequired),
+          if (settings.provider == STTProvider.system)
+            available.when(
+              data: (value) => value
+                  ? const SizedBox.shrink()
+                  : _StatusPanel(message: l10n.speechRecognitionNotAvailable),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          _Section(
+            title: l10n.general,
             children: [
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableStt),
-                subtitle: Text(AppLocalizations.of(context)!.useVoiceInputForMessages),
+                title: Text(l10n.enableStt),
+                subtitle: Text(l10n.useVoiceInputForMessages),
                 value: settings.enabled,
-                onChanged: (value) {
-                  ref.read(sttSettingsProvider.notifier).setEnabled(value);
-                },
+                onChanged: ref.read(sttSettingsProvider.notifier).setEnabled,
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.autoSendStt),
-                subtitle: Text(AppLocalizations.of(context)!.automaticallySendAfterSpeaking),
+                title: Text(l10n.autoSendStt),
+                subtitle: Text(l10n.automaticallySendAfterSpeaking),
                 value: settings.autoSend,
                 onChanged: settings.enabled
-                    ? (value) {
-                        ref.read(sttSettingsProvider.notifier).setAutoSend(value);
-                      }
+                    ? ref.read(sttSettingsProvider.notifier).setAutoSend
                     : null,
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.continuousListening),
-                subtitle: Text(AppLocalizations.of(context)!.keepListeningAfterPhrase),
+                title: Text(l10n.continuousListening),
+                subtitle: Text(l10n.keepListeningAfterPhrase),
                 value: settings.continuousListening,
-                onChanged: settings.enabled
-                    ? (value) {
-                        ref.read(sttSettingsProvider.notifier).setContinuousListening(value);
-                      }
-                    : null,
+                onChanged:
+                    settings.enabled && settings.provider == STTProvider.system
+                        ? ref
+                            .read(sttSettingsProvider.notifier)
+                            .setContinuousListening
+                        : null,
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.showPartialResults),
-                subtitle: Text(AppLocalizations.of(context)!.displayTextAsYouSpeak),
+                title: Text(l10n.showPartialResults),
+                subtitle: Text(l10n.displayTextAsYouSpeak),
                 value: settings.showPartialResults,
-                onChanged: settings.enabled
-                    ? (value) {
-                        ref.read(sttSettingsProvider.notifier).setShowPartialResults(value);
-                      }
-                    : null,
+                onChanged:
+                    settings.enabled && settings.provider == STTProvider.system
+                        ? ref
+                            .read(sttSettingsProvider.notifier)
+                            .setShowPartialResults
+                        : null,
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Provider selection
-          _buildSection(
-            context,
-            title: AppLocalizations.of(context)!.provider,
+          _Section(
+            title: l10n.provider,
             children: [
               ListTile(
-                title: Text(AppLocalizations.of(context)!.sttProvider),
+                title: Text(l10n.sttProvider),
                 subtitle: Text(settings.provider.displayName),
                 trailing: DropdownButton<STTProvider>(
                   value: settings.provider,
                   onChanged: settings.enabled
-                      ? (value) {
-                          if (value != null) {
-                            ref.read(sttSettingsProvider.notifier).setProvider(value);
+                      ? (provider) {
+                          if (provider != null) {
+                            ref
+                                .read(sttSettingsProvider.notifier)
+                                .setProvider(provider);
                           }
                         }
                       : null,
-                  items: STTProvider.values.map((provider) {
-                    return DropdownMenuItem(
-                      value: provider,
-                      child: Text(provider.displayName),
-                    );
-                  }).toList(),
+                  items: [
+                    for (final provider in STTProvider.values)
+                      DropdownMenuItem(
+                        value: provider,
+                        child: Text(provider.displayName),
+                      ),
+                  ],
                 ),
               ),
-              if (settings.provider != STTProvider.system) ...[
+              if (settings.provider.isRemote)
                 ListTile(
-                  title: Text(AppLocalizations.of(context)!.apiKey),
-                  subtitle: Text(
-                    settings.apiKey?.isNotEmpty == true
-                        ? '••••••••${settings.apiKey!.substring(settings.apiKey!.length - 4)}'
-                        : AppLocalizations.of(context)!.notConfigured,
-                  ),
+                  leading: const Icon(Icons.tune),
+                  title: Text(l10n.apiEndpoint),
+                  subtitle: Text(_providerSummary(settings, l10n)),
                   trailing: const Icon(Icons.edit),
+                  enabled: settings.enabled,
                   onTap: settings.enabled
-                      ? () => _showApiKeyDialog(context, ref, settings)
+                      ? () => _showProviderConfiguration(
+                            context,
+                            ref,
+                            settings,
+                          )
                       : null,
                 ),
-              ],
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Language selection
-          _buildSection(
-            context,
-            title: AppLocalizations.of(context)!.language,
+          _Section(
+            title: l10n.language,
             children: [
               ListTile(
-                title: Text(AppLocalizations.of(context)!.recognitionLanguage),
+                title: Text(l10n.recognitionLanguage),
                 subtitle: Text(
-                  STTLanguage.fromCode(settings.language)?.name ?? settings.language,
+                  STTLanguage.fromCode(settings.language)?.name ??
+                      settings.language,
                 ),
                 trailing: DropdownButton<String>(
                   value: settings.language,
                   onChanged: settings.enabled
-                      ? (value) {
-                          if (value != null) {
-                            ref.read(sttSettingsProvider.notifier).setLanguage(value);
+                      ? (language) {
+                          if (language != null) {
+                            ref
+                                .read(sttSettingsProvider.notifier)
+                                .setLanguage(language);
                           }
                         }
                       : null,
-                  items: STTLanguage.supportedLanguages.map((lang) {
-                    return DropdownMenuItem(
-                      value: lang.code,
-                      child: Text(lang.name),
-                    );
-                  }).toList(),
+                  items: [
+                    for (final language in STTLanguage.supportedLanguages)
+                      DropdownMenuItem(
+                        value: language.code,
+                        child: Text(language.name),
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Test section
-          _buildSection(
-            context,
-            title: AppLocalizations.of(context)!.test,
+          _Section(
+            title: l10n.test,
             children: [
               ListTile(
                 leading: Icon(
-                  isListening ? Icons.mic : Icons.mic_none,
-                  color: isListening ? Colors.red : AppTheme.accentColor,
+                  session.isActive ? Icons.stop_circle : Icons.mic_none,
+                  color: session.isActive ? Colors.red : AppTheme.accentColor,
                 ),
-                title: Text(isListening ? AppLocalizations.of(context)!.stopListening : AppLocalizations.of(context)!.testVoiceInput),
-                subtitle: Text(
-                  isListening
-                      ? AppLocalizations.of(context)!.tapToStop
-                      : AppLocalizations.of(context)!.tapToTestSpeechRecognition,
+                title: Text(
+                  session.isActive ? l10n.stopListening : l10n.testVoiceInput,
                 ),
-                onTap: settings.enabled
-                    ? () async {
-                        await ref.read(sttToggleListeningProvider)();
-                      }
+                subtitle: Text(_sessionSubtitle(session, l10n)),
+                enabled: settings.enabled &&
+                    (!settings.provider.isRemote || settings.isConfigured),
+                onTap: settings.enabled &&
+                        (!settings.provider.isRemote || settings.isConfigured)
+                    ? ref.read(sttSessionProvider.notifier).toggle
                     : null,
               ),
-              // Show current result
-              Consumer(
-                builder: (context, ref, _) {
-                  final result = ref.watch(sttResultProvider);
-                  if (result == null) return const SizedBox.shrink();
-                  
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.darkCard,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: result.isFinal
-                              ? AppTheme.accentColor
-                              : AppTheme.textMuted,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                result.isFinal ? Icons.check : Icons.more_horiz,
-                                size: 16,
-                                color: result.isFinal
-                                    ? AppTheme.accentColor
-                                    : AppTheme.textMuted,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                result.isFinal ? AppLocalizations.of(context)!.final_ : AppLocalizations.of(context)!.listening,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: result.isFinal
-                                      ? AppTheme.accentColor
-                                      : AppTheme.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            result.text.isEmpty ? '...' : result.text,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
+              if (session.result != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppTheme.darkBackground,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.darkDivider),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Info section
-          _buildSection(
-            context,
-            title: AppLocalizations.of(context)!.information,
-            children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline, color: AppTheme.accentColor),
-                title: Text('About STT'),
-                subtitle: Text(
-                  'Speech-to-Text allows you to dictate messages using your voice. '
-                  'Tap the microphone button in the chat input to start speaking.',
-                ),
-              ),
-              if (settings.provider == STTProvider.system)
-                const ListTile(
-                  leading: Icon(Icons.phone_android, color: AppTheme.textMuted),
-                  title: Text('System STT'),
-                  subtitle: Text(
-                    'Using your device\'s built-in speech recognition. '
-                    'Accuracy depends on your system settings.',
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(session.result!.text),
+                    ),
                   ),
                 ),
-              if (settings.provider == STTProvider.whisper)
-                const ListTile(
-                  leading: Icon(Icons.cloud, color: AppTheme.textMuted),
-                  title: Text('Whisper'),
+              if (session.isActive)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: ref.read(sttSessionProvider.notifier).cancel,
+                    icon: const Icon(Icons.close),
+                    label: Text(l10n.cancelVoiceInput),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _Section(
+            title: l10n.information,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.info_outline,
+                  color: AppTheme.accentColor,
+                ),
+                title: Text(l10n.aboutStt),
+                subtitle: Text(l10n.aboutSttDescription),
+              ),
+              if (settings.provider == STTProvider.system)
+                ListTile(
+                  leading: const Icon(
+                    Icons.offline_bolt_outlined,
+                    color: AppTheme.textMuted,
+                  ),
+                  title: Text(l10n.systemStt),
                   subtitle: Text(
-                    'OA Compatible\'s Whisper model for high-accuracy transcription. '
-                    'Requires an API key.',
+                    '${l10n.systemSttDescription}\n${l10n.systemSttOfflineNote}',
                   ),
                 ),
             ],
@@ -303,11 +256,109 @@ class STTSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<Widget> children,
-  }) {
+  bool _isFailure(STTSessionPhase phase) =>
+      phase == STTSessionPhase.failed ||
+      phase == STTSessionPhase.unavailable ||
+      phase == STTSessionPhase.permissionDenied ||
+      phase == STTSessionPhase.permissionPermanentlyDenied;
+
+  String _providerSummary(STTSettings settings, AppLocalizations l10n) {
+    final endpoint = settings.apiEndpoint?.trim();
+    final key = settings.apiKey?.trim() ?? '';
+    final keySuffix = key.isEmpty
+        ? l10n.notConfigured
+        : '...${key.substring(key.length > 4 ? key.length - 4 : 0)}';
+    if (settings.provider == STTProvider.selfHosted) {
+      return endpoint?.isNotEmpty == true ? endpoint! : l10n.notConfigured;
+    }
+    return '${endpoint?.isNotEmpty == true ? endpoint : settings.effectiveEndpoint} · $keySuffix';
+  }
+
+  String _sessionSubtitle(
+    STTSessionState session,
+    AppLocalizations l10n,
+  ) {
+    return switch (session.phase) {
+      STTSessionPhase.requestingPermission => l10n.processing,
+      STTSessionPhase.listening => l10n.listening,
+      STTSessionPhase.processing => l10n.processing,
+      _ => l10n.tapToTestSpeechRecognition,
+    };
+  }
+
+  Future<void> _showProviderConfiguration(
+    BuildContext context,
+    WidgetRef ref,
+    STTSettings settings,
+  ) async {
+    final endpointController = TextEditingController(
+      text: settings.apiEndpoint,
+    );
+    final keyController = TextEditingController(text: settings.apiKey);
+    final modelController = TextEditingController(text: settings.model);
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(settings.provider.displayName),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: endpointController,
+                keyboardType: TextInputType.url,
+                decoration: InputDecoration(
+                  labelText: l10n.apiEndpoint,
+                  hintText: settings.effectiveEndpoint,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: keyController,
+                obscureText: true,
+                decoration: InputDecoration(labelText: l10n.apiKey),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: modelController,
+                decoration: InputDecoration(labelText: l10n.model),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final notifier = ref.read(sttSettingsProvider.notifier);
+              notifier.setApiEndpoint(endpointController.text);
+              notifier.setApiKey(keyController.text);
+              notifier.setModel(modelController.text);
+              Navigator.pop(dialogContext);
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    endpointController.dispose();
+    keyController.dispose();
+    modelController.dispose();
+  }
+}
+
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: AppTheme.darkCard,
       child: Column(
@@ -329,171 +380,34 @@ class STTSettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref, STTSettings settings) {
-    final controller = TextEditingController(text: settings.apiKey);
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('${settings.provider.displayName} ${AppLocalizations.of(context)!.apiKey}'),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: AppLocalizations.of(context)!.apiKey,
-            hintText: AppLocalizations.of(context)!.enterApiKey,
-          ),
-          obscureText: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(sttSettingsProvider.notifier).setApiKey(controller.text);
-              Navigator.pop(context);
-            },
-            child: Text(AppLocalizations.of(context)!.save),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-/// Voice input button widget for chat input
-class VoiceInputButton extends ConsumerWidget {
-  final void Function(String text)? onResult;
-  final double size;
+class _StatusPanel extends StatelessWidget {
+  const _StatusPanel({this.message = '', this.actionLabel, this.onAction});
 
-  const VoiceInputButton({
-    super.key,
-    this.onResult,
-    this.size = 24,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(sttSettingsProvider);
-    final isListening = ref.watch(sttListeningProvider);
-
-    if (!settings.enabled) return const SizedBox.shrink();
-
-    // Listen for final results
-    ref.listen(sttResultProvider, (previous, next) {
-      if (next != null && next.isFinal && onResult != null) {
-        onResult!(next.text);
-        ref.read(sttClearResultProvider)();
-      }
-    });
-
-    return IconButton(
-      icon: Icon(
-        isListening ? Icons.mic : Icons.mic_none,
-        size: size,
-        color: isListening ? Colors.red : null,
-      ),
-      tooltip: isListening ? AppLocalizations.of(context)!.stopListening : AppLocalizations.of(context)!.voiceInput,
-      onPressed: () async {
-        await ref.read(sttToggleListeningProvider)();
-      },
-    );
-  }
-}
-
-/// Animated voice input button with visual feedback
-class AnimatedVoiceInputButton extends ConsumerStatefulWidget {
-  final void Function(String text)? onResult;
-  final double size;
-
-  const AnimatedVoiceInputButton({
-    super.key,
-    this.onResult,
-    this.size = 48,
-  });
-
-  @override
-  ConsumerState<AnimatedVoiceInputButton> createState() => _AnimatedVoiceInputButtonState();
-}
-
-class _AnimatedVoiceInputButtonState extends ConsumerState<AnimatedVoiceInputButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(sttSettingsProvider);
-    final isListening = ref.watch(sttListeningProvider);
-
-    if (!settings.enabled) return const SizedBox.shrink();
-
-    // Animate when listening
-    if (isListening && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    } else if (!isListening && _controller.isAnimating) {
-      _controller.stop();
-      _controller.reset();
-    }
-
-    // Listen for final results
-    ref.listen(sttResultProvider, (previous, next) {
-      if (next != null && next.isFinal && widget.onResult != null) {
-        widget.onResult!(next.text);
-        ref.read(sttClearResultProvider)();
-      }
-    });
-
-    return GestureDetector(
-      onTap: () async {
-        await ref.read(sttToggleListeningProvider)();
-      },
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: isListening ? _scaleAnimation.value : 1.0,
-            child: Container(
-              width: widget.size,
-              height: widget.size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isListening
-                    ? Colors.red.withValues(alpha: 0.2)
-                    : AppTheme.accentColor.withValues(alpha: 0.2),
-                border: Border.all(
-                  color: isListening ? Colors.red : AppTheme.accentColor,
-                  width: 2,
-                ),
-              ),
-              child: Icon(
-                isListening ? Icons.mic : Icons.mic_none,
-                size: widget.size * 0.5,
-                color: isListening ? Colors.red : AppTheme.accentColor,
-              ),
-            ),
-          );
-        },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Material(
+        color: Colors.orange.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              const Icon(Icons.warning_amber, color: Colors.orange),
+              const SizedBox(width: 12),
+              Expanded(child: Text(message)),
+              if (onAction != null)
+                TextButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
+          ),
+        ),
       ),
     );
   }

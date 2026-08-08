@@ -38,6 +38,7 @@ import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/chat/author_note_dialog.dart';
 import 'package:native_tavern/presentation/widgets/chat/bookmark_dialog.dart';
 import 'package:native_tavern/presentation/widgets/chat/chat_background_widget.dart';
+import 'package:native_tavern/presentation/widgets/chat/chat_voice_input_button.dart';
 import 'package:native_tavern/presentation/widgets/chat/message_content_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/quick_reply_bar.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
@@ -2059,6 +2060,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  ChatVoiceInputButton(
+                    controller: _messageController,
+                    onAutoSend: _sendMessage,
+                  ),
                   // Show stop button when generating, send button otherwise
                   if (chatState.isGenerating)
                     IconButton.filled(

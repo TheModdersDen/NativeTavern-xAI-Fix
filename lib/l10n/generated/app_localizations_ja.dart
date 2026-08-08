@@ -2521,6 +2521,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get voiceInput => 'Voice input';
 
   @override
+  String get holdToTalk => 'Hold to talk';
+
+  @override
+  String get releaseToTranscribe => 'Release to transcribe';
+
+  @override
+  String get cancelVoiceInput => 'Cancel voice input';
+
+  @override
+  String get openSystemSettings => 'Open settings';
+
+  @override
+  String get systemSttOfflineNote =>
+      'Offline recognition depends on your operating system and installed language packs.';
+
+  @override
+  String get sttConfigurationRequired =>
+      'Complete the selected provider configuration before testing.';
+
+  @override
   String get speechRecognitionNotAvailable =>
       'Speech recognition may not be available on this device.';
 

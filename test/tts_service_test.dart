@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
+import 'package:native_tavern/domain/services/voice_adapter_contract.dart';
 
 import 'support/fake_system_tts_backend.dart';
 
@@ -216,6 +221,123 @@ void main() {
     expect(service.playbackState.error, contains('engine unavailable'));
     expect(service.isSpeaking, isFalse);
   });
+
+  test('unconfigured remote TTS fails before any network request', () async {
+    final adapter = _VoiceAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    final remoteService = TTSService(dio: dio, systemTts: backend);
+    remoteService.updateSettings(
+      const TTSSettings(
+        enabled: true,
+        provider: TTSProvider.openaiCompatible,
+      ),
+    );
+
+    await expectLater(
+      remoteService.synthesize('hello'),
+      throwsA(
+        isA<VoiceAdapterException>().having(
+          (error) => error.kind,
+          'kind',
+          VoiceAdapterErrorKind.configuration,
+        ),
+      ),
+    );
+    expect(adapter.fetchCount, 0);
+    remoteService.dispose();
+  });
+
+  test('remote TTS normalizes timeout and cancellation', () async {
+    final timeoutAdapter = _VoiceAdapter(timeout: true);
+    final timeoutService = TTSService(
+      dio: Dio()..httpClientAdapter = timeoutAdapter,
+      systemTts: backend,
+    );
+    timeoutService.updateSettings(
+      const TTSSettings(
+        enabled: true,
+        provider: TTSProvider.elevenlabs,
+        apiKey: 'test-key',
+      ),
+    );
+    await expectLater(
+      timeoutService.synthesize('hello'),
+      throwsA(
+        isA<VoiceAdapterException>().having(
+          (error) => error.kind,
+          'kind',
+          VoiceAdapterErrorKind.timeout,
+        ),
+      ),
+    );
+    expect(timeoutAdapter.lastOptions?.sendTimeout, defaultVoiceRequestTimeout);
+    timeoutService.dispose();
+
+    final waitingAdapter = _VoiceAdapter(waitForCancellation: true);
+    final cancellingService = TTSService(
+      dio: Dio()..httpClientAdapter = waitingAdapter,
+      systemTts: backend,
+    );
+    cancellingService.updateSettings(
+      const TTSSettings(
+        enabled: true,
+        provider: TTSProvider.elevenlabs,
+        apiKey: 'test-key',
+      ),
+    );
+    final synthesis = cancellingService.synthesize('cancel me');
+    await waitingAdapter.started.future;
+    await cancellingService.stop();
+    await expectLater(
+      synthesis,
+      throwsA(
+        isA<VoiceAdapterException>().having(
+          (error) => error.kind,
+          'kind',
+          VoiceAdapterErrorKind.cancelled,
+        ),
+      ),
+    );
+    cancellingService.dispose();
+  });
 }
 
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
+
+class _VoiceAdapter implements HttpClientAdapter {
+  _VoiceAdapter({this.timeout = false, this.waitForCancellation = false});
+
+  final bool timeout;
+  final bool waitForCancellation;
+  final Completer<void> started = Completer<void>();
+  int fetchCount = 0;
+  RequestOptions? lastOptions;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    fetchCount++;
+    lastOptions = options;
+    if (!started.isCompleted) started.complete();
+    if (timeout) {
+      throw DioException(
+        requestOptions: options,
+        type: DioExceptionType.receiveTimeout,
+      );
+    }
+    if (waitForCancellation) {
+      await cancelFuture;
+      throw DioException.requestCancelled(
+        requestOptions: options,
+        reason: 'cancelled',
+      );
+    }
+    return ResponseBody.fromBytes([1, 2, 3], 200);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}

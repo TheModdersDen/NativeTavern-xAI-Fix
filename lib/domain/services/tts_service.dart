@@ -8,6 +8,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:native_tavern/domain/services/tts_amplitude_envelope.dart';
+import 'package:native_tavern/domain/services/voice_adapter_contract.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
@@ -433,6 +434,7 @@ class TTSService with WidgetsBindingObserver {
   int _nextSessionId = 0;
   int _systemSegmentOffset = 0;
   TTSAmplitudeEnvelope? _remoteEnvelope;
+  CancelToken? _remoteRequestCancelToken;
 
   TTSService({
     Dio? dio,
@@ -884,6 +886,9 @@ class TTSService with WidgetsBindingObserver {
 
   /// Stop immediately and discard every queued message.
   Future<void> stop({String? ownerId}) async {
+    if (ownerId == null) {
+      _remoteRequestCancelToken?.cancel('TTS request cancelled');
+    }
     final current = _currentItem;
     final cancelCurrent =
         current != null && (ownerId == null || current.ownerId == ownerId);
@@ -910,6 +915,7 @@ class TTSService with WidgetsBindingObserver {
     }
 
     _playbackGeneration++;
+    _remoteRequestCancelToken?.cancel('TTS playback cancelled');
     _mouthCloseTimer?.cancel();
     await _remotePositionSubscription?.cancel();
     _remotePositionSubscription = null;
@@ -1188,30 +1194,49 @@ class TTSService with WidgetsBindingObserver {
         characterId != null ? _characterVoices[characterId] : null;
     final voiceId = charVoice?.voiceId ?? _settings.voiceId;
 
-    switch (_settings.provider) {
-      case TTSProvider.system:
-        return null;
-      case TTSProvider.elevenlabs:
-        return _synthesizeElevenLabs(text, voiceId);
-      case TTSProvider.azure:
-        return _synthesizeAzure(text, voiceId);
-      case TTSProvider.volcengine:
-        return _synthesizeVolcengine(text, voiceId);
-      case TTSProvider.gptSovits:
-        return _synthesizeGptSovits(text, voiceId);
-      case TTSProvider.openaiCompatible:
-        return _synthesizeOpenAICompatible(text, voiceId);
+    if (_settings.provider == TTSProvider.system) return null;
+    _validateRemoteConfiguration();
+    final cancelToken = CancelToken();
+    _remoteRequestCancelToken?.cancel('Superseded by a new TTS request');
+    _remoteRequestCancelToken = cancelToken;
+    try {
+      return await switch (_settings.provider) {
+        TTSProvider.system => null,
+        TTSProvider.elevenlabs =>
+          _synthesizeElevenLabs(text, voiceId, cancelToken),
+        TTSProvider.azure => _synthesizeAzure(text, voiceId, cancelToken),
+        TTSProvider.volcengine =>
+          _synthesizeVolcengine(text, voiceId, cancelToken),
+        TTSProvider.gptSovits =>
+          _synthesizeGptSovits(text, voiceId, cancelToken),
+        TTSProvider.openaiCompatible =>
+          _synthesizeOpenAICompatible(text, voiceId, cancelToken),
+      };
+    } catch (error) {
+      throw normalizeVoiceAdapterError(error, operation: 'Speech synthesis');
+    } finally {
+      if (identical(_remoteRequestCancelToken, cancelToken)) {
+        _remoteRequestCancelToken = null;
+      }
     }
   }
 
-  Future<Uint8List?> _synthesizeElevenLabs(String text, String? voiceId) async {
-    final endpoint = _settings.apiEndpoint ?? 'https://api.elevenlabs.io';
+  Future<Uint8List?> _synthesizeElevenLabs(
+    String text,
+    String? voiceId,
+    CancelToken cancelToken,
+  ) async {
+    final endpoint = _remoteEndpoint('https://api.elevenlabs.io');
     final voice = voiceId ?? '21m00Tcm4TlvDq8ikWAM';
+    final url = endpoint.endsWith('/v1')
+        ? '$endpoint/text-to-speech/$voice'
+        : '$endpoint/v1/text-to-speech/$voice';
     final response = await _dio.post<List<int>>(
-      '$endpoint/v1/text-to-speech/$voice',
-      options: Options(
+      url,
+      cancelToken: cancelToken,
+      options: voiceRequestOptions(
         headers: {
-          'xi-api-key': _settings.apiKey ?? '',
+          'xi-api-key': _settings.apiKey!.trim(),
           'Content-Type': 'application/json',
         },
         responseType: ResponseType.bytes,
@@ -1225,18 +1250,23 @@ class TTSService with WidgetsBindingObserver {
     return response.data != null ? Uint8List.fromList(response.data!) : null;
   }
 
-  Future<Uint8List?> _synthesizeAzure(String text, String? voiceId) async {
+  Future<Uint8List?> _synthesizeAzure(
+    String text,
+    String? voiceId,
+    CancelToken cancelToken,
+  ) async {
     final region = _settings.providerOptions['region'] ?? 'eastus';
     final endpoint =
-        _settings.apiEndpoint ?? 'https://$region.tts.speech.microsoft.com';
+        _remoteEndpoint('https://$region.tts.speech.microsoft.com');
     final voice = voiceId ?? 'en-US-JennyNeural';
     final ssml = '<speak version="1.0" xml:lang="en-US"><voice name="$voice">'
         '${_escapeXml(text)}</voice></speak>';
     final response = await _dio.post<List<int>>(
       '$endpoint/cognitiveservices/v1',
-      options: Options(
+      cancelToken: cancelToken,
+      options: voiceRequestOptions(
         headers: {
-          'Ocp-Apim-Subscription-Key': _settings.apiKey ?? '',
+          'Ocp-Apim-Subscription-Key': _settings.apiKey!.trim(),
           'Content-Type': 'application/ssml+xml',
           'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
         },
@@ -1248,16 +1278,22 @@ class TTSService with WidgetsBindingObserver {
   }
 
   /// Volcengine (火山引擎) TTS - openspeech binary API
-  Future<Uint8List?> _synthesizeVolcengine(String text, String? voiceId) async {
-    final endpoint =
-        _settings.apiEndpoint ?? 'https://openspeech.bytedance.com/api/v1/tts';
+  Future<Uint8List?> _synthesizeVolcengine(
+    String text,
+    String? voiceId,
+    CancelToken cancelToken,
+  ) async {
+    final endpoint = _remoteEndpoint(
+      'https://openspeech.bytedance.com/api/v1/tts',
+    );
     final appId = _settings.providerOptions['appId'] ?? '';
     final cluster = _settings.providerOptions['cluster'] ?? 'volcano_tts';
     final response = await _dio.post<Map<String, dynamic>>(
       endpoint,
-      options: Options(
+      cancelToken: cancelToken,
+      options: voiceRequestOptions(
         headers: {
-          'Authorization': 'Bearer;${_settings.apiKey ?? ''}',
+          'Authorization': 'Bearer;${_settings.apiKey!.trim()}',
           'Content-Type': 'application/json',
         },
       ),
@@ -1285,12 +1321,17 @@ class TTSService with WidgetsBindingObserver {
   }
 
   /// GPT-SoVITS local inference server (api_v2 style)
-  Future<Uint8List?> _synthesizeGptSovits(String text, String? voiceId) async {
-    final endpoint = _settings.apiEndpoint ?? 'http://127.0.0.1:9880';
+  Future<Uint8List?> _synthesizeGptSovits(
+    String text,
+    String? voiceId,
+    CancelToken cancelToken,
+  ) async {
+    final endpoint = _remoteEndpoint('http://127.0.0.1:9880');
     final options = _settings.providerOptions;
     final response = await _dio.post<List<int>>(
-      '$endpoint/tts',
-      options: Options(responseType: ResponseType.bytes),
+      endpoint.endsWith('/tts') ? endpoint : '$endpoint/tts',
+      cancelToken: cancelToken,
+      options: voiceRequestOptions(responseType: ResponseType.bytes),
       data: {
         'text': text,
         'text_lang': options['textLang'] ?? 'zh',
@@ -1308,13 +1349,16 @@ class TTSService with WidgetsBindingObserver {
   Future<Uint8List?> _synthesizeOpenAICompatible(
     String text,
     String? voiceId,
+    CancelToken cancelToken,
   ) async {
-    final endpoint = _settings.apiEndpoint ?? 'https://api.openai.com/v1';
+    final endpoint = _remoteEndpoint('https://api.openai.com/v1');
     final response = await _dio.post<List<int>>(
-      '$endpoint/audio/speech',
-      options: Options(
+      endpoint.endsWith('/audio/speech') ? endpoint : '$endpoint/audio/speech',
+      cancelToken: cancelToken,
+      options: voiceRequestOptions(
         headers: {
-          'Authorization': 'Bearer ${_settings.apiKey ?? ''}',
+          if (_settings.apiKey?.trim().isNotEmpty == true)
+            'Authorization': 'Bearer ${_settings.apiKey!.trim()}',
           'Content-Type': 'application/json',
         },
         responseType: ResponseType.bytes,
@@ -1327,6 +1371,53 @@ class TTSService with WidgetsBindingObserver {
       },
     );
     return response.data != null ? Uint8List.fromList(response.data!) : null;
+  }
+
+  void _validateRemoteConfiguration() {
+    final apiKeyConfigured = _settings.apiKey?.trim().isNotEmpty == true;
+    final configured = switch (_settings.provider) {
+      TTSProvider.system => true,
+      TTSProvider.elevenlabs => apiKeyConfigured &&
+          _validHttpEndpoint(_remoteEndpoint('https://api.elevenlabs.io')),
+      TTSProvider.azure => apiKeyConfigured &&
+          _validHttpEndpoint(
+            _remoteEndpoint(
+              'https://${_settings.providerOptions['region'] ?? 'eastus'}.tts.speech.microsoft.com',
+            ),
+          ),
+      TTSProvider.volcengine => apiKeyConfigured &&
+          _settings.providerOptions['appId']?.trim().isNotEmpty == true &&
+          _validHttpEndpoint(
+            _remoteEndpoint(
+              'https://openspeech.bytedance.com/api/v1/tts',
+            ),
+          ),
+      TTSProvider.gptSovits =>
+        _validHttpEndpoint(_remoteEndpoint('http://127.0.0.1:9880')),
+      TTSProvider.openaiCompatible =>
+        _validHttpEndpoint(_remoteEndpoint('https://api.openai.com/v1')) &&
+            (apiKeyConfigured ||
+                _settings.apiEndpoint?.trim().isNotEmpty == true),
+    };
+    if (!configured) {
+      throw const VoiceAdapterException(
+        VoiceAdapterErrorKind.configuration,
+        'Complete the selected text-to-speech provider configuration',
+      );
+    }
+  }
+
+  bool _validHttpEndpoint(String value) {
+    final uri = Uri.tryParse(value);
+    return uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty;
+  }
+
+  String _remoteEndpoint(String fallback) {
+    final configured = _settings.apiEndpoint?.trim();
+    final endpoint = configured?.isNotEmpty == true ? configured! : fallback;
+    return endpoint.replaceAll(RegExp(r'/+$'), '');
   }
 
   String _escapeXml(String text) => text
@@ -1359,6 +1450,7 @@ class TTSService with WidgetsBindingObserver {
     }
     _isDisposed = true;
     _playbackGeneration++;
+    _remoteRequestCancelToken?.cancel('TTS service disposed');
     _mouthCloseTimer?.cancel();
     _completeSignal(_resumeSignal);
     _completeSignal(_systemTerminalSignal);
