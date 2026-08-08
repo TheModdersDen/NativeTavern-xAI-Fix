@@ -28,6 +28,7 @@ import 'package:native_tavern/presentation/screens/settings/logit_bias_settings_
 import 'package:native_tavern/presentation/screens/settings/cfg_scale_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/tokenizer_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/vector_storage_settings_screen.dart';
+import 'package:native_tavern/presentation/screens/settings/capability_diagnostics_screen.dart';
 import 'package:native_tavern/presentation/widgets/chat/logprobs_panel.dart';
 import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.dart';
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
@@ -78,6 +79,7 @@ abstract class AppRoutes {
   static const logprobsSettings = '/logprobs-settings';
   static const tokenizerSettings = '/tokenizer-settings';
   static const vectorStorageSettings = '/vector-storage-settings';
+  static const capabilityDiagnostics = '/capability-diagnostics';
 }
 
 /// Navigation keys for nested navigation
@@ -365,6 +367,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'vectorStorageSettings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const VectorStorageSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.capabilityDiagnostics,
+        name: 'capabilityDiagnostics',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CapabilityDiagnosticsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

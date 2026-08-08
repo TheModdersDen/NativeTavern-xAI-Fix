@@ -148,6 +148,7 @@ class STTResult {
 class STTService {
   bool _isInitialized = false;
   bool _isListening = false;
+  bool _permissionRequestAttempted = false;
   STTSettings _settings = const STTSettings();
 
   /// Platform speech recognition engine
@@ -161,13 +162,17 @@ class STTService {
 
   bool get isInitialized => _isInitialized;
   bool get isListening => _isListening;
+  bool get permissionRequestAttempted => _permissionRequestAttempted;
   STTSettings get settings => _settings;
+
+  Future<bool> hasPermission() => _speech.hasPermission;
 
   /// Initialize the STT service (requests microphone permission)
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
+      _permissionRequestAttempted = true;
       _isInitialized = await _speech.initialize(
         onError: (SpeechRecognitionError error) {
           _isListening = false;
