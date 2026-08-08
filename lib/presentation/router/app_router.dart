@@ -30,6 +30,7 @@ import 'package:native_tavern/presentation/screens/settings/tokenizer_settings_s
 import 'package:native_tavern/presentation/screens/settings/vector_storage_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/capability_diagnostics_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/memory_inbox_screen.dart';
+import 'package:native_tavern/presentation/screens/settings/mcp_settings_screen.dart';
 import 'package:native_tavern/presentation/widgets/chat/logprobs_panel.dart';
 import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.dart';
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
@@ -82,6 +83,7 @@ abstract class AppRoutes {
   static const vectorStorageSettings = '/vector-storage-settings';
   static const capabilityDiagnostics = '/capability-diagnostics';
   static const memoryInbox = '/memory-inbox';
+  static const mcpSettings = '/mcp-settings';
 }
 
 /// Navigation keys for nested navigation
@@ -384,6 +386,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'capabilityDiagnostics',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const CapabilityDiagnosticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mcpSettings,
+        name: 'mcpSettings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const McpSettingsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
