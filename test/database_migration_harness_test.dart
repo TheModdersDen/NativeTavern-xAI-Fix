@@ -17,7 +17,7 @@ void main() {
   test('fresh databases create the complete current schema', () async {
     final database = harness.createCurrentDatabase();
 
-    expect(await readSchemaVersion(database), 14);
+    expect(await readSchemaVersion(database), 15);
     expect(await runIntegrityCheck(database), 'ok');
     expect(await findForeignKeyViolations(database), isEmpty);
     expect(
@@ -26,7 +26,7 @@ void main() {
     );
   });
 
-  test('v10 fixture migrates through v11-v14 without losing logical data',
+  test('v10 fixture migrates through v11-v15 without losing logical data',
       () async {
     final file = harness.createFixture(LegacyDatabaseFixtures.v10);
     final before = captureRawDatabaseSnapshot(
@@ -35,7 +35,7 @@ void main() {
     );
     final database = harness.openWithProductionMigrations(file);
 
-    expect(await readSchemaVersion(database), 14);
+    expect(await readSchemaVersion(database), 15);
     final after = await captureDatabaseSnapshot(
       database,
       legacyV10PreservedSnapshotTables,
@@ -93,7 +93,7 @@ void main() {
     );
     final database = harness.openWithProductionMigrations(file);
 
-    expect(await readSchemaVersion(database), 14);
+    expect(await readSchemaVersion(database), 15);
     final after = await captureDatabaseSnapshot(
       database,
       legacyV13PreservedSnapshotTables,
@@ -102,6 +102,52 @@ void main() {
     expect(after.tables, before.tables);
     expect(await runIntegrityCheck(database), 'ok');
     expect(await findForeignKeyViolations(database), isEmpty);
+  });
+
+  test('v14 fixture gains all domain tables and can be reopened', () async {
+    final file = harness.createFixture(LegacyDatabaseFixtures.v14);
+    final before = captureRawDatabaseSnapshot(
+      file,
+      legacyV13PreservedSnapshotTables,
+    );
+    var database = harness.openWithProductionMigrations(file);
+
+    expect(await readSchemaVersion(database), 15);
+    expect(
+      (await captureDatabaseSnapshot(
+        database,
+        legacyV13PreservedSnapshotTables,
+      ))
+          .tables,
+      before.tables,
+    );
+    expect(await runIntegrityCheck(database), 'ok');
+    expect(await findForeignKeyViolations(database), isEmpty);
+    expect(
+      await readTableNames(database),
+      containsAll(currentSnapshotTables.map((table) => table.name)),
+    );
+
+    await harness.close(database);
+    database = harness.openWithProductionMigrations(file);
+    expect(await readSchemaVersion(database), 15);
+    expect(await runIntegrityCheck(database), 'ok');
+  });
+
+  test('failed v15 migration rolls back every new table', () async {
+    final file = harness.createFixture(
+      LegacyDatabaseFixtures.interruptedV14,
+      name: 'interrupted_v14',
+    );
+    final database = harness.openWithProductionMigrations(file);
+
+    await expectLater(
+        database.customSelect('SELECT 1').get(), throwsA(anything));
+    await harness.close(database);
+
+    expect(readRawSchemaVersion(file), 14);
+    expect(readRawTableNames(file), isNot(contains('long_term_memories')));
+    expect(readRawTableNames(file), contains('rpg_scenarios'));
   });
 
   test('failed migration rolls back schema changes and version advancement',
@@ -136,7 +182,7 @@ void main() {
     await harness.close(source);
 
     final restored = harness.createCurrentDatabase(name: 'backup_restored');
-    expect(await readSchemaVersion(restored), 14);
+    expect(await readSchemaVersion(restored), 15);
     final result = await DatabaseBackupService(restored).importData(
       data: backup,
       mode: ImportMode.addNewOnly,
