@@ -289,6 +289,44 @@ class RpgScenarioValidator {
     return RpgValidationResult(List.unmodifiable(collector.issues));
   }
 
+  /// Validates a resumed or newly produced runtime state against its scenario.
+  RpgValidationResult validateRuntimeState(
+    RpgScenario scenario,
+    RpgRuntimeState state,
+  ) {
+    final collector = _ValidationCollector();
+    final attributeIds = scenario.attributes.map((item) => item.id).toSet();
+    final itemIds = scenario.items.map((item) => item.id).toSet();
+    final actorIds = scenario.actors.map((item) => item.id).toSet();
+    final locationIds = scenario.locations.map((item) => item.id).toSet();
+    final questIds = scenario.quests.map((item) => item.id).toSet();
+    final actionIds = scenario.actions.map((item) => item.id).toSet();
+    final questStages = <String, Set<String>>{
+      for (final quest in scenario.quests)
+        quest.id: quest.stages.map((stage) => stage.id).toSet(),
+    };
+    final questObjectives = <String, Set<String>>{
+      for (final quest in scenario.quests)
+        quest.id: quest.stages.expand((stage) => stage.objectiveIds).toSet(),
+    };
+
+    _validateRuntimeState(
+      collector,
+      state,
+      'state',
+      scenario: scenario,
+      attributeIds: attributeIds,
+      itemIds: itemIds,
+      actorIds: actorIds,
+      locationIds: locationIds,
+      questIds: questIds,
+      actionIds: actionIds,
+      questStages: questStages,
+      questObjectives: questObjectives,
+    );
+    return RpgValidationResult(List.unmodifiable(collector.issues));
+  }
+
   RpgValidationResult validateSnapshot(
     RpgScenario scenario,
     RpgStateSnapshot snapshot,

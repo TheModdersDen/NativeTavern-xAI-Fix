@@ -18,6 +18,7 @@ abstract interface class RpgPersistenceRepository {
     required String scenarioId,
     required RpgRuntimeState state,
     String? currentSnapshotId,
+    String? expectedCurrentSnapshotId,
     required DateTime updatedAt,
   });
 
@@ -29,4 +30,11 @@ abstract interface class RpgPersistenceRepository {
   });
 
   Future<void> saveSnapshot(RpgStateSnapshot snapshot);
+
+  Future<void> commitSnapshotAndCurrentState({
+    required String chatId,
+    required RpgStateSnapshot snapshot,
+    required String? expectedCurrentSnapshotId,
+    required DateTime updatedAt,
+  });
 }
