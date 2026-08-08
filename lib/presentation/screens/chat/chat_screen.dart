@@ -1313,6 +1313,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Live2DCharacterView(
       config: live2d!,
       isSpeaking: chatState.isGenerating,
+      responseText: latestAssistantMessage?.content ?? '',
       interactive: interactive,
       onTransformChanged: persistTransform
           ? (transform) {

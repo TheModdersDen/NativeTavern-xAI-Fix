@@ -74,6 +74,15 @@ class Live2DService {
       }
     }
 
+    final hitAreas = <Live2DHitArea>[];
+    for (final raw in root['HitAreas'] as List<dynamic>? ?? const []) {
+      if (raw is! Map<String, dynamic>) continue;
+      final id = raw['Id'] as String? ?? '';
+      final name = raw['Name'] as String? ?? '';
+      if (id.isEmpty && name.isEmpty) continue;
+      hitAreas.add(Live2DHitArea(id: id, name: name));
+    }
+
     return Live2DModelManifest(
       version: (root['Version'] as num?)?.toInt() ?? 0,
       mocFile: references['Moc'] as String? ?? '',
@@ -84,6 +93,7 @@ class Live2DService {
       poseFile: references['Pose'] as String?,
       expressions: expressions,
       motions: motions,
+      hitAreas: hitAreas,
       lipSyncParameters: lipSyncParameters,
     );
   }

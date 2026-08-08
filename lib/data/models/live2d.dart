@@ -12,6 +12,49 @@ enum Live2DModelSource {
   }
 }
 
+/// App-level semantics for a Cubism hit area.
+enum Live2DHitAreaKind {
+  head,
+  body,
+  other,
+}
+
+/// A named drawable region declared by a Cubism `*.model3.json` file.
+class Live2DHitArea {
+  final String id;
+  final String name;
+
+  const Live2DHitArea({
+    required this.id,
+    required this.name,
+  });
+
+  Live2DHitAreaKind get kind {
+    final value = _normalize('$id $name');
+    if (value.contains('head') || value.contains('face')) {
+      return Live2DHitAreaKind.head;
+    }
+    if (value.contains('body') ||
+        value.contains('torso') ||
+        value.contains('bust')) {
+      return Live2DHitAreaKind.body;
+    }
+    return Live2DHitAreaKind.other;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+      };
+
+  factory Live2DHitArea.fromJson(Map<String, dynamic> json) {
+    return Live2DHitArea(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+    );
+  }
+}
+
 /// A motion's stable address inside a Cubism model definition.
 class Live2DMotionRef {
   final String group;
@@ -69,6 +112,7 @@ class Live2DModelManifest {
   final String? poseFile;
   final List<String> expressions;
   final List<Live2DMotionRef> motions;
+  final List<Live2DHitArea> hitAreas;
   final List<String> lipSyncParameters;
 
   const Live2DModelManifest({
@@ -79,6 +123,7 @@ class Live2DModelManifest {
     this.poseFile,
     this.expressions = const [],
     this.motions = const [],
+    this.hitAreas = const [],
     this.lipSyncParameters = const [],
   });
 
@@ -127,8 +172,12 @@ class Live2DConfig {
   final double motionSpeed;
   final Live2DMotionRef? idleMotion;
   final Live2DMotionRef? tapMotion;
+  final Live2DMotionRef? headTapMotion;
+  final Live2DMotionRef? bodyTapMotion;
   final Live2DMotionRef? speakingMotion;
   final Live2DMotionRef? responseMotion;
+  final Map<String, Live2DMotionRef> emotionMotions;
+  final List<Live2DHitArea> hitAreas;
   final String lipSyncParameter;
 
   const Live2DConfig({
@@ -145,8 +194,12 @@ class Live2DConfig {
     this.motionSpeed = 1,
     this.idleMotion,
     this.tapMotion,
+    this.headTapMotion,
+    this.bodyTapMotion,
     this.speakingMotion,
     this.responseMotion,
+    this.emotionMotions = const {},
+    this.hitAreas = const [],
     this.lipSyncParameter = 'ParamMouthOpenY',
   });
 
@@ -162,22 +215,49 @@ class Live2DConfig {
       source: definition.source,
       idleMotion: manifest.findMotion(const ['idle']),
       tapMotion: manifest.findMotion(
+        const ['tap', 'touch', 'flick'],
+      ),
+      headTapMotion: manifest.findMotion(
+        const [
+          'touch_head',
+          'tap_head',
+          'flick_head',
+          'head',
+        ],
+      ),
+      bodyTapMotion: manifest.findMotion(
         const [
           'touch_body',
-          'touch_special',
-          'touch_head',
           'tap_body',
-          'tap',
           'flick_body',
-          'flick',
+          'body',
         ],
       ),
       speakingMotion: manifest.findMotion(
-        const ['main_1', 'main_2', 'main_3', 'effect'],
+        const [
+          'speaking',
+          'speak',
+          'talking',
+          'talk',
+          'voice',
+          'main_1',
+          'main_2',
+          'main_3',
+          'effect',
+        ],
       ),
       responseMotion: manifest.findMotion(
-        const ['complete', 'mission_complete'],
+        const [
+          'complete',
+          'completed',
+          'finish',
+          'finished',
+          'response',
+          'mission_complete',
+        ],
       ),
+      emotionMotions: _discoverEmotionMotions(manifest),
+      hitAreas: manifest.hitAreas,
       lipSyncParameter:
           manifest.lipSyncParameters.firstOrNull ?? 'ParamMouthOpenY',
     );
@@ -197,8 +277,12 @@ class Live2DConfig {
     double? motionSpeed,
     Live2DMotionRef? idleMotion,
     Live2DMotionRef? tapMotion,
+    Live2DMotionRef? headTapMotion,
+    Live2DMotionRef? bodyTapMotion,
     Live2DMotionRef? speakingMotion,
     Live2DMotionRef? responseMotion,
+    Map<String, Live2DMotionRef>? emotionMotions,
+    List<Live2DHitArea>? hitAreas,
     String? lipSyncParameter,
   }) {
     return Live2DConfig(
@@ -215,9 +299,30 @@ class Live2DConfig {
       motionSpeed: motionSpeed ?? this.motionSpeed,
       idleMotion: idleMotion ?? this.idleMotion,
       tapMotion: tapMotion ?? this.tapMotion,
+      headTapMotion: headTapMotion ?? this.headTapMotion,
+      bodyTapMotion: bodyTapMotion ?? this.bodyTapMotion,
       speakingMotion: speakingMotion ?? this.speakingMotion,
       responseMotion: responseMotion ?? this.responseMotion,
+      emotionMotions: emotionMotions ?? this.emotionMotions,
+      hitAreas: hitAreas ?? this.hitAreas,
       lipSyncParameter: lipSyncParameter ?? this.lipSyncParameter,
+    );
+  }
+
+  /// Keeps explicit character choices and fills newly discovered semantics.
+  Live2DConfig withActionDefaults(Live2DConfig defaults) {
+    return copyWith(
+      idleMotion: idleMotion ?? defaults.idleMotion,
+      tapMotion: tapMotion ?? defaults.tapMotion,
+      headTapMotion: headTapMotion ?? defaults.headTapMotion,
+      bodyTapMotion: bodyTapMotion ?? defaults.bodyTapMotion,
+      speakingMotion: speakingMotion ?? defaults.speakingMotion,
+      responseMotion: responseMotion ?? defaults.responseMotion,
+      emotionMotions: {
+        ...defaults.emotionMotions,
+        ...emotionMotions,
+      },
+      hitAreas: hitAreas.isEmpty ? defaults.hitAreas : hitAreas,
     );
   }
 
@@ -235,8 +340,14 @@ class Live2DConfig {
         'motionSpeed': motionSpeed,
         'idleMotion': idleMotion?.toJson(),
         'tapMotion': tapMotion?.toJson(),
+        'headTapMotion': headTapMotion?.toJson(),
+        'bodyTapMotion': bodyTapMotion?.toJson(),
         'speakingMotion': speakingMotion?.toJson(),
         'responseMotion': responseMotion?.toJson(),
+        'emotionMotions': emotionMotions.map(
+          (emotion, motion) => MapEntry(emotion, motion.toJson()),
+        ),
+        'hitAreas': hitAreas.map((area) => area.toJson()).toList(),
         'lipSyncParameter': lipSyncParameter,
       };
 
@@ -262,13 +373,65 @@ class Live2DConfig {
       motionSpeed: (json['motionSpeed'] as num?)?.toDouble() ?? 1,
       idleMotion: parseMotion('idleMotion'),
       tapMotion: parseMotion('tapMotion'),
+      headTapMotion: parseMotion('headTapMotion'),
+      bodyTapMotion: parseMotion('bodyTapMotion'),
       speakingMotion: parseMotion('speakingMotion'),
       responseMotion: parseMotion('responseMotion'),
+      emotionMotions: _parseEmotionMotions(json['emotionMotions']),
+      hitAreas: (json['hitAreas'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Live2DHitArea.fromJson)
+          .toList(),
       lipSyncParameter:
           json['lipSyncParameter'] as String? ?? 'ParamMouthOpenY',
     );
   }
 }
+
+const _emotionMotionAliases = <String, List<String>>{
+  'neutral': ['neutral', 'normal', 'calm'],
+  'happy': ['happy', 'smile', 'joy', 'laugh', 'grin'],
+  'sad': ['sad', 'cry', 'sorrow'],
+  'angry': ['angry', 'mad', 'rage'],
+  'surprised': ['surprised', 'surprise', 'shock'],
+  'scared': ['scared', 'fear', 'afraid'],
+  'disgusted': ['disgusted', 'disgust'],
+  'confused': ['confused', 'puzzled'],
+  'embarrassed': ['embarrassed', 'blush', 'shy'],
+  'excited': ['excited', 'thrilled'],
+  'loving': ['loving', 'love', 'adore'],
+  'thinking': ['thinking', 'think', 'ponder'],
+  'smug': ['smug', 'proud'],
+  'tired': ['tired', 'sleepy', 'yawn'],
+  'bored': ['bored', 'uninterested'],
+};
+
+Map<String, Live2DMotionRef> _discoverEmotionMotions(
+  Live2DModelManifest manifest,
+) {
+  final motions = <String, Live2DMotionRef>{};
+  for (final entry in _emotionMotionAliases.entries) {
+    final motion = manifest.findMotion(entry.value);
+    if (motion != null) motions[entry.key] = motion;
+  }
+  return motions;
+}
+
+Map<String, Live2DMotionRef> _parseEmotionMotions(Object? value) {
+  if (value is! Map) return const {};
+  final motions = <String, Live2DMotionRef>{};
+  for (final entry in value.entries) {
+    if (entry.key is String && entry.value is Map) {
+      motions[entry.key as String] = Live2DMotionRef.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
+    }
+  }
+  return motions;
+}
+
+String _normalize(String value) =>
+    value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
 extension _FirstOrNull<T> on Iterable<T> {
   T? get firstOrNull => isEmpty ? null : first;
