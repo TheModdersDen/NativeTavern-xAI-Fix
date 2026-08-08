@@ -163,6 +163,27 @@ class Live2DActionOrchestrator {
     );
   }
 
+  Future<bool> onPlaybackPaused() => _stopSpeakingWithoutCompletion();
+
+  Future<bool> onPlaybackStopped() => _stopSpeakingWithoutCompletion();
+
+  Future<bool> _stopSpeakingWithoutCompletion() {
+    if (_disposed) return Future.value(false);
+    _speaking = false;
+    _pendingTransient = null;
+    _activeTransient = null;
+    _recoveryTimer?.cancel();
+    _recoveryTimer = null;
+    return _request(
+      const _ActionRequest(
+        kind: Live2DActionKind.idle,
+        priority: 1,
+        transient: false,
+        duration: Duration.zero,
+      ),
+    );
+  }
+
   Future<bool> onTap(Live2DHitResult hit) {
     if (_disposed || hit == Live2DHitResult.miss) {
       return Future.value(false);
