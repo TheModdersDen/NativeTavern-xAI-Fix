@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:archive/archive.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// Image Generation Provider types (channels, not models)
 enum ImageGenProvider {
@@ -533,7 +534,28 @@ class ImageAspectRatio {
 /// Image Generation Service
 class ImageGenerationService {
   ImageGenSettings _settings = const ImageGenSettings();
-  final Dio _dio = Dio();
+  final Dio _dio;
+
+  ImageGenerationService({
+    Dio? dio,
+    ExternalCallAuditRepository auditRepository =
+        const NoopExternalCallAuditRepository(),
+  }) : _dio = dio ?? Dio() {
+    _dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'imageGeneration',
+      classifyData: (request) {
+        if (request.method.toUpperCase() == 'GET' &&
+            (request.uri.path.contains('models') ||
+                request.uri.path.contains('object_info'))) {
+          return const {ExternalDataType.metadata};
+        }
+        return request.method.toUpperCase() == 'GET'
+            ? const {ExternalDataType.image}
+            : const {ExternalDataType.prompt, ExternalDataType.image};
+      },
+    ));
+  }
 
   /// Callbacks
   void Function(double)? onProgress;

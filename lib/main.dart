@@ -8,6 +8,8 @@ import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/import_service.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
 
@@ -27,7 +29,10 @@ void main() async {
   final worldInfoRepo = WorldInfoRepository(database);
 
   // Create services
-  final llmService = LLMService();
+  final externalCallAudit = FileExternalCallAuditRepository(
+    dataPath: initData.dataPath,
+  );
+  final llmService = LLMService(auditRepository: externalCallAudit);
   final importService = ImportService(initData.dataPath);
 
   runApp(
@@ -45,6 +50,9 @@ void main() async {
         // Services
         llmServiceProvider.overrideWithValue(llmService),
         importServiceProvider.overrideWithValue(importService),
+        externalCallAuditRepositoryProvider.overrideWithValue(
+          externalCallAudit,
+        ),
 
         // Shared preferences
         sharedPreferencesProvider.overrideWithValue(prefs),

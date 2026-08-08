@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:native_tavern/domain/services/import_service.dart';
 import 'package:native_tavern/data/models/character.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 enum UrlSource {
   nativeTavern,
@@ -32,14 +33,28 @@ class UrlImportService {
   final ImportService _importService;
   final Dio _dio;
 
-  UrlImportService(this._importService, {Dio? dio})
+  UrlImportService(
+    this._importService, {
+    Dio? dio,
+    ExternalCallAuditRepository auditRepository =
+        const NoopExternalCallAuditRepository(),
+  })
       : _dio = dio ?? Dio(BaseOptions(
           connectTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 60),
           headers: {
             'User-Agent': 'NativeTavern/1.0',
           },
-        ));
+        )) {
+    _dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'characterImport',
+      classifyData: (request) => const {
+        ExternalDataType.metadata,
+        ExternalDataType.characterCard,
+      },
+    ));
+  }
 
   UrlSource identifySource(String url) {
     final uri = Uri.tryParse(url.trim());

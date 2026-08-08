@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
 /// Provider for TTS service
 final ttsServiceProvider = Provider<TTSService>((ref) {
-  final service = TTSService();
+  final service = TTSService(
+    auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+  );
   ref.onDispose(() => service.dispose());
   return service;
 });

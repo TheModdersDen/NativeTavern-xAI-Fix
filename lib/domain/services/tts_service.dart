@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// TTS Provider types
 enum TTSProvider {
@@ -201,6 +202,22 @@ class TTSService {
 
   /// Player for remote-synthesized audio
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final Dio _dio;
+
+  TTSService({
+    Dio? dio,
+    ExternalCallAuditRepository auditRepository =
+        const NoopExternalCallAuditRepository(),
+  }) : _dio = dio ?? Dio() {
+    _dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'tts',
+      classifyData: (request) => const {
+        ExternalDataType.chatText,
+        ExternalDataType.audio,
+      },
+    ));
+  }
 
   /// Available voices (populated after initialization)
   List<TTSVoice> _availableVoices = [];
@@ -491,8 +508,6 @@ class TTSService {
   }
 
   // ==================== Remote synthesis ====================
-
-  final Dio _dio = Dio();
 
   /// Synthesize [text] to audio bytes with the configured remote provider.
   /// Returns null for providers without a remote API (system TTS).

@@ -14,6 +14,7 @@ import 'package:native_tavern/domain/services/character_regex_import_service.dar
 import 'package:native_tavern/domain/services/url_import_service.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/regex_providers.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
@@ -25,7 +26,10 @@ final importServiceProvider = Provider<ImportService>((ref) {
 /// URL import service provider
 final urlImportServiceProvider = Provider<UrlImportService>((ref) {
   final importService = ref.watch(importServiceProvider);
-  return UrlImportService(importService);
+  return UrlImportService(
+    importService,
+    auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+  );
 });
 
 /// Import result for a single file or URL

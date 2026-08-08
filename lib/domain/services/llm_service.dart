@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:native_tavern/domain/services/context_window_service.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// LLM Provider enum
 enum LLMProvider {
@@ -409,8 +410,23 @@ class LLMConfig {
 
 /// LLM Service for generating responses
 class LLMService {
-  final Dio _dio = Dio();
+  final Dio _dio;
   final ContextWindowService _contextWindowService = ContextWindowService();
+
+  LLMService({
+    Dio? dio,
+    ExternalCallAuditRepository auditRepository =
+        const NoopExternalCallAuditRepository(),
+  }) : _dio = dio ?? Dio() {
+    _dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'llm',
+      classifyData: (request) => metadataForGet(
+        request,
+        const {ExternalDataType.prompt, ExternalDataType.chatText},
+      ),
+    ));
+  }
 
   /// Token for the in-flight request so cancellation actually aborts the
   /// HTTP connection (stops server-side generation/billing) instead of

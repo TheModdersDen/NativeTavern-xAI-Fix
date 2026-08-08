@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
+import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// Generates text embeddings for RAG / vector storage.
 ///
@@ -8,7 +9,20 @@ import 'package:native_tavern/data/models/vector_storage.dart';
 class EmbeddingService {
   final Dio _dio;
 
-  EmbeddingService({Dio? dio}) : _dio = dio ?? Dio();
+  EmbeddingService({
+    Dio? dio,
+    ExternalCallAuditRepository auditRepository =
+        const NoopExternalCallAuditRepository(),
+  }) : _dio = dio ?? Dio() {
+    _dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'embedding',
+      classifyData: (request) => metadataForGet(
+        request,
+        const {ExternalDataType.documentText},
+      ),
+    ));
+  }
 
   /// Embed a single text
   Future<List<double>> embed(

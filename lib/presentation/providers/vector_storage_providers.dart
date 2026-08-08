@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
 import 'package:native_tavern/domain/services/embedding_service.dart';
 import 'package:native_tavern/domain/services/vector_storage_service.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
 /// Provider for VectorStorageService (loads persisted collections)
 final vectorStorageServiceProvider = Provider<VectorStorageService>((ref) {
@@ -13,7 +14,9 @@ final vectorStorageServiceProvider = Provider<VectorStorageService>((ref) {
 
 /// Provider for EmbeddingService
 final embeddingServiceProvider = Provider<EmbeddingService>((ref) {
-  return EmbeddingService();
+  return EmbeddingService(
+    auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+  );
 });
 
 /// Provider for vector storage settings

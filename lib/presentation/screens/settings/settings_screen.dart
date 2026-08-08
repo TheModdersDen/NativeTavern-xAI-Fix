@@ -117,6 +117,13 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.advanced),
           ListTile(
+            leading: const Icon(Icons.health_and_safety_outlined),
+            title: const Text('Capability check'),
+            subtitle: const Text('Availability, permissions, and configuration'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.capabilityDiagnostics),
+          ),
+          ListTile(
             leading: const Icon(Icons.find_replace),
             title: Text(l10n.regex),
             trailing: const Icon(Icons.chevron_right),

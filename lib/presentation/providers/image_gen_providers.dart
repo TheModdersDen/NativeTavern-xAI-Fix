@@ -3,10 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
 /// Provider for image generation service
 final imageGenServiceProvider = Provider<ImageGenerationService>((ref) {
-  final service = ImageGenerationService();
+  final service = ImageGenerationService(
+    auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+  );
   ref.onDispose(() => service.dispose());
   return service;
 });
