@@ -670,7 +670,107 @@ class AppDatabase extends _$AppDatabase {
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
+        final searchIndexCreated = await _ensureLongTermMemorySearchIndex();
+        if (searchIndexCreated) {
+          await _rebuildLongTermMemorySearchIndex();
+        }
       },
+    );
+  }
+
+  /// Recreates the derived long-term-memory FTS index from its content table.
+  Future<void> rebuildLongTermMemorySearchIndex() async {
+    await _ensureLongTermMemorySearchIndex();
+    await _rebuildLongTermMemorySearchIndex();
+  }
+
+  Future<bool> _ensureLongTermMemorySearchIndex() async {
+    final existing = await customSelect(
+      'SELECT 1 AS found FROM sqlite_master '
+      "WHERE type = 'table' AND name = 'long_term_memories_fts'",
+    ).getSingleOrNull();
+    final created = existing == null;
+
+    await customStatement('''
+      CREATE VIRTUAL TABLE IF NOT EXISTS long_term_memories_fts USING fts5(
+        id UNINDEXED,
+        content,
+        normalized_identity_key,
+        content = 'long_term_memories',
+        content_rowid = 'rowid',
+        tokenize = 'unicode61 remove_diacritics 2'
+      )
+    ''');
+    await _createLongTermMemorySearchTriggers();
+    return created;
+  }
+
+  Future<void> _createLongTermMemorySearchTriggers() async {
+    const statements = [
+      '''
+        CREATE TRIGGER IF NOT EXISTS long_term_memory_fts_insert
+        AFTER INSERT ON long_term_memories
+        BEGIN
+          INSERT INTO long_term_memories_fts(
+            rowid, id, content, normalized_identity_key
+          ) VALUES (
+            NEW.rowid, NEW.id, NEW.content, NEW.normalized_identity_key
+          );
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS long_term_memory_fts_delete
+        AFTER DELETE ON long_term_memories
+        BEGIN
+          INSERT INTO long_term_memories_fts(
+            long_term_memories_fts,
+            rowid,
+            id,
+            content,
+            normalized_identity_key
+          ) VALUES (
+            'delete',
+            OLD.rowid,
+            OLD.id,
+            OLD.content,
+            OLD.normalized_identity_key
+          );
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS long_term_memory_fts_update
+        AFTER UPDATE OF content, normalized_identity_key ON long_term_memories
+        BEGIN
+          INSERT INTO long_term_memories_fts(
+            long_term_memories_fts,
+            rowid,
+            id,
+            content,
+            normalized_identity_key
+          ) VALUES (
+            'delete',
+            OLD.rowid,
+            OLD.id,
+            OLD.content,
+            OLD.normalized_identity_key
+          );
+          INSERT INTO long_term_memories_fts(
+            rowid, id, content, normalized_identity_key
+          ) VALUES (
+            NEW.rowid, NEW.id, NEW.content, NEW.normalized_identity_key
+          );
+        END
+      ''',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _rebuildLongTermMemorySearchIndex() {
+    return customStatement(
+      'INSERT INTO long_term_memories_fts(long_term_memories_fts) '
+      "VALUES ('rebuild')",
     );
   }
 

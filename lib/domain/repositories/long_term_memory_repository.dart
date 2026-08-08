@@ -1,5 +1,16 @@
 import 'package:native_tavern/data/models/long_term_memory.dart';
 
+/// One full-text match. Lower [rank] values are more relevant BM25 scores.
+final class LongTermMemorySearchResult {
+  const LongTermMemorySearchResult({
+    required this.memory,
+    required this.rank,
+  });
+
+  final LongTermMemory memory;
+  final double rank;
+}
+
 /// Storage-independent operations required by the long-term memory feature.
 abstract interface class LongTermMemoryRepository {
   Future<LongTermMemory?> getById(String id);
@@ -23,6 +34,22 @@ abstract interface class LongTermMemoryRepository {
     required String chatId,
     String? messageId,
   });
+
+  /// Finds the most relevant memories in one exact owner scope.
+  ///
+  /// User input is treated as plain text rather than FTS query syntax. By
+  /// default, only active memories that have not expired are returned.
+  Future<List<LongTermMemorySearchResult>> search(
+    String query, {
+    required MemoryScope scope,
+    int topK = 20,
+    Set<MemoryState> states = const <MemoryState>{MemoryState.active},
+    bool includeExpired = false,
+    DateTime? at,
+  });
+
+  /// Recreates the derived full-text index from canonical memory records.
+  Future<void> rebuildSearchIndex();
 
   /// Applies one lifecycle state to a group of records atomically.
   ///

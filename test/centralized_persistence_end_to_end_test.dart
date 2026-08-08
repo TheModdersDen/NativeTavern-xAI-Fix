@@ -63,6 +63,15 @@ void main() {
       ),
       [memory],
     );
+    final searchResults = await repository.search(
+      'station',
+      scope: memory.scope,
+    );
+    expect(searchResults.map((result) => result.memory), [memory]);
+    expect(
+      searchResults.single.memory.source.sourceMessageIds,
+      ['message-1', 'message-2'],
+    );
 
     final replacement = LongTermMemory(
       id: 'memory-2',

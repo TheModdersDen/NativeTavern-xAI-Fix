@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:native_tavern/data/models/long_term_memory.dart';
+import 'package:native_tavern/data/repositories/drift_long_term_memory_repository.dart';
 import 'package:native_tavern/domain/services/database_backup_service.dart';
 
 import 'support/database_migration_harness.dart';
@@ -132,6 +136,29 @@ void main() {
     database = harness.openWithProductionMigrations(file);
     expect(await readSchemaVersion(database), 15);
     expect(await runIntegrityCheck(database), 'ok');
+  });
+
+  test('existing v15 data gains a rebuilt derived memory search index',
+      () async {
+    final file = File('${harness.directory.path}/derived_fts.sqlite');
+    var database = harness.openWithProductionMigrations(file);
+    await seedCurrentRepresentativeData(database);
+    await database.customStatement('DROP TABLE long_term_memories_fts');
+    await harness.close(database);
+
+    database = harness.openWithProductionMigrations(file);
+    final repository = DriftLongTermMemoryRepository(database);
+    final matches = await repository.search(
+      'representative',
+      scope: MemoryScope.characterPersona(
+        characterId: 'character-1',
+        personaId: 'persona-1',
+      ),
+    );
+
+    expect(await readSchemaVersion(database), 15);
+    expect(matches.map((result) => result.memory.id), ['memory-1']);
+    expect(matches.single.memory.source.sourceMessageIds, ['message-1']);
   });
 
   test('failed v15 migration rolls back every new table', () async {
