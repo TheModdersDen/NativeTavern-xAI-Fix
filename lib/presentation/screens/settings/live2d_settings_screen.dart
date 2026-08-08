@@ -328,9 +328,10 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       }
       if (!mounted) return;
       final previous = _config;
+      final discovered = Live2DConfig.fromDefinition(definition, manifest);
       var config = replaceConfig
-          ? Live2DConfig.fromDefinition(definition, manifest)
-          : previous!;
+          ? discovered
+          : previous!.withActionDefaults(discovered);
       if (replaceConfig && previous != null) {
         config = config.copyWith(
           enabled: previous.enabled,

@@ -23,6 +23,11 @@ void main() {
         expect(manifest.textures, isNotEmpty);
         expect(manifest.motions, isNotEmpty);
         expect(manifest.findMotion(const ['idle']), isNotNull);
+        expect(manifest.hitAreas, isNotEmpty);
+        expect(
+          manifest.hitAreas.map((area) => area.kind),
+          contains(Live2DHitAreaKind.body),
+        );
 
         for (final reference in manifest.referencedFiles) {
           expect(
@@ -60,6 +65,9 @@ void main() {
       scale: 1.2,
       offsetX: 0.1,
       idleMotion: motion,
+      headTapMotion: motion,
+      emotionMotions: {'happy': motion},
+      hitAreas: [Live2DHitArea(id: 'Head', name: 'Head')],
     );
 
     final restored = Live2DConfig.fromJson(config.toJson());
@@ -69,6 +77,9 @@ void main() {
     expect(restored.idleMotion?.group, '');
     expect(restored.idleMotion?.index, 3);
     expect(restored.idleMotion?.file, motion.file);
+    expect(restored.headTapMotion?.index, 3);
+    expect(restored.emotionMotions['happy']?.file, motion.file);
+    expect(restored.hitAreas.single.kind, Live2DHitAreaKind.head);
   });
 
   testWidgets('unsupported platforms use the supplied fallback',

@@ -8,6 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_live2d/flutter_live2d.dart';
 import 'package:native_tavern/core/utils/path_utils.dart';
 import 'package:native_tavern/data/models/live2d.dart';
+import 'package:native_tavern/domain/services/emotion_detection_service.dart';
+import 'package:native_tavern/domain/services/live2d_action_orchestrator.dart';
+import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
+import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:native_tavern/presentation/widgets/live2d/macos_live2d_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
 
@@ -143,6 +147,7 @@ class _MacOSLive2DController implements _NativeLive2DController {
 /// A stable app-level controller for motion playback and future TTS lip sync.
 class Live2DCharacterController {
   _NativeLive2DController? _nativeController;
+  Live2DActionOrchestrator? _orchestrator;
   String _lipSyncParameter = 'ParamMouthOpenY';
 
   bool get isReady => _nativeController?.value.isLoaded ?? false;
@@ -150,13 +155,18 @@ class Live2DCharacterController {
   void _attach(
     _NativeLive2DController controller,
     String lipSyncParameter,
+    Live2DActionOrchestrator orchestrator,
   ) {
     _nativeController = controller;
     _lipSyncParameter = lipSyncParameter;
+    _orchestrator = orchestrator;
   }
 
   void _detach(_NativeLive2DController controller) {
-    if (identical(_nativeController, controller)) _nativeController = null;
+    if (identical(_nativeController, controller)) {
+      _nativeController = null;
+      _orchestrator = null;
+    }
   }
 
   Future<bool> playMotion(Live2DMotionRef? motion, {int priority = 2}) async {
@@ -187,11 +197,22 @@ class Live2DCharacterController {
       return false;
     }
   }
+
+  Future<bool> notifyMessageStarted() =>
+      _orchestrator?.onMessageStarted() ?? Future.value(false);
+
+  Future<bool> notifySentenceBoundary() =>
+      _orchestrator?.onSentenceBoundary() ?? Future.value(false);
+
+  Future<bool> notifyResponseCompleted({String? emotion}) =>
+      _orchestrator?.onResponseCompleted(emotion: emotion) ??
+      Future.value(false);
 }
 
 class Live2DCharacterView extends StatefulWidget {
   final Live2DConfig config;
   final bool isSpeaking;
+  final String responseText;
   final Live2DCharacterController? controller;
   final Widget? fallback;
   final bool showStatus;
@@ -202,6 +223,7 @@ class Live2DCharacterView extends StatefulWidget {
     super.key,
     required this.config,
     this.isSpeaking = false,
+    this.responseText = '',
     this.controller,
     this.fallback,
     this.showStatus = false,
@@ -219,7 +241,13 @@ class Live2DCharacterView extends StatefulWidget {
 class _Live2DCharacterViewState extends State<Live2DCharacterView>
     with WidgetsBindingObserver {
   late final _NativeLive2DController _nativeController;
-  Timer? _returnToIdleTimer;
+  late Live2DActionOrchestrator _orchestrator;
+  late Live2DConfig _actionConfig;
+  final Live2DHitTestService _hitTestService = const Live2DHitTestService();
+  final Live2DSentenceBoundaryTracker _sentenceTracker =
+      Live2DSentenceBoundaryTracker();
+  final EmotionDetectionService _emotionDetectionService =
+      EmotionDetectionService();
   Timer? _scrollSaveTimer;
   String? _loadError;
   int _loadGeneration = 0;
@@ -235,6 +263,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     super.initState();
     _nativeController =
         Platform.isMacOS ? _MacOSLive2DController() : _MobileLive2DController();
+    _actionConfig = widget.config;
+    _orchestrator = _createOrchestrator(_actionConfig);
     _applyConfigTransform(widget.config);
     WidgetsBinding.instance.addObserver(this);
     if (Live2DCharacterView.isPlatformSupported) {
@@ -252,8 +282,10 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         oldConfig.offsetY != config.offsetY) {
       _applyConfigTransform(config);
     }
-    if (oldConfig.modelDirectory != config.modelDirectory ||
-        oldConfig.modelFileName != config.modelFileName) {
+    if (oldConfig.modelId != config.modelId ||
+        oldConfig.modelDirectory != config.modelDirectory ||
+        oldConfig.modelFileName != config.modelFileName ||
+        oldConfig.source != config.source) {
       _loadModel();
       return;
     }
@@ -263,6 +295,9 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     }
     if (oldWidget.isSpeaking != widget.isSpeaking) {
       _handleSpeakingChanged();
+    } else if (widget.isSpeaking &&
+        oldWidget.responseText != widget.responseText) {
+      _handleResponseTextChanged();
     }
   }
 
@@ -284,11 +319,14 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   Future<void> _loadModel() async {
     if (!Live2DCharacterView.isPlatformSupported) return;
     final generation = ++_loadGeneration;
-    _returnToIdleTimer?.cancel();
+    _orchestrator.reset();
+    _sentenceTracker.reset(text: widget.responseText);
     if (mounted) setState(() => _loadError = null);
 
     try {
       await _nativeController.whenAttached;
+      if (!mounted || generation != _loadGeneration) return;
+      final actionConfig = await _discoverActionConfig();
       if (!mounted || generation != _loadGeneration) return;
       final modelDirectory = await _resolveModelDirectory();
       final loaded = await _nativeController.loadModel(
@@ -304,14 +342,16 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         return;
       }
       await _nativeController.setMotionSpeed(widget.config.motionSpeed);
+      _replaceOrchestrator(actionConfig);
       widget.controller?._attach(
         _nativeController,
-        widget.config.lipSyncParameter,
+        actionConfig.lipSyncParameter,
+        _orchestrator,
       );
       if (widget.isSpeaking) {
-        await _play(widget.config.speakingMotion, priority: 2);
+        await _orchestrator.onMessageStarted();
       } else {
-        await _play(widget.config.idleMotion, priority: 1);
+        await _orchestrator.onIdleTimeout();
       }
     } catch (error) {
       if (mounted && generation == _loadGeneration) {
@@ -328,34 +368,94 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     return '$dataPath/${widget.config.modelDirectory}';
   }
 
+  Future<Live2DConfig> _discoverActionConfig() async {
+    try {
+      final config = widget.config;
+      final definition = Live2DModelDefinition(
+        id: config.modelId,
+        displayName: config.displayName,
+        modelDirectory: config.modelDirectory,
+        modelFileName: config.modelFileName,
+        source: config.source,
+      );
+      final dataPath = config.source == Live2DModelSource.appData
+          ? await PathUtils.getDataPath()
+          : null;
+      final manifest = await Live2DService(dataPath: dataPath).loadManifest(
+        definition,
+      );
+      return config.withActionDefaults(
+        Live2DConfig.fromDefinition(definition, manifest),
+      );
+    } catch (_) {
+      return widget.config;
+    }
+  }
+
+  Live2DActionOrchestrator _createOrchestrator(Live2DConfig config) {
+    return Live2DActionOrchestrator(
+      resolver: Live2DActionResolver(config),
+      player: _playMotion,
+    );
+  }
+
+  void _replaceOrchestrator(Live2DConfig config) {
+    _orchestrator.dispose();
+    _actionConfig = config;
+    _orchestrator = _createOrchestrator(config);
+  }
+
   void _handleSpeakingChanged() {
-    _returnToIdleTimer?.cancel();
     if (widget.isSpeaking) {
-      unawaited(_play(widget.config.speakingMotion, priority: 2));
+      _sentenceTracker.reset(text: widget.responseText);
+      unawaited(_orchestrator.onMessageStarted());
       return;
     }
 
-    unawaited(_play(widget.config.responseMotion, priority: 2));
-    _scheduleIdle(const Duration(milliseconds: 2200));
+    final emotion = _emotionDetectionService.detectEmotion(widget.responseText);
+    unawaited(
+      _orchestrator.onResponseCompleted(emotion: emotion.id),
+    );
   }
 
-  Future<void> _play(Live2DMotionRef? motion, {required int priority}) async {
-    if (motion == null || !_nativeController.value.isLoaded) return;
+  void _handleResponseTextChanged() {
+    final count = _sentenceTracker.takeNewBoundaries(widget.responseText);
+    for (var index = 0; index < count; index++) {
+      unawaited(_orchestrator.onSentenceBoundary());
+    }
+  }
+
+  Future<bool> _playMotion(Live2DMotionRef motion, int priority) async {
+    if (!_nativeController.value.isLoaded) return false;
     try {
       await _nativeController.startMotion(
         group: motion.group,
         index: motion.index,
         priority: priority,
       );
+      return true;
     } catch (_) {
-      // A failed optional motion should not replace a successfully loaded model.
+      return false;
     }
   }
 
-  void _handleTap() {
-    _returnToIdleTimer?.cancel();
-    unawaited(_play(widget.config.tapMotion, priority: 3));
-    _scheduleIdle(const Duration(milliseconds: 2600));
+  void _handleTap(TapUpDetails details) {
+    final size = context.size;
+    if (size == null || size.isEmpty) return;
+    final translatedX = details.localPosition.dx - (_offsetX * size.width);
+    final translatedY = details.localPosition.dy - (_offsetY * size.height);
+    final normalizedX =
+        ((translatedX - size.width / 2) / _stageScale + size.width / 2) /
+            size.width;
+    final normalizedY =
+        ((translatedY - size.height / 2) / _stageScale + size.height / 2) /
+            size.height;
+    final hit = _hitTestService.hitTest(
+      hitAreas: _actionConfig.hitAreas,
+      normalizedX: normalizedX,
+      normalizedY: normalizedY,
+    );
+    unawaited(_orchestrator.onTap(hit));
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
@@ -476,20 +576,13 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     );
   }
 
-  void _scheduleIdle(Duration delay) {
-    _returnToIdleTimer = Timer(delay, () {
-      if (!mounted || widget.isSpeaking) return;
-      unawaited(_play(widget.config.idleMotion, priority: 1));
-    });
-  }
-
   @override
   void dispose() {
     _loadGeneration++;
-    _returnToIdleTimer?.cancel();
     _scrollSaveTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     widget.controller?._detach(_nativeController);
+    _orchestrator.dispose();
     _nativeController.dispose();
     super.dispose();
   }
@@ -536,7 +629,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
                       : MouseCursor.defer,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onTap: _handleTap,
+                    onTapUp: _handleTap,
                     onDoubleTap: widget.interactive ? _resetTransform : null,
                     onScaleStart: widget.interactive ? _handleScaleStart : null,
                     onScaleUpdate:
