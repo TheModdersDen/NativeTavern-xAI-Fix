@@ -5492,7 +5492,7 @@
   "@live2dUnavailableLabel": {"placeholders": {"name": {"type": "String"}}},
   "live2dImportedLabel": "{name} (Imported)",
   "@live2dImportedLabel": {"placeholders": {"name": {"type": "String"}}},
-  "live2dImportZip": "Import ZIP",
+  "live2dImportZip": "Import model",
   "live2dMotion": "Motion",
   "live2dPlayMotion": "Play motion",
   "live2dStageAdjustment": "Stage adjustment",

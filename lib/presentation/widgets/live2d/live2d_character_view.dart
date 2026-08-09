@@ -14,12 +14,16 @@ import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
 import 'package:native_tavern/domain/services/live2d_render_lifecycle.dart';
 import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:native_tavern/domain/services/live2d_tts_playback_coordinator.dart';
+import 'package:native_tavern/domain/services/spine_runtime_service.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
 import 'package:native_tavern/presentation/widgets/live2d/macos_live2d_view.dart';
 import 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart';
+import 'package:spine_flutter/spine_flutter.dart' as spine;
 
 export 'package:native_tavern/presentation/widgets/live2d/live2d_stage_gestures.dart'
     show Live2DStageTransform;
+
+part 'spine_character_view.dart';
 
 abstract interface class _NativeLive2DController {
   ValueListenable<Live2DViewState> get listenable;
@@ -150,14 +154,19 @@ class _MacOSLive2DController implements _NativeLive2DController {
 /// A stable app-level controller for motion playback and future TTS lip sync.
 class Live2DCharacterController {
   _NativeLive2DController? _nativeController;
+  _SpineCharacterViewState? _spineState;
   Live2DActionOrchestrator? _orchestrator;
   String? _loadedModelId;
   String _lipSyncParameter = 'ParamMouthOpenY';
 
-  bool get isAttached => _nativeController?.value.isAttached ?? false;
-  bool get isReady => _nativeController?.value.isLoaded ?? false;
+  bool get isAttached =>
+      _spineState?.isAttached ?? _nativeController?.value.isAttached ?? false;
+  bool get isReady =>
+      _spineState?.isReady ?? _nativeController?.value.isLoaded ?? false;
   bool get isRenderingPaused =>
-      _nativeController?.value.isRenderingPaused ?? false;
+      _spineState?.isRenderingPaused ??
+      _nativeController?.value.isRenderingPaused ??
+      false;
   String? get loadedModelId => _loadedModelId;
 
   void _attach(
@@ -167,8 +176,20 @@ class Live2DCharacterController {
     Live2DActionOrchestrator orchestrator,
   ) {
     _nativeController = controller;
+    _spineState = null;
     _loadedModelId = modelId;
     _lipSyncParameter = lipSyncParameter;
+    _orchestrator = orchestrator;
+  }
+
+  void _attachSpine(
+    _SpineCharacterViewState state,
+    String modelId,
+    Live2DActionOrchestrator orchestrator,
+  ) {
+    _nativeController = null;
+    _spineState = state;
+    _loadedModelId = modelId;
     _orchestrator = orchestrator;
   }
 
@@ -180,7 +201,19 @@ class Live2DCharacterController {
     }
   }
 
+  void _detachSpine(_SpineCharacterViewState state) {
+    if (identical(_spineState, state)) {
+      _spineState = null;
+      _loadedModelId = null;
+      _orchestrator = null;
+    }
+  }
+
   Future<bool> playMotion(Live2DMotionRef? motion, {int priority = 2}) async {
+    final spineState = _spineState;
+    if (spineState != null) {
+      return spineState.playMotion(motion, priority: priority);
+    }
     final controller = _nativeController;
     if (controller == null || !controller.value.isLoaded || motion == null) {
       return false;
@@ -199,6 +232,7 @@ class Live2DCharacterController {
 
   /// Values are clamped to the standard Cubism mouth-open range.
   Future<bool> setMouthOpen(double value) async {
+    if (_spineState != null) return false;
     final controller = _nativeController;
     if (controller == null || !controller.value.isLoaded) return false;
     try {
@@ -291,7 +325,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     _orchestrator = _createOrchestrator(_actionConfig);
     _applyConfigTransform(widget.config);
     WidgetsBinding.instance.addObserver(this);
-    if (Live2DCharacterView.isPlatformSupported) {
+    if (Live2DCharacterView.isPlatformSupported &&
+        widget.config.format == Live2DModelFormat.cubism) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadModel());
     }
   }
@@ -306,9 +341,21 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         oldConfig.offsetY != config.offsetY) {
       _applyConfigTransform(config);
     }
+    if (oldConfig.format != config.format) {
+      _loadGeneration++;
+      widget.controller?._detach(_nativeController);
+      unawaited(_renderingLifecycle.setAttached(false));
+      if (config.format == Live2DModelFormat.cubism &&
+          Live2DCharacterView.isPlatformSupported) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _loadModel());
+      }
+      return;
+    }
+    if (config.format == Live2DModelFormat.spine) return;
     if (oldConfig.modelId != config.modelId ||
         oldConfig.modelDirectory != config.modelDirectory ||
         oldConfig.modelFileName != config.modelFileName ||
+        oldConfig.atlasFileName != config.atlasFileName ||
         oldConfig.source != config.source) {
       _loadModel();
       return;
@@ -331,6 +378,16 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    final isVisible = (route?.isCurrent ?? true) && TickerMode.of(context);
+    unawaited(
+      _renderingLifecycle.setViewVisible(isVisible).catchError((_) {}),
+    );
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     unawaited(
       _renderingLifecycle
@@ -342,13 +399,17 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   @override
   void reassemble() {
     super.reassemble();
-    if (Live2DCharacterView.isPlatformSupported) {
+    if (Live2DCharacterView.isPlatformSupported &&
+        widget.config.format == Live2DModelFormat.cubism) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadModel());
     }
   }
 
   Future<void> _loadModel() async {
-    if (!Live2DCharacterView.isPlatformSupported) return;
+    if (!Live2DCharacterView.isPlatformSupported ||
+        widget.config.format != Live2DModelFormat.cubism) {
+      return;
+    }
     final generation = ++_loadGeneration;
     _orchestrator.reset();
     _sentenceTracker.reset(text: widget.responseText);
@@ -432,6 +493,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         modelDirectory: config.modelDirectory,
         modelFileName: config.modelFileName,
         source: config.source,
+        format: config.format,
+        atlasFileName: config.atlasFileName,
       );
       final dataPath = config.source == Live2DModelSource.appData
           ? await PathUtils.getDataPath()
@@ -695,6 +758,23 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
             message: 'Live2D is available on Android, iOS, and macOS.',
             visible: widget.showStatus,
           );
+    }
+
+    if (widget.config.format == Live2DModelFormat.spine) {
+      return _SpineCharacterView(
+        key: ValueKey(
+          '${widget.config.modelDirectory}/${widget.config.modelFileName}',
+        ),
+        config: widget.config,
+        isSpeaking: widget.isSpeaking,
+        responseText: widget.responseText,
+        ttsPlayback: widget.ttsPlayback,
+        controller: widget.controller,
+        fallback: widget.fallback,
+        showStatus: widget.showStatus,
+        interactive: widget.interactive,
+        onTransformChanged: widget.onTransformChanged,
+      );
     }
 
     return ClipRect(

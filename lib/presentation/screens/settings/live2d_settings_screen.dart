@@ -154,20 +154,38 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     await _loadManifest(definition, replaceConfig: true);
   }
 
-  Future<void> _importZip() async {
+  Future<void> _importModel() async {
     if (_isImporting) return;
     try {
       final selection = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['zip'],
+        allowedExtensions: const [
+          'zip',
+          'skel',
+          'atlas',
+          'png',
+          'jpg',
+          'jpeg',
+          'webp',
+        ],
+        allowMultiple: true,
       );
-      final path = selection?.files.single.path;
-      if (path == null || !mounted) return;
+      final paths = selection?.files
+          .map((file) => file.path)
+          .whereType<String>()
+          .toList();
+      if (paths == null || paths.isEmpty || !mounted) return;
       setState(() {
         _isImporting = true;
         _error = null;
       });
-      final imported = await _importService.importZip(File(path));
+      final files = paths.map(File.new).toList();
+      final zipFiles = files
+          .where((file) => file.path.toLowerCase().endsWith('.zip'))
+          .toList();
+      final imported = zipFiles.length == 1 && files.length == 1
+          ? await _importService.importZip(zipFiles.single)
+          : await _importService.importSpineFiles(files);
       if (!mounted) return;
       final allImported = await _importService.listImportedModels();
       if (!mounted) return;
@@ -542,7 +560,7 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                       )
                     : const Icon(Icons.archive_outlined),
                 label: Text(l10n.live2dImportZip),
-                onPressed: _isImporting || _isDeleting ? null : _importZip,
+                onPressed: _isImporting || _isDeleting ? null : _importModel,
               ),
             ),
           ),

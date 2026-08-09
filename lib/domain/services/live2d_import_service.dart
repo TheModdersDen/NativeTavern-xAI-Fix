@@ -52,6 +52,8 @@ class Live2DImportService {
   static const _allowedExtensions = {
     '.json',
     '.moc3',
+    '.skel',
+    '.atlas',
     '.png',
     '.jpg',
     '.jpeg',
@@ -232,6 +234,138 @@ class Live2DImportService {
     );
   }
 
+  /// Imports one Spine skeleton plus its atlas and referenced texture pages.
+  /// Desktop callers may select only the `.skel` file when its siblings are
+  /// in the same directory. Mobile callers can select all package files.
+  Future<List<Live2DModelDefinition>> importSpineFiles(
+    List<File> selectedFiles,
+  ) async {
+    final existingFiles =
+        selectedFiles.where((file) => file.existsSync()).toList();
+    final skeletons = existingFiles
+        .where((file) => p.extension(file.path).toLowerCase() == '.skel')
+        .toList();
+    if (skeletons.length != 1) {
+      throw const Live2DImportException(
+        'Select one Spine .skel file with its .atlas and texture files.',
+      );
+    }
+    final skeleton = skeletons.single;
+    final selectedAtlases = existingFiles
+        .where((file) => p.extension(file.path).toLowerCase() == '.atlas')
+        .toList();
+    final siblingAtlas = File(
+      p.setExtension(skeleton.path, '.atlas'),
+    );
+    final atlas = selectedAtlases.firstWhere(
+      (candidate) =>
+          p.basenameWithoutExtension(candidate.path).toLowerCase() ==
+          p.basenameWithoutExtension(skeleton.path).toLowerCase(),
+      orElse: () {
+        if (selectedAtlases.length == 1) return selectedAtlases.single;
+        if (siblingAtlas.existsSync()) return siblingAtlas;
+        throw const Live2DImportException(
+          'The Spine .atlas file is missing or ambiguous.',
+        );
+      },
+    );
+    final textureReferences = Live2DService.parseSpineAtlasTexturePaths(
+      await atlas.readAsString(),
+    );
+    if (textureReferences.isEmpty) {
+      throw const Live2DImportException(
+        'The Spine atlas does not reference a texture file.',
+      );
+    }
+
+    final selectedByName = <String, File>{
+      for (final file in existingFiles)
+        p.basename(file.path).toLowerCase(): file,
+    };
+    final textureSources = <String, File>{};
+    for (final reference in textureReferences) {
+      final relativePath = _validatePackageReference(reference);
+      final sibling = File(p.join(atlas.parent.path, relativePath));
+      final source = sibling.existsSync()
+          ? sibling
+          : selectedByName[p.basename(relativePath).toLowerCase()];
+      if (source == null || !source.existsSync()) {
+        throw Live2DImportException(
+          'The Spine atlas texture is missing: $reference',
+        );
+      }
+      textureSources[relativePath] = source;
+    }
+
+    final filesToMeasure = <File>{skeleton, atlas, ...textureSources.values};
+    var totalBytes = 0;
+    for (final file in filesToMeasure) {
+      final size = file.lengthSync();
+      if (size <= 0 || size > maxSingleFileBytes) {
+        throw Live2DImportException(
+          'The selected Spine file is empty or too large: ${p.basename(file.path)}',
+        );
+      }
+      totalBytes += size;
+    }
+    if (totalBytes > maxExtractedBytes) {
+      throw const Live2DImportException(
+        'The selected Spine package exceeds the 512 MB limit.',
+      );
+    }
+
+    final importId = _uuid.v4();
+    final root = _modelsRoot;
+    await root.create(recursive: true);
+    final staging = Directory(p.join(root.path, '.import-$importId'));
+    final packageName =
+        '${_safeName(p.basenameWithoutExtension(skeleton.path))}-${importId.substring(0, 8)}';
+    final destination = Directory(p.join(root.path, packageName));
+    try {
+      await staging.create(recursive: true);
+      final importMarker = File(p.join(staging.path, _importMarkerFileName));
+      await importMarker.writeAsString(
+        DateTime.now().toUtc().toIso8601String(),
+        flush: true,
+      );
+      final stagedSkeleton = await skeleton.copy(
+        p.join(staging.path, p.basename(skeleton.path)),
+      );
+      await atlas.copy(p.join(staging.path, p.basename(atlas.path)));
+      for (final entry in textureSources.entries) {
+        final output = File(p.join(staging.path, entry.key));
+        await output.parent.create(recursive: true);
+        await entry.value.copy(output.path);
+      }
+
+      final metadataModels = [
+        await _createModelMetadata(
+          modelFile: stagedSkeleton,
+          packageRoot: staging,
+          importId: importId,
+          index: 0,
+        ),
+      ];
+      final metadata = {
+        'version': 2,
+        'importedAt': DateTime.now().toUtc().toIso8601String(),
+        'sourceArchive': null,
+        'models': metadataModels,
+      };
+      await File(p.join(staging.path, _metadataFileName)).writeAsString(
+        jsonEncode(metadata),
+        flush: true,
+      );
+      await importMarker.delete();
+      await staging.rename(destination.path);
+      return _definitionsFromMetadata(destination, metadataModels);
+    } catch (_) {
+      if (staging.existsSync()) await staging.delete(recursive: true);
+      if (destination.existsSync()) await destination.delete(recursive: true);
+      rethrow;
+    }
+  }
+
   Future<List<Live2DModelDefinition>> importZip(File zipFile) async {
     if (!zipFile.existsSync()) {
       throw const Live2DImportException(
@@ -317,71 +451,34 @@ class Live2DImportService {
         recursive: true,
         followLinks: false,
       )) {
+        final lowerPath = entity.path.toLowerCase();
         if (entity is File &&
-            entity.path.toLowerCase().endsWith('.model3.json')) {
+            (lowerPath.endsWith('.model3.json') ||
+                lowerPath.endsWith('.skel'))) {
           modelFiles.add(entity);
         }
       }
       if (modelFiles.isEmpty) {
         throw const Live2DImportException(
-          'No *.model3.json file was found in the ZIP archive.',
+          'No Cubism *.model3.json or Spine *.skel file was found in the ZIP archive.',
         );
       }
+      modelFiles.sort((left, right) => left.path.compareTo(right.path));
 
       final metadataModels = <Map<String, dynamic>>[];
       for (var index = 0; index < modelFiles.length; index++) {
-        final modelFile = modelFiles[index];
-        final modelDirectory = modelFile.parent.path;
-        final manifest = modelService.parseManifest(
-          await modelFile.readAsString(),
+        metadataModels.add(
+          await _createModelMetadata(
+            modelFile: modelFiles[index],
+            packageRoot: staging,
+            importId: importId,
+            index: index,
+          ),
         );
-        if (manifest.version < 3 ||
-            manifest.mocFile.isEmpty ||
-            manifest.textures.isEmpty) {
-          throw Live2DImportException(
-            'Invalid Cubism 3+ model definition: ${p.basename(modelFile.path)}',
-          );
-        }
-        final missing = <String>[];
-        for (final reference in manifest.referencedFiles) {
-          final normalizedReference = reference.replaceAll('\\', '/');
-          final isAbsolute = p.isAbsolute(normalizedReference) ||
-              normalizedReference.startsWith('/') ||
-              RegExp(r'^[a-zA-Z]:/').hasMatch(normalizedReference);
-          final resolved =
-              p.normalize(p.join(modelDirectory, normalizedReference));
-          if (isAbsolute ||
-              !p.isWithin(staging.path, resolved) ||
-              !File(resolved).existsSync()) {
-            missing.add(reference);
-          }
-        }
-        if (missing.isNotEmpty) {
-          throw Live2DImportException(
-            '${p.basename(modelFile.path)} references missing or unsafe file: '
-            '${missing.first}',
-          );
-        }
-
-        final relativeDirectory = p.relative(
-          modelDirectory,
-          from: staging.path,
-        );
-        final baseName = p.basename(modelFile.path).replaceFirst(
-              RegExp(r'\.model3\.json$', caseSensitive: false),
-              '',
-            );
-        metadataModels.add({
-          'id': 'imported:$importId:$index',
-          'displayName': _displayName(baseName),
-          'relativeDirectory':
-              relativeDirectory == '.' ? '' : relativeDirectory,
-          'modelFileName': p.basename(modelFile.path),
-        });
       }
 
       final metadata = {
-        'version': 1,
+        'version': 2,
         'importedAt': DateTime.now().toUtc().toIso8601String(),
         'sourceArchive': p.basename(zipFile.path),
         'models': metadataModels,
@@ -400,6 +497,151 @@ class Live2DImportService {
     }
   }
 
+  Future<Map<String, dynamic>> _createModelMetadata({
+    required File modelFile,
+    required Directory packageRoot,
+    required String importId,
+    required int index,
+  }) async {
+    final modelDirectory = modelFile.parent.path;
+    final isSpine = p.extension(modelFile.path).toLowerCase() == '.skel';
+    String? atlasFileName;
+    if (isSpine) {
+      final atlas = _findSpineAtlas(modelFile);
+      atlasFileName = p.basename(atlas.path);
+      final textures = Live2DService.parseSpineAtlasTexturePaths(
+        await atlas.readAsString(),
+      );
+      if (textures.isEmpty) {
+        throw const Live2DImportException(
+          'The Spine atlas does not reference a texture file.',
+        );
+      }
+      for (final reference in textures) {
+        _validateExistingReference(
+          packageRoot: packageRoot,
+          baseDirectory: atlas.parent.path,
+          reference: reference,
+          modelFileName: p.basename(modelFile.path),
+        );
+      }
+      try {
+        final manifest = await modelService.loadManifest(
+          Live2DModelDefinition(
+            id: 'validation',
+            displayName: 'validation',
+            modelDirectory: modelDirectory,
+            modelFileName: p.basename(modelFile.path),
+            source: Live2DModelSource.fileSystem,
+            format: Live2DModelFormat.spine,
+            atlasFileName: atlasFileName,
+          ),
+        );
+        if (manifest.version != 4) {
+          throw Live2DImportException(
+            'Unsupported Spine data version ${manifest.version}.x.',
+          );
+        }
+      } catch (error) {
+        if (error is Live2DImportException) rethrow;
+        throw Live2DImportException(
+          'The Spine model could not be read by runtime 4.1: $error',
+        );
+      }
+    } else {
+      final manifest = modelService.parseManifest(
+        await modelFile.readAsString(),
+      );
+      if (manifest.version < 3 ||
+          manifest.mocFile.isEmpty ||
+          manifest.textures.isEmpty) {
+        throw Live2DImportException(
+          'Invalid Cubism 3+ model definition: ${p.basename(modelFile.path)}',
+        );
+      }
+      for (final reference in manifest.referencedFiles) {
+        _validateExistingReference(
+          packageRoot: packageRoot,
+          baseDirectory: modelDirectory,
+          reference: reference,
+          modelFileName: p.basename(modelFile.path),
+        );
+      }
+    }
+
+    final relativeDirectory = p.relative(
+      modelDirectory,
+      from: packageRoot.path,
+    );
+    final baseName = p.basename(modelFile.path).replaceFirst(
+          isSpine
+              ? RegExp(r'\.skel$', caseSensitive: false)
+              : RegExp(r'\.model3\.json$', caseSensitive: false),
+          '',
+        );
+    return {
+      'id': 'imported:$importId:$index',
+      'displayName': _displayName(baseName),
+      'relativeDirectory': relativeDirectory == '.' ? '' : relativeDirectory,
+      'modelFileName': p.basename(modelFile.path),
+      'format': isSpine
+          ? Live2DModelFormat.spine.name
+          : Live2DModelFormat.cubism.name,
+      'atlasFileName': atlasFileName,
+    };
+  }
+
+  File _findSpineAtlas(File skeleton) {
+    final matching = File(p.setExtension(skeleton.path, '.atlas'));
+    if (matching.existsSync()) return matching;
+    final atlases = skeleton.parent
+        .listSync(followLinks: false)
+        .whereType<File>()
+        .where((file) => p.extension(file.path).toLowerCase() == '.atlas')
+        .toList();
+    if (atlases.length == 1) return atlases.single;
+    throw Live2DImportException(
+      'No unambiguous .atlas file was found for ${p.basename(skeleton.path)}.',
+    );
+  }
+
+  void _validateExistingReference({
+    required Directory packageRoot,
+    required String baseDirectory,
+    required String reference,
+    required String modelFileName,
+  }) {
+    String relativePath;
+    try {
+      relativePath = _validatePackageReference(reference);
+    } on Live2DImportException {
+      throw Live2DImportException(
+        '$modelFileName references missing or unsafe file: $reference',
+      );
+    }
+    final resolved = p.normalize(p.join(baseDirectory, relativePath));
+    if (!p.isWithin(packageRoot.path, resolved) ||
+        !File(resolved).existsSync()) {
+      throw Live2DImportException(
+        '$modelFileName references missing or unsafe file: $reference',
+      );
+    }
+  }
+
+  String _validatePackageReference(String reference) {
+    final normalized = reference.replaceAll('\\', '/').trim();
+    if (normalized.isEmpty ||
+        _isAbsolutePath(normalized) ||
+        normalized.contains('\u0000')) {
+      throw Live2DImportException('Unsafe model reference: $reference');
+    }
+    final segments = normalized.split('/');
+    if (segments.any((part) => part.isEmpty || part == '.' || part == '..')) {
+      throw Live2DImportException('Unsafe model reference: $reference');
+    }
+    return p.joinAll(segments);
+  }
+
   Future<List<Live2DModelDefinition>> _readPackageModels(
     Directory package,
   ) async {
@@ -413,9 +655,14 @@ class Live2DImportService {
           .toList();
       return _definitionsFromMetadata(package, models).where((definition) {
         final absoluteDirectory = p.join(dataPath, definition.modelDirectory);
-        return File(
+        final modelExists = File(
           p.join(absoluteDirectory, definition.modelFileName),
         ).existsSync();
+        final atlasFileName = definition.atlasFileName;
+        final atlasExists = definition.format != Live2DModelFormat.spine ||
+            (atlasFileName != null &&
+                File(p.join(absoluteDirectory, atlasFileName)).existsSync());
+        return modelExists && atlasExists;
       }).toList();
     } catch (_) {
       return const [];
@@ -430,6 +677,8 @@ class Live2DImportService {
     return models.map((model) {
       final relativeDirectory = model['relativeDirectory'] as String? ?? '';
       final modelFileName = model['modelFileName'] as String? ?? '';
+      final format = Live2DModelFormat.fromJson(model['format'] as String?);
+      final atlasFileName = model['atlasFileName'] as String?;
       final absoluteDirectory = p.normalize(
         p.join(package.path, relativeDirectory),
       );
@@ -437,7 +686,10 @@ class Live2DImportService {
               !p.isWithin(package.path, absoluteDirectory)) ||
           modelFileName.isEmpty ||
           p.basename(modelFileName) != modelFileName ||
-          p.isAbsolute(modelFileName)) {
+          p.isAbsolute(modelFileName) ||
+          (atlasFileName != null &&
+              (p.basename(atlasFileName) != atlasFileName ||
+                  p.isAbsolute(atlasFileName)))) {
         throw const Live2DImportException('Invalid imported model metadata.');
       }
       return Live2DModelDefinition(
@@ -446,6 +698,8 @@ class Live2DImportService {
         modelDirectory: p.relative(absoluteDirectory, from: dataPath),
         modelFileName: modelFileName,
         source: Live2DModelSource.appData,
+        format: format,
+        atlasFileName: atlasFileName,
       );
     }).where((definition) {
       final absolute = p.normalize(p.join(dataPath, definition.modelDirectory));

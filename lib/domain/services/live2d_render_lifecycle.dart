@@ -11,6 +11,8 @@ class Live2DRenderingLifecycle {
   Future<void> _tail = Future<void>.value();
   bool _attached = false;
   bool _disposed = false;
+  bool _appActive;
+  bool _viewVisible;
   bool _desiredPaused;
   bool? _appliedPaused;
   int _attachmentGeneration = 0;
@@ -20,6 +22,8 @@ class Live2DRenderingLifecycle {
     required Live2DRenderingPauseApplier applyPaused,
     bool initialPaused = false,
   })  : _applyPaused = applyPaused,
+        _appActive = !initialPaused,
+        _viewVisible = true,
         _desiredPaused = initialPaused;
 
   bool get isAttached => _attached;
@@ -37,7 +41,20 @@ class Live2DRenderingLifecycle {
 
   Future<void> setAppActive(bool active) {
     if (_disposed) return Future<void>.value();
-    _desiredPaused = !active;
+    _appActive = active;
+    return _updateDesiredState();
+  }
+
+  Future<void> setViewVisible(bool visible) {
+    if (_disposed) return Future<void>.value();
+    _viewVisible = visible;
+    return _updateDesiredState();
+  }
+
+  Future<void> _updateDesiredState() {
+    final desiredPaused = !_appActive || !_viewVisible;
+    if (_desiredPaused == desiredPaused) return _tail;
+    _desiredPaused = desiredPaused;
     return _scheduleSynchronization();
   }
 

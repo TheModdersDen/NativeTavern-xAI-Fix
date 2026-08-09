@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/core/services/initialization_service.dart';
 import 'package:native_tavern/data/models/live2d.dart';
+import 'package:native_tavern/domain/services/spine_runtime_service.dart';
 import 'package:path/path.dart' as p;
 
 /// Discovers and validates Cubism model metadata without loading native code.
@@ -42,7 +43,8 @@ class Live2DService {
             p.normalize(model.modelDirectory),
             p.normalize(config.modelDirectory),
           ) &&
-          model.modelFileName == config.modelFileName) {
+          model.modelFileName == config.modelFileName &&
+          model.format == config.format) {
         return model;
       }
     }
@@ -50,8 +52,9 @@ class Live2DService {
     final fileMatches = models
         .where(
           (model) =>
+              model.format == config.format &&
               model.modelFileName.toLowerCase() ==
-              config.modelFileName.toLowerCase(),
+                  config.modelFileName.toLowerCase(),
         )
         .toList();
     if (fileMatches.length == 1 &&
@@ -72,6 +75,8 @@ class Live2DService {
       modelDirectory: config.modelDirectory,
       modelFileName: config.modelFileName,
       source: config.source,
+      format: config.format,
+      atlasFileName: config.atlasFileName,
     );
   }
 
@@ -92,12 +97,17 @@ class Live2DService {
           modelDirectory: definition.modelDirectory,
           modelFileName: definition.modelFileName,
           source: definition.source,
+          format: definition.format,
+          atlasFileName: definition.atlasFileName,
         );
   }
 
   Future<Live2DModelManifest> loadManifest(
     Live2DModelDefinition definition,
   ) async {
+    if (definition.format == Live2DModelFormat.spine) {
+      return _loadSpineManifest(definition);
+    }
     final modelDirectory = _resolveModelDirectory(definition);
     final jsonText = switch (definition.source) {
       Live2DModelSource.asset => await rootBundle.loadString(
@@ -108,6 +118,77 @@ class Live2DService {
         ).readAsString(),
     };
     return parseManifest(jsonText);
+  }
+
+  Future<Live2DModelManifest> _loadSpineManifest(
+    Live2DModelDefinition definition,
+  ) async {
+    if (definition.source == Live2DModelSource.asset) {
+      throw UnsupportedError('Bundled Spine assets are not configured.');
+    }
+    final modelDirectory = _resolveModelDirectory(definition);
+    final atlasFileName = definition.atlasFileName;
+    if (atlasFileName == null || atlasFileName.isEmpty) {
+      throw const FormatException('The Spine model is missing its atlas file.');
+    }
+    final atlasPath = p.join(modelDirectory, atlasFileName);
+    final skeletonPath = p.join(modelDirectory, definition.modelFileName);
+    final textures = parseSpineAtlasTexturePaths(
+      await File(atlasPath).readAsString(),
+    );
+    if (textures.isEmpty) {
+      throw const FormatException(
+          'The Spine atlas does not reference a texture.');
+    }
+    final metadata = await SpineRuntimeService.inspectModel(
+      atlasPath: atlasPath,
+      skeletonPath: skeletonPath,
+    );
+    final version = int.tryParse(metadata.version.split('.').first) ?? 0;
+    return Live2DModelManifest(
+      format: Live2DModelFormat.spine,
+      version: version,
+      mocFile: '',
+      textures: textures,
+      atlasFileName: atlasFileName,
+      motions: [
+        for (var index = 0; index < metadata.animations.length; index++)
+          Live2DMotionRef(
+            group: metadata.animations[index],
+            index: index,
+            file: '',
+            name: metadata.animations[index],
+          ),
+      ],
+    );
+  }
+
+  /// Extracts page image paths from the standard Spine atlas text format.
+  static List<String> parseSpineAtlasTexturePaths(String atlasText) {
+    final lines = const LineSplitter().convert(atlasText);
+    final textures = <String>[];
+    var startsSection = true;
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index].trim();
+      if (line.isEmpty) {
+        startsSection = true;
+        continue;
+      }
+      if (!startsSection || line.contains(':')) continue;
+      final nextProperty = lines
+          .skip(index + 1)
+          .map((candidate) => candidate.trim())
+          .firstWhere((candidate) => candidate.isNotEmpty, orElse: () => '');
+      if (nextProperty.startsWith('size:') ||
+          nextProperty.startsWith('format:') ||
+          nextProperty.startsWith('filter:') ||
+          nextProperty.startsWith('repeat:') ||
+          nextProperty.startsWith('pma:')) {
+        textures.add(line.replaceAll('\\', '/'));
+      }
+      startsSection = false;
+    }
+    return textures;
   }
 
   Live2DModelManifest parseManifest(String jsonText) {

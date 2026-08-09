@@ -53,6 +53,16 @@ macos
 packages/native_tavern_live2d_macos/macos/CubismCore/
 linux
 windows
+!packages/spine_flutter_4_1_compat/android/
+!packages/spine_flutter_4_1_compat/android/**
+!packages/spine_flutter_4_1_compat/ios/
+!packages/spine_flutter_4_1_compat/ios/**
+!packages/spine_flutter_4_1_compat/linux/
+!packages/spine_flutter_4_1_compat/linux/**
+!packages/spine_flutter_4_1_compat/macos/
+!packages/spine_flutter_4_1_compat/macos/**
+!packages/spine_flutter_4_1_compat/windows/
+!packages/spine_flutter_4_1_compat/windows/**
 release
 .env
 build_*

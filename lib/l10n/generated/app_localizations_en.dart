@@ -4247,7 +4247,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get live2dImportZip => 'Import ZIP';
+  String get live2dImportZip => 'Import model';
 
   @override
   String get live2dMotion => 'Motion';

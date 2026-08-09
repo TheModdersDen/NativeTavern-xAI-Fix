@@ -41,6 +41,51 @@ void main() {
     expect(lifecycle.appliedPaused, isFalse);
   });
 
+  test('pauses while the model route is covered', () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    await lifecycle.setAttached(true);
+    await lifecycle.setViewVisible(false);
+
+    expect(applied, [false, true]);
+    expect(lifecycle.desiredPaused, isTrue);
+    expect(lifecycle.appliedPaused, isTrue);
+  });
+
+  test('app resume cannot resume a model on a covered route', () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    await lifecycle.setAttached(true);
+    await lifecycle.setViewVisible(false);
+    await lifecycle.setAppActive(false);
+    await lifecycle.setAppActive(true);
+
+    expect(applied, [false, true]);
+    expect(lifecycle.desiredPaused, isTrue);
+    expect(lifecycle.appliedPaused, isTrue);
+  });
+
+  test('resumes after a covered route becomes visible again', () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    await lifecycle.setAttached(true);
+    await lifecycle.setViewVisible(false);
+    await lifecycle.setViewVisible(true);
+
+    expect(applied, [false, true, false]);
+    expect(lifecycle.desiredPaused, isFalse);
+    expect(lifecycle.appliedPaused, isFalse);
+  });
+
   test('detachment invalidates an in-flight native result', () async {
     final call = Completer<void>();
     final lifecycle = Live2DRenderingLifecycle(

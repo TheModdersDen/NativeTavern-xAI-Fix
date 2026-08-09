@@ -206,6 +206,8 @@ class Live2DModelLifecycleService {
       p.normalize(definition.modelDirectory),
       p.normalize(definition.modelFileName),
       definition.source.name,
+      definition.format.name,
+      definition.atlasFileName ?? '',
     ].join('\u0000');
   }
 

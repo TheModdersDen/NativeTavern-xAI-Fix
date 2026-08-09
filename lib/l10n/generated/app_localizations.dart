@@ -7720,7 +7720,7 @@ abstract class AppLocalizations {
   /// No description provided for @live2dImportZip.
   ///
   /// In en, this message translates to:
-  /// **'Import ZIP'**
+  /// **'Import model'**
   String get live2dImportZip;
 
   /// No description provided for @live2dMotion.

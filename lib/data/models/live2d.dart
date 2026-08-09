@@ -12,6 +12,19 @@ enum Live2DModelSource {
   }
 }
 
+/// The animation runtime required by an imported character model.
+enum Live2DModelFormat {
+  cubism,
+  spine;
+
+  static Live2DModelFormat fromJson(String? value) {
+    return Live2DModelFormat.values.firstWhere(
+      (format) => format.name == value,
+      orElse: () => cubism,
+    );
+  }
+}
+
 /// App-level semantics for a Cubism hit area.
 enum Live2DHitAreaKind {
   head,
@@ -93,6 +106,8 @@ class Live2DModelDefinition {
   final String modelDirectory;
   final String modelFileName;
   final Live2DModelSource source;
+  final Live2DModelFormat format;
+  final String? atlasFileName;
 
   const Live2DModelDefinition({
     required this.id,
@@ -100,14 +115,18 @@ class Live2DModelDefinition {
     required this.modelDirectory,
     required this.modelFileName,
     this.source = Live2DModelSource.asset,
+    this.format = Live2DModelFormat.cubism,
+    this.atlasFileName,
   });
 }
 
 /// Parsed data from a Cubism `*.model3.json` file.
 class Live2DModelManifest {
+  final Live2DModelFormat format;
   final int version;
   final String mocFile;
   final List<String> textures;
+  final String? atlasFileName;
   final String? physicsFile;
   final String? poseFile;
   final List<String> expressions;
@@ -116,9 +135,11 @@ class Live2DModelManifest {
   final List<String> lipSyncParameters;
 
   const Live2DModelManifest({
+    this.format = Live2DModelFormat.cubism,
     required this.version,
     required this.mocFile,
     required this.textures,
+    this.atlasFileName,
     this.physicsFile,
     this.poseFile,
     this.expressions = const [],
@@ -128,6 +149,11 @@ class Live2DModelManifest {
   });
 
   Iterable<String> get referencedFiles sync* {
+    if (format == Live2DModelFormat.spine) {
+      if (atlasFileName case final value?) yield value;
+      yield* textures;
+      return;
+    }
     if (mocFile.isNotEmpty) yield mocFile;
     yield* textures;
     if (physicsFile case final value?) yield value;
@@ -165,6 +191,8 @@ class Live2DConfig {
   final String modelDirectory;
   final String modelFileName;
   final Live2DModelSource source;
+  final Live2DModelFormat format;
+  final String? atlasFileName;
   final double scale;
   final double offsetX;
   final double offsetY;
@@ -187,6 +215,8 @@ class Live2DConfig {
     required this.modelDirectory,
     required this.modelFileName,
     this.source = Live2DModelSource.asset,
+    this.format = Live2DModelFormat.cubism,
+    this.atlasFileName,
     this.scale = 1,
     this.offsetX = 0,
     this.offsetY = 0,
@@ -213,6 +243,8 @@ class Live2DConfig {
       modelDirectory: definition.modelDirectory,
       modelFileName: definition.modelFileName,
       source: definition.source,
+      format: definition.format,
+      atlasFileName: definition.atlasFileName ?? manifest.atlasFileName,
       idleMotion: manifest.findMotion(const ['idle']),
       tapMotion: manifest.findMotion(
         const ['tap', 'touch', 'flick'],
@@ -270,6 +302,8 @@ class Live2DConfig {
     String? modelDirectory,
     String? modelFileName,
     Live2DModelSource? source,
+    Live2DModelFormat? format,
+    String? atlasFileName,
     double? scale,
     double? offsetX,
     double? offsetY,
@@ -292,6 +326,8 @@ class Live2DConfig {
       modelDirectory: modelDirectory ?? this.modelDirectory,
       modelFileName: modelFileName ?? this.modelFileName,
       source: source ?? this.source,
+      format: format ?? this.format,
+      atlasFileName: atlasFileName ?? this.atlasFileName,
       scale: scale ?? this.scale,
       offsetX: offsetX ?? this.offsetX,
       offsetY: offsetY ?? this.offsetY,
@@ -333,6 +369,8 @@ class Live2DConfig {
         'modelDirectory': modelDirectory,
         'modelFileName': modelFileName,
         'source': source.name,
+        'format': format.name,
+        'atlasFileName': atlasFileName,
         'scale': scale,
         'offsetX': offsetX,
         'offsetY': offsetY,
@@ -366,6 +404,8 @@ class Live2DConfig {
       modelDirectory: json['modelDirectory'] as String? ?? '',
       modelFileName: json['modelFileName'] as String? ?? '',
       source: Live2DModelSource.fromJson(json['source'] as String?),
+      format: Live2DModelFormat.fromJson(json['format'] as String?),
+      atlasFileName: json['atlasFileName'] as String?,
       scale: (json['scale'] as num?)?.toDouble() ?? 1,
       offsetX: (json['offsetX'] as num?)?.toDouble() ?? 0,
       offsetY: (json['offsetY'] as num?)?.toDouble() ?? 0,

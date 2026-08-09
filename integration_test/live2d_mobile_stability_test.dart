@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -10,6 +12,10 @@ void main() {
   testWidgets(
     'Live2D survives lifecycle changes and 20 character switches',
     (tester) async {
+      // Android's integration-test host can request semantics after the test
+      // starts, which otherwise looks like an application-owned handle leak.
+      tester.platformDispatcher.semanticsEnabledTestValue = false;
+
       final harnessKey = GlobalKey<_Live2DStabilityHarnessState>();
       await tester.pumpWidget(_Live2DStabilityHarness(key: harnessKey));
       await _waitUntil(
@@ -51,6 +57,29 @@ void main() {
       );
       expect(harnessKey.currentState!.controller.isReady, isTrue);
 
+      final navigator = Navigator.of(tester.element(stage));
+      unawaited(
+        navigator.push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: Text('Covered route')),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await _waitUntil(
+        tester,
+        () => harnessKey.currentState!.controller.isRenderingPaused,
+      );
+      navigator.pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await _waitUntil(
+        tester,
+        () => !harnessKey.currentState!.controller.isRenderingPaused,
+      );
+      expect(harnessKey.currentState!.controller.isReady, isTrue);
+
       for (var index = 0; index < 20; index++) {
         final modelId = harnessKey.currentState!.switchCharacter();
         await tester.pump();
@@ -70,6 +99,7 @@ void main() {
       expect(finalController.isAttached, isFalse);
       expect(tester.takeException(), isNull);
     },
+    semanticsEnabled: false,
     timeout: const Timeout(Duration(minutes: 5)),
   );
 }

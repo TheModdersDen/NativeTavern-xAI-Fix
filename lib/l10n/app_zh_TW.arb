@@ -414,7 +414,7 @@
   "live2dReviewTerms": "查看條款",
   "live2dUnavailableLabel": "{name}（無法使用）",
   "live2dImportedLabel": "{name}（已匯入）",
-  "live2dImportZip": "匯入 ZIP",
+  "live2dImportZip": "匯入模型",
   "live2dMotion": "動作",
   "live2dPlayMotion": "播放動作",
   "live2dStageAdjustment": "舞台調整",

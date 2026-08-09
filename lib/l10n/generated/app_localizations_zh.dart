@@ -4115,7 +4115,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get live2dImportZip => '导入 ZIP';
+  String get live2dImportZip => '导入模型';
 
   @override
   String get live2dMotion => '动作';
@@ -10073,7 +10073,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get live2dImportZip => '匯入 ZIP';
+  String get live2dImportZip => '匯入模型';
 
   @override
   String get live2dMotion => '動作';

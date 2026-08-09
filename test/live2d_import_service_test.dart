@@ -15,7 +15,7 @@ void main() {
 
   setUp(() {
     tempDirectory = Directory.systemTemp.createTempSync('nt_live2d_import');
-    modelService = Live2DService(dataPath: tempDirectory.path);
+    modelService = _TestLive2DService(dataPath: tempDirectory.path);
     importService = Live2DImportService(
       dataPath: tempDirectory.path,
       modelService: modelService,
@@ -51,6 +51,32 @@ void main() {
     expect(rediscovered, hasLength(1));
     expect(rediscovered.single.id, imported.single.id);
     expect(rediscovered.single.modelFileName, 'test_model.model3.json');
+  });
+
+  test('imports a Spine skeleton with sibling atlas and texture', () async {
+    final source = Directory(p.join(tempDirectory.path, 'spine-source'))
+      ..createSync();
+    final skeleton = File(p.join(source.path, 'character.skel'))
+      ..writeAsBytesSync([0x53, 0x4b, 0x45, 0x4c]);
+    File(p.join(source.path, 'character.atlas')).writeAsStringSync('''
+character.png
+size:64,64
+filter:Linear,Linear
+body
+bounds:0,0,64,64
+''');
+    File(p.join(source.path, 'character.png'))
+        .writeAsBytesSync([0x89, 0x50, 0x4e, 0x47]);
+
+    final imported = await importService.importSpineFiles([skeleton]);
+
+    expect(imported, hasLength(1));
+    expect(imported.single.format, Live2DModelFormat.spine);
+    expect(imported.single.atlasFileName, 'character.atlas');
+    expect(imported.single.modelFileName, 'character.skel');
+    final rediscovered = await importService.listImportedModels();
+    expect(rediscovered.single.format, Live2DModelFormat.spine);
+    expect(rediscovered.single.atlasFileName, 'character.atlas');
   });
 
   test('rejects path traversal without writing outside the model library',
@@ -119,7 +145,8 @@ void main() {
     expect(await importService.listImportedModels(), isEmpty);
   });
 
-  test('repeated imports stay isolated and stale staging directories are removed',
+  test(
+      'repeated imports stay isolated and stale staging directories are removed',
       () async {
     final zipFile = _writeZip(
       tempDirectory,
@@ -175,6 +202,36 @@ void main() {
       throwsA(isA<Live2DImportException>()),
     );
   });
+}
+
+class _TestLive2DService extends Live2DService {
+  const _TestLive2DService({required super.dataPath});
+
+  @override
+  Future<Live2DModelManifest> loadManifest(
+    Live2DModelDefinition definition,
+  ) {
+    if (definition.format == Live2DModelFormat.spine) {
+      return Future.value(
+        Live2DModelManifest(
+          format: Live2DModelFormat.spine,
+          version: 4,
+          mocFile: '',
+          textures: const ['character.png'],
+          atlasFileName: definition.atlasFileName,
+          motions: const [
+            Live2DMotionRef(
+              group: 'idle',
+              index: 0,
+              file: '',
+              name: 'idle',
+            ),
+          ],
+        ),
+      );
+    }
+    return super.loadManifest(definition);
+  }
 }
 
 Map<String, List<int>> _validModelEntries() {

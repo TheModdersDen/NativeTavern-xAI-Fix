@@ -82,6 +82,56 @@ void main() {
     expect(restored.hitAreas.single.kind, Live2DHitAreaKind.head);
   });
 
+  test('Spine character configuration round-trips through JSON', () {
+    const config = Live2DConfig(
+      modelId: 'spine-character',
+      displayName: 'Spine character',
+      modelDirectory: 'live2d_models/spine-character',
+      modelFileName: 'character.skel',
+      source: Live2DModelSource.appData,
+      format: Live2DModelFormat.spine,
+      atlasFileName: 'character.atlas',
+    );
+
+    final restored = Live2DConfig.fromJson(config.toJson());
+
+    expect(restored.format, Live2DModelFormat.spine);
+    expect(restored.atlasFileName, 'character.atlas');
+    expect(restored.modelFileName, 'character.skel');
+  });
+
+  test('legacy configuration without a format remains Cubism', () {
+    final restored = Live2DConfig.fromJson(const {
+      'modelId': 'legacy',
+      'displayName': 'Legacy',
+      'modelDirectory': 'assets/live2d/legacy/',
+      'modelFileName': 'legacy.model3.json',
+    });
+
+    expect(restored.format, Live2DModelFormat.cubism);
+  });
+
+  test('parses texture page paths from a Spine atlas', () {
+    const atlas = '''
+character.png
+size:2048,1024
+filter:Linear,Linear
+body
+bounds:0,0,100,100
+
+effects/glow.png
+size:512,512
+filter:Linear,Linear
+glow
+bounds:0,0,10,10
+''';
+
+    expect(
+      Live2DService.parseSpineAtlasTexturePaths(atlas),
+      ['character.png', 'effects/glow.png'],
+    );
+  });
+
   test('legacy asset assignment resolves to a uniquely reimported model', () {
     const config = Live2DConfig(
       modelId: 'zhaohe_3',
