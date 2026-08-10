@@ -164,21 +164,28 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox.expand(
-          child: Live2DBackgroundTapRegion(
-            onTap: backgroundTaps.add,
-            child: ListView(
-              children: const [
-                SizedBox(height: 80),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    key: ValueKey('chat-message-bubble'),
-                    width: 180,
-                    height: 80,
+          child: Live2DTwoFingerGestureRegion(
+            initialTransform: const Live2DStageTransform(
+              scale: 1,
+              offsetX: 0,
+              offsetY: 0,
+            ),
+            builder: (context, transform) => Live2DBackgroundTapRegion(
+              onTap: backgroundTaps.add,
+              child: ListView(
+                children: const [
+                  SizedBox(height: 80),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      key: ValueKey('chat-message-bubble'),
+                      width: 180,
+                      height: 80,
+                    ),
                   ),
-                ),
-                SizedBox(height: 800),
-              ],
+                  SizedBox(height: 800),
+                ],
+              ),
             ),
           ),
         ),

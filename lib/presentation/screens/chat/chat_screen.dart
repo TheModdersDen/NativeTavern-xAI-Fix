@@ -1523,7 +1523,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           offsetX: live2d.offsetX,
           offsetY: live2d.offsetY,
         ),
-        resetOnDoubleTap: true,
         onTransformEnd: (transform) {
           unawaited(_saveLive2DTransform(character.id, transform));
         },
