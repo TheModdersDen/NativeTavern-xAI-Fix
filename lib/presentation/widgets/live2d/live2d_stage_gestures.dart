@@ -72,6 +72,27 @@ class Live2DStageTransform {
 typedef Live2DTransformBuilder = Widget Function(
     BuildContext context, Live2DStageTransform transform);
 
+/// Observes taps that were not claimed by foreground controls or scrolling.
+class Live2DBackgroundTapRegion extends StatelessWidget {
+  final Widget child;
+  final ValueChanged<Offset> onTap;
+
+  const Live2DBackgroundTapRegion({
+    super.key,
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapUp: (details) => onTap(details.localPosition),
+      child: child,
+    );
+  }
+}
+
 /// Waits for a second touch before accepting the gesture. A one-finger drag can
 /// therefore be won by the message list, while a two-finger gesture transforms
 /// the Live2D stage without scrolling messages at the same time.

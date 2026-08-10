@@ -93,6 +93,110 @@ void main() {
     expect(completed, isEmpty);
   });
 
+  testWidgets('background taps are forwarded after foreground controls decline',
+      (tester) async {
+    final taps = <Offset>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 240,
+            height: 320,
+            child: Live2DBackgroundTapRegion(
+              onTap: taps.add,
+              child: const ColoredBox(
+                key: ValueKey('live2d-background-tap-surface'),
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('live2d-background-tap-surface')),
+    );
+    await tester.pump();
+
+    expect(taps, hasLength(1));
+  });
+
+  testWidgets('foreground tap controls take priority over the background',
+      (tester) async {
+    final backgroundTaps = <Offset>[];
+    var foregroundTaps = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 240,
+            height: 320,
+            child: Live2DBackgroundTapRegion(
+              onTap: backgroundTaps.add,
+              child: Center(
+                child: GestureDetector(
+                  key: const ValueKey('live2d-foreground-control'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => foregroundTaps++,
+                  child: const SizedBox(width: 80, height: 48),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('live2d-foreground-control')));
+    await tester.pump();
+
+    expect(foregroundTaps, 1);
+    expect(backgroundTaps, isEmpty);
+  });
+
+  testWidgets('chat list forwards blank taps but not scroll gestures',
+      (tester) async {
+    final backgroundTaps = <Offset>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.expand(
+          child: Live2DBackgroundTapRegion(
+            onTap: backgroundTaps.add,
+            child: ListView(
+              children: const [
+                SizedBox(height: 80),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    key: ValueKey('chat-message-bubble'),
+                    width: 180,
+                    height: 80,
+                  ),
+                ),
+                SizedBox(height: 800),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(350, 400));
+    await tester.pump();
+    expect(backgroundTaps, hasLength(1));
+
+    await tester.dragFrom(
+      const Offset(350, 400),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+    expect(backgroundTaps, hasLength(1));
+  });
+
   testWidgets('double tap resets and persists the stage transform',
       (tester) async {
     final completed = <Live2DStageTransform>[];

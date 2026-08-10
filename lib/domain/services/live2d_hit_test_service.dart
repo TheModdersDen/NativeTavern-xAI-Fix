@@ -6,7 +6,7 @@ enum Live2DHitResult { head, body, miss }
 ///
 /// Cubism's model JSON identifies hit drawables but does not expose their
 /// geometry to Flutter. This resolver provides deterministic normalized zones
-/// while keeping unknown or malformed declarations non-interactive.
+/// and treats models without declarations as a generic body target.
 class Live2DHitTestService {
   static const double _modelLeft = 0.08;
   static const double _modelRight = 0.92;
@@ -33,6 +33,7 @@ class Live2DHitTestService {
     final kinds = hitAreas.map((area) => area.kind).toSet();
     final hasHead = kinds.contains(Live2DHitAreaKind.head);
     final hasBody = kinds.contains(Live2DHitAreaKind.body);
+    if (hitAreas.isEmpty) return Live2DHitResult.body;
     if (hasHead && (!hasBody || normalizedY <= _headBottom)) {
       return Live2DHitResult.head;
     }

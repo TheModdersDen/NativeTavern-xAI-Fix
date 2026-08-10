@@ -34,19 +34,26 @@ import StoreKit
         result(FlutterMethodNotImplemented)
         return
       }
-      result(self?.synchronizeLive2DContentScale() ?? 0)
+      let arguments = call.arguments as? [String: Any]
+      let requestedScale = (arguments?["devicePixelRatio"] as? NSNumber)
+        .map { CGFloat($0.doubleValue) }
+      result(self?.synchronizeLive2DContentScale(requestedScale: requestedScale) ?? 0)
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  private func synchronizeLive2DContentScale() -> Int {
+  private func synchronizeLive2DContentScale(requestedScale: CGFloat?) -> Int {
     let windows = UIApplication.shared.connectedScenes
       .compactMap { $0 as? UIWindowScene }
       .flatMap { $0.windows }
 
     return windows.reduce(0) { count, window in
-      count + synchronizeLive2DContentScale(in: window, scale: window.screen.scale)
+      let validRequestedScale = requestedScale.flatMap { scale in
+        scale.isFinite && scale >= 1 ? scale : nil
+      }
+      let scale = validRequestedScale ?? window.screen.scale
+      return count + synchronizeLive2DContentScale(in: window, scale: scale)
     }
   }
 

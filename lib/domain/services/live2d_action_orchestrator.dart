@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
@@ -23,12 +24,20 @@ typedef Live2DMotionPlayer = Future<bool> Function(
     Live2DMotionRef motion, int priority);
 
 typedef Live2DPlaybackListener = void Function(Live2DActionPlayback? playback);
+typedef Live2DRandomIndex = int Function(int upperBound);
 
 /// Applies semantic fallback rules without relying on provider-specific names.
 class Live2DActionResolver {
   final Live2DConfig config;
+  final List<Live2DMotionRef> tapMotions;
+  final Live2DRandomIndex _randomIndex;
 
-  const Live2DActionResolver(this.config);
+  Live2DActionResolver(
+    this.config, {
+    Iterable<Live2DMotionRef> tapMotions = const [],
+    Live2DRandomIndex? randomIndex,
+  })  : tapMotions = List.unmodifiable(tapMotions),
+        _randomIndex = randomIndex ?? Random().nextInt;
 
   List<Live2DMotionRef> candidatesFor(
     Live2DActionKind kind, {
@@ -38,12 +47,14 @@ class Live2DActionResolver {
       Live2DActionKind.idle => [config.idleMotion],
       Live2DActionKind.speaking => [config.speakingMotion, config.idleMotion],
       Live2DActionKind.headTap => [
+          ..._randomTapMotions(),
           config.headTapMotion,
           config.tapMotion,
           config.bodyTapMotion,
           config.idleMotion,
         ],
       Live2DActionKind.bodyTap => [
+          ..._randomTapMotions(),
           config.bodyTapMotion,
           config.tapMotion,
           config.headTapMotion,
@@ -61,6 +72,22 @@ class Live2DActionResolver {
     return candidates.whereType<Live2DMotionRef>().where((motion) {
       return seen.add('${motion.group}\u0000${motion.index}');
     }).toList();
+  }
+
+  List<Live2DMotionRef> _randomTapMotions() {
+    final idle = config.idleMotion;
+    final candidates = tapMotions.where((motion) {
+      return idle == null ||
+          motion.group != idle.group ||
+          motion.index != idle.index;
+    }).toList();
+    if (candidates.isEmpty) return const [];
+
+    final start = _randomIndex(candidates.length);
+    return [
+      ...candidates.skip(start),
+      ...candidates.take(start),
+    ];
   }
 }
 

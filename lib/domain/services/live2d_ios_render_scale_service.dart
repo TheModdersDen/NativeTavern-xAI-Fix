@@ -7,9 +7,12 @@ class Live2DIOSRenderScaleService {
 
   const Live2DIOSRenderScaleService();
 
-  Future<bool> synchronize() async {
-    final matchedViews =
-        await _channel.invokeMethod<int>('synchronizeContentScale') ?? 0;
+  Future<bool> synchronize({required double devicePixelRatio}) async {
+    final matchedViews = await _channel.invokeMethod<int>(
+          'synchronizeContentScale',
+          {'devicePixelRatio': devicePixelRatio},
+        ) ??
+        0;
     return matchedViews > 0;
   }
 }

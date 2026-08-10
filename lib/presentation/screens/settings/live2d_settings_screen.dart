@@ -77,6 +77,8 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
   bool _isImporting = false;
   bool _isDeleting = false;
   bool _isSaving = false;
+  bool _isPreviewReady = false;
+  bool _isPlayingPreviewMotion = false;
   String? _error;
   int _modelLoadGeneration = 0;
 
@@ -117,6 +119,8 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         _isLoadingModel = false;
         _manifest = null;
         _selectedMotion = null;
+        _isPreviewReady = false;
+        _isPlayingPreviewMotion = false;
         _error = AppLocalizations.of(context).live2dUnavailableModelMessage;
       });
       return;
@@ -132,6 +136,8 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
         _manifest = null;
         _selectedMotion = null;
         _isLoadingModel = false;
+        _isPreviewReady = false;
+        _isPlayingPreviewMotion = false;
         _error = null;
       });
       return;
@@ -339,6 +345,8 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     final generation = ++_modelLoadGeneration;
     setState(() {
       _isLoadingModel = true;
+      _isPreviewReady = false;
+      _isPlayingPreviewMotion = false;
       _error = null;
     });
     try {
@@ -387,6 +395,29 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       if (mounted && generation == _modelLoadGeneration) {
         setState(() => _isLoadingModel = false);
       }
+    }
+  }
+
+  Future<void> _playPreviewMotion() async {
+    final motion = _selectedMotion;
+    final config = _config;
+    if (_isPlayingPreviewMotion ||
+        !_isPreviewReady ||
+        motion == null ||
+        config == null) {
+      return;
+    }
+    if (!_previewController.isReady ||
+        _previewController.loadedModelId != config.modelId) {
+      setState(() => _isPreviewReady = false);
+      return;
+    }
+
+    setState(() => _isPlayingPreviewMotion = true);
+    try {
+      await _previewController.playMotion(motion, priority: 3);
+    } finally {
+      if (mounted) setState(() => _isPlayingPreviewMotion = false);
     }
   }
 
@@ -597,6 +628,13 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                   controller: _previewController,
                   showStatus: true,
                   interactive: true,
+                  onReady: () {
+                    if (!mounted ||
+                        _previewController.loadedModelId != config.modelId) {
+                      return;
+                    }
+                    setState(() => _isPreviewReady = true);
+                  },
                   onTransformChanged: (transform) => setState(
                     () => _config = config.copyWith(
                       scale: transform.scale,
@@ -636,14 +674,20 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                     ),
                     const SizedBox(width: 8),
                     IconButton.filled(
-                      icon: const Icon(Icons.play_arrow),
+                      key: const Key('live2d-preview-play-motion'),
+                      icon: _isPlayingPreviewMotion
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.play_arrow),
                       tooltip: l10n.live2dPlayMotion,
-                      onPressed: _selectedMotion == null
+                      onPressed: _selectedMotion == null ||
+                              !_isPreviewReady ||
+                              _isPlayingPreviewMotion
                           ? null
-                          : () => _previewController.playMotion(
-                                _selectedMotion,
-                                priority: 3,
-                              ),
+                          : _playPreviewMotion,
                     ),
                   ],
                 ),

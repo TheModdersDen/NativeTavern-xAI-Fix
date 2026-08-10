@@ -9,6 +9,7 @@ class _SpineCharacterView extends StatefulWidget {
   final Widget? fallback;
   final bool showStatus;
   final bool interactive;
+  final VoidCallback? onReady;
   final ValueChanged<Live2DStageTransform>? onTransformChanged;
 
   const _SpineCharacterView({
@@ -21,6 +22,7 @@ class _SpineCharacterView extends StatefulWidget {
     required this.fallback,
     required this.showStatus,
     required this.interactive,
+    required this.onReady,
     required this.onTransformChanged,
   });
 
@@ -32,7 +34,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
     with WidgetsBindingObserver {
   late final spine.SpineWidgetController _controller;
   late final Live2DRenderingLifecycle _renderingLifecycle;
-  late final Live2DActionOrchestrator _orchestrator;
+  late Live2DActionOrchestrator _orchestrator;
   final Live2DTTSPlaybackCoordinator _ttsPlaybackCoordinator =
       Live2DTTSPlaybackCoordinator();
   final Live2DSentenceBoundaryTracker _sentenceTracker =
@@ -78,13 +80,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
       initialPaused: appLifecycleState != null &&
           appLifecycleState != AppLifecycleState.resumed,
     );
-    _orchestrator = Live2DActionOrchestrator(
-      resolver: Live2DActionResolver(widget.config),
-      player: (motion, priority) => playMotion(
-        motion,
-        priority: priority,
-      ),
-    );
+    _orchestrator = _createOrchestrator();
     _applyConfigTransform(widget.config);
     _sentenceTracker.reset(text: widget.responseText);
     WidgetsBinding.instance.addObserver(this);
@@ -177,6 +173,17 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
     _isReady = true;
     controller.animationState.setTimeScale(widget.config.motionSpeed);
     final animations = controller.skeletonData.getAnimations();
+    final motions = [
+      for (var index = 0; index < animations.length; index++)
+        Live2DMotionRef(
+          group: animations[index].getName(),
+          index: index,
+          file: '',
+          name: animations[index].getName(),
+        ),
+    ];
+    _orchestrator.dispose();
+    _orchestrator = _createOrchestrator(tapMotions: motions);
     _idleAnimation = widget.config.idleMotion?.group;
     if (_idleAnimation == null && animations.isNotEmpty) {
       _idleAnimation = animations.first.getName();
@@ -189,7 +196,9 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
       this,
       widget.config.modelId,
       _orchestrator,
+      _handleTapAt,
     );
+    widget.onReady?.call();
     final playback = widget.ttsPlayback;
     if (playback?.phase == TTSPlaybackPhase.playing ||
         (playback == null && widget.isSpeaking)) {
@@ -215,6 +224,24 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
       return false;
     }
   }
+
+  Live2DActionOrchestrator _createOrchestrator({
+    Iterable<Live2DMotionRef> tapMotions = const [],
+  }) {
+    return Live2DActionOrchestrator(
+      resolver: Live2DActionResolver(
+        widget.config,
+        tapMotions: tapMotions,
+      ),
+      player: (motion, priority) => playMotion(
+        motion,
+        priority: priority,
+      ),
+    );
+  }
+
+  Future<bool> _handleTapAt(Offset _) =>
+      _orchestrator.onTap(Live2DHitResult.body);
 
   void _handleSpeakingChanged() {
     if (widget.isSpeaking) {
@@ -409,9 +436,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
         onPointerSignal: _handlePointerSignal,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () => unawaited(
-            _orchestrator.onTap(Live2DHitResult.body),
-          ),
+          onTap: () => unawaited(_handleTapAt(Offset.zero)),
           onDoubleTap: widget.interactive ? _resetTransform : null,
           onScaleStart: widget.interactive ? _handleScaleStart : null,
           onScaleUpdate: widget.interactive ? _handleScaleUpdate : null,

@@ -93,6 +93,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   final ChatTTSAutoPlayController _ttsAutoPlayController =
       ChatTTSAutoPlayController();
+  final Live2DCharacterController _live2DController =
+      Live2DCharacterController();
   late final TTSStopAction _stopTts;
   final Map<String, GlobalKey<_MessageBubbleState>> _messageKeys = {};
   bool _initialMessageJumpScheduled = false;
@@ -1525,25 +1527,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         onTransformEnd: (transform) {
           unawaited(_saveLive2DTransform(character.id, transform));
         },
-        builder: (context, transform) => Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: IgnorePointer(
-                child: _buildLive2DStage(
-                  chatState,
-                  configOverride: live2d.copyWith(
-                    scale: transform.scale,
-                    offsetX: transform.offsetX,
-                    offsetY: transform.offsetY,
+        builder: (context, transform) => Live2DBackgroundTapRegion(
+          onTap: (position) {
+            unawaited(_live2DController.handleTapAt(position));
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: _buildLive2DStage(
+                    chatState,
+                    configOverride: live2d.copyWith(
+                      scale: transform.scale,
+                      offsetX: transform.offsetX,
+                      offsetY: transform.offsetY,
+                    ),
+                    interactive: false,
+                    persistTransform: false,
                   ),
-                  interactive: false,
-                  persistTransform: false,
                 ),
               ),
-            ),
-            _buildMessageList(chatState),
-          ],
+              _buildMessageList(chatState),
+            ],
+          ),
         ),
       );
     }
@@ -1617,6 +1624,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
         return Live2DCharacterView(
           config: live2d!,
+          controller: _live2DController,
           isSpeaking: chatState.isGenerating,
           responseText: latestAssistantMessage?.content ?? '',
           ttsPlayback: stagePlayback,
@@ -3012,6 +3020,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                   isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 GestureDetector(
+                  onTap: () {},
                   onLongPress: () => _showMessageOptions(context),
                   child: Container(
                     padding: const EdgeInsets.symmetric(

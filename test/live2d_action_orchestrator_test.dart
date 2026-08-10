@@ -38,7 +38,7 @@ void main() {
       );
     });
 
-    test('unknown or missing declarations remain non-interactive', () {
+    test('unknown declarations remain non-interactive', () {
       expect(
         service.hitTest(
           hitAreas: const [Live2DHitArea(id: 'Accessory', name: 'Hat')],
@@ -47,18 +47,63 @@ void main() {
         ),
         Live2DHitResult.miss,
       );
+    });
+
+    test('models without declarations use a generic body target', () {
       expect(
         service.hitTest(
           hitAreas: const [],
           normalizedX: 0.5,
           normalizedY: 0.7,
         ),
-        Live2DHitResult.miss,
+        Live2DHitResult.body,
       );
     });
   });
 
   group('Live2D action orchestration', () {
+    test('tap starts from a random non-idle model motion', () async {
+      final played = <String>[];
+      final orchestrator = Live2DActionOrchestrator(
+        resolver: Live2DActionResolver(
+          _config(),
+          tapMotions: [
+            _motion('Idle'),
+            _motion('Wave'),
+            _motion('Jump'),
+          ],
+          randomIndex: (upperBound) => upperBound - 1,
+        ),
+        player: (motion, priority) async {
+          played.add(motion.group);
+          return true;
+        },
+      );
+
+      expect(await orchestrator.onTap(Live2DHitResult.body), isTrue);
+      expect(played, ['Jump']);
+      orchestrator.dispose();
+    });
+
+    test('failed random motion tries the remaining model motions', () async {
+      final attempted = <String>[];
+      final orchestrator = Live2DActionOrchestrator(
+        resolver: Live2DActionResolver(
+          _config(),
+          tapMotions: [_motion('Wave'), _motion('Jump')],
+          randomIndex: (_) => 0,
+        ),
+        player: (motion, priority) async {
+          attempted.add(motion.group);
+          return motion.group == 'Jump';
+        },
+      );
+
+      expect(await orchestrator.onTap(Live2DHitResult.head), isTrue);
+      expect(attempted, ['Wave', 'Jump']);
+      orchestrator.dispose();
+    });
+
     testWidgets('a tap preempts speaking and then restores it', (tester) async {
       final played = <String>[];
       final orchestrator = Live2DActionOrchestrator(

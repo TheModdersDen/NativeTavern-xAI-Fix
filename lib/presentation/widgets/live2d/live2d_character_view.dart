@@ -157,6 +157,7 @@ class Live2DCharacterController {
   _NativeLive2DController? _nativeController;
   _SpineCharacterViewState? _spineState;
   Live2DActionOrchestrator? _orchestrator;
+  Future<bool> Function(Offset localPosition)? _tapHandler;
   String? _loadedModelId;
   String _lipSyncParameter = 'ParamMouthOpenY';
 
@@ -175,23 +176,27 @@ class Live2DCharacterController {
     String modelId,
     String lipSyncParameter,
     Live2DActionOrchestrator orchestrator,
+    Future<bool> Function(Offset localPosition) tapHandler,
   ) {
     _nativeController = controller;
     _spineState = null;
     _loadedModelId = modelId;
     _lipSyncParameter = lipSyncParameter;
     _orchestrator = orchestrator;
+    _tapHandler = tapHandler;
   }
 
   void _attachSpine(
     _SpineCharacterViewState state,
     String modelId,
     Live2DActionOrchestrator orchestrator,
+    Future<bool> Function(Offset localPosition) tapHandler,
   ) {
     _nativeController = null;
     _spineState = state;
     _loadedModelId = modelId;
     _orchestrator = orchestrator;
+    _tapHandler = tapHandler;
   }
 
   void _detach(_NativeLive2DController controller) {
@@ -199,6 +204,7 @@ class Live2DCharacterController {
       _nativeController = null;
       _loadedModelId = null;
       _orchestrator = null;
+      _tapHandler = null;
     }
   }
 
@@ -207,6 +213,7 @@ class Live2DCharacterController {
       _spineState = null;
       _loadedModelId = null;
       _orchestrator = null;
+      _tapHandler = null;
     }
   }
 
@@ -230,6 +237,10 @@ class Live2DCharacterController {
       return false;
     }
   }
+
+  /// Routes a tap from an overlaying chat surface to the attached character.
+  Future<bool> handleTapAt(Offset localPosition) =>
+      _tapHandler?.call(localPosition) ?? Future.value(false);
 
   /// Values are clamped to the standard Cubism mouth-open range.
   Future<bool> setMouthOpen(double value) async {
@@ -264,6 +275,7 @@ class Live2DCharacterView extends StatefulWidget {
   final Widget? fallback;
   final bool showStatus;
   final bool interactive;
+  final VoidCallback? onReady;
   final ValueChanged<Live2DStageTransform>? onTransformChanged;
 
   const Live2DCharacterView({
@@ -276,6 +288,7 @@ class Live2DCharacterView extends StatefulWidget {
     this.fallback,
     this.showStatus = false,
     this.interactive = false,
+    this.onReady,
     this.onTransformChanged,
   });
 
@@ -440,7 +453,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         // A lifecycle command can be retried on the next app state change.
       }
       if (!mounted || generation != _loadGeneration) return;
-      final actionConfig = await _discoverActionConfig();
+      final actionModel = await _discoverActionConfig();
       if (!mounted || generation != _loadGeneration) return;
       final modelDirectory = await _resolveModelDirectory();
       final loaded = await _nativeController.loadModel(
@@ -456,13 +469,22 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         return;
       }
       await _nativeController.setMotionSpeed(widget.config.motionSpeed);
-      _replaceOrchestrator(actionConfig);
+      _replaceOrchestrator(
+        actionModel.config,
+        tapMotions: actionModel.motions,
+      );
       widget.controller?._attach(
         _nativeController,
         widget.config.modelId,
-        actionConfig.lipSyncParameter,
+        actionModel.config.lipSyncParameter,
         _orchestrator,
+        _handleTapAt,
       );
+      if (Platform.isIOS) {
+        await _synchronizeIOSRenderScale(generation);
+      }
+      if (!mounted || generation != _loadGeneration) return;
+      widget.onReady?.call();
       final playback = widget.ttsPlayback;
       if (playback?.phase == TTSPlaybackPhase.playing) {
         await _orchestrator.onMessageStarted();
@@ -484,11 +506,14 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   }
 
   Future<void> _synchronizeIOSRenderScale(int generation) async {
-    for (var attempt = 0; attempt < 3; attempt++) {
+    final devicePixelRatio = View.of(context).devicePixelRatio;
+    for (var attempt = 0; attempt < 4; attempt++) {
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted || generation != _loadGeneration) return;
       try {
-        if (await _iosRenderScaleService.synchronize()) return;
+        await _iosRenderScaleService.synchronize(
+          devicePixelRatio: devicePixelRatio,
+        );
       } catch (_) {
         // Rendering can continue at the platform default if the bridge is absent.
         return;
@@ -504,7 +529,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     return '$dataPath/${widget.config.modelDirectory}';
   }
 
-  Future<Live2DConfig> _discoverActionConfig() async {
+  Future<({Live2DConfig config, List<Live2DMotionRef> motions})>
+      _discoverActionConfig() async {
     try {
       final config = widget.config;
       final definition = Live2DModelDefinition(
@@ -522,25 +548,40 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
       final manifest = await Live2DService(dataPath: dataPath).loadManifest(
         definition,
       );
-      return config.withActionDefaults(
-        Live2DConfig.fromDefinition(definition, manifest),
+      return (
+        config: config.withActionDefaults(
+          Live2DConfig.fromDefinition(definition, manifest),
+        ),
+        motions: manifest.motions,
       );
     } catch (_) {
-      return widget.config;
+      return (
+        config: widget.config,
+        motions: const <Live2DMotionRef>[],
+      );
     }
   }
 
-  Live2DActionOrchestrator _createOrchestrator(Live2DConfig config) {
+  Live2DActionOrchestrator _createOrchestrator(
+    Live2DConfig config, {
+    Iterable<Live2DMotionRef> tapMotions = const [],
+  }) {
     return Live2DActionOrchestrator(
-      resolver: Live2DActionResolver(config),
+      resolver: Live2DActionResolver(config, tapMotions: tapMotions),
       player: _playMotion,
     );
   }
 
-  void _replaceOrchestrator(Live2DConfig config) {
+  void _replaceOrchestrator(
+    Live2DConfig config, {
+    Iterable<Live2DMotionRef> tapMotions = const [],
+  }) {
     _orchestrator.dispose();
     _actionConfig = config;
-    _orchestrator = _createOrchestrator(config);
+    _orchestrator = _createOrchestrator(
+      config,
+      tapMotions: tapMotions,
+    );
   }
 
   void _handleSpeakingChanged() {
@@ -619,10 +660,14 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   }
 
   void _handleTap(TapUpDetails details) {
+    unawaited(_handleTapAt(details.localPosition));
+  }
+
+  Future<bool> _handleTapAt(Offset localPosition) {
     final size = context.size;
-    if (size == null || size.isEmpty) return;
-    final translatedX = details.localPosition.dx - (_offsetX * size.width);
-    final translatedY = details.localPosition.dy - (_offsetY * size.height);
+    if (size == null || size.isEmpty) return Future.value(false);
+    final translatedX = localPosition.dx - (_offsetX * size.width);
+    final translatedY = localPosition.dy - (_offsetY * size.height);
     final normalizedX =
         ((translatedX - size.width / 2) / _stageScale + size.width / 2) /
             size.width;
@@ -634,7 +679,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
       normalizedX: normalizedX,
       normalizedY: normalizedY,
     );
-    unawaited(_orchestrator.onTap(hit));
+    return _orchestrator.onTap(hit);
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
@@ -793,6 +838,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         fallback: widget.fallback,
         showStatus: widget.showStatus,
         interactive: widget.interactive,
+        onReady: widget.onReady,
         onTransformChanged: widget.onTransformChanged,
       );
     }

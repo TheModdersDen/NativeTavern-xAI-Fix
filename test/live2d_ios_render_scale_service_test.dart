@@ -20,18 +20,21 @@ void main() {
       return 1;
     });
 
-    final synchronized =
-        await const Live2DIOSRenderScaleService().synchronize();
+    final synchronized = await const Live2DIOSRenderScaleService().synchronize(
+      devicePixelRatio: 3,
+    );
 
     expect(synchronized, isTrue);
     expect(receivedCall?.method, 'synchronizeContentScale');
+    expect(receivedCall?.arguments, {'devicePixelRatio': 3.0});
   });
 
   test('reports false while the platform view is not mounted', () async {
     messenger.setMockMethodCallHandler(channel, (_) async => 0);
 
-    final synchronized =
-        await const Live2DIOSRenderScaleService().synchronize();
+    final synchronized = await const Live2DIOSRenderScaleService().synchronize(
+      devicePixelRatio: 2,
+    );
 
     expect(synchronized, isFalse);
   });
