@@ -74,19 +74,46 @@ class Live2DMotionRef {
   final int index;
   final String file;
   final String name;
+  final double? durationSeconds;
+  final bool loop;
 
   const Live2DMotionRef({
     required this.group,
     required this.index,
     required this.file,
     required this.name,
+    this.durationSeconds,
+    this.loop = false,
   });
+
+  Duration? get duration {
+    final seconds = durationSeconds;
+    if (seconds == null || !seconds.isFinite || seconds <= 0) return null;
+    return Duration(
+        microseconds: (seconds * Duration.microsecondsPerSecond).round());
+  }
+
+  Live2DMotionRef copyWith({
+    double? durationSeconds,
+    bool? loop,
+  }) {
+    return Live2DMotionRef(
+      group: group,
+      index: index,
+      file: file,
+      name: name,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      loop: loop ?? this.loop,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'group': group,
         'index': index,
         'file': file,
         'name': name,
+        if (durationSeconds != null) 'durationSeconds': durationSeconds,
+        'loop': loop,
       };
 
   factory Live2DMotionRef.fromJson(Map<String, dynamic> json) {
@@ -95,6 +122,8 @@ class Live2DMotionRef {
       index: (json['index'] as num?)?.toInt() ?? 0,
       file: json['file'] as String? ?? '',
       name: json['name'] as String? ?? '',
+      durationSeconds: (json['durationSeconds'] as num?)?.toDouble(),
+      loop: json['loop'] as bool? ?? false,
     );
   }
 }
@@ -147,6 +176,22 @@ class Live2DModelManifest {
     this.hitAreas = const [],
     this.lipSyncParameters = const [],
   });
+
+  Live2DModelManifest copyWith({List<Live2DMotionRef>? motions}) {
+    return Live2DModelManifest(
+      format: format,
+      version: version,
+      mocFile: mocFile,
+      textures: textures,
+      atlasFileName: atlasFileName,
+      physicsFile: physicsFile,
+      poseFile: poseFile,
+      expressions: expressions,
+      motions: motions ?? this.motions,
+      hitAreas: hitAreas,
+      lipSyncParameters: lipSyncParameters,
+    );
+  }
 
   Iterable<String> get referencedFiles sync* {
     if (format == Live2DModelFormat.spine) {
@@ -346,21 +391,64 @@ class Live2DConfig {
   }
 
   /// Keeps explicit character choices and fills newly discovered semantics.
-  Live2DConfig withActionDefaults(Live2DConfig defaults) {
+  Live2DConfig withActionDefaults(
+    Live2DConfig defaults, {
+    Iterable<Live2DMotionRef> discoveredMotions = const [],
+  }) {
+    final metadataByAddress = {
+      for (final motion in discoveredMotions) _motionAddress(motion): motion,
+    };
+
+    Live2DMotionRef? merge(
+      Live2DMotionRef? selected,
+      Live2DMotionRef? fallback,
+    ) {
+      final motion = selected ?? fallback;
+      if (motion == null) return null;
+      return _withDiscoveredMetadata(
+        motion,
+        metadataByAddress[_motionAddress(motion)] ?? fallback,
+      );
+    }
+
     return copyWith(
-      idleMotion: idleMotion ?? defaults.idleMotion,
-      tapMotion: tapMotion ?? defaults.tapMotion,
-      headTapMotion: headTapMotion ?? defaults.headTapMotion,
-      bodyTapMotion: bodyTapMotion ?? defaults.bodyTapMotion,
-      speakingMotion: speakingMotion ?? defaults.speakingMotion,
-      responseMotion: responseMotion ?? defaults.responseMotion,
+      idleMotion: merge(idleMotion, defaults.idleMotion),
+      tapMotion: merge(tapMotion, defaults.tapMotion),
+      headTapMotion: merge(headTapMotion, defaults.headTapMotion),
+      bodyTapMotion: merge(bodyTapMotion, defaults.bodyTapMotion),
+      speakingMotion: merge(speakingMotion, defaults.speakingMotion),
+      responseMotion: merge(responseMotion, defaults.responseMotion),
       emotionMotions: {
         ...defaults.emotionMotions,
-        ...emotionMotions,
+        for (final entry in emotionMotions.entries)
+          entry.key: merge(
+            entry.value,
+            defaults.emotionMotions[entry.key],
+          )!,
       },
       hitAreas: hitAreas.isEmpty ? defaults.hitAreas : hitAreas,
     );
   }
+
+  static Live2DMotionRef? _withDiscoveredMetadata(
+    Live2DMotionRef? selected,
+    Live2DMotionRef? discovered,
+  ) {
+    if (selected == null) return discovered;
+    if (discovered == null ||
+        selected.group != discovered.group ||
+        selected.index != discovered.index) {
+      return selected;
+    }
+    if (discovered.durationSeconds == null) return selected;
+    return selected.copyWith(
+      durationSeconds: discovered.durationSeconds,
+      loop: discovered.loop,
+    );
+  }
+
+  static String _motionAddress(Live2DMotionRef motion) =>
+      '${motion.group}\u0000${motion.index}';
 
   Map<String, dynamic> toJson() => {
         'enabled': enabled,

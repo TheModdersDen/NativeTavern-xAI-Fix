@@ -104,6 +104,82 @@ void main() {
       orchestrator.dispose();
     });
 
+    testWidgets('default-group idle replays at its motion boundary',
+        (tester) async {
+      final played = <String>[];
+      final orchestrator = Live2DActionOrchestrator(
+        resolver: Live2DActionResolver(
+          _config().copyWith(
+            idleMotion: _motion(
+              '',
+              durationSeconds: 0.05,
+            ),
+          ),
+        ),
+        player: (motion, priority) async {
+          played.add('${motion.group}:${motion.index}');
+          return true;
+        },
+      );
+
+      expect(await orchestrator.onIdleTimeout(), isTrue);
+      expect(played, [':0']);
+      await tester.pump(const Duration(milliseconds: 51));
+      await tester.pump();
+      expect(played, [':0', ':0']);
+      orchestrator.dispose();
+    });
+
+    testWidgets('native-looped idle is not restarted at its boundary',
+        (tester) async {
+      final played = <String>[];
+      final orchestrator = Live2DActionOrchestrator(
+        resolver: Live2DActionResolver(
+          _config().copyWith(
+            idleMotion: _motion('', durationSeconds: 0.05),
+          ),
+        ),
+        player: (motion, priority) async {
+          played.add('${motion.group}:${motion.index}');
+          return true;
+        },
+        replayIdleAtMotionBoundary: false,
+      );
+
+      expect(await orchestrator.onIdleTimeout(), isTrue);
+      await tester.pump(const Duration(milliseconds: 51));
+      await tester.pump();
+      expect(played, [':0']);
+      orchestrator.dispose();
+    });
+
+    testWidgets('tap recovery uses the selected motion duration',
+        (tester) async {
+      final played = <String>[];
+      final orchestrator = Live2DActionOrchestrator(
+        resolver: Live2DActionResolver(
+          _config().copyWith(
+            headTapMotion: _motion(
+              'TapHead',
+              durationSeconds: 0.05,
+            ),
+          ),
+        ),
+        player: (motion, priority) async {
+          played.add(motion.group);
+          return true;
+        },
+        tapDuration: const Duration(seconds: 2),
+      );
+
+      expect(await orchestrator.onTap(Live2DHitResult.head), isTrue);
+      expect(played, ['TapHead']);
+      await tester.pump(const Duration(milliseconds: 51));
+      await tester.pump();
+      expect(played, ['TapHead', 'Idle']);
+      orchestrator.dispose();
+    });
+
     testWidgets('a tap preempts speaking and then restores it', (tester) async {
       final played = <String>[];
       final orchestrator = Live2DActionOrchestrator(
@@ -245,11 +321,17 @@ Live2DConfig _config() {
   );
 }
 
-Live2DMotionRef _motion(String group) {
+Live2DMotionRef _motion(
+  String group, {
+  double? durationSeconds,
+  bool loop = false,
+}) {
   return Live2DMotionRef(
     group: group,
     index: 0,
     file: '$group.motion3.json',
     name: group,
+    durationSeconds: durationSeconds,
+    loop: loop,
   );
 }

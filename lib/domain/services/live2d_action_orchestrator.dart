@@ -118,8 +118,10 @@ class Live2DActionOrchestrator {
   final Duration emotionDuration;
   final Duration tapCooldown;
   final Duration sentenceCooldown;
+  final bool replayIdleAtMotionBoundary;
 
   Timer? _recoveryTimer;
+  Timer? _baseReplayTimer;
   _ActionRequest? _activeTransient;
   _ActionRequest? _pendingTransient;
   Live2DActionPlayback? _current;
@@ -138,6 +140,7 @@ class Live2DActionOrchestrator {
     this.emotionDuration = const Duration(milliseconds: 2200),
     this.tapCooldown = const Duration(milliseconds: 600),
     this.sentenceCooldown = const Duration(milliseconds: 450),
+    this.replayIdleAtMotionBoundary = true,
   }) : _now = now ?? DateTime.now;
 
   Live2DActionPlayback? get current => _current;
@@ -250,6 +253,8 @@ class Live2DActionOrchestrator {
     Duration cooldown = Duration.zero,
   }) async {
     if (_disposed) return false;
+    _baseReplayTimer?.cancel();
+    _baseReplayTimer = null;
     if (cooldownKey != null && !_consumeCooldown(cooldownKey, cooldown)) {
       return false;
     }
@@ -303,7 +308,14 @@ class Live2DActionOrchestrator {
         ),
       );
       if (request.transient) {
-        _scheduleRecovery(request.duration, generation);
+        _scheduleRecovery(
+          _motionDuration(motion, request.duration),
+          generation,
+        );
+      } else if (replayIdleAtMotionBoundary &&
+          request.kind == Live2DActionKind.idle &&
+          motion.group != 'Idle') {
+        _scheduleBaseReplay(_motionDuration(motion, request.duration));
       }
       return true;
     }
@@ -316,6 +328,29 @@ class Live2DActionOrchestrator {
 
   void _scheduleRecovery(Duration duration, int generation) {
     _recoveryTimer = Timer(duration, () => _finishTransient(generation));
+  }
+
+  void _scheduleBaseReplay(Duration duration) {
+    if (duration <= Duration.zero) return;
+    _baseReplayTimer = Timer(duration, () {
+      _baseReplayTimer = null;
+      if (!_disposed && !_speaking && _activeTransient == null) {
+        unawaited(_restoreBaseAction());
+      }
+    });
+  }
+
+  Duration _motionDuration(
+    Live2DMotionRef motion,
+    Duration fallback,
+  ) {
+    final duration = motion.duration;
+    if (duration == null) return fallback;
+    final speed = resolver.config.motionSpeed;
+    if (!speed.isFinite || speed <= 0) return duration;
+    return Duration(
+      microseconds: (duration.inMicroseconds / speed).round(),
+    );
   }
 
   void _finishTransient(int generation) {
@@ -352,6 +387,8 @@ class Live2DActionOrchestrator {
     _generation++;
     _recoveryTimer?.cancel();
     _recoveryTimer = null;
+    _baseReplayTimer?.cancel();
+    _baseReplayTimer = null;
     _activeTransient = null;
     _pendingTransient = null;
     _lastEventAt.clear();

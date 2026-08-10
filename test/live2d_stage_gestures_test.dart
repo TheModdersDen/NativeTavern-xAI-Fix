@@ -204,6 +204,60 @@ void main() {
     expect(backgroundTaps, hasLength(1));
   });
 
+  testWidgets('visual novel stage forwards upper taps behind message controls',
+      (tester) async {
+    final backgroundTaps = <Offset>[];
+    var messageTaps = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.expand(
+          child: Live2DTwoFingerGestureRegion(
+            initialTransform: const Live2DStageTransform(
+              scale: 1,
+              offsetX: 0,
+              offsetY: 0,
+            ),
+            builder: (context, transform) => Live2DBackgroundTapRegion(
+              onTap: backgroundTaps.add,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const IgnorePointer(child: ColoredBox(color: Colors.black)),
+                  Column(
+                    children: [
+                      const Expanded(child: SizedBox.shrink()),
+                      GestureDetector(
+                        key: const ValueKey('visual-novel-message-control'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => messageTaps++,
+                        child: const SizedBox(
+                          height: 160,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(200, 180));
+    await tester.pump();
+    expect(backgroundTaps, hasLength(1));
+
+    await tester.tap(
+      find.byKey(const ValueKey('visual-novel-message-control')),
+    );
+    await tester.pump();
+    expect(messageTaps, 1);
+    expect(backgroundTaps, hasLength(1));
+  });
+
   testWidgets('double tap resets and persists the stage transform',
       (tester) async {
     final completed = <Live2DStageTransform>[];

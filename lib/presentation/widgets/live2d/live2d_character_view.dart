@@ -275,6 +275,7 @@ class Live2DCharacterView extends StatefulWidget {
   final Widget? fallback;
   final bool showStatus;
   final bool interactive;
+  final bool resetOnDoubleTap;
   final VoidCallback? onReady;
   final ValueChanged<Live2DStageTransform>? onTransformChanged;
 
@@ -288,6 +289,7 @@ class Live2DCharacterView extends StatefulWidget {
     this.fallback,
     this.showStatus = false,
     this.interactive = false,
+    this.resetOnDoubleTap = true,
     this.onReady,
     this.onTransformChanged,
   });
@@ -551,6 +553,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
       return (
         config: config.withActionDefaults(
           Live2DConfig.fromDefinition(definition, manifest),
+          discoveredMotions: manifest.motions,
         ),
         motions: manifest.motions,
       );
@@ -569,6 +572,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     return Live2DActionOrchestrator(
       resolver: Live2DActionResolver(config, tapMotions: tapMotions),
       player: _playMotion,
+      replayIdleAtMotionBoundary: !Platform.isMacOS,
     );
   }
 
@@ -838,6 +842,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         fallback: widget.fallback,
         showStatus: widget.showStatus,
         interactive: widget.interactive,
+        resetOnDoubleTap: widget.resetOnDoubleTap,
         onReady: widget.onReady,
         onTransformChanged: widget.onTransformChanged,
       );
@@ -875,7 +880,9 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTapUp: _handleTap,
-                    onDoubleTap: widget.interactive ? _resetTransform : null,
+                    onDoubleTap: widget.interactive && widget.resetOnDoubleTap
+                        ? _resetTransform
+                        : null,
                     onScaleStart: widget.interactive ? _handleScaleStart : null,
                     onScaleUpdate:
                         widget.interactive ? _handleScaleUpdate : null,

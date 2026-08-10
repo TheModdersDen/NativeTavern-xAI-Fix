@@ -56,6 +56,8 @@ void main() {
       index: 3,
       file: 'motions/idle.motion3.json',
       name: 'idle',
+      durationSeconds: 5,
+      loop: true,
     );
     const config = Live2DConfig(
       modelId: 'hiyori_free',
@@ -77,9 +79,97 @@ void main() {
     expect(restored.idleMotion?.group, '');
     expect(restored.idleMotion?.index, 3);
     expect(restored.idleMotion?.file, motion.file);
+    expect(restored.idleMotion?.durationSeconds, 5);
+    expect(restored.idleMotion?.loop, isTrue);
     expect(restored.headTapMotion?.index, 3);
     expect(restored.emotionMotions['happy']?.file, motion.file);
     expect(restored.hitAreas.single.kind, Live2DHitAreaKind.head);
+  });
+
+  test('loads Cubism motion duration and loop metadata', () async {
+    final root = Directory.systemTemp.createTempSync('nt_live2d_metadata');
+    try {
+      final modelDirectory = Directory(
+        p.join(root.path, 'live2d_models', 'metadata'),
+      )..createSync(recursive: true);
+      final motionsDirectory = Directory(p.join(modelDirectory.path, 'motions'))
+        ..createSync();
+      File(p.join(modelDirectory.path, 'model.model3.json')).writeAsStringSync(
+        r'''{
+          "Version": 3,
+          "FileReferences": {
+            "Moc": "model.moc3",
+            "Textures": [],
+            "Motions": {
+              "": [{"File": "motions/idle.motion3.json"}]
+            }
+          }
+        }''',
+      );
+      File(p.join(motionsDirectory.path, 'idle.motion3.json'))
+          .writeAsStringSync(
+        r'''{
+          "Version": 3,
+          "Meta": {"Duration": 5.25, "Loop": true, "CurveCount": 0},
+          "Curves": []
+        }''',
+      );
+
+      final manifest = await Live2DService(dataPath: root.path).loadManifest(
+        const Live2DModelDefinition(
+          id: 'metadata',
+          displayName: 'Metadata',
+          modelDirectory: 'live2d_models/metadata',
+          modelFileName: 'model.model3.json',
+          source: Live2DModelSource.appData,
+        ),
+      );
+
+      expect(manifest.motions.single.durationSeconds, 5.25);
+      expect(
+          manifest.motions.single.duration, const Duration(milliseconds: 5250));
+      expect(manifest.motions.single.loop, isTrue);
+    } finally {
+      root.deleteSync(recursive: true);
+    }
+  });
+
+  test('fills metadata for an explicitly selected default-group motion', () {
+    const selected = Live2DMotionRef(
+      group: '',
+      index: 13,
+      file: 'motions/idle.motion3.json',
+      name: 'idle',
+    );
+    const discovered = Live2DMotionRef(
+      group: '',
+      index: 13,
+      file: 'motions/idle.motion3.json',
+      name: 'idle',
+      durationSeconds: 5,
+      loop: true,
+    );
+    const config = Live2DConfig(
+      modelId: 'legacy',
+      displayName: 'Legacy',
+      modelDirectory: 'models/legacy',
+      modelFileName: 'legacy.model3.json',
+      idleMotion: selected,
+    );
+    const defaults = Live2DConfig(
+      modelId: 'legacy',
+      displayName: 'Legacy',
+      modelDirectory: 'models/legacy',
+      modelFileName: 'legacy.model3.json',
+    );
+
+    final restored = config.withActionDefaults(
+      defaults,
+      discoveredMotions: const [discovered],
+    );
+
+    expect(restored.idleMotion?.durationSeconds, 5);
+    expect(restored.idleMotion?.loop, isTrue);
   });
 
   test('Spine character configuration round-trips through JSON', () {

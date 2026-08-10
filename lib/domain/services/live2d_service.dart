@@ -91,7 +91,12 @@ class Live2DService {
     Live2DModelManifest manifest,
   ) {
     final discovered = Live2DConfig.fromDefinition(definition, manifest);
-    return config.withActionDefaults(discovered).copyWith(
+    return config
+        .withActionDefaults(
+          discovered,
+          discoveredMotions: manifest.motions,
+        )
+        .copyWith(
           modelId: definition.id,
           displayName: definition.displayName,
           modelDirectory: definition.modelDirectory,
@@ -117,7 +122,43 @@ class Live2DService {
           p.join(modelDirectory, definition.modelFileName),
         ).readAsString(),
     };
-    return parseManifest(jsonText);
+    final manifest = parseManifest(jsonText);
+    return _loadMotionMetadata(definition, manifest);
+  }
+
+  Future<Live2DModelManifest> _loadMotionMetadata(
+    Live2DModelDefinition definition,
+    Live2DModelManifest manifest,
+  ) async {
+    final modelDirectory = _resolveModelDirectory(definition);
+    final motions = <Live2DMotionRef>[];
+    for (final motion in manifest.motions) {
+      if (motion.file.isEmpty) {
+        motions.add(motion);
+        continue;
+      }
+      try {
+        final jsonText = switch (definition.source) {
+          Live2DModelSource.asset => await rootBundle.loadString(
+              '${definition.modelDirectory}${motion.file}',
+            ),
+          Live2DModelSource.appData ||
+          Live2DModelSource.fileSystem =>
+            await File(p.join(modelDirectory, motion.file)).readAsString(),
+        };
+        final root = jsonDecode(jsonText) as Map<String, dynamic>;
+        final meta = root['Meta'] as Map<String, dynamic>? ?? const {};
+        motions.add(
+          motion.copyWith(
+            durationSeconds: (meta['Duration'] as num?)?.toDouble(),
+            loop: meta['Loop'] as bool? ?? false,
+          ),
+        );
+      } catch (_) {
+        motions.add(motion);
+      }
+    }
+    return manifest.copyWith(motions: motions);
   }
 
   Future<Live2DModelManifest> _loadSpineManifest(

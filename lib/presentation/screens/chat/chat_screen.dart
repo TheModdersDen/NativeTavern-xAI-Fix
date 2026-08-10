@@ -1497,12 +1497,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (chatState.messages.isEmpty) {
       if (!hasLive2D) return _buildEmptyState();
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(child: _buildLive2DStage(chatState)),
-          _buildEmptyState(),
-        ],
+      return Live2DBackgroundTapRegion(
+        onTap: _handleLive2DBackgroundTap,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: _buildLive2DStage(chatState, interactive: false),
+              ),
+            ),
+            _buildEmptyState(),
+          ],
+        ),
       );
     }
 
@@ -1527,9 +1534,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           unawaited(_saveLive2DTransform(character.id, transform));
         },
         builder: (context, transform) => Live2DBackgroundTapRegion(
-          onTap: (position) {
-            unawaited(_live2DController.handleTapAt(position));
-          },
+          onTap: _handleLive2DBackgroundTap,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -1558,31 +1563,83 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildVisualNovelView(ActiveChatState chatState) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(child: _buildLive2DStage(chatState)),
-        Column(
+    final character = chatState.character;
+    final live2d = character?.assets?.live2d;
+
+    Widget buildContent(Live2DConfig? configOverride) {
+      return Live2DBackgroundTapRegion(
+        onTap: _handleLive2DBackgroundTap,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            const Expanded(child: SizedBox.shrink()),
-            VisualNovelMessageView(
-              messages: chatState.messages,
-              character: chatState.character,
-              isGenerating: chatState.isGenerating,
-              onLongPress: (message) => _showMessageOptionsForVisualNovel(
-                context,
-                message,
-                chatState,
+            if (live2d?.enabled == true)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: _buildLive2DStage(
+                    chatState,
+                    configOverride: configOverride,
+                    interactive: false,
+                    persistTransform: false,
+                  ),
+                ),
               ),
-              onSwipe: (swipeIndex, messageId) {
-                ref
-                    .read(activeChatProvider.notifier)
-                    .swipeMessage(messageId, swipeIndex);
-              },
+            Column(
+              children: [
+                const Expanded(child: SizedBox.shrink()),
+                VisualNovelMessageView(
+                  messages: chatState.messages,
+                  character: chatState.character,
+                  isGenerating: chatState.isGenerating,
+                  onLongPress: (message) => _showMessageOptionsForVisualNovel(
+                    context,
+                    message,
+                    chatState,
+                  ),
+                  onSwipe: (swipeIndex, messageId) {
+                    ref
+                        .read(activeChatProvider.notifier)
+                        .swipeMessage(messageId, swipeIndex);
+                  },
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      );
+    }
+
+    if (character == null || live2d?.enabled != true) {
+      return buildContent(null);
+    }
+
+    return Live2DTwoFingerGestureRegion(
+      initialTransform: Live2DStageTransform.constrained(
+        scale: live2d!.scale,
+        offsetX: live2d.offsetX,
+        offsetY: live2d.offsetY,
+      ),
+      onTransformEnd: (transform) {
+        unawaited(_saveLive2DTransform(character.id, transform));
+      },
+      builder: (context, transform) => buildContent(
+        live2d.copyWith(
+          scale: transform.scale,
+          offsetX: transform.offsetX,
+          offsetY: transform.offsetY,
+        ),
+      ),
+    );
+  }
+
+  void _handleLive2DBackgroundTap(Offset position) {
+    unawaited(
+      _live2DController.handleTapAt(position).then((played) {
+        debugPrint(
+          '[Live2D] Chat tap at $position: '
+          'attached=${_live2DController.isAttached}, '
+          'ready=${_live2DController.isReady}, played=$played',
+        );
+      }),
     );
   }
 
@@ -1628,6 +1685,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           responseText: latestAssistantMessage?.content ?? '',
           ttsPlayback: stagePlayback,
           interactive: interactive,
+          resetOnDoubleTap: false,
           onTransformChanged: persistTransform
               ? (transform) {
                   unawaited(_saveLive2DTransform(character.id, transform));

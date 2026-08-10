@@ -9,6 +9,7 @@ class _SpineCharacterView extends StatefulWidget {
   final Widget? fallback;
   final bool showStatus;
   final bool interactive;
+  final bool resetOnDoubleTap;
   final VoidCallback? onReady;
   final ValueChanged<Live2DStageTransform>? onTransformChanged;
 
@@ -22,6 +23,7 @@ class _SpineCharacterView extends StatefulWidget {
     required this.fallback,
     required this.showStatus,
     required this.interactive,
+    required this.resetOnDoubleTap,
     required this.onReady,
     required this.onTransformChanged,
   });
@@ -180,6 +182,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
           index: index,
           file: '',
           name: animations[index].getName(),
+          durationSeconds: animations[index].getDuration(),
         ),
     ];
     _orchestrator.dispose();
@@ -233,6 +236,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
         widget.config,
         tapMotions: tapMotions,
       ),
+      replayIdleAtMotionBoundary: false,
       player: (motion, priority) => playMotion(
         motion,
         priority: priority,
@@ -437,7 +441,9 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => unawaited(_handleTapAt(Offset.zero)),
-          onDoubleTap: widget.interactive ? _resetTransform : null,
+          onDoubleTap: widget.interactive && widget.resetOnDoubleTap
+              ? _resetTransform
+              : null,
           onScaleStart: widget.interactive ? _handleScaleStart : null,
           onScaleUpdate: widget.interactive ? _handleScaleUpdate : null,
           onScaleEnd: widget.interactive ? _handleScaleEnd : null,
