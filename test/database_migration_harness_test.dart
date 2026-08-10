@@ -140,6 +140,53 @@ void main() {
     expect(await runIntegrityCheck(database), 'ok');
   });
 
+  test('complete v15 schema recovers a version marker downgraded to v13',
+      () async {
+    final file = File('${harness.directory.path}/downgraded_marker.sqlite');
+    var database = harness.openWithProductionMigrations(file);
+    await seedCurrentRepresentativeData(database);
+    final before =
+        await captureDatabaseSnapshot(database, currentSnapshotTables);
+    await harness.close(database);
+
+    writeRawSchemaVersion(file, 13);
+    expect(readRawSchemaVersion(file), 13);
+
+    database = harness.openWithProductionMigrations(file);
+    expect(await readSchemaVersion(database), 15);
+    expect(
+      (await captureDatabaseSnapshot(database, currentSnapshotTables)).tables,
+      before.tables,
+    );
+    expect(await runIntegrityCheck(database), 'ok');
+    expect(await findForeignKeyViolations(database), isEmpty);
+  });
+
+  test('opening a newer database version is rejected without relabeling it',
+      () async {
+    final file = File('${harness.directory.path}/newer_schema.sqlite');
+    var database = harness.openWithProductionMigrations(file);
+    await database.customSelect('SELECT 1').get();
+    await harness.close(database);
+
+    writeRawSchemaVersion(file, 16);
+    database = harness.openWithProductionMigrations(file);
+
+    await expectLater(
+      database.customSelect('SELECT 1').get(),
+      throwsA(
+        isA<UnsupportedError>().having(
+          (error) => error.message,
+          'message',
+          contains('schema 16 -> 15'),
+        ),
+      ),
+    );
+    await harness.close(database);
+
+    expect(readRawSchemaVersion(file), 16);
+  });
+
   test('existing v15 data gains a rebuilt derived memory search index',
       () async {
     final file = File('${harness.directory.path}/derived_fts.sqlite');

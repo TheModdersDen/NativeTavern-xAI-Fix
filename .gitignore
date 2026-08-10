@@ -73,3 +73,4 @@ config/*
 !config/mobile_release_gate.json
 assets_for_discord
 scripts
+.wrangler/cache/wrangler-account.json

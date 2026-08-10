@@ -231,6 +231,15 @@ int readRawSchemaVersion(File file) {
   }
 }
 
+void writeRawSchemaVersion(File file, int version) {
+  final database = sqlite.sqlite3.open(file.path);
+  try {
+    database.userVersion = version;
+  } finally {
+    database.dispose();
+  }
+}
+
 Set<String> readRawTableColumns(File file, String tableName) {
   final database =
       sqlite.sqlite3.open(file.path, mode: sqlite.OpenMode.readOnly);

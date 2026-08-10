@@ -570,9 +570,24 @@ class AppDatabase extends _$AppDatabase {
         await _createV15Triggers();
       },
       onUpgrade: (Migrator m, int from, int to) async {
+        if (from > to) {
+          throw UnsupportedError(
+            'Database downgrade is not supported: schema $from -> $to',
+          );
+        }
+
         // SQLite supports transactional DDL. Keep the version upgrade atomic
         // so a failed step can be retried from the unchanged legacy schema.
         await transaction(() async {
+          // Older app binaries used the same callback for downgrades. They could
+          // lower user_version without changing the schema, causing the next
+          // current app launch to replay migrations against current tables.
+          if (to == schemaVersion && await _hasCompleteCurrentTableLayout()) {
+            await _createV15Indexes();
+            await _createV15Triggers();
+            return;
+          }
+
           // Handle migrations
           if (from < 2) {
             // Add swipes columns to messages
@@ -879,6 +894,22 @@ class AppDatabase extends _$AppDatabase {
     for (final statement in statements) {
       await customStatement(statement);
     }
+  }
+
+  Future<bool> _hasCompleteCurrentTableLayout() async {
+    for (final table in allTables) {
+      final tableName = table.actualTableName.replaceAll('"', '""');
+      final rows = await customSelect('PRAGMA table_info("$tableName")').get();
+      final actualColumns = rows.map((row) => row.read<String>('name')).toSet();
+      final expectedColumns = table.columnsByName.keys.toSet();
+
+      if (actualColumns.length != expectedColumns.length ||
+          !actualColumns.containsAll(expectedColumns)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Future<void> _assertNoPartialV15Schema() async {
