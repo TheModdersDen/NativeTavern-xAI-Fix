@@ -11,6 +11,7 @@ import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/domain/services/emotion_detection_service.dart';
 import 'package:native_tavern/domain/services/live2d_action_orchestrator.dart';
 import 'package:native_tavern/domain/services/live2d_hit_test_service.dart';
+import 'package:native_tavern/domain/services/live2d_ios_render_scale_service.dart';
 import 'package:native_tavern/domain/services/live2d_render_lifecycle.dart';
 import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:native_tavern/domain/services/live2d_tts_playback_coordinator.dart';
@@ -292,6 +293,8 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
   late Live2DActionOrchestrator _orchestrator;
   late Live2DConfig _actionConfig;
   final Live2DHitTestService _hitTestService = const Live2DHitTestService();
+  final Live2DIOSRenderScaleService _iosRenderScaleService =
+      const Live2DIOSRenderScaleService();
   final Live2DSentenceBoundaryTracker _sentenceTracker =
       Live2DSentenceBoundaryTracker();
   final Live2DTTSPlaybackCoordinator _ttsPlaybackCoordinator =
@@ -419,6 +422,10 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     try {
       await _nativeController.whenAttached;
       if (!mounted || generation != _loadGeneration) return;
+      if (Platform.isIOS) {
+        await _synchronizeIOSRenderScale(generation);
+      }
+      if (!mounted || generation != _loadGeneration) return;
       if (Platform.isAndroid && !_renderingLifecycle.isAttached) {
         // flutter_live2d reports its platform-view id before Android attaches
         // the TextureView surface. Commands sent in that gap are discarded by
@@ -472,6 +479,19 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     } catch (error) {
       if (mounted && generation == _loadGeneration) {
         setState(() => _loadError = error.toString());
+      }
+    }
+  }
+
+  Future<void> _synchronizeIOSRenderScale(int generation) async {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted || generation != _loadGeneration) return;
+      try {
+        if (await _iosRenderScaleService.synchronize()) return;
+      } catch (_) {
+        // Rendering can continue at the platform default if the bridge is absent.
+        return;
       }
     }
   }
