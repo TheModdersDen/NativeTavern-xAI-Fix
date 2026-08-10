@@ -66,6 +66,7 @@ windows
 release
 .env
 build_*
+!build_ios.sh
 resize_app_store_images.py
 config
 !config/
