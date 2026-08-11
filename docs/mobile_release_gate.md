@@ -47,20 +47,17 @@ Use `flutter devices --machine` before each run. Select one supported physical
 Android device and one supported physical iPhone or iPad. Record the full Git
 SHA from `git rev-parse HEAD`; debug/profile results do not qualify.
 
-Build and install the same release commit:
+Build and install the same release commit with the repository release scripts:
 
 ```sh
-dart run tool/build_android_release.dart
-flutter build ipa --release
+./build_android.sh
+./build_ios.sh
 ```
 
-The Android helper runs `flutter pub get`, excludes dev-only plugins from the
-generated release registrant, invokes `bundleRelease`, and restores the
-generated file afterward. This works around Flutter 3.38 generating an
-`integration_test` registration while its Gradle plugin correctly omits that
-dev dependency from release compilation. It does not add test code to the
-production bundle. Use JDK 17 when the local default Java runtime is newer than
-the Android Gradle Plugin supports.
+Do not replace these with direct Flutter, Gradle, or Xcode packaging commands.
+The scripts configure the expected platform projects and produce the named
+release artifacts used by the distribution workflow. See
+`docs/release-runbook.md` for the complete packaging and publishing sequence.
 
 Run every scenario in `config/mobile_release_gate.json`. Each platform covers:
 
