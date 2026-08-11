@@ -37,106 +37,109 @@ class RpgGamePanel extends ConsumerWidget {
           color: AppTheme.darkCard,
           border: Border(top: BorderSide(color: AppTheme.darkDivider)),
         ),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 42,
-              child: Row(
-                children: [
-                  const SizedBox(width: 12),
-                  const Icon(Icons.sports_esports, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      session.scenario.metadata.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      '${l10n.rpgTurnNumber(session.state.turn)} · ${session.branchId}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textMuted,
-                          ),
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('rpg-disable'),
-                    onPressed: onDisable,
-                    icon: const Icon(Icons.close, size: 19),
-                    tooltip: l10n.rpgDisableMode,
-                  ),
-                ],
-              ),
-            ),
-            if (uiState.lastResult case final result?)
-              _ResultBanner(result: result),
-            TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              dividerHeight: 1,
-              tabs: [
-                Tab(
-                    key: const Key('rpg-tab-status'),
-                    icon: const Icon(Icons.tune),
-                    text: l10n.rpgStatus),
-                Tab(
-                    key: const Key('rpg-tab-inventory'),
-                    icon: const Icon(Icons.backpack_outlined),
-                    text: l10n.rpgInventory),
-                Tab(
-                    key: const Key('rpg-tab-quests'),
-                    icon: const Icon(Icons.task_alt),
-                    text: l10n.rpgQuests),
-                Tab(
-                    key: const Key('rpg-tab-relations'),
-                    icon: const Icon(Icons.people_outline),
-                    text: l10n.rpgRelations),
-                Tab(
-                    key: const Key('rpg-tab-actions'),
-                    icon: const Icon(Icons.bolt),
-                    text: l10n.rpgActions),
-                Tab(
-                    key: const Key('rpg-tab-log'),
-                    icon: const Icon(Icons.history),
-                    text: l10n.rpgLog),
-              ],
-            ),
-            Expanded(
-              child: Stack(
-                children: [
-                  TabBarView(
-                    children: [
-                      _StatusView(session: session),
-                      _InventoryView(session: session),
-                      _QuestView(session: session),
-                      _RelationshipView(session: session),
-                      _ActionView(chatId: chatId, session: session),
-                      _LogView(
-                        chatId: chatId,
-                        session: session,
-                        snapshots: uiState.snapshots,
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 42,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    const Icon(Icons.sports_esports, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        session.scenario.metadata.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
-                    ],
-                  ),
-                  if (uiState.isLoading)
-                    const Positioned(
-                      left: 0,
-                      right: 0,
-                      top: 0,
-                      child: LinearProgressIndicator(minHeight: 2),
                     ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '${l10n.rpgTurnNumber(session.state.turn)} · ${session.branchId}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppTheme.textMuted,
+                            ),
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('rpg-disable'),
+                      onPressed: onDisable,
+                      icon: const Icon(Icons.close, size: 19),
+                      tooltip: l10n.rpgDisableMode,
+                    ),
+                  ],
+                ),
+              ),
+              if (uiState.lastResult case final result?)
+                _ResultBanner(result: result),
+              TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                dividerHeight: 1,
+                tabs: [
+                  Tab(
+                      key: const Key('rpg-tab-status'),
+                      icon: const Icon(Icons.tune),
+                      text: l10n.rpgStatus),
+                  Tab(
+                      key: const Key('rpg-tab-inventory'),
+                      icon: const Icon(Icons.backpack_outlined),
+                      text: l10n.rpgInventory),
+                  Tab(
+                      key: const Key('rpg-tab-quests'),
+                      icon: const Icon(Icons.task_alt),
+                      text: l10n.rpgQuests),
+                  Tab(
+                      key: const Key('rpg-tab-relations'),
+                      icon: const Icon(Icons.people_outline),
+                      text: l10n.rpgRelations),
+                  Tab(
+                      key: const Key('rpg-tab-actions'),
+                      icon: const Icon(Icons.bolt),
+                      text: l10n.rpgActions),
+                  Tab(
+                      key: const Key('rpg-tab-log'),
+                      icon: const Icon(Icons.history),
+                      text: l10n.rpgLog),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: Stack(
+                  children: [
+                    TabBarView(
+                      children: [
+                        _StatusView(session: session),
+                        _InventoryView(session: session),
+                        _QuestView(session: session),
+                        _RelationshipView(session: session),
+                        _ActionView(chatId: chatId, session: session),
+                        _LogView(
+                          chatId: chatId,
+                          session: session,
+                          snapshots: uiState.snapshots,
+                        ),
+                      ],
+                    ),
+                    if (uiState.isLoading)
+                      const Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        child: LinearProgressIndicator(minHeight: 2),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -3,8 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 void main() {
-  testWidgets('iOS action sheet survives a parent rebuild and returns value',
+  testWidgets('anchored app bar menu survives a parent rebuild on iPad',
       (tester) async {
+    tester.view.physicalSize = const Size(1640, 2360);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     var rebuild = 0;
     String? selected;
     late StateSetter rebuildParent;
@@ -15,11 +20,10 @@ void main() {
           builder: (context, setState) {
             rebuildParent = setState;
             return Scaffold(
-              body: Column(
-                children: [
-                  Text('rebuild-$rebuild'),
+              appBar: AppBar(
+                title: Text('rebuild-$rebuild'),
+                actions: [
                   AdaptivePopupMenuButton<String>(
-                    useBottomSheet: true,
                     onSelected: (value) => selected = value,
                     itemBuilder: (context) => const [
                       PopupMenuItem<String>(
@@ -39,6 +43,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
     expect(find.text('Edit item'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(tester.getTopLeft(find.text('Edit item')).dy, lessThan(200));
 
     rebuildParent(() => rebuild++);
     await tester.pump();

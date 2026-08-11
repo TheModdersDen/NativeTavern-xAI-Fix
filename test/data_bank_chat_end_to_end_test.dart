@@ -160,7 +160,7 @@ void main() {
         algorithm: DataBankHashAlgorithm.sha256,
         digest: 'b' * 64,
       ),
-      importedAt: DateTime.utc(2026, 8, 8, 13),
+      importedAt: global.document.createdAt.add(const Duration(hours: 1)),
       processingState: DataBankProcessingState.ready,
       indexState: DataBankIndexState.indexed,
     );
