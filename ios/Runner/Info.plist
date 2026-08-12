@@ -51,6 +51,8 @@
 	<string>This app needs access to your photo library to import character images, avatars, and chat backgrounds.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to take photos for character avatars and chat images.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location only when taking a photo, so optional GPS metadata can be attached to that photo.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app needs to connect to local AI services and APIs on your network.</string>
 	<key>NSMicrophoneUsageDescription</key>

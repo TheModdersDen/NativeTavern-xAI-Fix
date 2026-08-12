@@ -72,6 +72,8 @@ validate_source_project() {
     || fail "ITSAppUsesNonExemptEncryption must be false"
   [[ -n "$(read_plist_value "$INFO_PLIST" NSPhotoLibraryUsageDescription)" ]] \
     || fail "Info.plist is missing photo-library usage text"
+  [[ -n "$(read_plist_value "$INFO_PLIST" NSLocationWhenInUseUsageDescription)" ]] \
+    || fail "Info.plist is missing location usage text required by DKCamera"
   [[ -n "$(read_plist_value "$INFO_PLIST" NSMicrophoneUsageDescription)" ]] \
     || fail "Info.plist is missing microphone usage text"
 
