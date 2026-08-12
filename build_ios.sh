@@ -209,6 +209,7 @@ if [[ "$BUILD_FOR_DEVICE" == 'true' ]]; then
     -destination "id=$DEVICE_ID" \
     -derivedDataPath "$DERIVED_DATA_PATH" \
     -allowProvisioningUpdates \
+    -allowProvisioningDeviceRegistration \
     clean build
 
   DEVICE_APP="$DERIVED_DATA_PATH/Build/Products/Release-iphoneos/Runner.app"
