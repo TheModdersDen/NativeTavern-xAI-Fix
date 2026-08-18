@@ -6171,4 +6171,47 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => '원격 AI의 데이터 처리 방식 선택';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern은 로컬 우선 앱입니다. 원격 AI 기능을 사용하면 필요한 데이터가 이 기기에서 설정한 제공업체로 직접 전송됩니다. NativeTavern은 요청을 중계하거나 저장하지 않습니다.';
+
+  @override
+  String get aiDataSharingDataTitle => '전송될 수 있는 데이터';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- 메시지와 관련 채팅 기록\n- 캐릭터, 페르소나, 시스템 지침, 로어북, 메모리 및 도구 입력\n- 임베딩에 사용하는 문서\n- 이미지 생성에 사용하는 프롬프트와 이미지\n- 음성 기능에 사용하는 오디오와 텍스트';
+
+  @override
+  String get aiDataSharingRecipientsTitle => '데이터를 받을 수 있는 업체';
+
+  @override
+  String get aiDataSharingRecipients =>
+      '설정에 따라 Anthropic, 직접 설정한 OAI 호환 엔드포인트, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations 또는 직접 입력한 다른 엔드포인트가 데이터를 받을 수 있습니다.';
+
+  @override
+  String get aiDataSharingControlTitle => '사용자 선택';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      '원격 제공업체는 각자의 개인정보 처리방침에 따라 데이터를 처리합니다. API 인증 정보는 선택한 업체에 직접 인증할 때를 제외하고 이 기기에 보관됩니다. 설정에서 언제든 변경할 수 있으며 로컬 AI는 동의 없이 계속 사용할 수 있습니다.';
+
+  @override
+  String get allowRemoteAi => '원격 AI 허용';
+
+  @override
+  String get useLocalAiOnly => '로컬 AI만 사용';
+
+  @override
+  String get aiDataSharingSettingsTitle => '원격 AI 데이터 공유';
+
+  @override
+  String get aiDataSharingAllowedDescription => '설정한 제공업체와 엔드포인트로 전송 허용';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription => '차단됨. 로컬 AI는 계속 사용할 수 있습니다';
 }

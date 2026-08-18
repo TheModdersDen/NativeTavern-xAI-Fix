@@ -10982,6 +10982,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No valid characters in group'**
   String get noValidCharactersInGroup;
+
+  /// No description provided for @aiDataSharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how remote AI handles your data'**
+  String get aiDataSharingTitle;
+
+  /// No description provided for @aiDataSharingIntroduction.
+  ///
+  /// In en, this message translates to:
+  /// **'NativeTavern is local-first. When you use a remote AI feature, this device sends the required data directly to the provider you configured. NativeTavern does not proxy or store those requests.'**
+  String get aiDataSharingIntroduction;
+
+  /// No description provided for @aiDataSharingDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data that may be sent'**
+  String get aiDataSharingDataTitle;
+
+  /// No description provided for @aiDataSharingDataTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'- Your messages and relevant chat history\n- Character, persona and system instructions, lorebook, memory and tool inputs\n- Documents used for embeddings\n- Prompts and images used for image generation\n- Audio and text used for speech features'**
+  String get aiDataSharingDataTypes;
+
+  /// No description provided for @aiDataSharingRecipientsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who may receive it'**
+  String get aiDataSharingRecipientsTitle;
+
+  /// No description provided for @aiDataSharingRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.'**
+  String get aiDataSharingRecipients;
+
+  /// No description provided for @aiDataSharingControlTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice'**
+  String get aiDataSharingControlTitle;
+
+  /// No description provided for @aiDataSharingControlDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote providers process data under their own privacy policies. Your API credentials stay on this device except when used to authenticate directly with the selected provider. You can change this choice in Settings at any time. Local AI endpoints remain available without consent.'**
+  String get aiDataSharingControlDescription;
+
+  /// No description provided for @allowRemoteAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow remote AI'**
+  String get allowRemoteAi;
+
+  /// No description provided for @useLocalAiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Use local AI only'**
+  String get useLocalAiOnly;
+
+  /// No description provided for @aiDataSharingSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote AI data sharing'**
+  String get aiDataSharingSettingsTitle;
+
+  /// No description provided for @aiDataSharingAllowedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed for providers and endpoints you configure'**
+  String get aiDataSharingAllowedDescription;
+
+  /// No description provided for @aiDataSharingLocalOnlyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked; local AI endpoints remain available'**
+  String get aiDataSharingLocalOnlyDescription;
 }
 
 class _AppLocalizationsDelegate

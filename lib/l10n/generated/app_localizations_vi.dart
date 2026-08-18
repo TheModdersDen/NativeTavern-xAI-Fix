@@ -6185,4 +6185,49 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'Chọn cách AI từ xa xử lý dữ liệu của bạn';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern ưu tiên xử lý cục bộ. Khi dùng tính năng AI từ xa, thiết bị này gửi dữ liệu cần thiết trực tiếp đến nhà cung cấp bạn đã cấu hình. NativeTavern không chuyển tiếp hay lưu các yêu cầu đó.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Dữ liệu có thể được gửi';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Tin nhắn và lịch sử trò chuyện liên quan\n- Chỉ dẫn nhân vật, persona và hệ thống, lorebook, bộ nhớ và dữ liệu công cụ\n- Tài liệu dùng cho embedding\n- Prompt và hình ảnh dùng để tạo ảnh\n- Âm thanh và văn bản dùng cho tính năng giọng nói';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Bên có thể nhận dữ liệu';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Tùy cấu hình của bạn: Anthropic, endpoint tương thích OAI do bạn cấu hình, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations hoặc endpoint tùy chỉnh khác bạn nhập.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Lựa chọn của bạn';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Nhà cung cấp từ xa xử lý dữ liệu theo chính sách riêng tư của họ. Thông tin API nằm trên thiết bị này trừ khi xác thực trực tiếp với nhà cung cấp đã chọn. Bạn có thể đổi lựa chọn trong Cài đặt bất cứ lúc nào. AI cục bộ vẫn dùng được mà không cần đồng ý.';
+
+  @override
+  String get allowRemoteAi => 'Cho phép AI từ xa';
+
+  @override
+  String get useLocalAiOnly => 'Chỉ dùng AI cục bộ';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Chia sẻ dữ liệu với AI từ xa';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Được phép cho nhà cung cấp và endpoint đã cấu hình';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Đã chặn; AI cục bộ vẫn dùng được';
 }

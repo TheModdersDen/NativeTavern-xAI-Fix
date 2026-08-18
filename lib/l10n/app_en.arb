@@ -6105,5 +6105,18 @@
   "mcpLegacyHttpSse": "Legacy HTTP + SSE",
   "chatWithName": "Chat with {name}",
   "@chatWithName": {"placeholders": {"name": {"type": "String"}}},
-  "noValidCharactersInGroup": "No valid characters in group"
+  "noValidCharactersInGroup": "No valid characters in group",
+  "aiDataSharingTitle": "Choose how remote AI handles your data",
+  "aiDataSharingIntroduction": "NativeTavern is local-first. When you use a remote AI feature, this device sends the required data directly to the provider you configured. NativeTavern does not proxy or store those requests.",
+  "aiDataSharingDataTitle": "Data that may be sent",
+  "aiDataSharingDataTypes": "- Your messages and relevant chat history\n- Character, persona and system instructions, lorebook, memory and tool inputs\n- Documents used for embeddings\n- Prompts and images used for image generation\n- Audio and text used for speech features",
+  "aiDataSharingRecipientsTitle": "Who may receive it",
+  "aiDataSharingRecipients": "Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.",
+  "aiDataSharingControlTitle": "Your choice",
+  "aiDataSharingControlDescription": "Remote providers process data under their own privacy policies. Your API credentials stay on this device except when used to authenticate directly with the selected provider. You can change this choice in Settings at any time. Local AI endpoints remain available without consent.",
+  "allowRemoteAi": "Allow remote AI",
+  "useLocalAiOnly": "Use local AI only",
+  "aiDataSharingSettingsTitle": "Remote AI data sharing",
+  "aiDataSharingAllowedDescription": "Allowed for providers and endpoints you configure",
+  "aiDataSharingLocalOnlyDescription": "Blocked; local AI endpoints remain available"
 }

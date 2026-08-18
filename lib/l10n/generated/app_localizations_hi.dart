@@ -6185,4 +6185,49 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'चुनें कि रिमोट AI आपका डेटा कैसे संभाले';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern स्थानीय उपयोग को प्राथमिकता देता है। रिमोट AI सुविधा इस्तेमाल करने पर यह डिवाइस आवश्यक डेटा सीधे आपके कॉन्फ़िगर किए गए प्रदाता को भेजता है। NativeTavern इन अनुरोधों को प्रॉक्सी या संग्रहीत नहीं करता।';
+
+  @override
+  String get aiDataSharingDataTitle => 'भेजा जा सकने वाला डेटा';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- आपके संदेश और संबंधित चैट इतिहास\n- चरित्र, पर्सोना और सिस्टम निर्देश, लोरबुक, मेमोरी और टूल इनपुट\n- एम्बेडिंग के लिए दस्तावेज़\n- चित्र निर्माण के लिए प्रॉम्प्ट और चित्र\n- वॉइस सुविधाओं के लिए ऑडियो और टेक्स्ट';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'कौन इसे प्राप्त कर सकता है';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'आपकी कॉन्फ़िगरेशन के अनुसार: Anthropic, आपके द्वारा कॉन्फ़िगर किया OAI-संगत एंडपॉइंट, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations या आपका दर्ज किया अन्य कस्टम एंडपॉइंट।';
+
+  @override
+  String get aiDataSharingControlTitle => 'आपकी पसंद';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'रिमोट प्रदाता अपनी गोपनीयता नीतियों के अनुसार डेटा संसाधित करते हैं। API क्रेडेंशियल चुने गए प्रदाता से सीधे प्रमाणीकरण के अलावा इसी डिवाइस पर रहते हैं। इसे सेटिंग्स में कभी भी बदला जा सकता है। स्थानीय AI बिना सहमति उपलब्ध रहता है।';
+
+  @override
+  String get allowRemoteAi => 'रिमोट AI की अनुमति दें';
+
+  @override
+  String get useLocalAiOnly => 'केवल स्थानीय AI इस्तेमाल करें';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'रिमोट AI डेटा साझाकरण';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'कॉन्फ़िगर किए गए प्रदाताओं और एंडपॉइंट के लिए अनुमत';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'अवरुद्ध; स्थानीय AI उपलब्ध रहता है';
 }

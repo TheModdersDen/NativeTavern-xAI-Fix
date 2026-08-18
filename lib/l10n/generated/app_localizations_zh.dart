@@ -5959,6 +5959,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => '群组中没有有效角色';
+
+  @override
+  String get aiDataSharingTitle => '选择远程 AI 如何处理你的数据';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern 采用本地优先设计。使用远程 AI 功能时，本设备会将必要数据直接发送给你配置的服务商；NativeTavern 不会中转或存储这些请求。';
+
+  @override
+  String get aiDataSharingDataTitle => '可能发送的数据';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- 你的消息及相关聊天记录\n- 角色、人设和系统指令、世界书、记忆及工具输入\n- 用于向量嵌入的文档\n- 用于图片生成的提示词和图片\n- 用于语音功能的音频和文本';
+
+  @override
+  String get aiDataSharingRecipientsTitle => '可能接收数据的服务商';
+
+  @override
+  String get aiDataSharingRecipients =>
+      '根据你的配置，接收方可能是：Anthropic、你配置的 OAI Compatible 兼容端点、OpenRouter、Google Gemini、DeepSeek、阿里云通义千问、SiliconFlow、Moonshot/Kimi、Z.AI、MiniMax、Cohere、ElevenLabs、Azure Speech、火山引擎、NovelAI、Pollinations，或你填写的其他自定义端点。';
+
+  @override
+  String get aiDataSharingControlTitle => '由你选择';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      '远程服务商会依据其各自的隐私政策处理数据。API 凭据保留在本设备上，仅在向所选服务商直接认证时发送。你可以随时在“设置”中更改选择；本地 AI 端点无需同意即可继续使用。';
+
+  @override
+  String get allowRemoteAi => '允许使用远程 AI';
+
+  @override
+  String get useLocalAiOnly => '仅使用本地 AI';
+
+  @override
+  String get aiDataSharingSettingsTitle => '远程 AI 数据共享';
+
+  @override
+  String get aiDataSharingAllowedDescription => '已允许向你配置的服务商和端点发送数据';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription => '已阻止；本地 AI 端点仍可使用';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -11917,4 +11960,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get noValidCharactersInGroup => '群組中沒有有效角色';
+
+  @override
+  String get aiDataSharingTitle => '選擇遠端 AI 如何處理你的資料';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern 採用本機優先設計。使用遠端 AI 功能時，本裝置會將必要資料直接傳送給你設定的服務商；NativeTavern 不會轉送或儲存這些請求。';
+
+  @override
+  String get aiDataSharingDataTitle => '可能傳送的資料';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- 你的訊息及相關聊天記錄\n- 角色、人物設定和系統指令、世界書、記憶及工具輸入\n- 用於向量嵌入的文件\n- 用於圖片生成的提示詞和圖片\n- 用於語音功能的音訊和文字';
+
+  @override
+  String get aiDataSharingRecipientsTitle => '可能接收資料的服務商';
+
+  @override
+  String get aiDataSharingRecipients =>
+      '依你的設定，接收方可能是：Anthropic、你設定的 OAI Compatible 相容端點、OpenRouter、Google Gemini、DeepSeek、Alibaba Qwen、SiliconFlow、Moonshot/Kimi、Z.AI、MiniMax、Cohere、ElevenLabs、Azure Speech、Volcengine、NovelAI、Pollinations，或你輸入的其他自訂端點。';
+
+  @override
+  String get aiDataSharingControlTitle => '由你選擇';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      '遠端服務商會依其各自的隱私權政策處理資料。API 憑證保留在本裝置上，僅在向所選服務商直接驗證時傳送。你可以隨時在「設定」中變更選擇；本機 AI 端點無需同意即可繼續使用。';
+
+  @override
+  String get allowRemoteAi => '允許使用遠端 AI';
+
+  @override
+  String get useLocalAiOnly => '僅使用本機 AI';
+
+  @override
+  String get aiDataSharingSettingsTitle => '遠端 AI 資料共享';
+
+  @override
+  String get aiDataSharingAllowedDescription => '已允許向你設定的服務商和端點傳送資料';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription => '已封鎖；本機 AI 端點仍可使用';
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// Generates text embeddings for RAG / vector storage.
@@ -13,6 +14,8 @@ class EmbeddingService {
     Dio? dio,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   }) : _dio = dio ?? Dio() {
     _dio.interceptors.add(ExternalCallAuditInterceptor(
       repository: auditRepository,
@@ -21,6 +24,7 @@ class EmbeddingService {
         request,
         const {ExternalDataType.documentText},
       ),
+      consentRepository: consentRepository,
     ));
   }
 
@@ -55,8 +59,7 @@ class EmbeddingService {
         case EmbeddingProvider.ollama:
           return await _embedOllama(texts, settings);
         case EmbeddingProvider.local:
-          throw UnsupportedError(
-              'On-device embeddings are not available yet. '
+          throw UnsupportedError('On-device embeddings are not available yet. '
               'Use Ollama or a cloud provider.');
       }
     } on DioException catch (error) {
@@ -168,9 +171,8 @@ class EmbeddingService {
     );
     final embeddings = response.data?['embeddings'] as List<dynamic>? ?? [];
     return embeddings
-        .map((e) => (e as List<dynamic>)
-            .map((v) => (v as num).toDouble())
-            .toList())
+        .map((e) =>
+            (e as List<dynamic>).map((v) => (v as num).toDouble()).toList())
         .toList();
   }
 
@@ -219,9 +221,8 @@ class EmbeddingService {
     );
     final embeddings = response.data?['embeddings'] as List<dynamic>? ?? [];
     return embeddings
-        .map((e) => (e as List<dynamic>)
-            .map((v) => (v as num).toDouble())
-            .toList())
+        .map((e) =>
+            (e as List<dynamic>).map((v) => (v as num).toDouble()).toList())
         .toList();
   }
 }

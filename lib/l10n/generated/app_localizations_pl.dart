@@ -6186,4 +6186,50 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle =>
+      'Wybierz, jak zdalna AI przetwarza Twoje dane';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern działa przede wszystkim lokalnie. Gdy używasz zdalnej funkcji AI, urządzenie wysyła wymagane dane bezpośrednio do skonfigurowanego dostawcy. NativeTavern nie pośredniczy ani nie przechowuje tych żądań.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Dane, które mogą być wysyłane';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Twoje wiadomości i odpowiednia historia czatu\n- Instrukcje postaci, persony i systemu, lorebook, pamięć oraz dane narzędzi\n- Dokumenty do embeddingów\n- Prompty i obrazy do generowania obrazów\n- Audio i tekst do funkcji głosowych';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Możliwi odbiorcy';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Zależnie od konfiguracji: Anthropic, skonfigurowany przez Ciebie endpoint zgodny z OAI, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations albo inny własny endpoint.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Twój wybór';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Zdalni dostawcy przetwarzają dane według własnych polityk prywatności. Dane logowania API pozostają na urządzeniu poza bezpośrednim uwierzytelnieniem u wybranego dostawcy. Wybór można zmienić w Ustawieniach. Lokalna AI działa bez zgody.';
+
+  @override
+  String get allowRemoteAi => 'Zezwól na zdalną AI';
+
+  @override
+  String get useLocalAiOnly => 'Używaj tylko lokalnej AI';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Udostępnianie danych zdalnej AI';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Dozwolone dla skonfigurowanych dostawców i endpointów';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Zablokowane; lokalna AI pozostaje dostępna';
 }

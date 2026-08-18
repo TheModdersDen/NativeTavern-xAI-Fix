@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:path/path.dart' as p;
 
 enum ExternalDataType {
@@ -203,6 +204,7 @@ class ExternalCallAuditInterceptor extends Interceptor {
   final String capabilityId;
   final ExternalCostAttribution costAttribution;
   final ExternalDataClassifier classifyData;
+  final AiDataSharingConsentRepository consentRepository;
   final DateTime Function() _clock;
 
   ExternalCallAuditInterceptor({
@@ -210,12 +212,26 @@ class ExternalCallAuditInterceptor extends Interceptor {
     required this.capabilityId,
     required this.classifyData,
     this.costAttribution = ExternalCostAttribution.userServiceAccount,
+    this.consentRepository = const AllowAllAiDataSharingConsentRepository(),
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.extra[_startKey] = _clock().toUtc().toIso8601String();
+    if (!_isLocalRequest(options.uri) &&
+        !consentRepository.current.allowsRemoteAi) {
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.cancel,
+          error: const AiDataSharingConsentRequiredException(),
+          message:
+              'Remote AI data sharing is disabled. Enable it in Settings > Privacy.',
+        ),
+      );
+      return;
+    }
     handler.next(options);
   }
 
@@ -274,10 +290,22 @@ class ExternalCallAuditInterceptor extends Interceptor {
 
   bool _isLocalRequest(Uri uri) {
     final host = uri.host.toLowerCase();
-    return host == 'localhost' ||
-        host == '127.0.0.1' ||
-        host == '::1' ||
-        host.endsWith('.local');
+    if (host == 'localhost' || host.endsWith('.local')) return true;
+    final address = InternetAddress.tryParse(host);
+    if (address == null) return false;
+    final bytes = address.rawAddress;
+    if (address.type == InternetAddressType.IPv4) {
+      return bytes[0] == 127 ||
+          bytes[0] == 10 ||
+          (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+          (bytes[0] == 192 && bytes[1] == 168);
+    }
+
+    final isLoopback =
+        bytes.take(15).every((byte) => byte == 0) && bytes[15] == 1;
+    final isUniqueLocal = (bytes[0] & 0xfe) == 0xfc;
+    final isLinkLocal = bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80;
+    return isLoopback || isUniqueLocal || isLinkLocal;
   }
 }
 

@@ -6187,4 +6187,50 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle =>
+      'Wähle, wie Remote-KI deine Daten verarbeitet';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern arbeitet primär lokal. Bei einer Remote-KI-Funktion sendet dieses Gerät die erforderlichen Daten direkt an den konfigurierten Anbieter. NativeTavern leitet diese Anfragen weder weiter noch speichert sie.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Daten, die gesendet werden können';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Deine Nachrichten und relevanter Chatverlauf\n- Charakter-, Persona- und Systemanweisungen, Lorebook, Speicher und Tool-Eingaben\n- Dokumente für Embeddings\n- Prompts und Bilder für die Bilderzeugung\n- Audio und Text für Sprachfunktionen';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Mögliche Empfänger';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Je nach Konfiguration: Anthropic, ein von dir konfigurierter OAI-kompatibler Endpunkt, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations oder ein weiterer eigener Endpunkt.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Deine Wahl';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Remote-Anbieter verarbeiten Daten nach ihren eigenen Datenschutzrichtlinien. Deine API-Zugangsdaten bleiben auf diesem Gerät, außer zur direkten Anmeldung beim gewählten Anbieter. Du kannst dies jederzeit in den Einstellungen ändern. Lokale KI bleibt ohne Einwilligung verfügbar.';
+
+  @override
+  String get allowRemoteAi => 'Remote-KI erlauben';
+
+  @override
+  String get useLocalAiOnly => 'Nur lokale KI verwenden';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Datenfreigabe für Remote-KI';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Für konfigurierte Anbieter und Endpunkte erlaubt';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Blockiert; lokale KI bleibt verfügbar';
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
+import 'package:native_tavern/presentation/providers/ai_data_sharing_consent_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
@@ -9,13 +10,15 @@ import 'package:native_tavern/presentation/providers/external_call_audit_provide
 final imageGenServiceProvider = Provider<ImageGenerationService>((ref) {
   final service = ImageGenerationService(
     auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+    consentRepository: ref.watch(aiDataSharingConsentRepositoryProvider),
   );
   ref.onDispose(() => service.dispose());
   return service;
 });
 
 /// Provider for image generation settings
-final imageGenSettingsProvider = StateNotifierProvider<ImageGenSettingsNotifier, ImageGenSettings>((ref) {
+final imageGenSettingsProvider =
+    StateNotifierProvider<ImageGenSettingsNotifier, ImageGenSettings>((ref) {
   return ImageGenSettingsNotifier(ref.watch(imageGenServiceProvider));
 });
 
@@ -107,7 +110,7 @@ class ImageGenSettingsNotifier extends StateNotifier<ImageGenSettings> {
     state = state.copyWith(defaultSampler: sampler);
     _saveSettings();
   }
-  
+
   void setDefaultScheduler(String scheduler) {
     state = state.copyWith(defaultScheduler: scheduler);
     _saveSettings();
@@ -117,13 +120,13 @@ class ImageGenSettingsNotifier extends StateNotifier<ImageGenSettings> {
     state = state.copyWith(defaultNegativePrompt: negativePrompt);
     _saveSettings();
   }
-  
+
   // NovelAI specific setters
   void setNovelaiAnlasGuard(bool value) {
     state = state.copyWith(novelaiAnlasGuard: value);
     _saveSettings();
   }
-  
+
   void setNovelaiSm(bool value) {
     state = state.copyWith(novelaiSm: value);
     // Disable sm_dyn if sm is disabled
@@ -132,28 +135,28 @@ class ImageGenSettingsNotifier extends StateNotifier<ImageGenSettings> {
     }
     _saveSettings();
   }
-  
+
   void setNovelaiSmDyn(bool value) {
     state = state.copyWith(novelaiSmDyn: value);
     _saveSettings();
   }
-  
+
   void setNovelaiDecrisper(bool value) {
     state = state.copyWith(novelaiDecrisper: value);
     _saveSettings();
   }
-  
+
   void setNovelaiVarietyBoost(bool value) {
     state = state.copyWith(novelaiVarietyBoost: value);
     _saveSettings();
   }
-  
+
   // OpenAI specific setters
   void setOpenaiStyle(String style) {
     state = state.copyWith(openaiStyle: style);
     _saveSettings();
   }
-  
+
   void setOpenaiQuality(String quality) {
     state = state.copyWith(openaiQuality: quality);
     _saveSettings();
@@ -211,12 +214,12 @@ class ImageGenStateNotifier extends StateNotifier<ImageGenState> {
 
   Future<ImageGenResult?> generate(ImageGenRequest request) async {
     state = state.copyWith(
-      isGenerating: true, 
-      progress: 0.0, 
+      isGenerating: true,
+      progress: 0.0,
       clearError: true,
       clearResult: true,
     );
-    
+
     try {
       final result = await _service.generate(request);
       state = state.copyWith(isGenerating: false, result: result);
@@ -233,12 +236,12 @@ class ImageGenStateNotifier extends StateNotifier<ImageGenState> {
     String? style,
   }) async {
     state = state.copyWith(
-      isGenerating: true, 
-      progress: 0.0, 
+      isGenerating: true,
+      progress: 0.0,
       clearError: true,
       clearResult: true,
     );
-    
+
     try {
       final result = await _service.generatePortrait(
         characterName: characterName,
@@ -252,7 +255,7 @@ class ImageGenStateNotifier extends StateNotifier<ImageGenState> {
       return null;
     }
   }
-  
+
   /// Generate image from a specific mode (character, face, background, etc.)
   Future<ImageGenResult?> generateFromMode({
     required ImageGenMode mode,
@@ -260,7 +263,7 @@ class ImageGenStateNotifier extends StateNotifier<ImageGenState> {
     String? negativePrompt,
   }) async {
     final settings = _service.settings;
-    
+
     return generate(ImageGenRequest(
       prompt: prompt,
       negativePrompt: negativePrompt ?? settings.defaultNegativePrompt,
@@ -279,20 +282,23 @@ class ImageGenStateNotifier extends StateNotifier<ImageGenState> {
 }
 
 /// Provider for image generation state
-final imageGenStateProvider = StateNotifierProvider<ImageGenStateNotifier, ImageGenState>((ref) {
+final imageGenStateProvider =
+    StateNotifierProvider<ImageGenStateNotifier, ImageGenState>((ref) {
   final service = ref.watch(imageGenServiceProvider);
   return ImageGenStateNotifier(service);
 });
 
 /// Provider for generating images
-final generateImageProvider = Provider<Future<ImageGenResult?> Function(ImageGenRequest)>((ref) {
+final generateImageProvider =
+    Provider<Future<ImageGenResult?> Function(ImageGenRequest)>((ref) {
   return (ImageGenRequest request) async {
     return ref.read(imageGenStateProvider.notifier).generate(request);
   };
 });
 
 /// Provider for parsing /imagine command
-final parseImagineCommandProvider = Provider<ImageGenRequest? Function(String)>((ref) {
+final parseImagineCommandProvider =
+    Provider<ImageGenRequest? Function(String)>((ref) {
   final service = ref.watch(imageGenServiceProvider);
   return service.parseImagineCommand;
 });
@@ -319,13 +325,13 @@ class FetchedModelsState {
   final List<String>? models;
   final bool isLoading;
   final String? error;
-  
+
   const FetchedModelsState({
     this.models,
     this.isLoading = false,
     this.error,
   });
-  
+
   FetchedModelsState copyWith({
     List<String>? models,
     bool? isLoading,
@@ -344,8 +350,9 @@ class FetchedModelsState {
 class FetchedModelsNotifier extends StateNotifier<FetchedModelsState> {
   final ImageGenerationService _service;
   final ImageGenSettings _settings;
-  
-  FetchedModelsNotifier(this._service, this._settings) : super(const FetchedModelsState()) {
+
+  FetchedModelsNotifier(this._service, this._settings)
+      : super(const FetchedModelsState()) {
     // Auto-fetch models on initialization if provider supports it
     if (_settings.provider.supportsFetchingModels) {
       fetchModels();
@@ -354,26 +361,27 @@ class FetchedModelsNotifier extends StateNotifier<FetchedModelsState> {
       state = FetchedModelsState(models: _settings.provider.defaultModels);
     }
   }
-  
+
   Future<void> fetchModels() async {
     debugPrint('FetchedModelsNotifier.fetchModels() called');
     debugPrint('  Provider: ${_settings.provider.displayName}');
-    debugPrint('  Supports fetching: ${_settings.provider.supportsFetchingModels}');
-    
+    debugPrint(
+        '  Supports fetching: ${_settings.provider.supportsFetchingModels}');
+
     if (!_settings.provider.supportsFetchingModels) {
       // Provider doesn't support fetching, use default models
       debugPrint('  Using default models: ${_settings.provider.defaultModels}');
       state = FetchedModelsState(models: _settings.provider.defaultModels);
       return;
     }
-    
+
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
       debugPrint('  Calling service.fetchModels()...');
       final models = await _service.fetchModels();
       debugPrint('  Fetched models: $models');
-      
+
       if (models != null && models.isNotEmpty) {
         state = FetchedModelsState(models: models);
       } else {
@@ -389,40 +397,44 @@ class FetchedModelsNotifier extends StateNotifier<FetchedModelsState> {
       );
     }
   }
-  
+
   void reset() {
     state = const FetchedModelsState();
   }
 }
 
 /// Provider for fetched models state - only rebuilds when provider type changes
-final fetchedModelsProvider = StateNotifierProvider<FetchedModelsNotifier, FetchedModelsState>((ref) {
+final fetchedModelsProvider =
+    StateNotifierProvider<FetchedModelsNotifier, FetchedModelsState>((ref) {
   final service = ref.watch(imageGenServiceProvider);
   // Only rebuild when the provider type changes, not when model or other settings change
-  final provider = ref.watch(imageGenSettingsProvider.select((s) => s.provider));
+  final provider =
+      ref.watch(imageGenSettingsProvider.select((s) => s.provider));
   final apiKeys = ref.watch(imageGenSettingsProvider.select((s) => s.apiKeys));
-  final apiEndpoints = ref.watch(imageGenSettingsProvider.select((s) => s.apiEndpoints));
-  
+  final apiEndpoints =
+      ref.watch(imageGenSettingsProvider.select((s) => s.apiEndpoints));
+
   // Create a temporary settings object with just the fields we need for fetching
   final settings = ImageGenSettings(
     provider: provider,
     apiKeys: apiKeys,
     apiEndpoints: apiEndpoints,
   );
-  
+
   return FetchedModelsNotifier(service, settings);
 });
 
 /// Provider for available models - combines fetched and default models
 final availableModelsProvider = Provider<List<String>>((ref) {
-  final provider = ref.watch(imageGenSettingsProvider.select((s) => s.provider));
+  final provider =
+      ref.watch(imageGenSettingsProvider.select((s) => s.provider));
   final fetchedState = ref.watch(fetchedModelsProvider);
-  
+
   // If we have fetched models, use them
   if (fetchedState.models != null && fetchedState.models!.isNotEmpty) {
     return fetchedState.models!;
   }
-  
+
   // Otherwise fall back to default models
   return provider.defaultModels;
 });
@@ -434,6 +446,7 @@ final modelDisplayNameProvider = Provider.family<String, String>((ref, model) {
 
 /// Provider to check if provider supports fetching models
 final supportsFetchingModelsProvider = Provider<bool>((ref) {
-  final provider = ref.watch(imageGenSettingsProvider.select((s) => s.provider));
+  final provider =
+      ref.watch(imageGenSettingsProvider.select((s) => s.provider));
   return provider.supportsFetchingModels;
 });

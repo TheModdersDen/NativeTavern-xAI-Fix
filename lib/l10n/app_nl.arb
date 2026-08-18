@@ -281,5 +281,18 @@
   "link": "Link",
   "slashCommands": "Slash-commando's",
   "availableCommands": "Beschikbare commando's:",
-  "commandHelp": "Typ / om beschikbare commando's te zien"
+  "commandHelp": "Typ / om beschikbare commando's te zien",
+  "aiDataSharingTitle": "Kies hoe externe AI je gegevens verwerkt",
+  "aiDataSharingIntroduction": "NativeTavern werkt lokaal waar mogelijk. Bij gebruik van externe AI stuurt dit apparaat de benodigde gegevens rechtstreeks naar de ingestelde provider. NativeTavern leidt die verzoeken niet door en slaat ze niet op.",
+  "aiDataSharingDataTitle": "Gegevens die kunnen worden verzonden",
+  "aiDataSharingDataTypes": "- Je berichten en relevante chatgeschiedenis\n- Personage-, persona- en systeeminstructies, lorebook, geheugen en toolinvoer\n- Documenten voor embeddings\n- Prompts en afbeeldingen voor beeldgeneratie\n- Audio en tekst voor spraakfuncties",
+  "aiDataSharingRecipientsTitle": "Mogelijke ontvangers",
+  "aiDataSharingRecipients": "Afhankelijk van je configuratie: Anthropic, een door jou ingesteld OAI-compatibel endpoint, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations of een ander zelf ingevoerd endpoint.",
+  "aiDataSharingControlTitle": "Jouw keuze",
+  "aiDataSharingControlDescription": "Externe providers verwerken gegevens volgens hun eigen privacybeleid. Je API-gegevens blijven op dit apparaat, behalve bij directe authenticatie met de gekozen provider. Je kunt dit altijd wijzigen in Instellingen. Lokale AI blijft zonder toestemming beschikbaar.",
+  "allowRemoteAi": "Externe AI toestaan",
+  "useLocalAiOnly": "Alleen lokale AI gebruiken",
+  "aiDataSharingSettingsTitle": "Gegevens delen met externe AI",
+  "aiDataSharingAllowedDescription": "Toegestaan voor ingestelde providers en endpoints",
+  "aiDataSharingLocalOnlyDescription": "Geblokkeerd; lokale AI blijft beschikbaar"
 }

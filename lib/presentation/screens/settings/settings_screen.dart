@@ -8,6 +8,7 @@ import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:native_tavern/presentation/widgets/privacy/ai_data_sharing_consent_gate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -221,6 +222,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const _ConfirmDeleteTile(),
           const _AutoSaveTile(),
+          const AiDataSharingSettingsTile(),
           const _DebugLogTile(),
           ListTile(
             leading: const Icon(Icons.analytics),
@@ -260,6 +262,7 @@ class SettingsScreen extends ConsumerWidget {
               showLicensePage(context: context);
             },
           ),
+          const PrivacyPolicyTile(),
           const SizedBox(height: 32),
         ],
       ),

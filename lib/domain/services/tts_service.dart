@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/tts_amplitude_envelope.dart';
 import 'package:native_tavern/domain/services/voice_adapter_contract.dart';
 import 'package:path/path.dart' as p;
@@ -442,6 +443,8 @@ class TTSService with WidgetsBindingObserver {
     AudioPlayer? audioPlayer,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   })  : _dio = dio ?? Dio(),
         _systemTts = systemTts ?? FlutterSystemTTSBackend(),
         _audioPlayer = audioPlayer ?? AudioPlayer() {
@@ -453,6 +456,7 @@ class TTSService with WidgetsBindingObserver {
           ExternalDataType.chatText,
           ExternalDataType.audio,
         },
+        consentRepository: consentRepository,
       ),
     );
     _systemTts.setStartHandler(_handleSystemStart);

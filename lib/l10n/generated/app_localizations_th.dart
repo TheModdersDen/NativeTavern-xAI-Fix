@@ -6183,4 +6183,49 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'เลือกวิธีที่ AI ระยะไกลจัดการข้อมูลของคุณ';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern ให้ความสำคัญกับการทำงานในเครื่อง เมื่อใช้ฟีเจอร์ AI ระยะไกล อุปกรณ์นี้จะส่งข้อมูลที่จำเป็นตรงไปยังผู้ให้บริการที่คุณตั้งค่าไว้ NativeTavern ไม่ส่งต่อหรือจัดเก็บคำขอเหล่านั้น';
+
+  @override
+  String get aiDataSharingDataTitle => 'ข้อมูลที่อาจถูกส่ง';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- ข้อความและประวัติแชทที่เกี่ยวข้อง\n- คำสั่งตัวละคร เพอร์โซนา และระบบ lorebook หน่วยความจำ และข้อมูลเข้าเครื่องมือ\n- เอกสารที่ใช้ทำ embedding\n- พรอมต์และรูปภาพสำหรับสร้างภาพ\n- เสียงและข้อความสำหรับฟีเจอร์เสียงพูด';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'ผู้ที่อาจได้รับข้อมูล';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'ขึ้นอยู่กับการตั้งค่าของคุณ: Anthropic, endpoint ที่รองรับ OAI ซึ่งคุณตั้งค่าไว้, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations หรือ endpoint กำหนดเองอื่นที่คุณระบุ';
+
+  @override
+  String get aiDataSharingControlTitle => 'ตัวเลือกของคุณ';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'ผู้ให้บริการระยะไกลประมวลผลข้อมูลตามนโยบายความเป็นส่วนตัวของตน ข้อมูลรับรอง API จะอยู่บนอุปกรณ์นี้ยกเว้นเมื่อยืนยันตัวตนโดยตรงกับผู้ให้บริการที่เลือก คุณเปลี่ยนได้ทุกเมื่อในการตั้งค่า AI ในเครื่องยังใช้ได้โดยไม่ต้องยินยอม';
+
+  @override
+  String get allowRemoteAi => 'อนุญาต AI ระยะไกล';
+
+  @override
+  String get useLocalAiOnly => 'ใช้เฉพาะ AI ในเครื่อง';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'การแชร์ข้อมูลกับ AI ระยะไกล';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'อนุญาตสำหรับผู้ให้บริการและ endpoint ที่ตั้งค่าไว้';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'ถูกบล็อก; AI ในเครื่องยังใช้ได้';
 }

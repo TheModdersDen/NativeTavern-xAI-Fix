@@ -1808,5 +1808,18 @@
   "mcpLegacyHttpSse": "旧版 HTTP + SSE",
   "chatWithName": "与{name}聊天",
   "@chatWithName": {"placeholders": {"name": {"type": "String"}}},
-  "noValidCharactersInGroup": "群组中没有有效角色"
+  "noValidCharactersInGroup": "群组中没有有效角色",
+  "aiDataSharingTitle": "选择远程 AI 如何处理你的数据",
+  "aiDataSharingIntroduction": "NativeTavern 采用本地优先设计。使用远程 AI 功能时，本设备会将必要数据直接发送给你配置的服务商；NativeTavern 不会中转或存储这些请求。",
+  "aiDataSharingDataTitle": "可能发送的数据",
+  "aiDataSharingDataTypes": "- 你的消息及相关聊天记录\n- 角色、人设和系统指令、世界书、记忆及工具输入\n- 用于向量嵌入的文档\n- 用于图片生成的提示词和图片\n- 用于语音功能的音频和文本",
+  "aiDataSharingRecipientsTitle": "可能接收数据的服务商",
+  "aiDataSharingRecipients": "根据你的配置，接收方可能是：Anthropic、你配置的 OAI Compatible 兼容端点、OpenRouter、Google Gemini、DeepSeek、阿里云通义千问、SiliconFlow、Moonshot/Kimi、Z.AI、MiniMax、Cohere、ElevenLabs、Azure Speech、火山引擎、NovelAI、Pollinations，或你填写的其他自定义端点。",
+  "aiDataSharingControlTitle": "由你选择",
+  "aiDataSharingControlDescription": "远程服务商会依据其各自的隐私政策处理数据。API 凭据保留在本设备上，仅在向所选服务商直接认证时发送。你可以随时在“设置”中更改选择；本地 AI 端点无需同意即可继续使用。",
+  "allowRemoteAi": "允许使用远程 AI",
+  "useLocalAiOnly": "仅使用本地 AI",
+  "aiDataSharingSettingsTitle": "远程 AI 数据共享",
+  "aiDataSharingAllowedDescription": "已允许向你配置的服务商和端点发送数据",
+  "aiDataSharingLocalOnlyDescription": "已阻止；本地 AI 端点仍可使用"
 }

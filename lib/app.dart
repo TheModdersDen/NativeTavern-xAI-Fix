@@ -8,6 +8,7 @@ import 'package:native_tavern/presentation/providers/locale_provider.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/domain/services/debug_log_service.dart';
 import 'package:native_tavern/presentation/widgets/debug_log_overlay.dart';
+import 'package:native_tavern/presentation/widgets/privacy/ai_data_sharing_consent_gate.dart';
 
 /// Global navigator key for showing dialogs from anywhere
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -38,7 +39,7 @@ class _NativeTavernAppState extends ConsumerState<NativeTavernApp> {
     final activeTheme = ref.watch(activeThemeConfigProvider);
     final locale = ref.watch(localeProvider);
     final settings = ref.watch(appSettingsProvider);
-    
+
     // Listen for debug log setting changes
     ref.listen<AppSettings>(appSettingsProvider, (previous, next) {
       final debugLogService = ref.read(debugLogServiceProvider);
@@ -48,7 +49,7 @@ class _NativeTavernAppState extends ConsumerState<NativeTavernApp> {
         debugLogService.stopCapturing();
       }
     });
-    
+
     return MaterialApp.router(
       title: 'NativeTavern',
       debugShowCheckedModeBanner: false,
@@ -65,9 +66,11 @@ class _NativeTavernAppState extends ConsumerState<NativeTavernApp> {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
-        return DebugLogOverlayWrapper(
-          enabled: settings.enableDebugLog,
-          child: child ?? const SizedBox.shrink(),
+        return AiDataSharingConsentGate(
+          child: DebugLogOverlayWrapper(
+            enabled: settings.enableDebugLog,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );
@@ -86,10 +89,12 @@ class DebugLogOverlayWrapper extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<DebugLogOverlayWrapper> createState() => _DebugLogOverlayWrapperState();
+  ConsumerState<DebugLogOverlayWrapper> createState() =>
+      _DebugLogOverlayWrapperState();
 }
 
-class _DebugLogOverlayWrapperState extends ConsumerState<DebugLogOverlayWrapper> {
+class _DebugLogOverlayWrapperState
+    extends ConsumerState<DebugLogOverlayWrapper> {
   bool _showLogViewer = false;
 
   void _toggleLogViewer() {
@@ -105,7 +110,7 @@ class _DebugLogOverlayWrapperState extends ConsumerState<DebugLogOverlayWrapper>
     }
 
     final logs = ref.watch(currentLogsProvider);
-    
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Overlay(

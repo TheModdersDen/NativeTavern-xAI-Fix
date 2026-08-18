@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:archive/archive.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 /// Image Generation Provider types (channels, not models)
@@ -10,9 +11,11 @@ enum ImageGenProvider {
   // Cloud providers
   openai('openai', 'OAI Compatible', 'https://api.openai.com/v1'),
   openaiChat('openai_chat', 'OAI Compatible Chat', 'https://api.openai.com/v1'),
-  gemini('gemini', 'Gemini', 'https://generativelanguage.googleapis.com/v1beta'),
+  gemini(
+      'gemini', 'Gemini', 'https://generativelanguage.googleapis.com/v1beta'),
   novelai('novelai', 'NovelAI', 'https://image.novelai.net'),
-  pollinations('pollinations', 'Pollinations (Free)', 'https://image.pollinations.ai'),
+  pollinations(
+      'pollinations', 'Pollinations (Free)', 'https://image.pollinations.ai'),
 
   // Local SD backends
   automatic1111('automatic1111', 'Automatic1111', 'http://localhost:7860'),
@@ -32,21 +35,21 @@ enum ImageGenProvider {
       return null;
     }
   }
-  
+
   /// Check if this provider requires an API key
   bool get requiresApiKey => [
-    openai,
-    openaiChat,
-    gemini,
-    novelai,
-  ].contains(this);
-  
+        openai,
+        openaiChat,
+        gemini,
+        novelai,
+      ].contains(this);
+
   /// Check if this provider uses local endpoint
   bool get isLocalProvider => [
-    automatic1111,
-    comfyui,
-  ].contains(this);
-  
+        automatic1111,
+        comfyui,
+      ].contains(this);
+
   /// Get default model for this provider
   String get defaultModel {
     switch (this) {
@@ -65,16 +68,16 @@ enum ImageGenProvider {
         return '';
     }
   }
-  
+
   /// Check if this provider supports fetching model list from API
   bool get supportsFetchingModels => [
-    openai,
-    openaiChat,
-    gemini,
-    automatic1111,
-    comfyui,
-  ].contains(this);
-  
+        openai,
+        openaiChat,
+        gemini,
+        automatic1111,
+        comfyui,
+      ].contains(this);
+
   /// Get default/fallback models for this provider (used when API fetch fails)
   List<String> get defaultModels {
     switch (this) {
@@ -92,8 +95,8 @@ enum ImageGenProvider {
         ];
       case gemini:
         return [
-          'gemini-2.5-flash-image',      // Nano-Banana
-          'gemini-3-pro-image-preview',       // Nano-Banana-Pro
+          'gemini-2.5-flash-image', // Nano-Banana
+          'gemini-3-pro-image-preview', // Nano-Banana-Pro
         ];
       case novelai:
         return [
@@ -115,23 +118,33 @@ enum ImageGenProvider {
         return []; // Models are fetched from the local server
     }
   }
-  
+
   /// Get model display name
   static String getModelDisplayName(String model) {
     switch (model) {
       // OpenAI
-      case 'gpt-image-2': return 'GPT-Image-2';
-      case 'gpt-image-1': return 'GPT-Image-1';
-      case 'gpt-image-1-mini': return 'GPT-Image-1 Mini';
+      case 'gpt-image-2':
+        return 'GPT-Image-2';
+      case 'gpt-image-1':
+        return 'GPT-Image-1';
+      case 'gpt-image-1-mini':
+        return 'GPT-Image-1 Mini';
       // Gemini
-      case 'gemini-2.5-flash-image': return 'Nano-Banana';
-      case 'gemini-3-pro-image-preview': return 'Nano-Banana-Pro';
+      case 'gemini-2.5-flash-image':
+        return 'Nano-Banana';
+      case 'gemini-3-pro-image-preview':
+        return 'Nano-Banana-Pro';
       // NovelAI
-      case 'nai-diffusion-4-curated-preview': return 'NAI Diffusion V4 Curated';
-      case 'nai-diffusion-4-full': return 'NAI Diffusion V4 Full';
-      case 'nai-diffusion-3': return 'NAI Diffusion V3';
-      case 'nai-diffusion-furry-3': return 'NAI Diffusion Furry V3';
-      default: return model;
+      case 'nai-diffusion-4-curated-preview':
+        return 'NAI Diffusion V4 Curated';
+      case 'nai-diffusion-4-full':
+        return 'NAI Diffusion V4 Full';
+      case 'nai-diffusion-3':
+        return 'NAI Diffusion V3';
+      case 'nai-diffusion-furry-3':
+        return 'NAI Diffusion Furry V3';
+      default:
+        return model;
     }
   }
 }
@@ -148,7 +161,7 @@ enum ImageGenMode {
 
   final String id;
   final String displayName;
-  
+
   const ImageGenMode(this.id, this.displayName);
 }
 
@@ -156,12 +169,12 @@ enum ImageGenMode {
 class ImageGenSettings {
   final bool enabled;
   final ImageGenProvider provider;
-  
+
   // Per-provider configurations stored as Maps
   final Map<String, String> apiKeys; // provider.id -> apiKey
   final Map<String, String> apiEndpoints; // provider.id -> endpoint
   final Map<String, String> models; // provider.id -> model
-  
+
   // Shared defaults
   final int defaultWidth;
   final int defaultHeight;
@@ -170,14 +183,14 @@ class ImageGenSettings {
   final String defaultSampler;
   final String defaultScheduler;
   final String? defaultNegativePrompt;
-  
+
   // NovelAI specific
   final bool novelaiAnlasGuard;
   final bool novelaiSm;
   final bool novelaiSmDyn;
   final bool novelaiDecrisper;
   final bool novelaiVarietyBoost;
-  
+
   // OpenAI specific
   final String openaiStyle; // vivid or natural
   final String openaiQuality; // standard or hd
@@ -205,12 +218,12 @@ class ImageGenSettings {
     this.openaiStyle = 'vivid',
     this.openaiQuality = 'standard',
   });
-  
+
   // Convenience getters for current provider's config
   String? get apiKey => apiKeys[provider.id];
   String? get apiEndpoint => apiEndpoints[provider.id];
   String get model => models[provider.id] ?? provider.defaultModel;
-  
+
   /// Get the effective API endpoint for current provider
   String get effectiveEndpoint {
     final configuredEndpoint = apiEndpoint?.trim();
@@ -279,7 +292,8 @@ class ImageGenSettings {
       defaultCfgScale: defaultCfgScale ?? this.defaultCfgScale,
       defaultSampler: defaultSampler ?? this.defaultSampler,
       defaultScheduler: defaultScheduler ?? this.defaultScheduler,
-      defaultNegativePrompt: defaultNegativePrompt ?? this.defaultNegativePrompt,
+      defaultNegativePrompt:
+          defaultNegativePrompt ?? this.defaultNegativePrompt,
       novelaiAnlasGuard: novelaiAnlasGuard ?? this.novelaiAnlasGuard,
       novelaiSm: novelaiSm ?? this.novelaiSm,
       novelaiSmDyn: novelaiSmDyn ?? this.novelaiSmDyn,
@@ -289,7 +303,7 @@ class ImageGenSettings {
       openaiQuality: openaiQuality ?? this.openaiQuality,
     );
   }
-  
+
   /// Helper to update apiKey for current provider
   ImageGenSettings withApiKey(String? key) {
     final newKeys = Map<String, String>.from(apiKeys);
@@ -300,7 +314,7 @@ class ImageGenSettings {
     }
     return copyWith(apiKeys: newKeys);
   }
-  
+
   /// Helper to update apiEndpoint for current provider
   ImageGenSettings withApiEndpoint(String? endpoint) {
     final newEndpoints = Map<String, String>.from(apiEndpoints);
@@ -311,7 +325,7 @@ class ImageGenSettings {
     }
     return copyWith(apiEndpoints: newEndpoints);
   }
-  
+
   /// Helper to update model for current provider
   ImageGenSettings withModel(String model) {
     final newModels = Map<String, String>.from(models);
@@ -320,33 +334,33 @@ class ImageGenSettings {
   }
 
   Map<String, dynamic> toJson() => {
-    'enabled': enabled,
-    'provider': provider.id,
-    'apiKeys': apiKeys,
-    'apiEndpoints': apiEndpoints,
-    'models': models,
-    'defaultWidth': defaultWidth,
-    'defaultHeight': defaultHeight,
-    'defaultSteps': defaultSteps,
-    'defaultCfgScale': defaultCfgScale,
-    'defaultSampler': defaultSampler,
-    'defaultScheduler': defaultScheduler,
-    'defaultNegativePrompt': defaultNegativePrompt,
-    'novelaiAnlasGuard': novelaiAnlasGuard,
-    'novelaiSm': novelaiSm,
-    'novelaiSmDyn': novelaiSmDyn,
-    'novelaiDecrisper': novelaiDecrisper,
-    'novelaiVarietyBoost': novelaiVarietyBoost,
-    'openaiStyle': openaiStyle,
-    'openaiQuality': openaiQuality,
-  };
+        'enabled': enabled,
+        'provider': provider.id,
+        'apiKeys': apiKeys,
+        'apiEndpoints': apiEndpoints,
+        'models': models,
+        'defaultWidth': defaultWidth,
+        'defaultHeight': defaultHeight,
+        'defaultSteps': defaultSteps,
+        'defaultCfgScale': defaultCfgScale,
+        'defaultSampler': defaultSampler,
+        'defaultScheduler': defaultScheduler,
+        'defaultNegativePrompt': defaultNegativePrompt,
+        'novelaiAnlasGuard': novelaiAnlasGuard,
+        'novelaiSm': novelaiSm,
+        'novelaiSmDyn': novelaiSmDyn,
+        'novelaiDecrisper': novelaiDecrisper,
+        'novelaiVarietyBoost': novelaiVarietyBoost,
+        'openaiStyle': openaiStyle,
+        'openaiQuality': openaiQuality,
+      };
 
   factory ImageGenSettings.fromJson(Map<String, dynamic> json) {
     // Handle migration from old format (single apiKey/apiEndpoint/model)
     Map<String, String> apiKeys = {};
     Map<String, String> apiEndpoints = {};
     Map<String, String> models = {};
-    
+
     if (json['apiKeys'] is Map) {
       apiKeys = Map<String, String>.from(json['apiKeys'] as Map);
     } else if (json['apiKey'] != null) {
@@ -354,7 +368,7 @@ class ImageGenSettings {
       final provider = json['provider'] as String? ?? 'openai';
       apiKeys[provider] = json['apiKey'] as String;
     }
-    
+
     if (json['apiEndpoints'] is Map) {
       apiEndpoints = Map<String, String>.from(json['apiEndpoints'] as Map);
     } else if (json['apiEndpoint'] != null) {
@@ -362,7 +376,7 @@ class ImageGenSettings {
       final provider = json['provider'] as String? ?? 'openai';
       apiEndpoints[provider] = json['apiEndpoint'] as String;
     }
-    
+
     if (json['models'] is Map) {
       models = Map<String, String>.from(json['models'] as Map);
     } else if (json['model'] != null) {
@@ -370,10 +384,12 @@ class ImageGenSettings {
       final provider = json['provider'] as String? ?? 'openai';
       models[provider] = json['model'] as String;
     }
-    
+
     return ImageGenSettings(
       enabled: json['enabled'] as bool? ?? false,
-      provider: ImageGenProvider.fromId(json['provider'] as String? ?? 'openai') ?? ImageGenProvider.openai,
+      provider:
+          ImageGenProvider.fromId(json['provider'] as String? ?? 'openai') ??
+              ImageGenProvider.openai,
       apiKeys: apiKeys,
       apiEndpoints: apiEndpoints,
       models: models,
@@ -426,18 +442,18 @@ class ImageGenRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    'prompt': prompt,
-    'negative_prompt': negativePrompt,
-    'width': width,
-    'height': height,
-    'steps': steps,
-    'cfg_scale': cfgScale,
-    'sampler_name': sampler,
-    'scheduler': scheduler,
-    'model': model,
-    'seed': seed ?? -1,
-    'batch_size': batchSize,
-  };
+        'prompt': prompt,
+        'negative_prompt': negativePrompt,
+        'width': width,
+        'height': height,
+        'steps': steps,
+        'cfg_scale': cfgScale,
+        'sampler_name': sampler,
+        'scheduler': scheduler,
+        'model': model,
+        'seed': seed ?? -1,
+        'batch_size': batchSize,
+      };
 }
 
 /// Image generation result
@@ -457,7 +473,7 @@ class ImageGenResult {
     this.format = 'png',
     this.metadata,
   });
-  
+
   bool get hasImages => images.isNotEmpty || imageUrls.isNotEmpty;
 }
 
@@ -490,11 +506,13 @@ class ImageGenSampler {
     ImageGenSampler(id: 'k_dpmpp_2s_ancestral', name: 'K-DPM++ 2S Ancestral'),
     ImageGenSampler(id: 'k_dpmpp_sde', name: 'K-DPM++ SDE'),
   ];
-  
+
   static List<ImageGenSampler> forProvider(ImageGenProvider provider) {
     switch (provider) {
       case ImageGenProvider.novelai:
-        return samplers.where((s) => s.id.startsWith('k_') || s.id == 'ddim').toList();
+        return samplers
+            .where((s) => s.id.startsWith('k_') || s.id == 'ddim')
+            .toList();
       case ImageGenProvider.openai:
       case ImageGenProvider.openaiChat:
       case ImageGenProvider.gemini:
@@ -540,6 +558,8 @@ class ImageGenerationService {
     Dio? dio,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   }) : _dio = dio ?? Dio() {
     _dio.interceptors.add(ExternalCallAuditInterceptor(
       repository: auditRepository,
@@ -554,6 +574,7 @@ class ImageGenerationService {
             ? const {ExternalDataType.image}
             : const {ExternalDataType.prompt, ExternalDataType.image};
       },
+      consentRepository: consentRepository,
     ));
   }
 
@@ -571,16 +592,17 @@ class ImageGenerationService {
   /// Fetch available models from the provider's API
   /// Returns null if the provider doesn't support fetching or if the request fails
   Future<List<String>?> fetchModels() async {
-    debugPrint('fetchModels() called for provider: ${_settings.provider.displayName}');
-    
+    debugPrint(
+        'fetchModels() called for provider: ${_settings.provider.displayName}');
+
     if (!_settings.provider.supportsFetchingModels) {
       debugPrint('Provider does not support fetching models');
       return null;
     }
-    
+
     try {
       debugPrint('Fetching models from ${_settings.effectiveEndpoint}...');
-      
+
       switch (_settings.provider) {
         case ImageGenProvider.openai:
         case ImageGenProvider.openaiChat:
@@ -599,7 +621,7 @@ class ImageGenerationService {
       return null;
     }
   }
-  
+
   /// Fetch available image generation models from OpenAI
   Future<List<String>> _fetchOpenAIModels() async {
     final apiKey = _settings.apiKey;
@@ -607,46 +629,48 @@ class ImageGenerationService {
       debugPrint('OpenAI: No API key configured, returning default models');
       return _settings.provider.defaultModels;
     }
-    
+
     final endpoint = _settings.effectiveEndpoint;
     debugPrint('OpenAI: Fetching models from $endpoint/models');
-    
+
     final response = await _dio.get<Map<String, dynamic>>(
       '$endpoint/models',
       options: Options(headers: {
         'Authorization': 'Bearer $apiKey',
       }),
     );
-    
+
     debugPrint('OpenAI: Response status ${response.statusCode}');
-    
+
     if (response.statusCode != 200 || response.data == null) {
       debugPrint('OpenAI: Failed to fetch, returning default models');
       return _settings.provider.defaultModels;
     }
-    
+
     final data = response.data!;
     final models = <String>[];
-    
+
     // Get all models and filter for image generation capable ones
     final modelList = data['data'] as List? ?? [];
     debugPrint('OpenAI: Found ${modelList.length} total models');
-    
+
     for (final model in modelList) {
       final id = model['id'] as String?;
       if (id != null) {
         // Include known image generation models
-        if (id.contains('dall-e') || id.contains('gpt-image') || id.contains('image')) {
+        if (id.contains('dall-e') ||
+            id.contains('gpt-image') ||
+            id.contains('image')) {
           models.add(id);
           debugPrint('OpenAI: Found image model: $id');
         }
       }
     }
-    
+
     debugPrint('OpenAI: Found ${models.length} image models');
     return models.isEmpty ? _settings.provider.defaultModels : models;
   }
-  
+
   /// Fetch available models from Gemini API
   Future<List<String>> _fetchGeminiModels() async {
     final apiKey = _settings.apiKey;
@@ -654,88 +678,88 @@ class ImageGenerationService {
       debugPrint('Gemini: No API key configured, returning default models');
       return _settings.provider.defaultModels;
     }
-    
+
     final endpoint = _settings.effectiveEndpoint;
     debugPrint('Gemini: Fetching models from $endpoint/models');
-    
+
     final response = await _dio.get<Map<String, dynamic>>(
       '$endpoint/models?key=$apiKey',
     );
-    
+
     debugPrint('Gemini: Response status ${response.statusCode}');
-    
+
     if (response.statusCode != 200 || response.data == null) {
       debugPrint('Gemini: Failed to fetch, returning default models');
       return _settings.provider.defaultModels;
     }
-    
+
     final data = response.data!;
     final models = <String>[];
-    
+
     // Get all models and filter for image generation capable ones
     final modelList = data['models'] as List? ?? [];
     debugPrint('Gemini: Found ${modelList.length} total models');
-    
+
     for (final model in modelList) {
       final name = model['name'] as String?;
       // Model name format: models/gemini-xxx
       if (name != null) {
         final modelId = name.replaceFirst('models/', '');
-        
-        if (
-            (modelId.contains('image') || 
-             modelId.contains('banana'))) {
+
+        if ((modelId.contains('image') || modelId.contains('banana'))) {
           models.add(modelId);
           debugPrint('Gemini: Found model: $modelId');
         }
       }
     }
-    
+
     debugPrint('Gemini: Found ${models.length} usable models');
     return models.isEmpty ? _settings.provider.defaultModels : models;
   }
-  
+
   /// Fetch available models from Automatic1111 WebUI
   Future<List<String>> _fetchAutomatic1111Models() async {
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.get<List<dynamic>>(
       '$endpoint/sdapi/v1/sd-models',
     );
-    
+
     if (response.statusCode != 200 || response.data == null) {
       return [];
     }
-    
+
     return response.data!
-        .map((model) => model['model_name'] as String? ?? model['title'] as String? ?? '')
+        .map((model) =>
+            model['model_name'] as String? ?? model['title'] as String? ?? '')
         .where((name) => name.isNotEmpty)
         .toList();
   }
-  
+
   /// Fetch available checkpoints from ComfyUI
   Future<List<String>> _fetchComfyUIModels() async {
     final endpoint = _settings.effectiveEndpoint;
     final response = await _dio.get<Map<String, dynamic>>(
       '$endpoint/object_info/CheckpointLoaderSimple',
     );
-    
+
     if (response.statusCode != 200 || response.data == null) {
       return [];
     }
-    
+
     // ComfyUI returns checkpoint names in a specific format
-    final checkpointInfo = response.data!['CheckpointLoaderSimple'] as Map<String, dynamic>?;
+    final checkpointInfo =
+        response.data!['CheckpointLoaderSimple'] as Map<String, dynamic>?;
     final input = checkpointInfo?['input'] as Map<String, dynamic>?;
     final required = input?['required'] as Map<String, dynamic>?;
     final ckptName = required?['ckpt_name'] as List?;
-    
+
     if (ckptName != null && ckptName.isNotEmpty) {
       final options = ckptName[0] as List?;
       if (options != null) {
         return options.map((e) => e.toString()).toList();
       }
     }
-    
+
     return [];
   }
 
@@ -747,47 +771,48 @@ class ImageGenerationService {
     CancelToken? cancelToken,
   }) async {
     final images = <Uint8List>[];
-    
+
     // Convert response to string for URL extraction
     String textContent = '';
-    
+
     if (responseData is String) {
       textContent = responseData;
     } else if (responseData is Map) {
       // Try common response formats
-      final content = responseData['content'] ?? 
-                      responseData['text'] ?? 
-                      responseData['message'] ??
-                      responseData['output'] ??
-                      responseData['result'];
+      final content = responseData['content'] ??
+          responseData['text'] ??
+          responseData['message'] ??
+          responseData['output'] ??
+          responseData['result'];
       if (content is String) {
         textContent = content;
       } else if (content is Map) {
         textContent = content['text'] as String? ?? content.toString();
       }
-      
+
       // Check for inline base64 data
-      final b64 = responseData['b64_json'] ?? 
-                  responseData['data'] ?? 
-                  responseData['image'] ??
-                  responseData['base64'];
+      final b64 = responseData['b64_json'] ??
+          responseData['data'] ??
+          responseData['image'] ??
+          responseData['base64'];
       if (b64 is String && b64.isNotEmpty) {
         try {
-          final base64Data = b64.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
+          final base64Data =
+              b64.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
           images.add(base64Decode(base64Data));
           debugPrint('$debugPrefix Found inline base64 image');
         } catch (e) {
           debugPrint('$debugPrefix Failed to decode base64: $e');
         }
       }
-      
+
       // Check for URL field
       final url = responseData['url'] ?? responseData['image_url'];
       if (url is String && url.isNotEmpty) {
         textContent += ' $url';
       }
     }
-    
+
     // Extract and download any image URLs found in the text
     if (textContent.isNotEmpty) {
       final urls = extractImageUrls(textContent);
@@ -796,7 +821,8 @@ class ImageGenerationService {
         try {
           if (url.startsWith('data:image')) {
             // Base64 data URL
-            final base64Data = url.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
+            final base64Data =
+                url.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
             images.add(base64Decode(base64Data));
           } else {
             // Regular URL - download it
@@ -810,7 +836,7 @@ class ImageGenerationService {
         }
       }
     }
-    
+
     return images;
   }
 
@@ -822,7 +848,7 @@ class ImageGenerationService {
     if (!_settings.enabled) return null;
 
     final model = request.model ?? _settings.model;
-    
+
     try {
       debugPrint('Image Generation [${_settings.provider.displayName}]');
       debugPrint('  Model configured: ${model.isNotEmpty}');
@@ -832,7 +858,8 @@ class ImageGenerationService {
 
       switch (_settings.provider) {
         case ImageGenProvider.openai:
-          return await _generateOpenAI(request, model, cancelToken: cancelToken);
+          return await _generateOpenAI(request, model,
+              cancelToken: cancelToken);
         case ImageGenProvider.openaiChat:
           return await _generateOpenAIChat(
             request,
@@ -840,9 +867,11 @@ class ImageGenerationService {
             cancelToken: cancelToken,
           );
         case ImageGenProvider.gemini:
-          return await _generateGemini(request, model, cancelToken: cancelToken);
+          return await _generateGemini(request, model,
+              cancelToken: cancelToken);
         case ImageGenProvider.novelai:
-          return await _generateNovelAI(request, model, cancelToken: cancelToken);
+          return await _generateNovelAI(request, model,
+              cancelToken: cancelToken);
         case ImageGenProvider.pollinations:
           return await _generatePollinations(
             request,
@@ -850,7 +879,8 @@ class ImageGenerationService {
             cancelToken: cancelToken,
           );
         case ImageGenProvider.automatic1111:
-          return await _generateAutomatic1111(request, cancelToken: cancelToken);
+          return await _generateAutomatic1111(request,
+              cancelToken: cancelToken);
         case ImageGenProvider.comfyui:
           return await _generateComfyUI(request, cancelToken: cancelToken);
       }
@@ -961,12 +991,13 @@ class ImageGenerationService {
     onProgress?.call(0.9);
 
     if (response.statusCode != 200) {
-      throw Exception('OAI Compatible error: ${response.statusCode} ${response.data}');
+      throw Exception(
+          'OAI Compatible error: ${response.statusCode} ${response.data}');
     }
 
     final data = response.data as Map<String, dynamic>;
     final images = <Uint8List>[];
-    
+
     for (final item in data['data'] as List? ?? []) {
       if (item['b64_json'] != null) {
         images.add(base64Decode(item['b64_json'] as String));
@@ -981,10 +1012,11 @@ class ImageGenerationService {
         }
       }
     }
-    
+
     // Fallback: try to extract images from the raw response
     if (images.isEmpty) {
-      debugPrint('OpenAI: No images in standard format, trying fallback extraction...');
+      debugPrint(
+          'OpenAI: No images in standard format, trying fallback extraction...');
       final fallbackImages = await _extractImagesFromResponse(
         data,
         debugPrefix: 'OpenAI: ',
@@ -1052,20 +1084,21 @@ class ImageGenerationService {
     onProgress?.call(0.7);
 
     if (response.statusCode != 200) {
-      throw Exception('OAI Compatible Chat error: ${response.statusCode} ${response.data}');
+      throw Exception(
+          'OAI Compatible Chat error: ${response.statusCode} ${response.data}');
     }
 
     final data = response.data as Map<String, dynamic>;
     final images = <Uint8List>[];
-    
+
     // Parse the response - look for base64 image data or URLs in the content
     final choices = data['choices'] as List? ?? [];
     for (final choice in choices) {
       final message = choice['message'] as Map<String, dynamic>?;
       if (message == null) continue;
-      
+
       final content = message['content'];
-      
+
       // Check if content is a list (multimodal response with images)
       if (content is List) {
         for (final item in content) {
@@ -1077,7 +1110,8 @@ class ImageGenerationService {
                 final b64 = imageData['b64_json'] ?? imageData['data'];
                 if (b64 != null && b64 is String) {
                   // Remove data URL prefix if present
-                  final base64Data = b64.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
+                  final base64Data = b64.replaceFirst(
+                      RegExp(r'^data:image/[^;]+;base64,'), '');
                   images.add(base64Decode(base64Data));
                   debugPrint('OpenAI-Chat: Found inline base64 image');
                 }
@@ -1106,7 +1140,8 @@ class ImageGenerationService {
           debugPrint('OpenAI-Chat: Found image URL in response');
           if (url.startsWith('data:image')) {
             // Base64 data URL
-            final base64Data = url.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
+            final base64Data =
+                url.replaceFirst(RegExp(r'^data:image/[^;]+;base64,'), '');
             images.add(base64Decode(base64Data));
           } else {
             // Regular URL - download it
@@ -1127,7 +1162,8 @@ class ImageGenerationService {
     if (images.isEmpty) {
       debugPrint('OpenAI-Chat: No images found in response');
       debugPrint('OpenAI-Chat: Response contained no usable image data');
-      throw Exception('No images generated - response did not contain image data');
+      throw Exception(
+          'No images generated - response did not contain image data');
     }
 
     debugPrint('OpenAI-Chat: Generated ${images.length} images');
@@ -1153,7 +1189,7 @@ class ImageGenerationService {
     }
 
     onProgress?.call(0.1);
-    
+
     // Determine aspect ratio
     String aspectRatio;
     final ratio = request.width / request.height;
@@ -1184,7 +1220,7 @@ class ImageGenerationService {
       'imageGenerationConfig': {
         'aspectRatio': aspectRatio,
         'numberOfImages': 1,
-        if (request.negativePrompt != null) 
+        if (request.negativePrompt != null)
           'negativePrompt': request.negativePrompt,
       },
     };
@@ -1209,7 +1245,7 @@ class ImageGenerationService {
 
     final data = response.data as Map<String, dynamic>;
     final images = <Uint8List>[];
-    
+
     // Extract image from Gemini response
     final candidates = data['candidates'] as List?;
     if (candidates != null && candidates.isNotEmpty) {
@@ -1237,10 +1273,11 @@ class ImageGenerationService {
         }
       }
     }
-    
+
     // Fallback: try to extract images from the raw response
     if (images.isEmpty) {
-      debugPrint('Gemini: No images in standard format, trying fallback extraction...');
+      debugPrint(
+          'Gemini: No images in standard format, trying fallback extraction...');
       final fallbackImages = await _extractImagesFromResponse(
         data,
         debugPrefix: 'Gemini: ',
@@ -1281,18 +1318,18 @@ class ImageGenerationService {
     int width = request.width;
     int height = request.height;
     int steps = request.steps;
-    
+
     if (_settings.novelaiAnlasGuard) {
       const maxPixels = 1024 * 1024;
       const maxSteps = 28;
-      
+
       if (width * height > maxPixels) {
         final ratio = math.sqrt(maxPixels / (width * height));
         width = ((width * ratio) ~/ 64) * 64;
         height = ((height * ratio) ~/ 64) * 64;
         debugPrint('Anlas Guard: Reduced size to ${width}x$height');
       }
-      
+
       if (steps > maxSteps) {
         steps = maxSteps;
         debugPrint('Anlas Guard: Reduced steps to $steps');
@@ -1300,14 +1337,17 @@ class ImageGenerationService {
     }
 
     final isV4Model = model.contains('nai-diffusion-4');
-    
+
     // Disable SM for DDIM sampler or V4 models
-    final sm = (request.sampler == 'ddim' || isV4Model) ? false : _settings.novelaiSm;
+    final sm =
+        (request.sampler == 'ddim' || isV4Model) ? false : _settings.novelaiSm;
     final smDyn = sm ? _settings.novelaiSmDyn : false;
-    
-    final seed = request.seed ?? DateTime.now().millisecondsSinceEpoch % 4294967295;
-    
-    final negativePrompt = request.negativePrompt ?? _settings.defaultNegativePrompt ?? 
+
+    final seed =
+        request.seed ?? DateTime.now().millisecondsSinceEpoch % 4294967295;
+
+    final negativePrompt = request.negativePrompt ??
+        _settings.defaultNegativePrompt ??
         'blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page';
 
     final requestBody = <String, dynamic>{
@@ -1333,8 +1373,8 @@ class ImageGenerationService {
         'cfg_rescale': 0,
         'noise_schedule': _settings.defaultScheduler,
         'legacy_v3_extend': false,
-        'skip_cfg_above_sigma': _settings.novelaiVarietyBoost 
-            ? _calculateSkipCfgAboveSigma(width, height, model) 
+        'skip_cfg_above_sigma': _settings.novelaiVarietyBoost
+            ? _calculateSkipCfgAboveSigma(width, height, model)
             : null,
         'use_coords': false,
         'normalize_reference_strength_multiple': true,
@@ -1369,13 +1409,13 @@ class ImageGenerationService {
     };
 
     onProgress?.call(0.2);
-    
+
     debugPrint(
       'NovelAI: Request prepared (${request.prompt.length} prompt characters)',
     );
 
     final endpoint = _settings.effectiveEndpoint;
-    
+
     try {
       final response = await _dio.post<List<int>>(
         '$endpoint/ai/generate-image',
@@ -1386,7 +1426,8 @@ class ImageGenerationService {
             'Content-Type': 'application/json',
           },
           responseType: ResponseType.bytes,
-          validateStatus: (status) => true, // Accept all status codes to read error body
+          validateStatus: (status) =>
+              true, // Accept all status codes to read error body
         ),
         data: requestBody,
       );
@@ -1405,35 +1446,36 @@ class ImageGenerationService {
         throw Exception(errorMsg);
       }
 
-    // NovelAI returns a ZIP file containing the PNG
-    final archive = ZipDecoder().decodeBytes(response.data as List<int>);
-    Uint8List? imageBytes;
-    
-    for (final file in archive) {
-      if (file.isFile && file.name.endsWith('.png')) {
-        imageBytes = Uint8List.fromList(file.content as List<int>);
-        break;
+      // NovelAI returns a ZIP file containing the PNG
+      final archive = ZipDecoder().decodeBytes(response.data as List<int>);
+      Uint8List? imageBytes;
+
+      for (final file in archive) {
+        if (file.isFile && file.name.endsWith('.png')) {
+          imageBytes = Uint8List.fromList(file.content as List<int>);
+          break;
+        }
       }
-    }
 
-    if (imageBytes == null) {
-      throw Exception('NovelAI: No image found in response');
-    }
+      if (imageBytes == null) {
+        throw Exception('NovelAI: No image found in response');
+      }
 
-    onProgress?.call(1.0);
+      onProgress?.call(1.0);
 
-    return ImageGenResult(
-      images: [imageBytes],
-      prompt: request.prompt,
-      seed: seed,
-      format: 'png',
-      metadata: {'model': model, 'provider': 'novelai'},
-    );
+      return ImageGenResult(
+        images: [imageBytes],
+        prompt: request.prompt,
+        seed: seed,
+        format: 'png',
+        metadata: {'model': model, 'provider': 'novelai'},
+      );
     } catch (e) {
       if (e is DioException && e.response != null) {
         try {
           final errorBody = utf8.decode(e.response!.data as List<int>);
-          throw Exception('NovelAI error: ${e.response!.statusCode} - $errorBody');
+          throw Exception(
+              'NovelAI error: ${e.response!.statusCode} - $errorBody');
         } catch (_) {}
       }
       rethrow;
@@ -1445,14 +1487,14 @@ class ImageGenerationService {
     const referencePixelCount = 1011712; // 832 * 1216
     const sigmaMagicNumber = 19;
     const sigmaMagicNumberV4_5 = 58;
-    
-    final magicConstant = model.contains('nai-diffusion-4-5') 
-        ? sigmaMagicNumberV4_5 
+
+    final magicConstant = model.contains('nai-diffusion-4-5')
+        ? sigmaMagicNumberV4_5
         : sigmaMagicNumber;
-    
+
     final pixelCount = width * height;
     final ratio = pixelCount / referencePixelCount;
-    
+
     return math.sqrt(ratio) * magicConstant;
   }
 
@@ -1465,7 +1507,8 @@ class ImageGenerationService {
 
     final requestBody = {
       'prompt': request.prompt,
-      'negative_prompt': request.negativePrompt ?? _settings.defaultNegativePrompt ?? '',
+      'negative_prompt':
+          request.negativePrompt ?? _settings.defaultNegativePrompt ?? '',
       'width': request.width,
       'height': request.height,
       'steps': request.steps,
@@ -1490,17 +1533,19 @@ class ImageGenerationService {
     onProgress?.call(0.9);
 
     if (response.statusCode != 200) {
-      throw Exception('Automatic1111 error: ${response.statusCode} ${response.data}');
+      throw Exception(
+          'Automatic1111 error: ${response.statusCode} ${response.data}');
     }
 
     final data = response.data as Map<String, dynamic>;
     final images = <Uint8List>[];
-    
+
     for (final b64 in data['images'] as List) {
       images.add(base64Decode(b64 as String));
     }
 
-    final info = jsonDecode(data['info'] as String? ?? '{}') as Map<String, dynamic>;
+    final info =
+        jsonDecode(data['info'] as String? ?? '{}') as Map<String, dynamic>;
     final seed = info['seed'] as int? ?? DateTime.now().millisecondsSinceEpoch;
 
     onProgress?.call(1.0);
@@ -1520,27 +1565,31 @@ class ImageGenerationService {
     CancelToken? cancelToken,
   }) async {
     // ComfyUI requires workflow-based generation
-    throw UnimplementedError('ComfyUI generation requires workflow configuration');
+    throw UnimplementedError(
+        'ComfyUI generation requires workflow configuration');
   }
 
   /// Extract image URLs from AI response text (base feature for all channels)
   static List<String> extractImageUrls(String text) {
     final urls = <String>[];
-    
+
     // Common image URL patterns
     final patterns = [
       // Direct image URLs
-      RegExp(r'https?://[^\s<>"]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s<>"]*)?', caseSensitive: false),
+      RegExp(r'https?://[^\s<>"]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s<>"]*)?',
+          caseSensitive: false),
       // Markdown image syntax
       RegExp(r'!\[[^\]]*\]\((https?://[^\s)]+)\)', caseSensitive: false),
       // Common image hosting patterns
       RegExp(r'https?://(?:i\.)?imgur\.com/[^\s<>"]+', caseSensitive: false),
-      RegExp(r'https?://cdn\.discordapp\.com/attachments/[^\s<>"]+', caseSensitive: false),
-      RegExp(r'https?://media\.discordapp\.net/attachments/[^\s<>"]+', caseSensitive: false),
+      RegExp(r'https?://cdn\.discordapp\.com/attachments/[^\s<>"]+',
+          caseSensitive: false),
+      RegExp(r'https?://media\.discordapp\.net/attachments/[^\s<>"]+',
+          caseSensitive: false),
       // Base64 data URLs
       RegExp(r'data:image/[^;]+;base64,[a-zA-Z0-9+/=]+', caseSensitive: false),
     ];
-    
+
     for (final pattern in patterns) {
       for (final match in pattern.allMatches(text)) {
         final url = match.group(match.groupCount > 0 ? 1 : 0);
@@ -1549,7 +1598,7 @@ class ImageGenerationService {
         }
       }
     }
-    
+
     return urls;
   }
 
@@ -1564,7 +1613,7 @@ class ImageGenerationService {
         final base64Data = url.split(',').last;
         return base64Decode(base64Data);
       }
-      
+
       final response = await _dio.get<List<int>>(
         url,
         cancelToken: cancelToken,
@@ -1610,7 +1659,7 @@ class ImageGenerationService {
     String? style,
   ) {
     final parts = <String>[];
-    
+
     // Add style prefix
     if (style != null && style.isNotEmpty) {
       parts.add(style);
@@ -1632,7 +1681,7 @@ class ImageGenerationService {
   }
 
   /// Default negative prompt
-  static const String _defaultNegativePrompt = 
+  static const String _defaultNegativePrompt =
       'low quality, blurry, distorted, deformed, ugly, bad anatomy, '
       'bad proportions, extra limbs, mutated hands, poorly drawn face, '
       'watermark, text, signature';
@@ -1693,7 +1742,7 @@ class ImageGenerationService {
       seed: seed,
     );
   }
-  
+
   void dispose() {
     _dio.close();
   }

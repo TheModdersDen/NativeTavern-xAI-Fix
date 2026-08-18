@@ -1,114 +1,178 @@
 # Privacy Policy for NativeTavern
 
-**Last Updated: January 10, 2026**
+**Last Updated: August 18, 2026**
 
-## Introduction
+## Overview
 
-NativeTavern ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains how we handle information when you use our mobile application.
+NativeTavern is a local-first AI character chat application. NativeTavern does
+not operate an AI proxy and does not collect or store your conversations on
+NativeTavern servers. When you choose a remote AI feature, the app sends the
+data required for that feature directly from your device to the provider or
+endpoint you configured.
 
-## Information We Collect
+This policy explains what stays on your device, what may leave your device at
+your request, who may receive it, and how to control that sharing.
 
-### Information You Provide
-- **Character Data**: Characters, personas, and world information you create or import
-- **Chat Data**: Conversations, messages, and chat histories you generate
-- **User Preferences**: App settings, themes, and configurations you select
-- **Media Files**: Images, backgrounds, and sprites you upload or generate
+## Data Stored on Your Device
 
-### Automatically Collected Information
-- **App Usage Data**: Features used and interactions within the app (stored locally only)
-- **Device Information**: App version, operating system version (for crash reporting only)
+NativeTavern stores the following data locally:
 
-## How We Use Information
+- Characters, personas, system instructions, lorebooks, world information,
+  memories, Data Bank content, and tool configuration
+- Conversations, messages, bookmarks, and chat history
+- Images, backgrounds, sprites, Live2D/Spine assets, audio, and generated media
+- App preferences, provider configuration, API credentials, and backups
+- Local capability and external-call diagnostics, which record destinations,
+  data categories, status, and timing but not request content or API keys
 
-All data you create or input into NativeTavern is:
-- **Stored Locally**: All your data is stored exclusively on your device
-- **Not Transmitted**: We do not collect, transmit, or store your personal data on our servers
-- **User-Controlled**: You have complete control over your data through backup and export features
+This local data remains on your device unless you initiate an export, cloud
+backup, URL import, or remote AI request.
 
-## Third-Party Services
+## Remote AI Data Sharing
 
-NativeTavern may integrate with third-party AI services if you choose to configure them:
-- **AI API Providers**: If you configure external AI services (OpenAI, Anthropic, etc.), your API credentials and chat data may be transmitted to these providers according to their privacy policies
-- **User Control**: These integrations are entirely optional and require you to provide your own API credentials
-- **No Default Connections**: The app does not connect to any external services by default
+### Consent and control
 
-## Data Storage and Security
+Before NativeTavern permits remote AI requests, the app displays a disclosure
+that identifies the data categories and supported recipients. You may choose
+either **Allow remote AI** or **Use local AI only**.
 
-- **Local Storage**: All data is stored in your device's local database
-- **No Cloud Sync**: We do not provide cloud storage or synchronization services
-- **User Backups**: You can create manual backups of your data, which are stored locally on your device or exported to your chosen location
-- **Data Encryption**: Data stored on your device benefits from your device's built-in security features
+Your choice is saved on your device. You can withdraw or restore permission at
+any time under **Settings > Remote AI data sharing**. When permission is off,
+NativeTavern blocks remote AI requests before they leave the device. Local and
+private-network AI endpoints remain available. A materially changed disclosure
+will require a new choice.
 
-## Data Sharing
+### Data that may be sent
 
-We do not:
-- Sell your personal information
-- Share your data with third parties for marketing purposes
-- Transmit your chat data or character information to our servers
-- Track your usage across other apps or websites
+The exact data depends on the feature you use:
 
-## Your Rights and Choices
+- **Chat and text generation:** your current message, relevant chat history,
+  character and persona content, system instructions, enabled lorebook/world
+  information, memory or Data Bank excerpts, and enabled tool definitions or
+  tool inputs
+- **Embeddings and semantic search:** document text or excerpts selected for
+  embedding
+- **Image generation:** prompts, generation settings, and any source or
+  reference image you provide
+- **Speech to text:** recorded audio and selected language/model settings
+- **Text to speech:** text to synthesize and selected voice/model settings;
+  generated audio is returned to your device
+- **Authentication and request metadata:** your API credential, model name,
+  request settings, IP address, and standard network metadata required to make
+  and authenticate the connection
 
-You have the right to:
-- **Access**: View all data stored in the app through the app interface
-- **Delete**: Remove any or all data through the app's settings
-- **Export**: Create backups and export your data in standard formats (JSON, TXT, PDF)
-- **Control**: Manage all app permissions through your device settings
+NativeTavern sends this data only when you invoke or enable the corresponding
+remote feature. NativeTavern does not use it for advertising or sell it.
 
-## Children's Privacy
+### Recipients
 
-NativeTavern does not knowingly collect or store information from children under 13 years of age. The app requires users to be at least 13 years old. Parents or guardians who believe their child has provided information to the app should contact us immediately.
+Depending on the provider and endpoint you configure, data may be sent directly
+to:
 
-## Data Retention
+- Anthropic
+- An OAI Compatible endpoint you configure
+- OpenRouter
+- Google Gemini
+- DeepSeek
+- Alibaba Cloud Qwen (DashScope)
+- SiliconFlow
+- Moonshot AI / Kimi
+- Z.AI
+- MiniMax
+- Cohere
+- ElevenLabs
+- Microsoft Azure Speech
+- Volcengine
+- NovelAI
+- Pollinations
+- A self-hosted or custom endpoint whose address you enter
 
-- **User-Controlled**: Data is retained on your device until you choose to delete it
-- **No Automatic Deletion**: We do not automatically delete your data
-- **App Uninstallation**: Uninstalling the app will remove all locally stored data from your device
+The active provider and endpoint are shown in the relevant AI configuration
+screen. If you enter a custom endpoint, the operator of that endpoint is the
+recipient and is responsible for its privacy and security practices.
 
-## International Users
+Remote providers process data under their own terms and privacy policies. The
+supported providers publish privacy and security commitments intended to
+protect data they receive. NativeTavern connects directly to the provider using
+your account or API credential and does not control provider-side retention,
+training, or deletion. Review the selected provider's privacy policy and account
+data controls before use. Do not use a provider or custom endpoint whose
+protections do not meet your requirements.
 
-Since all data is stored locally on your device, your data remains in your jurisdiction and is subject to your local laws and regulations.
+## Cloud Backup
 
-## Changes to This Privacy Policy
+Cloud backup is optional and user initiated. If you choose Google Drive or an
+available Apple/iCloud storage location, the selected backup file and the
+account information needed for authentication are handled by Google or Apple
+under their respective privacy policies. NativeTavern does not receive a copy
+of your backup through its own servers. You can sign out, delete cloud backups,
+or use local export instead.
 
-We may update this Privacy Policy from time to time. We will notify you of any changes by:
-- Posting the new Privacy Policy in the app
-- Updating the "Last Updated" date at the top of this policy
-- Providing in-app notifications for significant changes
+## URL Imports and External Links
 
-Your continued use of the app after changes constitutes acceptance of the updated Privacy Policy.
+When you request an import from a URL or open an external link, the destination
+website receives the requested URL and normal network metadata such as your IP
+address and user agent. Imported character data is stored locally after it is
+downloaded. The destination website's privacy policy applies to that request.
+
+## Data Retention and Deletion
+
+- Local data remains until you delete it in the app or uninstall the app.
+- A local export remains wherever you save or share it.
+- A cloud backup remains until you delete it from the selected cloud provider.
+- Remote AI providers retain or delete transmitted data according to their
+  policies and your provider account settings.
+- NativeTavern cannot retrieve or delete data held by a provider because the
+  request is made directly with your provider account or custom endpoint.
+
+## Security
+
+NativeTavern relies on device security for locally stored data and keeps API
+credentials on the device except when sending them directly to authenticate a
+request. Use HTTPS for remote custom endpoints, protect device access, and do
+not share exported backups or API credentials with untrusted parties.
 
 ## Permissions
 
-The app may request the following permissions:
-- **Storage**: To save and read your character data, chat histories, and backups
-- **Camera** (optional): To capture or select images for character avatars
-- **Microphone** (optional): For speech-to-text features if configured
-- **Internet** (optional): Only if you configure external AI services
+NativeTavern may request:
 
-All permissions are requested only when needed and can be revoked through your device settings.
+- **Camera or photo access:** to select or capture character and background
+  images, including location metadata that may be embedded in a selected photo
+- **Microphone and speech recognition:** for speech features you invoke
+- **Files or storage:** to import, export, and back up your data
+- **Network access:** for remote AI, cloud backup, URL import, external links,
+  and provider authentication
 
-## Contact Us
+Permissions are requested when needed and can be changed in system settings.
 
-If you have any questions about this Privacy Policy or our data practices, please contact us at:
+## Your Choices and Rights
 
-**Email**: [Your Contact Email]  
-**GitHub**: https://github.com/[YourUsername]/NativeTavern
+You can:
 
-## Compliance
+- View, edit, export, and delete locally stored content
+- Disable remote AI data sharing while continuing to use local endpoints
+- Change or remove provider credentials and custom endpoints
+- Delete cloud backups or disconnect a cloud account
+- Revoke operating-system permissions
 
-This Privacy Policy is designed to comply with:
-- Apple App Store Review Guidelines
-- Google Play Store Developer Policy
-- General Data Protection Regulation (GDPR)
-- California Consumer Privacy Act (CCPA)
-- Children's Online Privacy Protection Act (COPPA)
+Depending on your jurisdiction, you may also have legal rights concerning data
+held by a remote provider. Submit those requests directly to that provider.
 
-## Acknowledgment
+## Children's Privacy
 
-By using NativeTavern, you acknowledge that you have read and understood this Privacy Policy and agree to its terms.
+NativeTavern is not directed to children under 13 and does not knowingly
+collect their personal data. Users must meet the minimum age required by their
+jurisdiction and by each remote provider they choose.
 
----
+## Changes to This Policy
 
-**Note for App Store Review**:
-NativeTavern is a local-first application that stores all user data exclusively on the user's device. We do not operate any servers that collect, store, or process user data. Any connections to external services are user-initiated and optional, using the user's own API credentials.
+We may update this policy when features or data practices change. We will update
+the date above and require a new in-app choice before remote AI sharing when a
+change materially affects the disclosure.
+
+## Contact
+
+Questions or privacy requests may be sent to:
+
+- Email: support@nativetavern.com
+- Discord: https://discord.com/invite/URQvW2FvZa

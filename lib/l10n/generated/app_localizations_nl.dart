@@ -6187,4 +6187,49 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'Kies hoe externe AI je gegevens verwerkt';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern werkt lokaal waar mogelijk. Bij gebruik van externe AI stuurt dit apparaat de benodigde gegevens rechtstreeks naar de ingestelde provider. NativeTavern leidt die verzoeken niet door en slaat ze niet op.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Gegevens die kunnen worden verzonden';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Je berichten en relevante chatgeschiedenis\n- Personage-, persona- en systeeminstructies, lorebook, geheugen en toolinvoer\n- Documenten voor embeddings\n- Prompts en afbeeldingen voor beeldgeneratie\n- Audio en tekst voor spraakfuncties';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Mogelijke ontvangers';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Afhankelijk van je configuratie: Anthropic, een door jou ingesteld OAI-compatibel endpoint, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations of een ander zelf ingevoerd endpoint.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Jouw keuze';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Externe providers verwerken gegevens volgens hun eigen privacybeleid. Je API-gegevens blijven op dit apparaat, behalve bij directe authenticatie met de gekozen provider. Je kunt dit altijd wijzigen in Instellingen. Lokale AI blijft zonder toestemming beschikbaar.';
+
+  @override
+  String get allowRemoteAi => 'Externe AI toestaan';
+
+  @override
+  String get useLocalAiOnly => 'Alleen lokale AI gebruiken';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Gegevens delen met externe AI';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Toegestaan voor ingestelde providers en endpoints';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Geblokkeerd; lokale AI blijft beschikbaar';
 }

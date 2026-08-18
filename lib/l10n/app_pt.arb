@@ -281,5 +281,18 @@
   "link": "Link",
   "slashCommands": "Comandos de barra",
   "availableCommands": "Comandos disponíveis:",
-  "commandHelp": "Digite / para ver os comandos disponíveis"
+  "commandHelp": "Digite / para ver os comandos disponíveis",
+  "aiDataSharingTitle": "Escolha como a IA remota trata seus dados",
+  "aiDataSharingIntroduction": "O NativeTavern prioriza o uso local. Ao usar uma função de IA remota, este dispositivo envia os dados necessários diretamente ao provedor configurado. O NativeTavern não encaminha nem armazena essas solicitações.",
+  "aiDataSharingDataTitle": "Dados que podem ser enviados",
+  "aiDataSharingDataTypes": "- Suas mensagens e histórico relevante\n- Instruções de personagem, persona e sistema, lorebook, memória e entradas de ferramentas\n- Documentos usados para embeddings\n- Prompts e imagens para geração de imagens\n- Áudio e texto para recursos de voz",
+  "aiDataSharingRecipientsTitle": "Quem pode recebê-los",
+  "aiDataSharingRecipients": "Conforme sua configuração: Anthropic, um endpoint compatível com OAI configurado por você, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations ou outro endpoint personalizado informado por você.",
+  "aiDataSharingControlTitle": "Sua escolha",
+  "aiDataSharingControlDescription": "Provedores remotos tratam dados segundo suas próprias políticas de privacidade. Suas credenciais de API ficam neste dispositivo, exceto ao autenticar diretamente com o provedor escolhido. Você pode alterar isso nas Configurações. A IA local continua disponível sem consentimento.",
+  "allowRemoteAi": "Permitir IA remota",
+  "useLocalAiOnly": "Usar apenas IA local",
+  "aiDataSharingSettingsTitle": "Compartilhamento com IA remota",
+  "aiDataSharingAllowedDescription": "Permitido para provedores e endpoints configurados",
+  "aiDataSharingLocalOnlyDescription": "Bloqueado; a IA local continua disponível"
 }

@@ -281,5 +281,18 @@
   "link": "Link",
   "slashCommands": "Polecenia slash",
   "availableCommands": "Dostępne polecenia:",
-  "commandHelp": "Wpisz / aby zobaczyć dostępne polecenia"
+  "commandHelp": "Wpisz / aby zobaczyć dostępne polecenia",
+  "aiDataSharingTitle": "Wybierz, jak zdalna AI przetwarza Twoje dane",
+  "aiDataSharingIntroduction": "NativeTavern działa przede wszystkim lokalnie. Gdy używasz zdalnej funkcji AI, urządzenie wysyła wymagane dane bezpośrednio do skonfigurowanego dostawcy. NativeTavern nie pośredniczy ani nie przechowuje tych żądań.",
+  "aiDataSharingDataTitle": "Dane, które mogą być wysyłane",
+  "aiDataSharingDataTypes": "- Twoje wiadomości i odpowiednia historia czatu\n- Instrukcje postaci, persony i systemu, lorebook, pamięć oraz dane narzędzi\n- Dokumenty do embeddingów\n- Prompty i obrazy do generowania obrazów\n- Audio i tekst do funkcji głosowych",
+  "aiDataSharingRecipientsTitle": "Możliwi odbiorcy",
+  "aiDataSharingRecipients": "Zależnie od konfiguracji: Anthropic, skonfigurowany przez Ciebie endpoint zgodny z OAI, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations albo inny własny endpoint.",
+  "aiDataSharingControlTitle": "Twój wybór",
+  "aiDataSharingControlDescription": "Zdalni dostawcy przetwarzają dane według własnych polityk prywatności. Dane logowania API pozostają na urządzeniu poza bezpośrednim uwierzytelnieniem u wybranego dostawcy. Wybór można zmienić w Ustawieniach. Lokalna AI działa bez zgody.",
+  "allowRemoteAi": "Zezwól na zdalną AI",
+  "useLocalAiOnly": "Używaj tylko lokalnej AI",
+  "aiDataSharingSettingsTitle": "Udostępnianie danych zdalnej AI",
+  "aiDataSharingAllowedDescription": "Dozwolone dla skonfigurowanych dostawców i endpointów",
+  "aiDataSharingLocalOnlyDescription": "Zablokowane; lokalna AI pozostaje dostępna"
 }

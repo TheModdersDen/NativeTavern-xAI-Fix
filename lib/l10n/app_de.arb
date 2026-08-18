@@ -281,5 +281,18 @@
   "link": "Link",
   "slashCommands": "Slash-Befehle",
   "availableCommands": "Verfügbare Befehle:",
-  "commandHelp": "Tippe / um verfügbare Befehle zu sehen"
+  "commandHelp": "Tippe / um verfügbare Befehle zu sehen",
+  "aiDataSharingTitle": "Wähle, wie Remote-KI deine Daten verarbeitet",
+  "aiDataSharingIntroduction": "NativeTavern arbeitet primär lokal. Bei einer Remote-KI-Funktion sendet dieses Gerät die erforderlichen Daten direkt an den konfigurierten Anbieter. NativeTavern leitet diese Anfragen weder weiter noch speichert sie.",
+  "aiDataSharingDataTitle": "Daten, die gesendet werden können",
+  "aiDataSharingDataTypes": "- Deine Nachrichten und relevanter Chatverlauf\n- Charakter-, Persona- und Systemanweisungen, Lorebook, Speicher und Tool-Eingaben\n- Dokumente für Embeddings\n- Prompts und Bilder für die Bilderzeugung\n- Audio und Text für Sprachfunktionen",
+  "aiDataSharingRecipientsTitle": "Mögliche Empfänger",
+  "aiDataSharingRecipients": "Je nach Konfiguration: Anthropic, ein von dir konfigurierter OAI-kompatibler Endpunkt, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations oder ein weiterer eigener Endpunkt.",
+  "aiDataSharingControlTitle": "Deine Wahl",
+  "aiDataSharingControlDescription": "Remote-Anbieter verarbeiten Daten nach ihren eigenen Datenschutzrichtlinien. Deine API-Zugangsdaten bleiben auf diesem Gerät, außer zur direkten Anmeldung beim gewählten Anbieter. Du kannst dies jederzeit in den Einstellungen ändern. Lokale KI bleibt ohne Einwilligung verfügbar.",
+  "allowRemoteAi": "Remote-KI erlauben",
+  "useLocalAiOnly": "Nur lokale KI verwenden",
+  "aiDataSharingSettingsTitle": "Datenfreigabe für Remote-KI",
+  "aiDataSharingAllowedDescription": "Für konfigurierte Anbieter und Endpunkte erlaubt",
+  "aiDataSharingLocalOnlyDescription": "Blockiert; lokale KI bleibt verfügbar"
 }

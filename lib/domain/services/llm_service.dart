@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:native_tavern/domain/models/tool_calling.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/context_window_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 import 'package:native_tavern/domain/services/tool_calling/tool_calling_adapter.dart';
@@ -419,6 +420,8 @@ class LLMService {
     Dio? dio,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   }) : _dio = dio ?? Dio() {
     _dio.interceptors.add(ExternalCallAuditInterceptor(
       repository: auditRepository,
@@ -427,6 +430,7 @@ class LLMService {
         request,
         const {ExternalDataType.prompt, ExternalDataType.chatText},
       ),
+      consentRepository: consentRepository,
     ));
   }
 
@@ -1255,11 +1259,13 @@ class LLMService {
       requestedTokens: config.maxTokens,
     );
     config = config.copyWith(maxTokens: responseTokens);
-    messages = _contextWindowService.fit(
-      messages,
-      contextLength: config.contextLength,
-      responseTokens: responseTokens,
-    ).messages;
+    messages = _contextWindowService
+        .fit(
+          messages,
+          contextLength: config.contextLength,
+          responseTokens: responseTokens,
+        )
+        .messages;
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
       case LLMProvider.deepSeek:
@@ -1346,11 +1352,13 @@ class LLMService {
       requestedTokens: config.maxTokens,
     );
     config = config.copyWith(maxTokens: responseTokens);
-    messages = _contextWindowService.fit(
-      messages,
-      contextLength: config.contextLength,
-      responseTokens: responseTokens,
-    ).messages;
+    messages = _contextWindowService
+        .fit(
+          messages,
+          contextLength: config.contextLength,
+          responseTokens: responseTokens,
+        )
+        .messages;
     messages = _mergeConsecutiveRoles(messages, config);
     switch (config.provider) {
       case LLMProvider.deepSeek:

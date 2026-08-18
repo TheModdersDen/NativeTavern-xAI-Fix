@@ -6173,4 +6173,47 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'リモート AI によるデータ処理を選択';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern はローカル優先です。リモート AI 機能を使用すると、必要なデータがこのデバイスから設定済みプロバイダーへ直接送信されます。NativeTavern がリクエストを中継または保存することはありません。';
+
+  @override
+  String get aiDataSharingDataTitle => '送信される可能性があるデータ';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- メッセージと関連するチャット履歴\n- キャラクター、ペルソナ、システム指示、ロアブック、メモリ、ツール入力\n- 埋め込みに使用する文書\n- 画像生成に使用するプロンプトと画像\n- 音声機能に使用する音声とテキスト';
+
+  @override
+  String get aiDataSharingRecipientsTitle => '受信する可能性がある事業者';
+
+  @override
+  String get aiDataSharingRecipients =>
+      '設定に応じて、Anthropic、設定した OAI 互換エンドポイント、OpenRouter、Google Gemini、DeepSeek、Alibaba Qwen、SiliconFlow、Moonshot/Kimi、Z.AI、MiniMax、Cohere、ElevenLabs、Azure Speech、Volcengine、NovelAI、Pollinations、または入力した別のカスタムエンドポイントが受信します。';
+
+  @override
+  String get aiDataSharingControlTitle => '選択はいつでも変更可能';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'リモートプロバイダーは各社のプライバシーポリシーに従ってデータを処理します。API 認証情報は、選択したプロバイダーへの直接認証時を除き、このデバイスに保存されます。設定からいつでも変更できます。ローカル AI は同意なしで利用できます。';
+
+  @override
+  String get allowRemoteAi => 'リモート AI を許可';
+
+  @override
+  String get useLocalAiOnly => 'ローカル AI のみ使用';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'リモート AI へのデータ共有';
+
+  @override
+  String get aiDataSharingAllowedDescription => '設定したプロバイダーとエンドポイントへの送信を許可';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription => 'ブロック中。ローカル AI は利用できます';
 }

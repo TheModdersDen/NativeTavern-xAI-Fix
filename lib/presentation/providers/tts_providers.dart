@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/tts_service.dart';
+import 'package:native_tavern/presentation/providers/ai_data_sharing_consent_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
@@ -9,6 +10,7 @@ import 'package:native_tavern/presentation/providers/external_call_audit_provide
 final ttsServiceProvider = Provider<TTSService>((ref) {
   final service = TTSService(
     auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+    consentRepository: ref.watch(aiDataSharingConsentRepositoryProvider),
   );
   ref.onDispose(() => service.dispose());
   return service;

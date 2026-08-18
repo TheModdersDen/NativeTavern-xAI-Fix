@@ -6182,4 +6182,51 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle =>
+      'اختر كيفية معالجة الذكاء الاصطناعي البعيد لبياناتك';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'يعتمد NativeTavern على التخزين المحلي أولاً. عند استخدام ميزة ذكاء اصطناعي بعيدة، يرسل هذا الجهاز البيانات المطلوبة مباشرة إلى المزوّد الذي أعددته. لا يمرر NativeTavern هذه الطلبات ولا يخزنها.';
+
+  @override
+  String get aiDataSharingDataTitle => 'البيانات التي قد تُرسل';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- رسائلك وسجل المحادثة ذي الصلة\n- تعليمات الشخصية والهوية والنظام وكتاب العالم والذاكرة ومدخلات الأدوات\n- المستندات المستخدمة للتضمين\n- المطالبات والصور المستخدمة لتوليد الصور\n- الصوت والنص المستخدمان لميزات الكلام';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'من قد يستلمها';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'بحسب إعدادك: Anthropic أو نقطة نهاية متوافقة مع OAI تقوم بإعدادها أو OpenRouter أو Google Gemini أو DeepSeek أو Alibaba Qwen أو SiliconFlow أو Moonshot/Kimi أو Z.AI أو MiniMax أو Cohere أو ElevenLabs أو Azure Speech أو Volcengine أو NovelAI أو Pollinations أو نقطة نهاية مخصصة أخرى تدخلها.';
+
+  @override
+  String get aiDataSharingControlTitle => 'خيارك';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'يعالج المزوّدون البعيدون البيانات وفق سياسات الخصوصية الخاصة بهم. تبقى بيانات اعتماد API على هذا الجهاز إلا عند المصادقة المباشرة مع المزوّد المحدد. يمكنك تغيير هذا الخيار من الإعدادات في أي وقت. يبقى الذكاء الاصطناعي المحلي متاحاً دون موافقة.';
+
+  @override
+  String get allowRemoteAi => 'السماح بالذكاء الاصطناعي البعيد';
+
+  @override
+  String get useLocalAiOnly => 'استخدام الذكاء الاصطناعي المحلي فقط';
+
+  @override
+  String get aiDataSharingSettingsTitle =>
+      'مشاركة البيانات مع الذكاء الاصطناعي البعيد';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'مسموح للمزوّدين ونقاط النهاية التي أعددتها';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'محظور؛ يبقى الذكاء الاصطناعي المحلي متاحاً';
 }

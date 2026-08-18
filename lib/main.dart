@@ -8,7 +8,9 @@ import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/import_service.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
+import 'package:native_tavern/presentation/providers/ai_data_sharing_consent_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
@@ -32,7 +34,12 @@ void main() async {
   final externalCallAudit = FileExternalCallAuditRepository(
     dataPath: initData.dataPath,
   );
-  final llmService = LLMService(auditRepository: externalCallAudit);
+  final aiDataSharingConsent =
+      SharedPreferencesAiDataSharingConsentRepository(prefs);
+  final llmService = LLMService(
+    auditRepository: externalCallAudit,
+    consentRepository: aiDataSharingConsent,
+  );
   final importService = ImportService(initData.dataPath);
 
   runApp(
@@ -52,6 +59,9 @@ void main() async {
         importServiceProvider.overrideWithValue(importService),
         externalCallAuditRepositoryProvider.overrideWithValue(
           externalCallAudit,
+        ),
+        aiDataSharingConsentRepositoryProvider.overrideWithValue(
+          aiDataSharingConsent,
         ),
 
         // Shared preferences

@@ -281,5 +281,18 @@
   "link": "ลิงก์",
   "slashCommands": "คำสั่งสแลช",
   "availableCommands": "คำสั่งที่ใช้ได้:",
-  "commandHelp": "พิมพ์ / เพื่อดูคำสั่งที่ใช้ได้"
+  "commandHelp": "พิมพ์ / เพื่อดูคำสั่งที่ใช้ได้",
+  "aiDataSharingTitle": "เลือกวิธีที่ AI ระยะไกลจัดการข้อมูลของคุณ",
+  "aiDataSharingIntroduction": "NativeTavern ให้ความสำคัญกับการทำงานในเครื่อง เมื่อใช้ฟีเจอร์ AI ระยะไกล อุปกรณ์นี้จะส่งข้อมูลที่จำเป็นตรงไปยังผู้ให้บริการที่คุณตั้งค่าไว้ NativeTavern ไม่ส่งต่อหรือจัดเก็บคำขอเหล่านั้น",
+  "aiDataSharingDataTitle": "ข้อมูลที่อาจถูกส่ง",
+  "aiDataSharingDataTypes": "- ข้อความและประวัติแชทที่เกี่ยวข้อง\n- คำสั่งตัวละคร เพอร์โซนา และระบบ lorebook หน่วยความจำ และข้อมูลเข้าเครื่องมือ\n- เอกสารที่ใช้ทำ embedding\n- พรอมต์และรูปภาพสำหรับสร้างภาพ\n- เสียงและข้อความสำหรับฟีเจอร์เสียงพูด",
+  "aiDataSharingRecipientsTitle": "ผู้ที่อาจได้รับข้อมูล",
+  "aiDataSharingRecipients": "ขึ้นอยู่กับการตั้งค่าของคุณ: Anthropic, endpoint ที่รองรับ OAI ซึ่งคุณตั้งค่าไว้, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations หรือ endpoint กำหนดเองอื่นที่คุณระบุ",
+  "aiDataSharingControlTitle": "ตัวเลือกของคุณ",
+  "aiDataSharingControlDescription": "ผู้ให้บริการระยะไกลประมวลผลข้อมูลตามนโยบายความเป็นส่วนตัวของตน ข้อมูลรับรอง API จะอยู่บนอุปกรณ์นี้ยกเว้นเมื่อยืนยันตัวตนโดยตรงกับผู้ให้บริการที่เลือก คุณเปลี่ยนได้ทุกเมื่อในการตั้งค่า AI ในเครื่องยังใช้ได้โดยไม่ต้องยินยอม",
+  "allowRemoteAi": "อนุญาต AI ระยะไกล",
+  "useLocalAiOnly": "ใช้เฉพาะ AI ในเครื่อง",
+  "aiDataSharingSettingsTitle": "การแชร์ข้อมูลกับ AI ระยะไกล",
+  "aiDataSharingAllowedDescription": "อนุญาตสำหรับผู้ให้บริการและ endpoint ที่ตั้งค่าไว้",
+  "aiDataSharingLocalOnlyDescription": "ถูกบล็อก; AI ในเครื่องยังใช้ได้"
 }

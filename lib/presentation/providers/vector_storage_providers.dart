@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:native_tavern/data/models/vector_storage.dart';
 import 'package:native_tavern/domain/services/embedding_service.dart';
 import 'package:native_tavern/domain/services/vector_storage_service.dart';
+import 'package:native_tavern/presentation/providers/ai_data_sharing_consent_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 
 /// Provider for VectorStorageService (loads persisted collections)
@@ -16,17 +17,20 @@ final vectorStorageServiceProvider = Provider<VectorStorageService>((ref) {
 final embeddingServiceProvider = Provider<EmbeddingService>((ref) {
   return EmbeddingService(
     auditRepository: ref.watch(externalCallAuditRepositoryProvider),
+    consentRepository: ref.watch(aiDataSharingConsentRepositoryProvider),
   );
 });
 
 /// Provider for vector storage settings
 final vectorStorageSettingsProvider =
-    StateNotifierProvider<VectorStorageSettingsNotifier, VectorStorageSettings>((ref) {
+    StateNotifierProvider<VectorStorageSettingsNotifier, VectorStorageSettings>(
+        (ref) {
   return VectorStorageSettingsNotifier();
 });
 
 /// Notifier for managing vector storage settings
-class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings> {
+class VectorStorageSettingsNotifier
+    extends StateNotifier<VectorStorageSettings> {
   static const _storageKey = 'vector_storage_settings';
 
   VectorStorageSettingsNotifier() : super(const VectorStorageSettings()) {
@@ -48,7 +52,8 @@ class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings>
   Future<void> _saveSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_storageKey, VectorStorageSettings.serialize(state));
+      await prefs.setString(
+          _storageKey, VectorStorageSettings.serialize(state));
     } catch (e) {
       // Ignore save errors
     }
@@ -144,7 +149,8 @@ class VectorStorageSettingsNotifier extends StateNotifier<VectorStorageSettings>
 
 /// Provider for collections list
 final vectorCollectionsProvider =
-    StateNotifierProvider<VectorCollectionsNotifier, List<VectorCollection>>((ref) {
+    StateNotifierProvider<VectorCollectionsNotifier, List<VectorCollection>>(
+        (ref) {
   final service = ref.watch(vectorStorageServiceProvider);
   return VectorCollectionsNotifier(service);
 });
@@ -235,9 +241,9 @@ class VectorCollectionsNotifier extends StateNotifier<List<VectorCollection>> {
 final activeCollectionProvider = Provider<VectorCollection?>((ref) {
   final settings = ref.watch(vectorStorageSettingsProvider);
   final collections = ref.watch(vectorCollectionsProvider);
-  
+
   if (settings.activeCollectionId == null) return null;
-  
+
   try {
     return collections.firstWhere((c) => c.id == settings.activeCollectionId);
   } catch (_) {
@@ -246,25 +252,29 @@ final activeCollectionProvider = Provider<VectorCollection?>((ref) {
 });
 
 /// Provider for collection statistics
-final collectionStatisticsProvider = Provider.family<CollectionStatistics, String>((ref, collectionId) {
+final collectionStatisticsProvider =
+    Provider.family<CollectionStatistics, String>((ref, collectionId) {
   final service = ref.watch(vectorStorageServiceProvider);
   return service.getStatistics(collectionId);
 });
 
 /// Provider for search results
-final vectorSearchProvider = FutureProvider.family<List<VectorSearchResult>, VectorSearchRequest>((ref, request) async {
+final vectorSearchProvider =
+    FutureProvider.family<List<VectorSearchResult>, VectorSearchRequest>(
+        (ref, request) async {
   final service = ref.watch(vectorStorageServiceProvider);
   final settings = ref.watch(vectorStorageSettingsProvider);
-  
+
   if (request.queryEmbedding == null) {
     return [];
   }
-  
+
   return service.search(
     collectionId: request.collectionId,
     queryEmbedding: request.queryEmbedding!,
     topK: request.topK ?? settings.topK,
-    similarityThreshold: request.similarityThreshold ?? settings.similarityThreshold,
+    similarityThreshold:
+        request.similarityThreshold ?? settings.similarityThreshold,
   );
 });
 
@@ -338,8 +348,8 @@ final embedCollectionProvider =
     // Embed in batches of 32 to stay within API limits
     var embedded = 0;
     for (var i = 0; i < pending.length; i += 32) {
-      final batch = pending.sublist(
-          i, i + 32 > pending.length ? pending.length : i + 32);
+      final batch =
+          pending.sublist(i, i + 32 > pending.length ? pending.length : i + 32);
       final embeddings = await embedder.embedBatch(
         batch.map((d) => d.content).toList(),
         settings,
@@ -386,8 +396,7 @@ final ragContextProvider =
       );
       if (results.isEmpty) return null;
 
-      final context =
-          results.map((r) => '- ${r.document.content}').join('\n');
+      final context = results.map((r) => '- ${r.document.content}').join('\n');
       return settings.promptTemplate.replaceAll('{{context}}', context);
     } catch (e) {
       // RAG is best-effort: never block generation on retrieval failure

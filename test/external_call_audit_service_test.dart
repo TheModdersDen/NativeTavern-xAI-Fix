@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 
 void main() {
@@ -123,6 +124,73 @@ void main() {
     expect(failureRecord.outcome, ExternalCallOutcome.failed);
     expect(failureRecord.statusCode, isNull);
   });
+
+  test('blocks remote requests before the network when consent is off',
+      () async {
+    final auditRepository = MemoryExternalCallAuditRepository();
+    final consentRepository = MemoryAiDataSharingConsentRepository(
+      choice: AiDataSharingChoice.localOnly,
+    );
+    final adapter = _CountingSuccessAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: auditRepository,
+      capabilityId: 'llm',
+      classifyData: (_) => const {ExternalDataType.chatText},
+      consentRepository: consentRepository,
+    ));
+
+    await expectLater(
+      dio.post<void>('https://fcloud.example.com/v1/chat'),
+      throwsA(
+        isA<DioException>().having(
+          (error) => error.error,
+          'consent error',
+          isA<AiDataSharingConsentRequiredException>(),
+        ),
+      ),
+    );
+
+    expect(adapter.requestCount, 0);
+    final record = (await auditRepository.readRecent()).single;
+    expect(record.outcome, ExternalCallOutcome.cancelled);
+    expect(record.targetDomain, 'fcloud.example.com');
+  });
+
+  test('local endpoints remain available without remote AI consent', () async {
+    final consentRepository = MemoryAiDataSharingConsentRepository(
+      choice: AiDataSharingChoice.localOnly,
+    );
+    final adapter = _CountingSuccessAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: MemoryExternalCallAuditRepository(),
+      capabilityId: 'llm',
+      classifyData: (_) => const {ExternalDataType.chatText},
+      consentRepository: consentRepository,
+    ));
+
+    await dio.post<void>('http://192.168.1.20:11434/api/chat');
+    expect(adapter.requestCount, 1);
+  });
+
+  test('allows remote requests after consent is granted', () async {
+    final consentRepository = MemoryAiDataSharingConsentRepository(
+      choice: AiDataSharingChoice.localOnly,
+    );
+    final adapter = _CountingSuccessAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    dio.interceptors.add(ExternalCallAuditInterceptor(
+      repository: MemoryExternalCallAuditRepository(),
+      capabilityId: 'llm',
+      classifyData: (_) => const {ExternalDataType.chatText},
+      consentRepository: consentRepository,
+    ));
+
+    await consentRepository.setChoice(AiDataSharingChoice.allowed);
+    await dio.post<void>('https://api.example.com/v1/chat');
+    expect(adapter.requestCount, 1);
+  });
 }
 
 class _SuccessAdapter implements HttpClientAdapter {
@@ -157,6 +225,23 @@ class _FailureAdapter implements HttpClientAdapter {
       type: DioExceptionType.connectionError,
       message: 'offline',
     );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _CountingSuccessAdapter implements HttpClientAdapter {
+  int requestCount = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requestCount++;
+    return ResponseBody.fromString('{}', 200);
   }
 
   @override

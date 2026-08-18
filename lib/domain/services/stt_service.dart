@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:native_tavern/domain/services/ai_data_sharing_consent_service.dart';
 import 'package:native_tavern/domain/services/external_call_audit_service.dart';
 import 'package:native_tavern/domain/services/voice_adapter_contract.dart';
 import 'package:path/path.dart' as p;
@@ -444,12 +445,15 @@ class DioRemoteSTTBackend implements RemoteSTTBackend {
     Dio? dio,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   }) : _dio = dio ?? Dio() {
     _dio.interceptors.add(
       ExternalCallAuditInterceptor(
         repository: auditRepository,
         capabilityId: 'stt',
         classifyData: (_) => const {ExternalDataType.audio},
+        consentRepository: consentRepository,
       ),
     );
   }
@@ -539,6 +543,8 @@ class STTService with WidgetsBindingObserver {
     Dio? dio,
     ExternalCallAuditRepository auditRepository =
         const NoopExternalCallAuditRepository(),
+    AiDataSharingConsentRepository consentRepository =
+        const AllowAllAiDataSharingConsentRepository(),
   })  : _systemBackend = systemBackend ?? SpeechToTextBackend(),
         _permissionGateway =
             permissionGateway ?? const PlatformSTTPermissionGateway(),
@@ -547,6 +553,7 @@ class STTService with WidgetsBindingObserver {
             DioRemoteSTTBackend(
               dio: dio,
               auditRepository: auditRepository,
+              consentRepository: consentRepository,
             );
 
   final SystemSTTBackend _systemBackend;

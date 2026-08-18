@@ -6186,4 +6186,49 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle => 'Pilih cara AI jauh mengendalikan data anda';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern mengutamakan penggunaan setempat. Apabila menggunakan ciri AI jauh, peranti ini menghantar data yang diperlukan terus kepada penyedia yang anda tetapkan. NativeTavern tidak menjadi perantara atau menyimpan permintaan tersebut.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Data yang mungkin dihantar';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Mesej dan sejarah sembang yang berkaitan\n- Arahan watak, persona dan sistem, lorebook, memori serta input alat\n- Dokumen untuk embedding\n- Prompt dan imej untuk penjanaan imej\n- Audio dan teks untuk ciri suara';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Pihak yang mungkin menerima';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Bergantung pada konfigurasi anda: Anthropic, endpoint serasi OAI yang anda tetapkan, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations atau endpoint tersuai lain yang anda masukkan.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Pilihan anda';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Penyedia jauh memproses data mengikut dasar privasi masing-masing. Kelayakan API kekal pada peranti ini kecuali semasa pengesahan terus dengan penyedia pilihan. Anda boleh mengubahnya dalam Tetapan pada bila-bila masa. AI setempat kekal tersedia tanpa persetujuan.';
+
+  @override
+  String get allowRemoteAi => 'Benarkan AI jauh';
+
+  @override
+  String get useLocalAiOnly => 'Gunakan AI setempat sahaja';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Perkongsian data AI jauh';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Dibenarkan untuk penyedia dan endpoint yang ditetapkan';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Disekat; AI setempat kekal tersedia';
 }

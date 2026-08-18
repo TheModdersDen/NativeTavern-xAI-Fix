@@ -281,5 +281,18 @@
   "link": "Bağlantı",
   "slashCommands": "Eğik Çizgi Komutları",
   "availableCommands": "Kullanılabilir komutlar:",
-  "commandHelp": "Kullanılabilir komutları görmek için / yazın"
+  "commandHelp": "Kullanılabilir komutları görmek için / yazın",
+  "aiDataSharingTitle": "Uzak yapay zekânın verilerinizi nasıl işleyeceğini seçin",
+  "aiDataSharingIntroduction": "NativeTavern yerel kullanıma öncelik verir. Uzak bir yapay zekâ özelliği kullandığınızda gerekli veriler bu cihazdan yapılandırdığınız sağlayıcıya doğrudan gönderilir. NativeTavern bu istekleri aktarmak veya saklamak için aracı olmaz.",
+  "aiDataSharingDataTitle": "Gönderilebilecek veriler",
+  "aiDataSharingDataTypes": "- Mesajlarınız ve ilgili sohbet geçmişi\n- Karakter, persona ve sistem talimatları, lorebook, bellek ve araç girdileri\n- Embedding için kullanılan belgeler\n- Görsel üretimi için promptlar ve görseller\n- Ses özellikleri için ses ve metin",
+  "aiDataSharingRecipientsTitle": "Kimler alabilir",
+  "aiDataSharingRecipients": "Yapılandırmanıza göre: Anthropic, yapılandırdığınız OAI uyumlu bir uç nokta, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations ya da girdiğiniz başka bir özel uç nokta.",
+  "aiDataSharingControlTitle": "Seçim sizin",
+  "aiDataSharingControlDescription": "Uzak sağlayıcılar verileri kendi gizlilik politikalarına göre işler. API bilgileriniz yalnızca seçilen sağlayıcıyla doğrudan kimlik doğrularken gönderilir, aksi halde bu cihazda kalır. Ayarlardan istediğiniz zaman değiştirebilirsiniz. Yerel yapay zekâ onay olmadan kullanılabilir.",
+  "allowRemoteAi": "Uzak yapay zekâya izin ver",
+  "useLocalAiOnly": "Yalnızca yerel yapay zekâ",
+  "aiDataSharingSettingsTitle": "Uzak yapay zekâ veri paylaşımı",
+  "aiDataSharingAllowedDescription": "Yapılandırılan sağlayıcı ve uç noktalar için izin verildi",
+  "aiDataSharingLocalOnlyDescription": "Engellendi; yerel yapay zekâ kullanılabilir"
 }

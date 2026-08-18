@@ -281,5 +281,18 @@
   "link": "Ссылка",
   "slashCommands": "Слэш-команды",
   "availableCommands": "Доступные команды:",
-  "commandHelp": "Введите / для просмотра доступных команд"
+  "commandHelp": "Введите / для просмотра доступных команд",
+  "aiDataSharingTitle": "Выберите, как удалённый ИИ обрабатывает ваши данные",
+  "aiDataSharingIntroduction": "NativeTavern прежде всего работает локально. При использовании удалённого ИИ это устройство отправляет необходимые данные напрямую настроенному провайдеру. NativeTavern не перенаправляет и не хранит эти запросы.",
+  "aiDataSharingDataTitle": "Какие данные могут отправляться",
+  "aiDataSharingDataTypes": "- Ваши сообщения и относящаяся к ним история чата\n- Инструкции персонажа, персоны и системы, лорбук, память и ввод инструментов\n- Документы для эмбеддингов\n- Промпты и изображения для генерации изображений\n- Аудио и текст для голосовых функций",
+  "aiDataSharingRecipientsTitle": "Возможные получатели",
+  "aiDataSharingRecipients": "В зависимости от настроек: Anthropic, настроенный вами OAI-совместимый адрес, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations либо другой указанный вами адрес.",
+  "aiDataSharingControlTitle": "Ваш выбор",
+  "aiDataSharingControlDescription": "Удалённые провайдеры обрабатывают данные по собственным политикам конфиденциальности. Учётные данные API остаются на устройстве, кроме прямой аутентификации у выбранного провайдера. Выбор можно изменить в настройках. Локальный ИИ доступен без согласия.",
+  "allowRemoteAi": "Разрешить удалённый ИИ",
+  "useLocalAiOnly": "Только локальный ИИ",
+  "aiDataSharingSettingsTitle": "Передача данных удалённому ИИ",
+  "aiDataSharingAllowedDescription": "Разрешено для настроенных провайдеров и адресов",
+  "aiDataSharingLocalOnlyDescription": "Заблокировано; локальный ИИ доступен"
 }

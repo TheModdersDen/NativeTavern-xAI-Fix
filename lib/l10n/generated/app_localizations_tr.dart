@@ -6186,4 +6186,50 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle =>
+      'Uzak yapay zekânın verilerinizi nasıl işleyeceğini seçin';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern yerel kullanıma öncelik verir. Uzak bir yapay zekâ özelliği kullandığınızda gerekli veriler bu cihazdan yapılandırdığınız sağlayıcıya doğrudan gönderilir. NativeTavern bu istekleri aktarmak veya saklamak için aracı olmaz.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Gönderilebilecek veriler';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Mesajlarınız ve ilgili sohbet geçmişi\n- Karakter, persona ve sistem talimatları, lorebook, bellek ve araç girdileri\n- Embedding için kullanılan belgeler\n- Görsel üretimi için promptlar ve görseller\n- Ses özellikleri için ses ve metin';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Kimler alabilir';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'Yapılandırmanıza göre: Anthropic, yapılandırdığınız OAI uyumlu bir uç nokta, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations ya da girdiğiniz başka bir özel uç nokta.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Seçim sizin';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Uzak sağlayıcılar verileri kendi gizlilik politikalarına göre işler. API bilgileriniz yalnızca seçilen sağlayıcıyla doğrudan kimlik doğrularken gönderilir, aksi halde bu cihazda kalır. Ayarlardan istediğiniz zaman değiştirebilirsiniz. Yerel yapay zekâ onay olmadan kullanılabilir.';
+
+  @override
+  String get allowRemoteAi => 'Uzak yapay zekâya izin ver';
+
+  @override
+  String get useLocalAiOnly => 'Yalnızca yerel yapay zekâ';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Uzak yapay zekâ veri paylaşımı';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Yapılandırılan sağlayıcı ve uç noktalar için izin verildi';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Engellendi; yerel yapay zekâ kullanılabilir';
 }

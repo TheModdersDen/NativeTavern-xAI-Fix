@@ -6186,4 +6186,50 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noValidCharactersInGroup => 'No valid characters in group';
+
+  @override
+  String get aiDataSharingTitle =>
+      'Выберите, как удалённый ИИ обрабатывает ваши данные';
+
+  @override
+  String get aiDataSharingIntroduction =>
+      'NativeTavern прежде всего работает локально. При использовании удалённого ИИ это устройство отправляет необходимые данные напрямую настроенному провайдеру. NativeTavern не перенаправляет и не хранит эти запросы.';
+
+  @override
+  String get aiDataSharingDataTitle => 'Какие данные могут отправляться';
+
+  @override
+  String get aiDataSharingDataTypes =>
+      '- Ваши сообщения и относящаяся к ним история чата\n- Инструкции персонажа, персоны и системы, лорбук, память и ввод инструментов\n- Документы для эмбеддингов\n- Промпты и изображения для генерации изображений\n- Аудио и текст для голосовых функций';
+
+  @override
+  String get aiDataSharingRecipientsTitle => 'Возможные получатели';
+
+  @override
+  String get aiDataSharingRecipients =>
+      'В зависимости от настроек: Anthropic, настроенный вами OAI-совместимый адрес, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations либо другой указанный вами адрес.';
+
+  @override
+  String get aiDataSharingControlTitle => 'Ваш выбор';
+
+  @override
+  String get aiDataSharingControlDescription =>
+      'Удалённые провайдеры обрабатывают данные по собственным политикам конфиденциальности. Учётные данные API остаются на устройстве, кроме прямой аутентификации у выбранного провайдера. Выбор можно изменить в настройках. Локальный ИИ доступен без согласия.';
+
+  @override
+  String get allowRemoteAi => 'Разрешить удалённый ИИ';
+
+  @override
+  String get useLocalAiOnly => 'Только локальный ИИ';
+
+  @override
+  String get aiDataSharingSettingsTitle => 'Передача данных удалённому ИИ';
+
+  @override
+  String get aiDataSharingAllowedDescription =>
+      'Разрешено для настроенных провайдеров и адресов';
+
+  @override
+  String get aiDataSharingLocalOnlyDescription =>
+      'Заблокировано; локальный ИИ доступен';
 }

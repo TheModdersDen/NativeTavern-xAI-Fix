@@ -281,5 +281,18 @@
   "link": "Pautan",
   "slashCommands": "Arahan Slash",
   "availableCommands": "Arahan yang tersedia:",
-  "commandHelp": "Taip / untuk melihat arahan yang tersedia"
+  "commandHelp": "Taip / untuk melihat arahan yang tersedia",
+  "aiDataSharingTitle": "Pilih cara AI jauh mengendalikan data anda",
+  "aiDataSharingIntroduction": "NativeTavern mengutamakan penggunaan setempat. Apabila menggunakan ciri AI jauh, peranti ini menghantar data yang diperlukan terus kepada penyedia yang anda tetapkan. NativeTavern tidak menjadi perantara atau menyimpan permintaan tersebut.",
+  "aiDataSharingDataTitle": "Data yang mungkin dihantar",
+  "aiDataSharingDataTypes": "- Mesej dan sejarah sembang yang berkaitan\n- Arahan watak, persona dan sistem, lorebook, memori serta input alat\n- Dokumen untuk embedding\n- Prompt dan imej untuk penjanaan imej\n- Audio dan teks untuk ciri suara",
+  "aiDataSharingRecipientsTitle": "Pihak yang mungkin menerima",
+  "aiDataSharingRecipients": "Bergantung pada konfigurasi anda: Anthropic, endpoint serasi OAI yang anda tetapkan, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations atau endpoint tersuai lain yang anda masukkan.",
+  "aiDataSharingControlTitle": "Pilihan anda",
+  "aiDataSharingControlDescription": "Penyedia jauh memproses data mengikut dasar privasi masing-masing. Kelayakan API kekal pada peranti ini kecuali semasa pengesahan terus dengan penyedia pilihan. Anda boleh mengubahnya dalam Tetapan pada bila-bila masa. AI setempat kekal tersedia tanpa persetujuan.",
+  "allowRemoteAi": "Benarkan AI jauh",
+  "useLocalAiOnly": "Gunakan AI setempat sahaja",
+  "aiDataSharingSettingsTitle": "Perkongsian data AI jauh",
+  "aiDataSharingAllowedDescription": "Dibenarkan untuk penyedia dan endpoint yang ditetapkan",
+  "aiDataSharingLocalOnlyDescription": "Disekat; AI setempat kekal tersedia"
 }
