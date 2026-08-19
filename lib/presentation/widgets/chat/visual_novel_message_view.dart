@@ -15,6 +15,7 @@ import 'package:native_tavern/presentation/widgets/common/character_avatar_image
 class VisualNovelMessageView extends ConsumerStatefulWidget {
   final List<ChatMessage> messages;
   final Character? character;
+  final Character? Function(ChatMessage message)? characterForMessage;
   final bool isGenerating;
   final void Function(ChatMessage message) onLongPress;
   final void Function(int swipeIndex, String messageId) onSwipe;
@@ -23,6 +24,7 @@ class VisualNovelMessageView extends ConsumerStatefulWidget {
     super.key,
     required this.messages,
     this.character,
+    this.characterForMessage,
     this.isGenerating = false,
     required this.onLongPress,
     required this.onSwipe,
@@ -266,12 +268,14 @@ class _VisualNovelMessageViewState
   }
 
   Widget _buildSpeakerHeader(ChatMessage message, bool isUser) {
+    final character =
+        widget.characterForMessage?.call(message) ?? widget.character;
     return Row(
       children: [
         // Avatar
-        if (!isUser && widget.character?.assets?.avatarPath != null)
+        if (!isUser && character?.assets?.avatarPath != null)
           CharacterAvatarCircle(
-            imagePath: widget.character!.assets!.avatarPath!,
+            imagePath: character!.assets!.avatarPath!,
             radius: 18,
             errorBuilder: (_, __, ___) => CircleAvatar(
               radius: 18,
@@ -294,7 +298,7 @@ class _VisualNovelMessageViewState
         const SizedBox(width: 10),
         // Name
         Text(
-          isUser ? 'You' : (widget.character?.name ?? 'AI'),
+          isUser ? 'You' : (character?.name ?? 'AI'),
           style: TextStyle(
             color: isUser ? AppTheme.accentColor : Colors.amber,
             fontSize: 15,

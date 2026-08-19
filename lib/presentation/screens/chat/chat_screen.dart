@@ -672,11 +672,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
       case 'note':
         if (argument != null && argument.isNotEmpty) {
-          await chatNotifier.updateAuthorNote(argument);
-          await chatNotifier.toggleAuthorNote(true);
+          await chatNotifier.updateAuthorNoteSettings(
+            chatId: widget.chatId,
+            content: argument,
+            enabled: true,
+          );
           _showSnackBar(l10n.authorsNoteUpdated);
         } else {
-          showAuthorNoteDialog(context);
+          showAuthorNoteDialog(context, widget.chatId);
         }
         break;
     }
@@ -1166,7 +1169,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            chatState.character?.name ?? l10n.chat,
+            chatState.group?.name ?? chatState.character?.name ?? l10n.chat,
             style: const TextStyle(fontSize: 16),
           ),
           // Model selector - tap to change model
@@ -1217,7 +1220,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             color: hasAuthorNote ? AppTheme.accentColor : null,
           ),
           tooltip: l10n.authorsNote,
-          onPressed: () => showAuthorNoteDialog(context),
+          onPressed: () => showAuthorNoteDialog(context, widget.chatId),
         ),
         // Bookmarks button
         IconButton(
@@ -1260,10 +1263,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         AdaptivePopupMenuButton<String>(
           itemBuilder: (context) => [
             PopupMenuItem(
-              value: 'character',
+              value: chatState.isGroupChat ? 'group' : 'character',
               child: ListTile(
-                leading: const Icon(Icons.person),
-                title: Text(l10n.viewCharacter),
+                leading: Icon(
+                  chatState.isGroupChat ? Icons.groups : Icons.person,
+                ),
+                title: Text(
+                  chatState.isGroupChat ? l10n.editGroup : l10n.viewCharacter,
+                ),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -1399,8 +1406,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   context.push('/characters/$characterId');
                 }
                 break;
+              case 'group':
+                final groupId = chatState.group?.id;
+                if (groupId != null) {
+                  context.push('/groups/$groupId');
+                }
+                break;
               case 'author_note':
-                showAuthorNoteDialog(context);
+                showAuthorNoteDialog(context, widget.chatId);
                 break;
               case 'live2d':
                 final characterId = chatState.character?.id;
@@ -1448,15 +1461,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ActiveChatState chatState) {
     final l10n = AppLocalizations.of(context);
-    final character = ref.read(activeChatProvider).character;
+    final character = chatState.character;
+    final group = chatState.group;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (character?.assets?.avatarPath != null)
+          if (group != null)
+            const CircleAvatar(
+              radius: 50,
+              child: Icon(Icons.groups, size: 50),
+            )
+          else if (character?.assets?.avatarPath != null)
             CharacterAvatarCircle(
               imagePath: character!.assets!.avatarPath!,
               radius: 50,
@@ -1469,7 +1488,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
           const SizedBox(height: 16),
           Text(
-            character?.name ?? l10n.chat,
+            group?.name ?? character?.name ?? l10n.chat,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -1496,7 +1515,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasLive2D = chatState.character?.assets?.live2d?.enabled == true;
 
     if (chatState.messages.isEmpty) {
-      if (!hasLive2D) return _buildEmptyState();
+      if (!hasLive2D) return _buildEmptyState(chatState);
       return Live2DBackgroundTapRegion(
         onTap: _handleLive2DBackgroundTap,
         child: Stack(
@@ -1507,7 +1526,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 child: _buildLive2DStage(chatState, interactive: false),
               ),
             ),
-            _buildEmptyState(),
+            _buildEmptyState(chatState),
           ],
         ),
       );
@@ -1589,6 +1608,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 VisualNovelMessageView(
                   messages: chatState.messages,
                   character: chatState.character,
+                  characterForMessage: chatState.characterForMessage,
                   isGenerating: chatState.isGenerating,
                   onLongPress: (message) => _showMessageOptionsForVisualNovel(
                     context,
@@ -1836,7 +1856,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           messageIndex:
               actualIndex, // Use actual index for bookmarks and other features
           chatId: widget.chatId,
-          character: chatState.character,
+          character: chatState.characterForMessage(message),
           isGenerating: isLast && chatState.isGenerating,
           isLast: isLast,
           hasBackground: hasBackground,
@@ -2943,13 +2963,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
       // Update author's note if present
       if (result.authorNote != null && result.authorNote!.isNotEmpty) {
-        await chatNotifier.updateAuthorNote(result.authorNote!);
-        if (result.authorNoteDepth != null) {
-          await chatNotifier.updateAuthorNoteDepth(result.authorNoteDepth!);
-        }
-        if (result.authorNoteEnabled == true) {
-          await chatNotifier.toggleAuthorNote(true);
-        }
+        await chatNotifier.updateAuthorNoteSettings(
+          chatId: widget.chatId,
+          content: result.authorNote,
+          depth: result.authorNoteDepth,
+          enabled: result.authorNoteEnabled == true ? true : null,
+        );
       }
 
       _showSnackBar(l10n.importedMessages(importedCount));

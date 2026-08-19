@@ -30,7 +30,8 @@ class ChatRepository {
   Future<List<models.Chat>> getChatsForCharacter(String characterId) async {
     final rows =
         await (_db.select(_db.chats)
-              ..where((t) => t.characterId.equals(characterId))
+              ..where((t) =>
+                  t.characterId.equals(characterId) & t.groupId.isNull())
               ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
             .get();
     return rows.map(_chatFromRow).toList();

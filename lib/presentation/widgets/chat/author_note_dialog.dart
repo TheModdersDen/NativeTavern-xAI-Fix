@@ -5,7 +5,9 @@ import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Dialog for editing Author's Note settings
 class AuthorNoteDialog extends ConsumerStatefulWidget {
-  const AuthorNoteDialog({super.key});
+  final String chatId;
+
+  const AuthorNoteDialog({super.key, required this.chatId});
 
   @override
   ConsumerState<AuthorNoteDialog> createState() => _AuthorNoteDialogState();
@@ -20,7 +22,8 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
   @override
   void initState() {
     super.initState();
-    final chat = ref.read(activeChatProvider).chat;
+    final activeChat = ref.read(activeChatProvider).chat;
+    final chat = activeChat?.id == widget.chatId ? activeChat : null;
     _contentController = TextEditingController(text: chat?.authorNote ?? '');
     _depth = chat?.authorNoteDepth ?? 4;
     _enabled = chat?.authorNoteEnabled ?? false;
@@ -42,12 +45,14 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
   }
 
   Future<void> _save() async {
-    await ref.read(activeChatProvider.notifier).updateAuthorNoteSettings(
+    final saved =
+        await ref.read(activeChatProvider.notifier).updateAuthorNoteSettings(
+      chatId: widget.chatId,
       content: _contentController.text,
       depth: _depth,
       enabled: _enabled,
     );
-    if (mounted) {
+    if (mounted && saved) {
       Navigator.of(context).pop(true);
     }
   }
@@ -217,9 +222,9 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
 }
 
 /// Show the Author's Note dialog
-Future<bool?> showAuthorNoteDialog(BuildContext context) {
+Future<bool?> showAuthorNoteDialog(BuildContext context, String chatId) {
   return showDialog<bool>(
     context: context,
-    builder: (context) => const AuthorNoteDialog(),
+    builder: (context) => AuthorNoteDialog(chatId: chatId),
   );
 }

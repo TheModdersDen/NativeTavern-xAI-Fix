@@ -15,6 +15,7 @@ import 'package:native_tavern/data/models/prompt_manager.dart';
 import 'package:native_tavern/data/models/world_info.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
+import 'package:native_tavern/data/repositories/group_repository.dart';
 import 'package:native_tavern/data/repositories/persona_repository.dart';
 import 'package:native_tavern/domain/models/tool_calling.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
@@ -70,6 +71,14 @@ class ActiveChatState {
   /// Check if this is a group chat
   bool get isGroupChat => group != null;
 
+  Character? characterForMessage(ChatMessage message) {
+    final senderId = message.characterId;
+    if (senderId != null) {
+      return groupCharacters[senderId] ?? character;
+    }
+    return character;
+  }
+
   ActiveChatState copyWith({
     Chat? chat,
     Character? character,
@@ -103,6 +112,7 @@ class ActiveChatState {
 class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   final ChatRepository _chatRepository;
   final CharacterRepository _characterRepository;
+  final GroupRepository _groupRepository;
   final PersonaRepository _personaRepository;
   final LLMService _llmService;
   final WorldInfoMatcher _worldInfoMatcher;
@@ -112,12 +122,14 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   // Track cancellation flag for stream processing
   bool _isCancelling = false;
+  int _chatLoadGeneration = 0;
   ChatGenerationSession? _activeGenerationSession;
   DataBankContextSnapshot? _pendingDataBankContext;
 
   ActiveChatNotifier({
     required ChatRepository chatRepository,
     required CharacterRepository characterRepository,
+    required GroupRepository groupRepository,
     required PersonaRepository personaRepository,
     required LLMService llmService,
     required WorldInfoMatcher worldInfoMatcher,
@@ -126,6 +138,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     required Ref ref,
   })  : _chatRepository = chatRepository,
         _characterRepository = characterRepository,
+        _groupRepository = groupRepository,
         _personaRepository = personaRepository,
         _llmService = llmService,
         _worldInfoMatcher = worldInfoMatcher,
@@ -457,12 +470,17 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   /// Load a chat by ID
   Future<void> loadChat(String chatId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    final loadGeneration = ++_chatLoadGeneration;
+    state = const ActiveChatState(isLoading: true);
 
     try {
       final chat = await _chatRepository.getChat(chatId);
+      if (loadGeneration != _chatLoadGeneration) return;
       if (chat == null) {
-        state = state.copyWith(isLoading: false, error: 'Chat not found');
+        state = const ActiveChatState(
+          isLoading: false,
+          error: 'Chat not found',
+        );
         return;
       }
 
@@ -470,19 +488,18 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         chat.characterId,
       );
       var messages = await _chatRepository.getMessages(chatId);
+      if (loadGeneration != _chatLoadGeneration) return;
 
       if (!chat.isGroupChat && character != null) {
         messages = await _syncGreetingSwipes(chat, character, messages);
+        if (loadGeneration != _chatLoadGeneration) return;
       }
 
       // Check if this is a group chat
       if (chat.isGroupChat) {
-        final groupsAsync = _ref.read(groupListProvider);
-        final groups = groupsAsync.valueOrNull ?? [];
-        final group = groups.firstWhere(
-          (g) => g.id == chat.groupId,
-          orElse: () => throw Exception('Group not found'),
-        );
+        final group = await _groupRepository.getGroup(chat.groupId!);
+        if (loadGeneration != _chatLoadGeneration) return;
+        if (group == null) throw Exception('Group not found');
 
         // Load all group member characters
         final groupChars = <String, Character>{};
@@ -494,6 +511,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
             groupChars[char.id] = char;
           }
         }
+        if (loadGeneration != _chatLoadGeneration) return;
 
         state = state.copyWith(
           chat: chat,
@@ -504,6 +522,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           isLoading: false,
         );
       } else {
+        if (loadGeneration != _chatLoadGeneration) return;
         state = state.copyWith(
           chat: chat,
           character: character,
@@ -514,8 +533,9 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         );
       }
     } catch (e, stackTrace) {
+      if (loadGeneration != _chatLoadGeneration) return;
       debugPrint('❌ ChatProvider error: $e\n$stackTrace');
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = ActiveChatState(isLoading: false, error: e.toString());
     }
   }
 
@@ -575,6 +595,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   /// Create a new chat with a character
   Future<String?> createChat(String characterId) async {
+    _chatLoadGeneration++;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -661,6 +682,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   Future<String?> createGroupChat(Group group) async {
     if (group.members.isEmpty) return null;
 
+    _chatLoadGeneration++;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -2702,13 +2724,26 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   // AUTHOR'S NOTE METHODS
   // ============================================
 
-  /// Update Author's Note content
-  Future<void> updateAuthorNote(String content) async {
-    if (state.chat == null) return;
+  Future<bool> _updateChatById(
+    String chatId,
+    Chat Function(Chat chat) update,
+  ) async {
+    final chat = await _chatRepository.getChat(chatId);
+    if (chat == null) return false;
 
-    final updatedChat = state.chat!.copyWith(authorNote: content);
-    await _chatRepository.updateChat(updatedChat);
-    state = state.copyWith(chat: updatedChat);
+    final updatedChat = await _chatRepository.updateChat(update(chat));
+    if (state.chat?.id == chatId) {
+      state = state.copyWith(chat: updatedChat);
+    }
+    return true;
+  }
+
+  /// Update Author's Note content for a specific chat.
+  Future<bool> updateAuthorNote(String chatId, String content) {
+    return _updateChatById(
+      chatId,
+      (chat) => chat.copyWith(authorNote: content),
+    );
   }
 
   /// Update the "Start Reply With" assistant prefill for this chat
@@ -2736,38 +2771,36 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   }
 
   /// Update Author's Note depth
-  Future<void> updateAuthorNoteDepth(int depth) async {
-    if (state.chat == null) return;
-
-    final updatedChat = state.chat!.copyWith(authorNoteDepth: depth);
-    await _chatRepository.updateChat(updatedChat);
-    state = state.copyWith(chat: updatedChat);
+  Future<bool> updateAuthorNoteDepth(String chatId, int depth) {
+    return _updateChatById(
+      chatId,
+      (chat) => chat.copyWith(authorNoteDepth: depth),
+    );
   }
 
   /// Toggle Author's Note enabled state
-  Future<void> toggleAuthorNote(bool enabled) async {
-    if (state.chat == null) return;
-
-    final updatedChat = state.chat!.copyWith(authorNoteEnabled: enabled);
-    await _chatRepository.updateChat(updatedChat);
-    state = state.copyWith(chat: updatedChat);
+  Future<bool> toggleAuthorNote(String chatId, bool enabled) {
+    return _updateChatById(
+      chatId,
+      (chat) => chat.copyWith(authorNoteEnabled: enabled),
+    );
   }
 
   /// Update all Author's Note settings at once
-  Future<void> updateAuthorNoteSettings({
+  Future<bool> updateAuthorNoteSettings({
+    required String chatId,
     String? content,
     int? depth,
     bool? enabled,
-  }) async {
-    if (state.chat == null) return;
-
-    final updatedChat = state.chat!.copyWith(
-      authorNote: content ?? state.chat!.authorNote,
-      authorNoteDepth: depth ?? state.chat!.authorNoteDepth,
-      authorNoteEnabled: enabled ?? state.chat!.authorNoteEnabled,
+  }) {
+    return _updateChatById(
+      chatId,
+      (chat) => chat.copyWith(
+        authorNote: content ?? chat.authorNote,
+        authorNoteDepth: depth ?? chat.authorNoteDepth,
+        authorNoteEnabled: enabled ?? chat.authorNoteEnabled,
+      ),
     );
-    await _chatRepository.updateChat(updatedChat);
-    state = state.copyWith(chat: updatedChat);
   }
 
   // ============================================
@@ -3275,6 +3308,7 @@ final activeChatProvider =
   ref.watch(longTermMemoryContextRegistrationProvider);
   final chatRepo = ref.watch(chatRepositoryProvider);
   final characterRepo = ref.watch(characterRepositoryProvider);
+  final groupRepo = ref.watch(groupRepositoryProvider);
   final personaRepo = ref.watch(personaRepositoryProvider);
   final llmService = ref.watch(llmServiceProvider);
   final worldInfoMatcher = ref.watch(worldInfoMatcherProvider);
@@ -3284,6 +3318,7 @@ final activeChatProvider =
   return ActiveChatNotifier(
     chatRepository: chatRepo,
     characterRepository: characterRepo,
+    groupRepository: groupRepo,
     personaRepository: personaRepo,
     llmService: llmService,
     worldInfoMatcher: worldInfoMatcher,

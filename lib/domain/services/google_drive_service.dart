@@ -100,8 +100,15 @@ class GoogleDriveService {
           drive.DriveApi.driveFileScope,
         ],
       );
+    } else if (Platform.isAndroid) {
+      _googleSignIn = GoogleSignIn(
+        serverClientId: webClientId,
+        scopes: [
+          'email',
+          drive.DriveApi.driveFileScope,
+        ],
+      );
     } else {
-      // Android and other platforms
       _googleSignIn = GoogleSignIn(
         scopes: [
           'email',
@@ -149,7 +156,10 @@ class GoogleDriveService {
       return true;
     } catch (e) {
       debugPrint('GoogleDriveService: Sign in error: $e');
-      return false;
+      _currentUser = null;
+      _driveApi = null;
+      _backupFolderId = null;
+      rethrow;
     }
   }
   
@@ -199,17 +209,21 @@ class GoogleDriveService {
     try {
       final httpClient = await _getGoogleSignIn().authenticatedClient();
       if (httpClient == null) {
-        debugPrint('GoogleDriveService: Failed to get authenticated client');
-        return;
+        throw StateError('Failed to initialize Google Drive authentication');
       }
       
       _driveApi = drive.DriveApi(httpClient);
       debugPrint('GoogleDriveService: Drive API initialized');
       
       // Get or create backup folder
-      await _getOrCreateBackupFolder();
+      final folderId = await _getOrCreateBackupFolder();
+      if (folderId == null) {
+        throw StateError('Failed to initialize the Google Drive backup folder');
+      }
     } catch (e) {
       debugPrint('GoogleDriveService: Drive API init error: $e');
+      _driveApi = null;
+      rethrow;
     }
   }
   
@@ -245,7 +259,7 @@ class GoogleDriveService {
       return _backupFolderId;
     } catch (e) {
       debugPrint('GoogleDriveService: Get/create folder error: $e');
-      return null;
+      rethrow;
     }
   }
   

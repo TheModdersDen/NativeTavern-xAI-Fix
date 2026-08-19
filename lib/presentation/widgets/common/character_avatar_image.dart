@@ -69,38 +69,18 @@ class CharacterAvatarCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: PathUtils.toAbsolutePath(imagePath),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return CircleAvatar(
-            radius: radius,
-            backgroundImage: FileImage(File(snapshot.data!)),
-            onBackgroundImageError: errorBuilder != null 
-                ? (exception, stackTrace) {}
-                : null,
-          );
-        } else if (snapshot.hasError) {
-          // Fallback to original path
-          return CircleAvatar(
-            radius: radius,
-            backgroundImage: FileImage(File(imagePath)),
-            onBackgroundImageError: errorBuilder != null 
-                ? (exception, stackTrace) {}
-                : null,
-          );
-        } else {
-          return CircleAvatar(
-            radius: radius,
-            backgroundColor: Colors.grey[800],
-            child: const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        }
-      },
+    return SizedBox.square(
+      dimension: radius * 2,
+      child: ClipOval(
+        child: CharacterAvatarImage(
+          imagePath: imagePath,
+          errorBuilder: errorBuilder ??
+              (_, __, ___) => CircleAvatar(
+                    radius: radius,
+                    child: const Icon(Icons.person),
+                  ),
+        ),
+      ),
     );
   }
 }

@@ -444,6 +444,28 @@ class LLMService {
     return _cancelToken!;
   }
 
+  bool _isGroqCompound(LLMConfig config) {
+    final host = Uri.tryParse(config.apiUrl)?.host.toLowerCase();
+    return host == 'api.groq.com' &&
+        config.model.toLowerCase().contains('compound');
+  }
+
+  List<Map<String, dynamic>> _prepareOpenAIMessages(
+    List<Map<String, dynamic>> messages,
+    LLMConfig config,
+  ) {
+    if (!_isGroqCompound(config) ||
+        messages.isEmpty ||
+        messages.last['role'] != 'assistant') {
+      return messages;
+    }
+
+    return [
+      ...messages,
+      const {'role': 'user', 'content': 'Continue.'},
+    ];
+  }
+
   /// Abort the current request, if any
   void cancelActiveRequest() {
     final token = _cancelToken;
@@ -531,7 +553,10 @@ class LLMService {
     final endpoint = '${config.apiUrl}/chat/completions';
     final baseRequest = <String, dynamic>{
       'model': config.model,
-      'messages': [...baseMessages, ...continuationMessages],
+      'messages': _prepareOpenAIMessages(
+        [...baseMessages, ...continuationMessages],
+        config,
+      ),
       'max_tokens': config.maxTokens,
       'temperature': config.temperature,
       'top_p': config.topP,
@@ -1849,7 +1874,7 @@ class LLMService {
     final endpoint = '${config.apiUrl}/chat/completions';
     final requestData = {
       'model': config.model,
-      'messages': messages,
+      'messages': _prepareOpenAIMessages(messages, config),
       'max_tokens': config.maxTokens,
       'temperature': config.temperature,
       'top_p': config.topP,
@@ -2527,7 +2552,7 @@ class LLMService {
       final endpoint = '${config.apiUrl}/chat/completions';
       final requestData = {
         'model': config.model,
-        'messages': messages,
+        'messages': _prepareOpenAIMessages(messages, config),
         'max_tokens': config.maxTokens,
         'temperature': config.temperature,
         'top_p': config.topP,
