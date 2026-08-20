@@ -107,6 +107,18 @@ Upload the IPA with the App Store Connect API credentials, then wait until the
 build is `VALID`. Associate it with the intended internal TestFlight group and
 verify `internalBuildState` is `IN_BETA_TESTING` before sending invitations.
 
+Use `tool/app_store_connect_api.rb` for App Store Connect resource reads and
+mutations instead of assembling one-off JWT and `curl` requests. The tool reads
+`APP_STORE_CONNECT_ISSUER_ID` from the environment and discovers the matching
+`AuthKey_*.p8` in the standard App Store Connect private-key directory:
+
+```sh
+set -a
+. ./.env
+set +a
+tool/app_store_connect_api.rb GET '/v1/apps/6757631215/appStoreVersions'
+```
+
 Do not submit App Store review without an explicit instruction. Expire or
 remove old test builds only when requested or when they make the current
 internal invitation non-installable.
@@ -116,6 +128,17 @@ internal invitation non-installable.
 Upload the `.aab`, not the APK. Use the configured track and follow the user's
 explicit instruction about draft, staged rollout, or production review.
 Verify the edit was committed and read back the resulting track/release state.
+Use the repository helper so the upload, track update, validation, commit, and
+read-back remain one operation:
+
+```sh
+set -a
+. ./.env
+set +a
+GOOGLE_PLAY_TRACK=production dart run tool/google_play_release.dart publish \
+  release/NativeTavern_v<version>_Android.aab \
+  docs/releases/<version>-app-store-whats-new.json <version-code>
+```
 
 ### Cloudflare R2
 

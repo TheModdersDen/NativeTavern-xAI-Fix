@@ -67,6 +67,8 @@ release
 .env
 build_*
 !build_ios.sh
+!build_android.sh
+!tool/build_android_release.dart
 resize_app_store_images.py
 config
 !config/
