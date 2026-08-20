@@ -178,6 +178,63 @@ class ThinkTagParser {
   }
 }
 
+/// Incrementally consumes the top-level objects in a streamed JSON array.
+///
+/// Gemini splits its response at arbitrary byte boundaries. Keeping parsed
+/// objects in the input buffer would emit them again whenever the next network
+/// chunk arrives, so this decoder removes each object as soon as it completes.
+class _GeminiJsonArrayObjectDecoder {
+  final StringBuffer _object = StringBuffer();
+  var _depth = 0;
+  var _capturing = false;
+  var _inString = false;
+  var _escaped = false;
+
+  Iterable<Map<String, dynamic>> add(String chunk) sync* {
+    for (final codeUnit in chunk.codeUnits) {
+      if (!_capturing) {
+        if (codeUnit != 0x7b) continue; // {
+        _capturing = true;
+        _depth = 1;
+        _object.writeCharCode(codeUnit);
+        continue;
+      }
+
+      _object.writeCharCode(codeUnit);
+      if (_inString) {
+        if (_escaped) {
+          _escaped = false;
+        } else if (codeUnit == 0x5c) {
+          _escaped = true;
+        } else if (codeUnit == 0x22) {
+          _inString = false;
+        }
+        continue;
+      }
+
+      if (codeUnit == 0x22) {
+        _inString = true;
+      } else if (codeUnit == 0x7b || codeUnit == 0x5b) {
+        _depth++;
+      } else if (codeUnit == 0x7d || codeUnit == 0x5d) {
+        _depth--;
+      }
+
+      if (_depth != 0) continue;
+
+      final decoded = jsonDecode(_object.toString());
+      _object.clear();
+      _capturing = false;
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException(
+          'Gemini stream array element must be a JSON object.',
+        );
+      }
+      yield decoded;
+    }
+  }
+}
+
 /// Reasoning effort levels (aligned with SillyTavern's REASONING_EFFORT)
 class ReasoningEffort {
   static const String auto = 'auto';
@@ -2879,75 +2936,57 @@ class LLMService {
 
     final stream =
         response.data!.stream.cast<List<int>>().transform(utf8.decoder);
-    final buffer = StringBuffer();
+    final decoder = _GeminiJsonArrayObjectDecoder();
     final fullContent = StringBuffer();
     final fullThought = StringBuffer();
     var isFirst = true;
 
     await for (final chunk in stream) {
-      buffer.write(chunk);
+      for (final json in decoder.add(chunk)) {
+        final candidates = json['candidates'] as List<dynamic>?;
+        if (candidates == null || candidates.isEmpty) continue;
 
-      // Gemini streams JSON array chunks
-      try {
-        // Try to parse accumulated buffer as JSON
-        var jsonStr = buffer.toString().trim();
-        // Remove leading [ if present
-        if (jsonStr.startsWith('[')) {
-          jsonStr = jsonStr.substring(1);
-        }
-        // Remove trailing ] if present
-        if (jsonStr.endsWith(']')) {
-          jsonStr = jsonStr.substring(0, jsonStr.length - 1);
-        }
-        // Split by },{ to get individual objects
-        final parts = jsonStr.split(RegExp(r'\}\s*,\s*\{'));
+        final candidate = candidates[0] as Map<String, dynamic>;
+        final content = candidate['content'] as Map<String, dynamic>?;
+        final contentParts = content?['parts'] as List<dynamic>?;
+        if (contentParts == null) continue;
 
-        for (var i = 0; i < parts.length; i++) {
-          var part = parts[i];
-          if (i > 0) part = '{$part';
-          if (i < parts.length - 1) part = '$part}';
+        for (final contentPart in contentParts) {
+          if (contentPart is! Map<String, dynamic>) continue;
 
-          try {
-            final json = jsonDecode(part) as Map<String, dynamic>;
-            final candidates = json['candidates'] as List<dynamic>?;
-            if (candidates != null && candidates.isNotEmpty) {
-              final candidate = candidates[0] as Map<String, dynamic>;
-              final content = candidate['content'] as Map<String, dynamic>?;
-              final contentParts = content?['parts'] as List<dynamic>?;
-
-              if (contentParts != null) {
-                for (final contentPart in contentParts) {
-                  final partMap = contentPart as Map<String, dynamic>;
-
-                  // Check for thought (Gemini 2.0 Flash Thinking)
-                  final thought = partMap['thought'] as String?;
-                  if (thought != null) {
-                    _logStreamChunk(config.provider.name, '[thought] $thought',
-                        isFirst: isFirst);
-                    isFirst = false;
-                    fullThought.write(thought);
-                    yield LLMStreamChunk(
-                        reasoning: thought, isReasoningChunk: true);
-                  }
-
-                  // Regular text
-                  final text = partMap['text'] as String?;
-                  if (text != null) {
-                    _logStreamChunk(config.provider.name, text,
-                        isFirst: isFirst);
-                    isFirst = false;
-                    fullContent.write(text);
-                    yield LLMStreamChunk(content: text);
-                  }
-                }
-              }
-            }
-          } catch (e) {
-            // Part not yet complete, continue
+          final text = contentPart['text'] as String?;
+          final thoughtValue = contentPart['thought'];
+          final String? thought;
+          if (thoughtValue is String && thoughtValue.isNotEmpty) {
+            thought = thoughtValue;
+          } else if (thoughtValue == true) {
+            thought = text;
+          } else {
+            thought = null;
+          }
+          if (thought != null && thought.isNotEmpty) {
+            _logStreamChunk(
+              config.provider.name,
+              '[thought] $thought',
+              isFirst: isFirst,
+            );
+            isFirst = false;
+            fullThought.write(thought);
+            yield LLMStreamChunk(
+              reasoning: thought,
+              isReasoningChunk: true,
+            );
+          } else if (text != null && text.isNotEmpty) {
+            _logStreamChunk(
+              config.provider.name,
+              text,
+              isFirst: isFirst,
+            );
+            isFirst = false;
+            fullContent.write(text);
+            yield LLMStreamChunk(content: text);
           }
         }
-      } catch (e) {
-        // Buffer not yet parseable, continue accumulating
       }
     }
 
