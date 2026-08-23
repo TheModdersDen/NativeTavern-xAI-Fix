@@ -75,6 +75,7 @@ Future<void> _publish(
   File bundle,
   File notesFile,
   int expectedVersionCode,
+  String releaseStatus,
 ) async {
   if (!bundle.existsSync()) throw StateError('AAB not found: ${bundle.path}');
   if (!notesFile.existsSync()) {
@@ -86,6 +87,11 @@ Future<void> _publish(
   if (editId == null) throw StateError('Google Play returned no edit ID.');
   var committed = false;
   try {
+    final currentTrack = await api.edits.tracks.get(
+      packageName,
+      editId,
+      trackName,
+    );
     final uploaded = await api.edits.bundles.upload(
       packageName,
       editId,
@@ -107,17 +113,26 @@ Future<void> _publish(
     final versionName = notesJson is Map<String, dynamic>
         ? notesJson['versionString']?.toString()
         : null;
+    final nextRelease = play.TrackRelease(
+      name: '${versionName ?? 'release'} ($expectedVersionCode)',
+      releaseNotes: _releaseNotes(notesFile),
+      status: releaseStatus,
+      versionCodes: ['$expectedVersionCode'],
+    );
+    final releases = releaseStatus == 'draft'
+        ? [
+            for (final release
+                in currentTrack.releases ?? const <play.TrackRelease>[])
+              if (!(release.versionCodes ?? const <String>[])
+                  .contains('$expectedVersionCode'))
+                release,
+            nextRelease,
+          ]
+        : [nextRelease];
     await api.edits.tracks.update(
       play.Track(
         track: trackName,
-        releases: [
-          play.TrackRelease(
-            name: '${versionName ?? 'release'} ($expectedVersionCode)',
-            releaseNotes: _releaseNotes(notesFile),
-            status: 'completed',
-            versionCodes: ['$expectedVersionCode'],
-          ),
-        ],
+        releases: releases,
       ),
       packageName,
       editId,
@@ -127,7 +142,10 @@ Future<void> _publish(
     await api.edits.commit(
       packageName,
       editId,
-      changesNotSentForReview: false,
+      // A draft release cannot be rolled out or reviewed. Some Play Console
+      // accounts reject the changesNotSentForReview query parameter entirely,
+      // so omit it for drafts instead of trying to restate that guarantee.
+      changesNotSentForReview: releaseStatus == 'draft' ? null : false,
     );
     committed = true;
   } finally {
@@ -147,7 +165,7 @@ Future<void> main(List<String> arguments) async {
     stderr.writeln(
       'usage: dart run tool/google_play_release.dart inspect\n'
       '   or: dart run tool/google_play_release.dart publish '
-      '<aab> <release-notes.json> <version-code>',
+      '<aab> <release-notes.json> <version-code> [completed|draft]',
     );
     exitCode = 64;
     return;
@@ -169,12 +187,18 @@ Future<void> main(List<String> arguments) async {
 
   try {
     if (arguments.first == 'publish') {
-      if (arguments.length != 4) {
-        throw const FormatException('publish requires AAB, notes, and code.');
+      if (arguments.length != 4 && arguments.length != 5) {
+        throw const FormatException(
+          'publish requires AAB, notes, code, and optional status.',
+        );
       }
       final versionCode = int.tryParse(arguments[3]);
       if (versionCode == null || versionCode <= 0) {
         throw FormatException('Invalid version code: ${arguments[3]}');
+      }
+      final releaseStatus = arguments.length == 5 ? arguments[4] : 'completed';
+      if (releaseStatus != 'completed' && releaseStatus != 'draft') {
+        throw FormatException('Invalid release status: $releaseStatus');
       }
       await _publish(
         api,
@@ -183,6 +207,7 @@ Future<void> main(List<String> arguments) async {
         File(arguments[1]),
         File(arguments[2]),
         versionCode,
+        releaseStatus,
       );
     }
 

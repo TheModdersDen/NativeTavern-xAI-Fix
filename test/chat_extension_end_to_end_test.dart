@@ -44,6 +44,7 @@ void main() {
       sharedPreferencesProvider.overrideWithValue(preferences),
       ragContextProvider.overrideWithValue((_) async => null),
     ]);
+    container.read(appSettingsProvider.notifier).updateStoryEnabled(false);
 
     final now = DateTime.now();
     await characterRepository.createCharacter(models.Character(

@@ -217,7 +217,8 @@ final class MomentService {
     final posts = await _moments.listAll();
     final targets = [
       for (final post in posts)
-        if (post.origin == MomentPostOrigin.user || post.authorId == userAuthorId)
+        if (post.origin == MomentPostOrigin.user ||
+            post.authorId == userAuthorId)
           MomentCommentTarget(
             id: post.id,
             body: post.publicBody,
@@ -229,6 +230,11 @@ final class MomentService {
     var moved = 0;
     for (final post in posts) {
       if (post.origin != MomentPostOrigin.character || post.hasPhoto) {
+        continue;
+      }
+      // Once people have replied, this is an established standalone post.
+      // Rehoming it would cascade-delete its existing comment thread.
+      if ((await _moments.listComments(post.id)).isNotEmpty) {
         continue;
       }
       final targetId = bestReplyPostId(post.publicBody, targets: targets);
@@ -574,7 +580,8 @@ final class MomentService {
       await operations?.markIncomplete(
         claimed,
         error: 'Image generation failed.',
-        dueAt: _now().add(Duration(minutes: 1 << (claimed.attempts - 1).clamp(0, 4))),
+        dueAt: _now()
+            .add(Duration(minutes: 1 << (claimed.attempts - 1).clamp(0, 4))),
       );
       return null;
     }
@@ -663,8 +670,9 @@ final class MomentService {
     Character character,
   ) async {
     final social = _social;
-    final friends =
-        social == null ? const <Character>[] : await social.friendsOf(character.id);
+    final friends = social == null
+        ? const <Character>[]
+        : await social.friendsOf(character.id);
     final posts = formatVisibleMoments(
       await visibleFeedFor(character.id, limit: 6),
     );

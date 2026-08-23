@@ -137,7 +137,19 @@ set -a
 set +a
 GOOGLE_PLAY_TRACK=production dart run tool/google_play_release.dart publish \
   release/NativeTavern_v<version>_Android.aab \
-  docs/releases/<version>-app-store-whats-new.json <version-code>
+  docs/releases/<version>-app-store-whats-new.json <version-code> completed
+```
+
+For a production-track draft that must not be sent for review, preserve the
+currently completed release and pass `draft` explicitly:
+
+```sh
+set -a
+. ./.env
+set +a
+GOOGLE_PLAY_TRACK=production dart run tool/google_play_release.dart publish \
+  release/NativeTavern_v<version>_Android.aab \
+  docs/releases/<version>-app-store-whats-new.json <version-code> draft
 ```
 
 ### Cloudflare R2

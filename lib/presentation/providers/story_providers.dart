@@ -90,7 +90,13 @@ Future<MemoryScope> resolveStoryMemoryScope(Ref ref, String chatId) {
 }
 
 Future<MemoryScope> _scopeForChat(Ref ref, String chatId) async {
-  final chat = await ref.read(chatRepositoryProvider).getChat(chatId);
+  // Capture dependencies before the first await. Story writes run in the
+  // background and the owning provider may be disposed while repositories are
+  // still resolving the scope.
+  final chatRepository = ref.read(chatRepositoryProvider);
+  final personaRepository = ref.read(personaRepositoryProvider);
+  final activeId = ref.read(activePersonaIdProvider);
+  final chat = await chatRepository.getChat(chatId);
   if (chat == null) return MemoryScope.chat(chatId);
   final storyRootId = chat.settings[storyRootChatIdKey];
   if (storyRootId is String && storyRootId.trim().isNotEmpty) {
@@ -98,7 +104,6 @@ Future<MemoryScope> _scopeForChat(Ref ref, String chatId) async {
   }
   if (chat.groupId != null) return MemoryScope.group(chat.groupId!);
 
-  final personaRepository = ref.read(personaRepositoryProvider);
   final personas = await personaRepository.getAllPersonas();
   Persona? persona;
   for (final candidate in personas) {
@@ -112,7 +117,6 @@ Future<MemoryScope> _scopeForChat(Ref ref, String chatId) async {
       break;
     }
   }
-  final activeId = ref.read(activePersonaIdProvider);
   persona ??= activeId == null
       ? await personaRepository.getDefaultPersona()
       : await personaRepository.getPersona(activeId);
