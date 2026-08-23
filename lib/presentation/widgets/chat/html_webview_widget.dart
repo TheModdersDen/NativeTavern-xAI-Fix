@@ -135,7 +135,11 @@ class _HtmlWebViewWidgetState extends State<HtmlWebViewWidget> {
   String _buildHtml() {
     final effectiveFontSize = widget.fontSize ?? 14.0;
     final textColorHex = _colorToHex(widget.textColor);
-    
+    final content = widget.htmlContent.replaceAllMapped(
+      RegExp(r'<details\b', caseSensitive: false),
+      (match) => '<details open',
+    );
+
     return '''
 <!DOCTYPE html>
 <html>
@@ -149,15 +153,30 @@ class _HtmlWebViewWidgetState extends State<HtmlWebViewWidget> {
     }
     html, body {
       margin: 0;
-      padding: 8px;
+      padding: 0;
       background-color: transparent;
       color: $textColorHex;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       font-size: ${effectiveFontSize}px;
       line-height: 1.5;
-      overflow-x: hidden;
-      overflow-y: hidden;
+      width: 100%;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
       word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
+    #measure-root {
+      display: flow-root;
+      width: 100%;
+      padding: 8px;
+      height: auto !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    details, details[open], summary {
+      overflow: visible;
     }
     img {
       max-width: 100%;
@@ -194,9 +213,6 @@ class _HtmlWebViewWidgetState extends State<HtmlWebViewWidget> {
     p {
       margin: 0 0 0.5em 0;
     }
-    div[style*="border"] {
-      overflow: hidden;
-    }
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -211,30 +227,30 @@ class _HtmlWebViewWidgetState extends State<HtmlWebViewWidget> {
   </style>
 </head>
 <body>
-${widget.htmlContent}
+<div id="measure-root">
+$content
+</div>
 <script>
   var heightSent = false;
   var lastSentHeight = 0;
   var allImagesLoaded = false;
-  var heightLocked = false; // Once images loaded and height stable, lock it
   
-  // Simple and reliable height calculation
   function getContentHeight() {
-    // Just use body.scrollHeight - it's the most reliable metric
-    // that represents the actual content height without being affected by external factors
-    return document.body.scrollHeight;
+    var root = document.getElementById('measure-root') || document.body;
+    var rect = root.getBoundingClientRect();
+    return Math.ceil(Math.max(
+      rect.height || 0,
+      root.scrollHeight || 0,
+      root.offsetHeight || 0,
+      document.body.scrollHeight || 0,
+      document.body.offsetHeight || 0
+    ));
   }
   
-  // Send content height to Flutter
   function sendHeight() {
-    // If height is locked (after images loaded and stabilized), don't send updates
-    if (heightLocked) {
-      return;
-    }
-    
     try {
       var height = getContentHeight();
-      if (!heightSent || Math.abs(height - lastSentHeight) > 5) {
+      if (!heightSent || Math.abs(height - lastSentHeight) >= 1) {
         if (window.flutter_inappwebview) {
           console.log('Sending height: ' + height);
           window.flutter_inappwebview.callHandler('contentHeight', height);
@@ -247,20 +263,10 @@ ${widget.htmlContent}
     }
   }
   
-  // Notify Flutter when all images are loaded
   function notifyImagesLoaded() {
     if (!allImagesLoaded) {
       allImagesLoaded = true;
-      
-      // Send final height after a short delay to ensure layout is complete
-      setTimeout(function() {
-        sendHeight();
-        // Lock height after images loaded to prevent scroll-induced updates
-        setTimeout(function() {
-          heightLocked = true;
-          console.log('Height locked at: ' + lastSentHeight);
-        }, 500);
-      }, 100);
+      setTimeout(sendHeight, 100);
       
       try {
         if (window.flutter_inappwebview) {
@@ -458,16 +464,22 @@ ${widget.htmlContent}
     });
   }
   
-  // Initial height calculation
+  function observeLayoutChanges() {
+    var root = document.getElementById('measure-root');
+    if (root && window.ResizeObserver) {
+      new ResizeObserver(function() { sendHeight(); }).observe(root);
+    }
+    document.addEventListener('toggle', function() {
+      setTimeout(sendHeight, 50);
+    }, true);
+  }
+
   function init() {
-    // First, defer image loading
+    document.querySelectorAll('details').forEach(function(d){ d.open = true; });
     deferImageLoading();
-    
-    // Don't send height immediately - wait for layout to stabilize first
-    // This avoids incorrect height values during initial render
-    
-    // Progressive height updates - starting after layout settles
-    setTimeout(sendHeight, 150); // First update after initial layout
+    observeLayoutChanges();
+    sendHeight();
+    setTimeout(sendHeight, 150);
     setTimeout(sendHeight, 300);
     
     // Load images after a short delay to ensure WebView is fully ready
@@ -535,11 +547,13 @@ ${widget.htmlContent}
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
+        clipBehavior: Clip.none,
         constraints: BoxConstraints(
           minHeight: _minHeight,
         ),
         height: _contentHeight,
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             InAppWebView(
               initialData: InAppWebViewInitialData(
@@ -568,50 +582,27 @@ ${widget.htmlContent}
                 controller.addJavaScriptHandler(
                   handlerName: 'contentHeight',
                   callback: (args) {
-                    if (args.isNotEmpty && mounted) {
-                      final height = (args[0] as num).toDouble();
-                      _heightUpdateCount++;
-                      
-                      // Skip the very first height update - it's often inaccurate during initial layout
-                      if (_heightUpdateCount == 1) {
-                        debugPrint('🌐 Skipping first height: $height (often inaccurate)');
-                        return;
-                      }
-                      
-                      // Validate height - must be positive and within reasonable bounds
-                      if (height > 10 && height < 50000) {
-                        final newHeight = height + 24; // Add padding
-                        final heightDiff = (newHeight - _contentHeight).abs();
-                        
-                        // Once height has stabilized (after several updates with small changes),
-                        // stop accepting more height updates to prevent scroll-induced changes
-                        if (_heightUpdateCount >= 10 && heightDiff < 50) {
-                          // Height is stable, don't update anymore
-                          debugPrint('🌐 Height stable at $_contentHeight, ignoring update $newHeight');
-                          return;
-                        }
-                        
-                        // Accept height update if:
-                        // - It's one of the first few updates (2-5)
-                        // - Height increased significantly (by more than 20px)
-                        // - Height decreased significantly (by more than 100px) - layout correction
-                        final shouldUpdate = _heightUpdateCount <= 5 || 
-                            (newHeight > _contentHeight && heightDiff > 20) ||
-                            (newHeight < _contentHeight && heightDiff > 100);
-                        
-                        if (shouldUpdate) {
-                          debugPrint('🌐 Updating height: $_contentHeight -> $newHeight (update #$_heightUpdateCount)');
-                          setState(() {
-                            _contentHeight = newHeight;
-                            _isLoading = false;
-                          });
-                        } else {
-                          debugPrint('🌐 Skipping height update: $_contentHeight -> $newHeight (diff: $heightDiff)');
-                        }
-                      } else if (height >= 50000) {
-                        debugPrint('🌐 Ignoring unreasonable height: $height (too large)');
-                      }
+                    if (args.isEmpty || !mounted) return;
+                    final height = (args[0] as num).toDouble();
+                    _heightUpdateCount++;
+                    final resolved = resolveHtmlWebViewHeight(
+                      currentHeight: _contentHeight,
+                      measuredHeight: height,
+                      updateCount: _heightUpdateCount,
+                    );
+                    if (resolved == null) {
+                      debugPrint(
+                        '🌐 Skipping height: $height (current=$_contentHeight, #$_heightUpdateCount)',
+                      );
+                      return;
                     }
+                    debugPrint(
+                      '🌐 Updating height: $_contentHeight -> $resolved (update #$_heightUpdateCount)',
+                    );
+                    setState(() {
+                      _contentHeight = resolved;
+                      _isLoading = false;
+                    });
                   },
                 );
                 
@@ -719,6 +710,9 @@ bool isComplexHtml(String html) {
     RegExp(r'object-fit:', caseSensitive: false),
     RegExp(r'background:\s*linear-gradient', caseSensitive: false),
     RegExp(r'background:\s*radial-gradient', caseSensitive: false),
+    RegExp(r'overflow:\s*(hidden|auto|scroll)', caseSensitive: false),
+    RegExp(r'height:\s*\d+', caseSensitive: false),
+    RegExp(r'<[^>]+style="[^"]{10,}"', caseSensitive: false),
   ];
   
   for (final pattern in complexPatterns) {
@@ -736,4 +730,20 @@ bool isComplexHtml(String html) {
   }
   
   return false;
+}
+
+/// Decide the Flutter WebView height from a JS content measurement.
+/// Always grows to fit content; only shrinks during early layout.
+double? resolveHtmlWebViewHeight({
+  required double currentHeight,
+  required double measuredHeight,
+  required int updateCount,
+}) {
+  if (measuredHeight <= 10 || measuredHeight >= 50000) return null;
+  final newHeight = measuredHeight + 12;
+  final diff = (newHeight - currentHeight).abs();
+  if (diff < 1) return null;
+  if (newHeight > currentHeight) return newHeight;
+  if (updateCount <= 6) return newHeight;
+  return null;
 }
