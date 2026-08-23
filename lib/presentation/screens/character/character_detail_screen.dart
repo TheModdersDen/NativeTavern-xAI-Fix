@@ -7,6 +7,7 @@ import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
+import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
@@ -83,6 +84,7 @@ class _CharacterDetailContentState
           .createChat(widget.character.id);
 
       if (chatId != null && mounted) {
+        ref.invalidate(characterChatsProvider(widget.character.id));
         context.push('/chat/$chatId');
       } else if (mounted) {
         final l10n = AppLocalizations.of(context);
@@ -304,6 +306,14 @@ class _CharacterDetailContentState
                     ],
                   ),
                   const SizedBox(height: 24),
+
+                  _CharacterChatList(
+                    characterId: character.id,
+                    onStartChat: _isCreatingChat ? null : _startChat,
+                  ),
+                  const SizedBox(height: 16),
+                  _CharacterFriendsList(characterId: character.id),
+                  const SizedBox(height: 16),
 
                   // Description section
                   if (character.description.isNotEmpty)
@@ -864,5 +874,171 @@ class _CharacterBookCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _CharacterFriendsList extends ConsumerWidget {
+  const _CharacterFriendsList({required this.characterId});
+
+  final String characterId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder(
+      future: ref.watch(characterSocialServiceProvider).friendsOf(characterId),
+      builder: (context, snapshot) {
+        final friends = snapshot.data ?? const [];
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.people_outline,
+                          size: 20, color: AppTheme.primaryColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.momentsFriends,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: AppTheme.primaryColor,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (friends.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+                    child: Text(
+                      l10n.momentsNoFriends,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textMuted,
+                          ),
+                    ),
+                  )
+                else
+                  for (final friend in friends)
+                    ListTile(
+                      dense: true,
+                      title: Text(friend.name),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/characters/${friend.id}'),
+                    ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CharacterChatList extends ConsumerWidget {
+  const _CharacterChatList({
+    required this.characterId,
+    required this.onStartChat,
+  });
+
+  final String characterId;
+  final VoidCallback? onStartChat;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final chats = ref.watch(characterChatsProvider(characterId));
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.forum_outlined,
+                      size: 20, color: AppTheme.primaryColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.chats,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: AppTheme.primaryColor,
+                          ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: onStartChat,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(l10n.newChat),
+                  ),
+                ],
+              ),
+            ),
+            chats.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, _) => Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text('$error'),
+              ),
+              data: (items) {
+                if (items.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+                    child: Text(
+                      l10n.noChatsYet,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textMuted,
+                          ),
+                    ),
+                  );
+                }
+                return Column(
+                  children: [
+                    for (final chat in items)
+                      ListTile(
+                        dense: true,
+                        title: Text(
+                          chat.title.trim().isEmpty ? l10n.chats : chat.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          _formatChatTime(chat.updatedAt),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push('/chat/${chat.id}'),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatChatTime(DateTime time) {
+    final local = time.toLocal();
+    final month = local.month.toString().padLeft(2, '0');
+    final day = local.day.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$month-$day $hour:$minute';
   }
 }

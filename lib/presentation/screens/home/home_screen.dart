@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/data/models/chat.dart';
+import 'package:native_tavern/data/models/character.dart';
+import 'package:native_tavern/data/models/group.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
+import 'package:native_tavern/data/repositories/group_repository.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
+import 'package:native_tavern/presentation/widgets/common/group_avatar.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
 /// Home screen showing recent chats
@@ -19,7 +23,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -27,6 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     // Refresh chat list when screen is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(allChatsProvider);
+      ref.invalidate(_groupPresentationProvider);
     });
   }
 
@@ -41,6 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     if (state == AppLifecycleState.resumed) {
       // Refresh chat list when returning to the app
       ref.invalidate(allChatsProvider);
+      ref.invalidate(_groupPresentationProvider);
     }
   }
 
@@ -49,12 +56,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     super.didChangeDependencies();
     // Refresh chat list whenever dependencies change (e.g., when navigating back)
     ref.invalidate(allChatsProvider);
+    ref.invalidate(_groupPresentationProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -168,42 +176,47 @@ class _ChatListTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final characterAsync = ref.watch(_characterForChatProvider(chat.characterId));
+    final characterAsync =
+        ref.watch(_characterForChatProvider(chat.characterId));
+    final groupPresentationAsync = chat.groupId == null
+        ? null
+        : ref.watch(_groupPresentationProvider(chat.groupId!));
     final lastMessageAsync = ref.watch(_lastMessageProvider(chat.id));
 
     return Card(
       child: ListTile(
-        leading: characterAsync.when(
-          loading: () => const CircleAvatar(child: CircularProgressIndicator(strokeWidth: 2)),
-          error: (_, __) => const CircleAvatar(child: Icon(Icons.person)),
-          data: (character) {
-            final avatarPath = character?.assets?.avatarPath;
-            if (avatarPath != null && avatarPath.isNotEmpty) {
-              return CharacterAvatarCircle(
-                imagePath: avatarPath,
-                errorBuilder: (_, __, ___) => CircleAvatar(
-                  backgroundColor: AppTheme.accentColor.withValues(alpha: 0.2),
-                  child: Text(
-                    character?.name.isNotEmpty == true ? character!.name[0].toUpperCase() : '?',
-                    style: const TextStyle(color: AppTheme.accentColor),
+        leading: groupPresentationAsync != null
+            ? groupPresentationAsync.when(
+                loading: () => const SizedBox.square(
+                  dimension: 56,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-              );
-            }
-            return CircleAvatar(
-              backgroundColor: AppTheme.accentColor.withValues(alpha: 0.2),
-              child: Text(
-                character?.name.isNotEmpty == true ? character!.name[0].toUpperCase() : '?',
-                style: const TextStyle(color: AppTheme.accentColor),
+                error: (_, __) => const GroupAvatar(characters: []),
+                data: (presentation) => GroupAvatar(
+                  characters: presentation?.characters ?? const [],
+                ),
+              )
+            : characterAsync.when(
+                loading: () => const CircleAvatar(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                error: (_, __) => const CircleAvatar(child: Icon(Icons.person)),
+                data: _buildCharacterAvatar,
               ),
-            );
-          },
-        ),
-        title: characterAsync.when(
-          loading: () => Text(l10n.loading),
-          error: (_, __) => Text(chat.title),
-          data: (character) => Text(character?.name ?? chat.title),
-        ),
+        title: groupPresentationAsync != null
+            ? groupPresentationAsync.when(
+                loading: () => Text(l10n.loading),
+                error: (_, __) => Text(chat.title),
+                data: (presentation) =>
+                    Text(presentation?.group.name ?? chat.title),
+              )
+            : characterAsync.when(
+                loading: () => Text(l10n.loading),
+                error: (_, __) => Text(chat.title),
+                data: (character) => Text(character?.name ?? chat.title),
+              ),
         subtitle: lastMessageAsync.when(
           loading: () => const Text('...'),
           error: (_, __) => Text(l10n.noMessages),
@@ -233,7 +246,8 @@ class _ChatListTile extends ConsumerWidget {
                     children: [
                       const Icon(Icons.delete, color: Colors.red),
                       const SizedBox(width: 8),
-                      Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                      Text(l10n.delete,
+                          style: const TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -245,6 +259,29 @@ class _ChatListTile extends ConsumerWidget {
           // Navigate to chat screen
           context.push('/chat/${chat.id}');
         },
+      ),
+    );
+  }
+
+  Widget _buildCharacterAvatar(Character? character) {
+    final avatarPath = character?.assets?.avatarPath;
+    if (avatarPath != null && avatarPath.isNotEmpty) {
+      return CharacterAvatarCircle(
+        imagePath: avatarPath,
+        errorBuilder: (_, __, ___) => _characterFallback(character),
+      );
+    }
+    return _characterFallback(character);
+  }
+
+  Widget _characterFallback(Character? character) {
+    return CircleAvatar(
+      backgroundColor: AppTheme.accentColor.withValues(alpha: 0.2),
+      child: Text(
+        character?.name.isNotEmpty == true
+            ? character!.name.characters.first.toUpperCase()
+            : '?',
+        style: const TextStyle(color: AppTheme.accentColor),
       ),
     );
   }
@@ -279,7 +316,7 @@ class _ChatListTile extends ConsumerWidget {
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    
+
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -311,9 +348,31 @@ class _ChatListTile extends ConsumerWidget {
 }
 
 /// Provider to get character for a chat
-final _characterForChatProvider = FutureProvider.family((ref, String characterId) async {
+final _characterForChatProvider =
+    FutureProvider.family((ref, String characterId) async {
   final repo = ref.watch(characterRepositoryProvider);
   return repo.getCharacter(characterId);
+});
+
+class _GroupPresentation {
+  const _GroupPresentation({required this.group, required this.characters});
+
+  final Group group;
+  final List<Character?> characters;
+}
+
+final _groupPresentationProvider =
+    FutureProvider.family<_GroupPresentation?, String>((ref, groupId) async {
+  final groupRepo = ref.watch(groupRepositoryProvider);
+  final characterRepo = ref.watch(characterRepositoryProvider);
+  final group = await groupRepo.getGroup(groupId);
+  if (group == null) return null;
+  final characters = await Future.wait(
+    group.sortedMembers.take(4).map(
+          (member) => characterRepo.getCharacter(member.characterId),
+        ),
+  );
+  return _GroupPresentation(group: group, characters: characters);
 });
 
 /// Provider to get last message for a chat

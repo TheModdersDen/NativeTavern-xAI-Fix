@@ -40,7 +40,17 @@ class DriftStoryRepository implements StoryRepository {
 
   @override
   Future<List<StoryChapter>> listByChatId(String chatId) async {
-    final rows = await _survivingChapterQuery(chatId).get();
+    final rows = await _survivingChapterQuery(chatId: chatId).get();
+    return rows
+        .map((row) => _toModel(row.readTable(_database.storyChapters)))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<StoryChapter>> listRecent({int limit = 100}) async {
+    final query = _survivingChapterQuery(newestFirst: true);
+    if (limit > 0) query.limit(limit);
+    final rows = await query.get();
     return rows
         .map((row) => _toModel(row.readTable(_database.storyChapters)))
         .toList(growable: false);
@@ -48,7 +58,7 @@ class DriftStoryRepository implements StoryRepository {
 
   @override
   Future<StoryChapter?> latestByChatId(String chatId) async {
-    final query = _survivingChapterQuery(chatId)..limit(1);
+    final query = _survivingChapterQuery(chatId: chatId)..limit(1);
     final row = await query.getSingleOrNull();
     return row == null ? null : _toModel(row.readTable(_database.storyChapters));
   }
@@ -120,12 +130,13 @@ class DriftStoryRepository implements StoryRepository {
     return _database.rebuildStoryChapterSearchIndex();
   }
 
-  JoinedSelectStatement<HasResultSet, dynamic> _survivingChapterQuery(
-    String chatId,
-  ) {
+  JoinedSelectStatement<HasResultSet, dynamic> _survivingChapterQuery({
+    String? chatId,
+    bool newestFirst = false,
+  }) {
     final startMessage = _database.alias(_database.messages, 'start_message');
     final endMessage = _database.alias(_database.messages, 'end_message');
-    return _database.select(_database.storyChapters).join([
+    final query = _database.select(_database.storyChapters).join([
       innerJoin(
         startMessage,
         startMessage.id.equalsExp(_database.storyChapters.startMessageId) &
@@ -136,13 +147,24 @@ class DriftStoryRepository implements StoryRepository {
         endMessage.id.equalsExp(_database.storyChapters.endMessageId) &
             endMessage.chatId.equalsExp(_database.storyChapters.chatId),
       ),
-    ])
-      ..where(_database.storyChapters.chatId.equals(chatId))
-      ..orderBy([
-        OrderingTerm.desc(_database.storyChapters.endOrdinal),
-        OrderingTerm.desc(_database.storyChapters.createdAt),
-        OrderingTerm.asc(_database.storyChapters.id),
-      ]);
+    ]);
+    if (chatId != null) {
+      query.where(_database.storyChapters.chatId.equals(chatId));
+    }
+    query.orderBy(
+      newestFirst
+          ? [
+              OrderingTerm.desc(_database.storyChapters.createdAt),
+              OrderingTerm.desc(_database.storyChapters.endOrdinal),
+              OrderingTerm.asc(_database.storyChapters.id),
+            ]
+          : [
+              OrderingTerm.desc(_database.storyChapters.endOrdinal),
+              OrderingTerm.desc(_database.storyChapters.createdAt),
+              OrderingTerm.asc(_database.storyChapters.id),
+            ],
+    );
+    return query;
   }
 
   StoryChapter _toModel(StoryChapterRow row) {

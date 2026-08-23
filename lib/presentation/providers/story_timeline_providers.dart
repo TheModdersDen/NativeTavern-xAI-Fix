@@ -1,13 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/screens/play/story_models.dart';
 import 'package:native_tavern/presentation/screens/play/story_timeline_source.dart';
 
-/// Override in tests (or after #65) to supply real chapters.
+final storyRevisionProvider = StateProvider<int>((ref) => 0);
+
 final storyTimelineSourceProvider = Provider<StoryTimelineSource>((ref) {
-  return const EmptyStoryTimelineSource();
+  return RepositoryStoryTimelineSource(ref.watch(storyQueryServiceProvider));
 });
 
 final storyTimelineProvider =
     FutureProvider<List<StoryChapterTimelineItem>>((ref) {
+  ref.watch(storyRevisionProvider);
   return ref.watch(storyTimelineSourceProvider).listChapters();
 });

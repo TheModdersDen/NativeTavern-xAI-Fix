@@ -4028,7 +4028,18 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get momentsDisabledEmpty =>
-      'You turned moments off. Turn them back on to see what people are saying.';
+      'Moments is off. Turn it back on in Settings.';
+
+  @override
+  String get momentsEnabledSubtitle =>
+      'When this is off, the feed stays still and characters do not post.';
+
+  @override
+  String get momentsInChat => 'Use Moments in this chat';
+
+  @override
+  String get momentsInChatHint =>
+      'Off by default. When on, this character can talk about friends\' and your moments.';
 
   @override
   String get momentsEmpty => 'Nobody has posted yet.';
@@ -4040,7 +4051,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get momentsCompose => 'Post';
 
   @override
-  String get momentsComposeHint => 'Say something, or add a photo.';
+  String get momentsComposeHint => 'What\'s on your mind…';
 
   @override
   String get momentsAuthor => 'Who is posting';
@@ -4059,6 +4070,13 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get momentsComment => 'Comment';
+
+  @override
+  String get momentsFriends => 'Friends';
+
+  @override
+  String get momentsNoFriends =>
+      'No friends yet. Characters who share a group chat can add each other.';
 
   @override
   String get momentsTalk => 'Talk';

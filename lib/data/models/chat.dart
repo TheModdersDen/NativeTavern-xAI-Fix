@@ -41,7 +41,7 @@ class Chat {
   summaries; // History summaries for context compression
 
   /// Per-chat settings (persisted as JSON):
-  /// startReplyWith, linkedWorldInfoIds, ...
+  /// startReplyWith, linkedWorldInfoIds, momentsInChat, ...
   final Map<String, dynamic> settings;
 
   final DateTime createdAt;
@@ -73,6 +73,10 @@ class Chat {
   List<String> get linkedWorldInfoIds =>
       (settings['linkedWorldInfoIds'] as List<dynamic>?)?.cast<String>() ??
       const [];
+
+  /// When true, this chat may inject visible moments into the prompt.
+  /// Defaults to off so existing character-card play stays unchanged.
+  bool get momentsInChat => settings['momentsInChat'] == true;
 
   /// Copy with an updated settings entry
   Chat withSetting(String key, dynamic value) {

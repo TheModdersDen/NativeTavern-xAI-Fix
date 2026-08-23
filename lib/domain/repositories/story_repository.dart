@@ -24,6 +24,9 @@ abstract interface class StoryRepository {
   /// Chapters whose start and end messages still exist in [chatId].
   Future<List<StoryChapter>> listByChatId(String chatId);
 
+  /// Surviving chapters across chats, newest first.
+  Future<List<StoryChapter>> listRecent({int limit = 100});
+
   /// Latest surviving chapter for [chatId], or null when none exist.
   Future<StoryChapter?> latestByChatId(String chatId);
 

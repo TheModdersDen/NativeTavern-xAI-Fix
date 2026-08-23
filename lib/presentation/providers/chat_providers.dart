@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/bookmark.dart';
 import 'package:native_tavern/data/models/chat.dart';
+import 'package:native_tavern/data/models/operation_log.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/data_bank_context.dart';
 import 'package:native_tavern/data/models/group.dart';
@@ -27,10 +28,11 @@ import 'package:native_tavern/presentation/providers/chat_extension_providers.da
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
-import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/providers/locale_provider.dart';
+import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
+import 'package:native_tavern/presentation/providers/story_timeline_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/providers/tool_calling_providers.dart';
@@ -53,6 +55,7 @@ class ActiveChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
   final bool isGenerating;
+  final Set<String> generatingMessageIds;
   final String? error;
   final String?
       currentResponderId; // Which character is currently responding (group chat)
@@ -65,6 +68,7 @@ class ActiveChatState {
     this.messages = const [],
     this.isLoading = false,
     this.isGenerating = false,
+    this.generatingMessageIds = const {},
     this.error,
     this.currentResponderId,
   });
@@ -89,6 +93,7 @@ class ActiveChatState {
     List<ChatMessage>? messages,
     bool? isLoading,
     bool? isGenerating,
+    Set<String>? generatingMessageIds,
     String? error,
     String? currentResponderId,
     bool clearCurrentResponder = false,
@@ -101,12 +106,25 @@ class ActiveChatState {
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
       isGenerating: isGenerating ?? this.isGenerating,
+      generatingMessageIds: generatingMessageIds ?? this.generatingMessageIds,
       error: error,
       currentResponderId: clearCurrentResponder
           ? null
           : (currentResponderId ?? this.currentResponderId),
     );
   }
+}
+
+class _PreparedGroupResponse {
+  const _PreparedGroupResponse({
+    required this.context,
+    required this.session,
+    required this.message,
+  });
+
+  final List<Map<String, dynamic>> context;
+  final ChatGenerationSession session;
+  final ChatMessage message;
 }
 
 /// Active chat notifier
@@ -244,8 +262,9 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   Future<List<Map<String, dynamic>>> _applyContextContributors(
     List<Map<String, dynamic>> messages, {
     int? conversationStartIndex,
+    ChatGenerationSession? generationSession,
   }) async {
-    final session = _activeGenerationSession;
+    final session = generationSession ?? _activeGenerationSession;
     if (session == null) return messages;
     final result = await session.assemble(
       messages,
@@ -375,9 +394,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// the displayed/saved reply
   Stream<LLMStreamChunk> _generateStreamWithPrefill(
     List<Map<String, dynamic>> context,
-    LLMConfig config,
-  ) async* {
-    final session = _activeGenerationSession;
+    LLMConfig config, {
+    ChatGenerationSession? generationSession,
+  }) async* {
+    final session = generationSession ?? _activeGenerationSession;
     if (session == null) {
       yield* _toolAwareStream(context, config);
       return;
@@ -397,9 +417,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// Non-streaming generation with assistant prefill
   Future<LLMResponse> _generateWithPrefill(
     List<Map<String, dynamic>> context,
-    LLMConfig config,
-  ) async {
-    final session = _activeGenerationSession;
+    LLMConfig config, {
+    ChatGenerationSession? generationSession,
+  }) async {
+    final session = generationSession ?? _activeGenerationSession;
     final prefill = state.chat?.startReplyWith ?? '';
     try {
       if (session == null) {
@@ -910,15 +931,6 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           config: config,
         ),
       );
-      final characterId = state.character?.id;
-      if (characterId != null) {
-        unawaited(
-          _maybePublishMomentsAfterTurn(
-            characterIds: [characterId],
-            config: config,
-          ),
-        );
-      }
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -2765,6 +2777,18 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     state = state.copyWith(chat: updatedChat);
   }
 
+  /// Opt this chat into visible moments knowledge. Off by default.
+  Future<void> updateMomentsInChat(bool enabled) async {
+    if (state.chat == null) return;
+
+    final updatedChat = state.chat!.withSetting(
+      'momentsInChat',
+      enabled ? true : null,
+    );
+    await _chatRepository.updateChat(updatedChat);
+    state = state.copyWith(chat: updatedChat);
+  }
+
   /// Update the world info books linked to this chat
   Future<void> updateLinkedWorldBooks(List<String> worldInfoIds) async {
     if (state.chat == null) return;
@@ -2901,9 +2925,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     // Determine which characters should respond based on response mode
     final responders = _selectResponders(content);
 
-    // Generate responses from each selected character
-    for (final characterId in responders) {
-      await _generateGroupCharacterResponse(characterId, config);
+    if (state.group!.settings.effectiveResponseMode == GroupResponseMode.all &&
+        responders.length > 1) {
+      await _generateGroupResponsesTogether(responders, config);
+    } else {
+      for (final characterId in responders) {
+        await _generateGroupCharacterResponse(characterId, config);
+      }
     }
     final turnMessages = state.messages.skip(turnStart).toList(growable: false);
     if (turnMessages.any((message) => message.role == MessageRole.assistant)) {
@@ -2914,31 +2942,6 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           config: config,
         ),
       );
-      unawaited(
-        _maybePublishMomentsAfterTurn(
-          characterIds: responders,
-          config: config,
-        ),
-      );
-    }
-  }
-
-  Future<void> _maybePublishMomentsAfterTurn({
-    required List<String> characterIds,
-    required LLMConfig config,
-  }) async {
-    if (!mounted) return;
-    if (!_ref.read(appSettingsProvider).momentsEnabled) return;
-    final service = _ref.read(momentServiceProvider);
-    for (final characterId in characterIds) {
-      try {
-        await service.maybePublishAfterChat(
-          characterId: characterId,
-          config: config,
-        );
-      } catch (error, stackTrace) {
-        debugPrint('Moment publish failed: $error\n$stackTrace');
-      }
     }
   }
 
@@ -2959,7 +2962,36 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           config: config,
         );
         if (!mounted) return;
-        await story.maybeCloseAfterTurn(chatId: chatId, config: config);
+        final operations = _ref.read(operationLogRepositoryProvider);
+        OperationLog? chapterJob;
+        if (await story.isChapterWindowDue(chatId)) {
+          chapterJob = await operations.begin(
+            kind: OperationKind.storyChapter,
+            subjectId: chatId,
+          );
+        }
+        if (!mounted) return;
+        final chapter = await story.maybeCloseAfterTurn(
+          chatId: chatId,
+          config: config,
+        );
+        if (chapter.chapter != null) {
+          if (chapterJob != null) {
+            await operations.markCompleted(chapterJob);
+          }
+          if (mounted) {
+            _ref.read(storyRevisionProvider.notifier).state++;
+          }
+        } else if (chapter.skipped && chapter.failure == null) {
+          if (chapterJob != null) {
+            await operations.markCompleted(chapterJob);
+          }
+        } else if (chapterJob != null) {
+          await operations.markIncomplete(
+            chapterJob,
+            error: chapter.failure?.message ?? 'Chapter write failed.',
+          );
+        }
       } catch (error, stackTrace) {
         debugPrint('Story write failed: $error\n$stackTrace');
       }
@@ -2987,8 +3019,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
     if (activeMemberIds.isEmpty) return [];
 
-    final responseMode =
-        group.settings.responseMode ?? GroupResponseMode.natural;
+    final responseMode = group.settings.effectiveResponseMode;
 
     switch (responseMode) {
       case GroupResponseMode.sequential:
@@ -3087,28 +3118,130 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     String characterId,
     LLMConfig config,
   ) async {
-    final character = state.groupCharacters[characterId];
-    if (character == null || state.chat == null) return;
-
     state = state.copyWith(
       isGenerating: true,
       currentResponderId: characterId,
       error: null,
     );
-    _startGenerationSession(
-      config,
-      ChatGenerationMode.groupResponse,
-      characterId: characterId,
+    try {
+      final prepared = await _prepareGroupResponse(characterId, config);
+      if (prepared == null) return;
+      state = state.copyWith(
+        messages: [...state.messages, prepared.message],
+        isGenerating: true,
+        generatingMessageIds: {prepared.message.id},
+        currentResponderId: characterId,
+        error: null,
+      );
+      await _runPreparedGroupResponse(prepared, config);
+    } catch (error, stackTrace) {
+      debugPrint(
+        '❌ ChatProvider group response preparation error: '
+        '$error\n$stackTrace',
+      );
+      state = state.copyWith(error: error.toString());
+    } finally {
+      state = state.copyWith(
+        isGenerating: false,
+        generatingMessageIds: const {},
+        clearCurrentResponder: true,
+        error: state.error,
+      );
+    }
+  }
+
+  Future<void> _generateGroupResponsesTogether(
+    List<String> characterIds,
+    LLMConfig config,
+  ) async {
+    final preparedResponses = <_PreparedGroupResponse>[];
+    state = state.copyWith(
+      isGenerating: true,
+      clearCurrentResponder: true,
+      error: null,
+    );
+    try {
+      for (final characterId in characterIds) {
+        final prepared = await _prepareGroupResponse(characterId, config);
+        if (prepared != null) preparedResponses.add(prepared);
+      }
+    } catch (error, stackTrace) {
+      for (final prepared in preparedResponses) {
+        prepared.session.close();
+      }
+      debugPrint(
+        '❌ ChatProvider group response preparation error: '
+        '$error\n$stackTrace',
+      );
+      state = state.copyWith(
+        isGenerating: false,
+        error: error.toString(),
+      );
+      return;
+    }
+    if (preparedResponses.isEmpty) {
+      state = state.copyWith(isGenerating: false);
+      return;
+    }
+
+    final messageIds =
+        preparedResponses.map((prepared) => prepared.message.id).toSet();
+    state = state.copyWith(
+      messages: [
+        ...state.messages,
+        ...preparedResponses.map((prepared) => prepared.message),
+      ],
+      isGenerating: true,
+      generatingMessageIds: messageIds,
+      clearCurrentResponder: true,
+      error: null,
     );
 
     try {
-      final context = await _buildGroupContext(character);
-      final assistantMetadata = _newAssistantMetadata();
+      await Future.wait(
+        preparedResponses.map(
+          (prepared) => _runPreparedGroupResponse(prepared, config),
+        ),
+      );
+    } finally {
+      state = state.copyWith(
+        isGenerating: false,
+        generatingMessageIds: const {},
+        clearCurrentResponder: true,
+        error: state.error,
+      );
+    }
+  }
 
-      // Create placeholder for assistant message
-      final assistantMessage = ChatMessage(
+  Future<_PreparedGroupResponse?> _prepareGroupResponse(
+    String characterId,
+    LLMConfig config,
+  ) async {
+    final character = state.groupCharacters[characterId];
+    final chat = state.chat;
+    if (character == null || chat == null) return null;
+
+    _pendingDataBankContext = null;
+    final session = _generationPipeline.startSession(
+      chatId: chat.id,
+      characterId: characterId,
+      groupId: state.group?.id ?? chat.groupId,
+      mode: ChatGenerationMode.groupResponse,
+      config: config,
+      metadata: {
+        'isGroupChat': true,
+        'messageCount': state.messages.length,
+      },
+    );
+
+    try {
+      final context = await _buildGroupContext(
+        character,
+        generationSession: session,
+      );
+      final message = ChatMessage(
         id: _generateId(),
-        chatId: state.chat!.id,
+        chatId: chat.id,
         role: MessageRole.assistant,
         content: '',
         timestamp: DateTime.now(),
@@ -3116,96 +3249,121 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         currentSwipeIndex: 0,
         characterId: character.id,
         characterName: character.name,
-        metadata: assistantMetadata,
+        metadata: _newAssistantMetadata(),
       );
+      return _PreparedGroupResponse(
+        context: context,
+        session: session,
+        message: message,
+      );
+    } catch (_) {
+      session.close();
+      rethrow;
+    }
+  }
 
-      state = state.copyWith(messages: [...state.messages, assistantMessage]);
-
+  Future<void> _runPreparedGroupResponse(
+    _PreparedGroupResponse prepared,
+    LLMConfig config,
+  ) async {
+    final assistantMessage = prepared.message;
+    try {
       String finalContent;
       String? finalReasoning;
 
       if (config.streamEnabled) {
-        // Stream the response with reasoning support
         final contentBuffer = StringBuffer();
         final reasoningBuffer = StringBuffer();
-        await for (final chunk in _generateStreamWithPrefill(context, config)) {
-          // Check if generation was cancelled
-          if (_isCancelling) {
-            break;
-          }
-
+        await for (final chunk in _generateStreamWithPrefill(
+          prepared.context,
+          config,
+          generationSession: prepared.session,
+        )) {
+          if (_isCancelling) break;
           if (chunk.isReasoningChunk && chunk.reasoning != null) {
             reasoningBuffer.write(chunk.reasoning);
           }
-          if (chunk.content != null) {
-            contentBuffer.write(chunk.content);
-          }
-          final updatedMessage = assistantMessage.copyWith(
-            content: contentBuffer.toString(),
-            swipes: [contentBuffer.toString()],
-            reasoning:
-                reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null,
-            reasoningSwipes: reasoningBuffer.isNotEmpty
-                ? [reasoningBuffer.toString()]
-                : null,
+          if (chunk.content != null) contentBuffer.write(chunk.content);
+          _replaceMessage(
+            assistantMessage.id,
+            assistantMessage.copyWith(
+              content: contentBuffer.toString(),
+              swipes: [contentBuffer.toString()],
+              reasoning: reasoningBuffer.isNotEmpty
+                  ? reasoningBuffer.toString()
+                  : null,
+              reasoningSwipes: reasoningBuffer.isNotEmpty
+                  ? [reasoningBuffer.toString()]
+                  : null,
+            ),
           );
-
-          final updatedMessages = List<ChatMessage>.from(state.messages);
-          updatedMessages[updatedMessages.length - 1] = updatedMessage;
-          state = state.copyWith(messages: updatedMessages);
         }
         finalContent = contentBuffer.toString();
         finalReasoning =
             reasoningBuffer.isNotEmpty ? reasoningBuffer.toString() : null;
       } else {
-        // Non-streaming: get complete response at once with reasoning support
-        final response = await _generateWithPrefill(context, config);
+        final response = await _generateWithPrefill(
+          prepared.context,
+          config,
+          generationSession: prepared.session,
+        );
         finalContent = response.content;
         finalReasoning = response.reasoning;
-
-        // Update the message with final content
-        final updatedMessage = assistantMessage.copyWith(
-          content: finalContent,
-          swipes: [finalContent],
-        );
-        final updatedMessages = List<ChatMessage>.from(state.messages);
-        updatedMessages[updatedMessages.length - 1] = updatedMessage;
-        state = state.copyWith(messages: updatedMessages);
       }
 
-      // Save the final message
       final finalMessage = assistantMessage.copyWith(
         content: finalContent,
         swipes: [finalContent],
         reasoning: finalReasoning,
         reasoningSwipes: finalReasoning != null ? [finalReasoning] : null,
       );
+      _replaceMessage(assistantMessage.id, finalMessage);
       await _chatRepository.addMessage(finalMessage);
-
-      state = state.copyWith(isGenerating: false, clearCurrentResponder: true);
-    } catch (e, stackTrace) {
-      _closeGenerationSession();
-      if (e is ChatGenerationCancelledException) {
-        _discardTrailingEmptyAssistantPlaceholder();
-        state = state.copyWith(
-          isGenerating: false,
-          clearCurrentResponder: true,
-        );
-        return;
-      }
-      debugPrint('❌ ChatProvider group response error: $e\n$stackTrace');
+    } on ChatGenerationCancelledException {
+      _removeEmptyMessage(assistantMessage.id);
+    } catch (error, stackTrace) {
+      debugPrint(
+        '❌ ChatProvider group response error: $error\n$stackTrace',
+      );
+      _removeEmptyMessage(assistantMessage.id);
+      state = state.copyWith(error: error.toString());
+    } finally {
+      prepared.session.close();
+      final generatingIds = Set<String>.from(state.generatingMessageIds)
+        ..remove(assistantMessage.id);
       state = state.copyWith(
-        isGenerating: false,
-        clearCurrentResponder: true,
-        error: e.toString(),
+        generatingMessageIds: generatingIds,
+        error: state.error,
       );
     }
   }
 
+  void _replaceMessage(String messageId, ChatMessage replacement) {
+    final index =
+        state.messages.indexWhere((message) => message.id == messageId);
+    if (index < 0) return;
+    final messages = List<ChatMessage>.from(state.messages);
+    messages[index] = replacement;
+    state = state.copyWith(messages: messages);
+  }
+
+  void _removeEmptyMessage(String messageId) {
+    final message = state.messages
+        .where((candidate) => candidate.id == messageId)
+        .firstOrNull;
+    if (message == null || message.content.isNotEmpty) return;
+    state = state.copyWith(
+      messages: state.messages
+          .where((candidate) => candidate.id != messageId)
+          .toList(growable: false),
+    );
+  }
+
   /// Build context for group chat
   Future<List<Map<String, dynamic>>> _buildGroupContext(
-    Character respondingCharacter,
-  ) async {
+    Character respondingCharacter, {
+    ChatGenerationSession? generationSession,
+  }) async {
     final messages = <Map<String, dynamic>>[];
     final group = state.group;
     if (group == null) return messages;
@@ -3232,6 +3390,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     return _applyContextContributors(
       messages,
       conversationStartIndex: conversationStartIndex,
+      generationSession: generationSession,
     );
   }
 

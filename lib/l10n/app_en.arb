@@ -5421,9 +5421,21 @@
   "@moments": {
     "description": "Play hub row for the public moments feed"
   },
-  "momentsDisabledEmpty": "You turned moments off. Turn them back on to see what people are saying.",
+  "momentsDisabledEmpty": "Moments is off. Turn it back on in Settings.",
   "@momentsDisabledEmpty": {
     "description": "Empty state when the user has turned moments off"
+  },
+  "momentsEnabledSubtitle": "When this is off, the feed stays still and characters do not post.",
+  "@momentsEnabledSubtitle": {
+    "description": "Settings switch subtitle for the moments world loop"
+  },
+  "momentsInChat": "Use Moments in this chat",
+  "@momentsInChat": {
+    "description": "Chat-page toggle to inject visible moments into this conversation"
+  },
+  "momentsInChatHint": "Off by default. When on, this character can talk about friends' and your moments.",
+  "@momentsInChatHint": {
+    "description": "Explains that moments knowledge stays out of chat unless enabled"
   },
   "momentsEmpty": "Nobody has posted yet.",
   "@momentsEmpty": {
@@ -5434,13 +5446,15 @@
     "description": "Shown while characters decide whether to post"
   },
   "momentsCompose": "Post",
-  "momentsComposeHint": "Say something, or add a photo.",
+  "momentsComposeHint": "What's on your mind…",
   "momentsAuthor": "Who is posting",
   "momentsAuthorMe": "Me",
   "momentsAddPhoto": "Add a photo",
   "momentsChangePhoto": "Change photo",
   "momentsNeedSomething": "Write something or add a photo first.",
   "momentsComment": "Comment",
+  "momentsFriends": "Friends",
+  "momentsNoFriends": "No friends yet. Characters who share a group chat can add each other.",
   "momentsTalk": "Talk",
   "momentsExpose": "Expose",
   "momentsIgnore": "Leave it",

@@ -38,6 +38,10 @@ void main() {
     expect(l10n.fillImagePromptWithAi, 'AI 填写提示词');
     expect(l10n.moments, '动态');
     expect(l10n.momentsEmpty, '还没人发过。');
+    expect(l10n.momentsEnabledSubtitle, '关闭后动态不再更新，角色也不会再发。');
+    expect(l10n.momentsInChat, '本聊天带入动态');
+    expect(l10n.momentsInChatHint, '默认关闭。打开后，这个角色才会知道好友和你的动态。');
+    expect(l10n.momentsCompose, '发表');
     expect(l10n.momentsRefreshing, '大家正在发动态…');
     expect(l10n.momentsComment, '评论');
     expect(l10n.momentsAuthorMe, '我');

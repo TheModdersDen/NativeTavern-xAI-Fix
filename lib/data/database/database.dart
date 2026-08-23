@@ -646,7 +646,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration {
@@ -678,6 +678,9 @@ class AppDatabase extends _$AppDatabase {
             await _createV16Indexes();
             await _createV17Indexes();
             await _createV18Indexes();
+            await _repairMomentCommentsForeignKey();
+            await _ensureCharacterFriendshipsTable();
+            await _ensureOperationLogsTable();
             return;
           }
 
@@ -789,10 +792,22 @@ class AppDatabase extends _$AppDatabase {
             await _migrateMomentPostsToV18();
             await _createV18Indexes();
           }
+          if (from < 19) {
+            await _repairMomentCommentsForeignKey();
+          }
+          if (from < 20) {
+            await _ensureCharacterFriendshipsTable();
+          }
+          if (from < 21) {
+            await _ensureOperationLogsTable();
+          }
         });
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
+        await _repairMomentCommentsForeignKey();
+        await _ensureCharacterFriendshipsTable();
+        await _ensureOperationLogsTable();
         final memorySearchIndexCreated =
             await _ensureLongTermMemorySearchIndex();
         if (memorySearchIndexCreated) {
@@ -1141,6 +1156,115 @@ class AppDatabase extends _$AppDatabase {
       FROM moment_posts_v17
     ''');
     await customStatement('DROP TABLE moment_posts_v17');
+    await _repairMomentCommentsForeignKey();
+  }
+
+  /// v18 renamed moment_posts, which left moment_comments pointing at
+  /// moment_posts_v17. Recreate the comments table so inserts work again.
+  Future<void> _repairMomentCommentsForeignKey() async {
+    final commentsExist = await customSelect(
+      'SELECT 1 AS found FROM sqlite_master '
+      "WHERE type = 'table' AND name = 'moment_comments'",
+    ).getSingleOrNull();
+    if (commentsExist == null) return;
+
+    final foreignKeys =
+        await customSelect('PRAGMA foreign_key_list(moment_comments)').get();
+    var needsRepair = foreignKeys.isEmpty;
+    for (final row in foreignKeys) {
+      final target = row.read<String>('table');
+      if (target != 'moment_posts') {
+        needsRepair = true;
+        break;
+      }
+      final targetExists = await customSelect(
+        'SELECT 1 AS found FROM sqlite_master '
+        "WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(target)],
+      ).getSingleOrNull();
+      if (targetExists == null) {
+        needsRepair = true;
+        break;
+      }
+    }
+    if (!needsRepair) return;
+
+    await customStatement('PRAGMA foreign_keys = OFF');
+    await customStatement('''
+      CREATE TABLE moment_comments_new (
+        id TEXT NOT NULL PRIMARY KEY,
+        post_id TEXT NOT NULL REFERENCES moment_posts(id) ON DELETE CASCADE,
+        author_id TEXT NOT NULL,
+        author_name TEXT NOT NULL,
+        body TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        CHECK (kind IN ('comment', 'expose', 'character'))
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO moment_comments_new
+      SELECT id, post_id, author_id, author_name, body, kind, created_at
+      FROM moment_comments
+    ''');
+    await customStatement('DROP TABLE moment_comments');
+    await customStatement(
+      'ALTER TABLE moment_comments_new RENAME TO moment_comments',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS moment_comments_post_idx '
+      'ON moment_comments (post_id, created_at)',
+    );
+    await customStatement('PRAGMA foreign_keys = ON');
+  }
+
+  Future<void> _ensureOperationLogsTable() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS operation_logs (
+        id TEXT NOT NULL PRIMARY KEY,
+        kind TEXT NOT NULL,
+        subject_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        attempts INTEGER NOT NULL,
+        payload_json TEXT NOT NULL DEFAULT '{}',
+        last_error TEXT NULL,
+        due_at INTEGER NOT NULL,
+        started_at INTEGER NULL,
+        completed_at INTEGER NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        CHECK (status IN ('running', 'completed', 'incomplete'))
+      )
+    ''');
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS operation_logs_retry_idx '
+      'ON operation_logs (status, due_at)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS operation_logs_kind_subject_idx '
+      'ON operation_logs (kind, subject_id, status)',
+    );
+  }
+
+  Future<void> _ensureCharacterFriendshipsTable() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS character_friendships (
+        id TEXT NOT NULL PRIMARY KEY,
+        left_id TEXT NOT NULL,
+        right_id TEXT NOT NULL,
+        source_group_id TEXT NULL,
+        created_at INTEGER NOT NULL,
+        UNIQUE (left_id, right_id)
+      )
+    ''');
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS character_friendships_left_idx '
+      'ON character_friendships (left_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS character_friendships_right_idx '
+      'ON character_friendships (right_id)',
+    );
   }
 
   Future<void> _createV17Indexes() async {

@@ -22,6 +22,10 @@ final class StoryQueryService {
     return _storyRepository.listByChatId(chatId);
   }
 
+  Future<List<StoryChapter>> listRecent({int limit = 100}) {
+    return _storyRepository.listRecent(limit: limit);
+  }
+
   Future<StoryChapter?> getChapter(String chapterId) {
     return _storyRepository.getById(chapterId);
   }

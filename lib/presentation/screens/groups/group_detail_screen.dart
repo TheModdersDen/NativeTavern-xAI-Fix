@@ -53,8 +53,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
         _group = group;
         _nameController.text = group.name;
         _descriptionController.text = group.description ?? '';
-        _responseMode =
-            group.settings.responseMode ?? GroupResponseMode.natural;
+        _responseMode = group.settings.effectiveResponseMode;
         _isLoading = false;
       });
     } catch (e) {
@@ -72,7 +71,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
       description: _descriptionController.text.trim().isEmpty
           ? null
           : _descriptionController.text.trim(),
-      settings: _group!.settings.copyWith(responseMode: _responseMode),
+      settings: _group!.settings.withResponseMode(_responseMode),
       modifiedAt: DateTime.now(),
     );
 

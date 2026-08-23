@@ -245,6 +245,34 @@ final class StoryService {
     );
   }
 
+  /// True when the open window is long enough to write a chapter.
+  Future<bool> isChapterWindowDue(String chatId) async {
+    final messages = await _chatRepository.getMessages(chatId);
+    final latest = await _storyRepository.latestByChatId(chatId);
+    final startIndex = latest == null ? 0 : latest.endOrdinal + 1;
+    if (startIndex >= messages.length) return false;
+    final window = messages.sublist(startIndex);
+    if (window.every((message) => message.content.trim().isEmpty)) {
+      return false;
+    }
+    return _countTurns(window) >= turnsPerChapter;
+  }
+
+  /// Chats whose leftover conversation is long enough to become a chapter.
+  ///
+  /// Used on startup so earlier talks land as chapters without a new turn.
+  Future<List<String>> listDueChatIds({int limit = 50}) async {
+    final chats = await _chatRepository.getAllChats();
+    final due = <String>[];
+    for (final chat in chats) {
+      if (await isChapterWindowDue(chat.id)) {
+        due.add(chat.id);
+        if (due.length >= limit) break;
+      }
+    }
+    return due;
+  }
+
   Future<StoryChapterWriteResult> closeOpenWindow({
     required String chatId,
     LLMConfig? config,
@@ -256,12 +284,15 @@ final class StoryService {
     if (startIndex >= messages.length) {
       return const StoryChapterWriteResult(skipped: true);
     }
-    final window = messages.sublist(startIndex);
-    final turnCount = _countTurns(window);
-    if (!force && turnCount < turnsPerChapter) {
+    final remaining = messages.sublist(startIndex);
+    if (remaining.every((message) => message.content.trim().isEmpty)) {
       return const StoryChapterWriteResult(skipped: true);
     }
-    if (window.every((message) => message.content.trim().isEmpty)) {
+    final window = force
+        ? remaining
+        : _sliceChapterWindow(remaining, turnsPerChapter);
+    final turnCount = _countTurns(window);
+    if (!force && turnCount < turnsPerChapter) {
       return const StoryChapterWriteResult(skipped: true);
     }
 
@@ -693,6 +724,29 @@ Rules:
       }
     }
     return turns;
+  }
+
+  /// Keep automatic chapters near [turnsPerChapter] so a long leftover
+  /// conversation becomes several chapters instead of one block.
+  static List<ChatMessage> _sliceChapterWindow(
+    List<ChatMessage> window,
+    int turnsPerChapter,
+  ) {
+    var turns = 0;
+    var sawUser = false;
+    for (var i = 0; i < window.length; i++) {
+      final message = window[i];
+      if (message.role == MessageRole.user) {
+        sawUser = true;
+      } else if (message.role == MessageRole.assistant && sawUser) {
+        turns++;
+        sawUser = false;
+        if (turns >= turnsPerChapter) {
+          return window.sublist(0, i + 1);
+        }
+      }
+    }
+    return window;
   }
 
   static String _fallbackTitle(List<ChatMessage> window, int startIndex) {

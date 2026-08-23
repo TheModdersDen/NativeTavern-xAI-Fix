@@ -1223,7 +1223,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   : Icons.sports_esports_outlined,
               color: rpgState.enabled ? AppTheme.accentColor : null,
             ),
-            tooltip: rpgState.enabled ? l10n.rpgDisableMode : l10n.rpgEnableMode,
+            tooltip:
+                rpgState.enabled ? l10n.rpgDisableMode : l10n.rpgEnableMode,
             onPressed: rpgState.isLoading ? null : _toggleRpgMode,
           ),
         // Author's Note button
@@ -1347,6 +1348,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
             PopupMenuItem(
+              key: const Key('moments-in-chat-menu'),
+              value: 'moments_in_chat',
+              child: ListTile(
+                leading: Icon(
+                  Icons.dynamic_feed_outlined,
+                  color: chatState.chat?.momentsInChat == true
+                      ? AppTheme.accentColor
+                      : null,
+                ),
+                title: Text(l10n.momentsInChat),
+                subtitle: Text(
+                  chatState.chat?.momentsInChat == true
+                      ? l10n.enabled
+                      : l10n.disabled,
+                  style: TextStyle(
+                    color: chatState.chat?.momentsInChat == true
+                        ? AppTheme.accentColor
+                        : AppTheme.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
               value: 'chat_lorebooks',
               child: ListTile(
                 leading: Icon(
@@ -1439,6 +1465,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 break;
               case 'impersonate':
                 _handleImpersonate();
+                break;
+              case 'moments_in_chat':
+                unawaited(
+                  ref.read(activeChatProvider.notifier).updateMomentsInChat(
+                        chatState.chat?.momentsInChat != true,
+                      ),
+                );
                 break;
               case 'chat_lorebooks':
                 _showChatLorebooksDialog();
@@ -1870,7 +1903,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               actualIndex, // Use actual index for bookmarks and other features
           chatId: widget.chatId,
           character: chatState.characterForMessage(message),
-          isGenerating: isLast && chatState.isGenerating,
+          isGenerating: chatState.generatingMessageIds.contains(message.id) ||
+              (isLast &&
+                  message.role == MessageRole.assistant &&
+                  chatState.isGenerating &&
+                  chatState.generatingMessageIds.isEmpty),
           isLast: isLast,
           hasBackground: hasBackground,
           bubbleOpacity: background.bubbleOpacity,
@@ -1963,12 +2000,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> _openImagineFromInput(ActiveChatState chatState) async {
     final typed = _messageController.text.trim();
-    final lastAssistant = chatState.messages.reversed
-        .cast<ChatMessage?>()
-        .firstWhere(
-          (message) => message?.role == MessageRole.assistant,
-          orElse: () => null,
-        );
+    final lastAssistant =
+        chatState.messages.reversed.cast<ChatMessage?>().firstWhere(
+              (message) => message?.role == MessageRole.assistant,
+              orElse: () => null,
+            );
     final result = await ImageGenerationDialog.show(
       context,
       basePrompt: typed.isNotEmpty ? typed : (lastAssistant?.content ?? ''),

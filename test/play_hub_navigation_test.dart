@@ -21,7 +21,9 @@ import 'package:native_tavern/presentation/screens/chat/chat_screen.dart';
 import 'package:native_tavern/presentation/screens/data_bank/data_bank_screen.dart';
 import 'package:native_tavern/presentation/screens/play/moments_screen.dart';
 import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
+import 'package:native_tavern/presentation/providers/story_timeline_providers.dart';
 import 'package:native_tavern/presentation/screens/play/story_screen.dart';
+import 'package:native_tavern/presentation/screens/play/story_timeline_source.dart';
 import 'package:native_tavern/presentation/screens/settings/settings_screen.dart';
 import 'package:native_tavern/presentation/screens/world_info/world_info_screen.dart';
 import 'package:native_tavern/presentation/widgets/common/app_shell.dart';
@@ -187,8 +189,13 @@ void main() {
 
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: [
+          storyTimelineSourceProvider.overrideWithValue(
+            const EmptyStoryTimelineSource(),
+          ),
+        ],
+        child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: StoryScreen(),
@@ -380,11 +387,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final tile = find.byKey(const Key('data-bank-settings-tile'));
+    await tester.scrollUntilVisible(tile, 240);
+    await tester.pumpAndSettle();
     expect(find.text(l10n.openDataBank), findsOneWidget);
     expect(find.text(l10n.dataBank), findsNothing);
-
-    final tile = find.byKey(const Key('data-bank-settings-tile'));
-    await tester.ensureVisible(tile);
     await tester.tap(tile);
     await tester.pumpAndSettle();
     expect(find.text('destination:/data-bank'), findsOneWidget);

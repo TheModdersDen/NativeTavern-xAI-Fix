@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,7 @@ import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
+import 'package:native_tavern/presentation/widgets/common/group_avatar.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 
@@ -154,9 +154,7 @@ class _GroupCard extends ConsumerWidget {
                         Text(
                           AppLocalizations.of(context)!.membersAndMode(
                               group.members.length,
-                              (group.settings.responseMode ??
-                                      GroupResponseMode.natural)
-                                  .name),
+                              group.settings.effectiveResponseMode.name),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppTheme.textMuted,
@@ -220,19 +218,17 @@ class _GroupCard extends ConsumerWidget {
   }
 
   Widget _buildGroupAvatar(BuildContext context, WidgetRef ref) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.groups,
-          size: 28,
-          color: AppTheme.primaryColor,
+    final members = group.sortedMembers.take(4).toList(growable: false);
+    return FutureBuilder<List<Character?>>(
+      future: Future.wait(
+        members.map(
+          (member) => ref
+              .read(characterRepositoryProvider)
+              .getCharacter(member.characterId),
         ),
+      ),
+      builder: (context, snapshot) => GroupAvatar(
+        characters: snapshot.data ?? const [],
       ),
     );
   }

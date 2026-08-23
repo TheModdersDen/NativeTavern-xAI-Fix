@@ -94,6 +94,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.localFeatures),
+          const _MomentsEnabledTile(),
           ListTile(
             key: const Key('data-bank-settings-tile'),
             leading: const Icon(Icons.library_books_outlined),
@@ -330,6 +331,26 @@ class _ConfirmDeleteTile extends ConsumerWidget {
       value: settings.confirmBeforeDelete,
       onChanged: (value) {
         ref.read(appSettingsProvider.notifier).updateConfirmBeforeDelete(value);
+      },
+    );
+  }
+}
+
+class _MomentsEnabledTile extends ConsumerWidget {
+  const _MomentsEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.watch(appSettingsProvider);
+    return SwitchListTile(
+      key: const Key('moments-enabled-switch'),
+      secondary: const Icon(Icons.dynamic_feed_outlined),
+      title: Text(l10n.moments),
+      subtitle: Text(l10n.momentsEnabledSubtitle),
+      value: settings.momentsEnabled,
+      onChanged: (value) {
+        ref.read(appSettingsProvider.notifier).updateMomentsEnabled(value);
       },
     );
   }

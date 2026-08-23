@@ -7366,8 +7366,26 @@ abstract class AppLocalizations {
   /// Empty state when the user has turned moments off
   ///
   /// In en, this message translates to:
-  /// **'You turned moments off. Turn them back on to see what people are saying.'**
+  /// **'Moments is off. Turn it back on in Settings.'**
   String get momentsDisabledEmpty;
+
+  /// Settings switch subtitle for the moments world loop
+  ///
+  /// In en, this message translates to:
+  /// **'When this is off, the feed stays still and characters do not post.'**
+  String get momentsEnabledSubtitle;
+
+  /// Chat-page toggle to inject visible moments into this conversation
+  ///
+  /// In en, this message translates to:
+  /// **'Use Moments in this chat'**
+  String get momentsInChat;
+
+  /// Explains that moments knowledge stays out of chat unless enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. When on, this character can talk about friends\' and your moments.'**
+  String get momentsInChatHint;
 
   /// Empty state when moments is on but there are no posts
   ///
@@ -7390,7 +7408,7 @@ abstract class AppLocalizations {
   /// No description provided for @momentsComposeHint.
   ///
   /// In en, this message translates to:
-  /// **'Say something, or add a photo.'**
+  /// **'What\'s on your mind…'**
   String get momentsComposeHint;
 
   /// No description provided for @momentsAuthor.
@@ -7428,6 +7446,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Comment'**
   String get momentsComment;
+
+  /// No description provided for @momentsFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get momentsFriends;
+
+  /// No description provided for @momentsNoFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends yet. Characters who share a group chat can add each other.'**
+  String get momentsNoFriends;
 
   /// No description provided for @momentsTalk.
   ///

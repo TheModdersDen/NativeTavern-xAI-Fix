@@ -26,6 +26,8 @@ List<Map<String, dynamic>> composeMomentMessages({
   required String knowledge,
   required String conversations,
   required String recentPosts,
+  String friends = '',
+  String visibleMoments = '',
 }) {
   return [
     {
@@ -33,6 +35,8 @@ List<Map<String, dynamic>> composeMomentMessages({
       'content': '''
 You are $characterName posting on a friends-circle moments feed.
 Speak as yourself. Do not summarize a chapter. Do not write a recap.
+You only see your own posts, posts by your friends, posts by the player, and comments on those posts.
+You cannot see strangers' moments. You may react to what you can see, but this output is your own post.
 Decide whether you have something natural to share right now.
 
 Return JSON only:
@@ -52,10 +56,64 @@ Rules:
         'character': characterCard,
         'knowledge': knowledge,
         'conversations': conversations,
+        'friends': friends,
+        'visible_moments': visibleMoments,
         'recent_posts': recentPosts,
       }),
     },
   ];
+}
+
+List<Map<String, dynamic>> composeFriendCommentMessages({
+  required String characterName,
+  required String visiblePosts,
+}) {
+  return [
+    {
+      'role': 'system',
+      'content': '''
+You are $characterName commenting on a moments post you can see.
+That is a friend's post or the player's post, plus comments already on it.
+Speak as yourself. One short comment only. You cannot mention posts you cannot see.
+
+Return JSON only:
+{"skip": false, "post_id": "...", "body": "..."}
+or {"skip": true}
+''',
+    },
+    {
+      'role': 'user',
+      'content': jsonEncode({'visible_posts': visiblePosts}),
+    },
+  ];
+}
+
+final class MomentFriendCommentDraft {
+  const MomentFriendCommentDraft({required this.postId, required this.body});
+
+  final String postId;
+  final String body;
+}
+
+MomentFriendCommentDraft? parseFriendCommentDraft(
+  String response, {
+  required Set<String> allowedPostIds,
+}) {
+  final document = jsonDecode(_jsonObjectFromResponse(response));
+  if (document is! Map<String, dynamic>) return null;
+  if (document['skip'] == true) return null;
+  final postId = document['post_id'] is String
+      ? (document['post_id'] as String).trim()
+      : document['postId'] is String
+          ? (document['postId'] as String).trim()
+          : '';
+  final body = document['body'] is String
+      ? (document['body'] as String).trim()
+      : '';
+  if (postId.isEmpty || body.isEmpty || !allowedPostIds.contains(postId)) {
+    return null;
+  }
+  return MomentFriendCommentDraft(postId: postId, body: _clip(body, 200));
 }
 
 MomentDraft? parseMomentDraft(String response) {

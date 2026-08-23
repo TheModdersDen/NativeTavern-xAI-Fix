@@ -19,6 +19,21 @@ void main() {
     expect(messages.last['content'], contains('lock the gate'));
   });
 
+  test('friend comment drafts only accept known posts', () {
+    final draft = parseFriendCommentDraft(
+      '{"post_id":"p1","body":"Nice gate."}',
+      allowedPostIds: {'p1'},
+    );
+    expect(draft?.body, 'Nice gate.');
+    expect(
+      parseFriendCommentDraft(
+        '{"post_id":"nope","body":"Nice gate."}',
+        allowedPostIds: {'p1'},
+      ),
+      isNull,
+    );
+  });
+
   test('parseMomentDraft accepts text, photo, and skip', () {
     expect(
       parseMomentDraft('{"kind":"text","body":"Locked it."}')!.body,

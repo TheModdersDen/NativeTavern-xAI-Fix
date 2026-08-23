@@ -4,13 +4,17 @@ import 'dart:typed_data';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/data_bank.dart';
+import 'package:native_tavern/data/models/long_term_memory.dart';
 import 'package:native_tavern/data/models/moment/moment_post.dart';
 import 'package:native_tavern/data/models/world_info.dart';
-import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
+import 'package:native_tavern/domain/repositories/long_term_memory_repository.dart';
 import 'package:native_tavern/domain/repositories/moment_repository.dart';
+import 'package:native_tavern/data/models/operation_log.dart';
+import 'package:native_tavern/data/repositories/operation_log_repository.dart';
+import 'package:native_tavern/domain/services/character_social_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/long_term_memory_governance_service.dart';
 import 'package:native_tavern/domain/services/moment_draft.dart';
@@ -34,26 +38,51 @@ typedef MomentLlmTransport = Future<String> Function(
 
 typedef MomentImageGenerator = Future<List<int>?> Function(String prompt);
 
+/// One world-clock attempt: posted, commented, skipped, or failed.
+final class MomentWakeResult {
+  const MomentWakeResult.skipped()
+      : post = null,
+        comment = null,
+        failed = false;
+  const MomentWakeResult.posted(this.post)
+      : comment = null,
+        failed = false;
+  const MomentWakeResult.commented(this.comment)
+      : post = null,
+        failed = false;
+  const MomentWakeResult.failed()
+      : post = null,
+        comment = null,
+        failed = true;
+
+  final MomentPost? post;
+  final MomentComment? comment;
+  final bool failed;
+}
+
 /// Friends-circle moments: characters post on their own, people can comment.
 final class MomentService {
   MomentService({
     required MomentRepository momentRepository,
-    required CharacterRepository characterRepository,
     required String dataPath,
     ChatRepository? chatRepository,
     WorldInfoRepository? worldInfoRepository,
     DataBankRepository? dataBank,
+    CharacterSocialService? social,
+    OperationLogRepository? operations,
+    LongTermMemoryRepository? memories,
     MomentLlmTransport? transport,
     MomentImageGenerator? imageGenerator,
     DateTime Function()? now,
     String Function()? createId,
     this.minInterval = defaultMinInterval,
-    this.maxPostsPerSweep = defaultMaxPostsPerSweep,
   })  : _moments = momentRepository,
-        _characters = characterRepository,
         _chats = chatRepository,
         _worldInfo = worldInfoRepository,
         _dataBank = dataBank,
+        _social = social,
+        _operations = operations,
+        _memories = memories,
         _transport = transport,
         _imageGenerator = imageGenerator,
         _dataPath = dataPath,
@@ -62,21 +91,21 @@ final class MomentService {
 
   static const userAuthorId = 'user';
   static const userAuthorName = 'You';
-  static const defaultMinInterval = Duration(minutes: 30);
-  static const defaultMaxPostsPerSweep = 3;
+  static const defaultMinInterval = Duration(minutes: 20);
 
   final MomentRepository _moments;
-  final CharacterRepository _characters;
   final ChatRepository? _chats;
   final WorldInfoRepository? _worldInfo;
   final DataBankRepository? _dataBank;
+  final CharacterSocialService? _social;
+  final OperationLogRepository? _operations;
+  final LongTermMemoryRepository? _memories;
   final MomentLlmTransport? _transport;
   final MomentImageGenerator? _imageGenerator;
   final String _dataPath;
   final DateTime Function() _now;
   final String Function() _createId;
   final Duration minInterval;
-  final int maxPostsPerSweep;
 
   Future<List<MomentFeedItem>> loadFeed() async {
     final posts = await _moments.listAll();
@@ -95,10 +124,13 @@ final class MomentService {
   Future<MomentPost> publishPlayerPost({
     String body = '',
     String? imagePath,
+    String? authorName,
   }) {
     return createPost(
       authorId: userAuthorId,
-      authorName: userAuthorName,
+      authorName: (authorName == null || authorName.trim().isEmpty)
+          ? userAuthorName
+          : authorName.trim(),
       origin: MomentPostOrigin.user,
       body: body,
       imagePath: imagePath,
@@ -115,7 +147,7 @@ final class MomentService {
     if (origin == MomentPostOrigin.chapter) {
       throw ArgumentError('New posts are written by people, not chapters.');
     }
-    return _moments.create(
+    final post = await _moments.create(
       MomentPost(
         id: _createId(),
         authorId: authorId,
@@ -126,6 +158,16 @@ final class MomentService {
         createdAt: _now(),
       ),
     );
+    await _rememberMoment(
+      characterId: authorId,
+      kind: MemoryKind.event,
+      content: imagePath == null
+          ? '$authorName posted on moments: ${body.trim()}'
+          : '$authorName posted a photo on moments'
+              '${body.trim().isEmpty ? '' : ': ${body.trim()}'}',
+      identity: 'moment:${post.id}',
+    );
+    return post;
   }
 
   Future<String> importImage(String sourcePath) async {
@@ -145,8 +187,8 @@ final class MomentService {
     required String body,
     String authorId = userAuthorId,
     String authorName = userAuthorName,
-  }) {
-    return _moments.addComment(
+  }) async {
+    final comment = await _moments.addComment(
       MomentComment(
         id: _createId(),
         postId: postId,
@@ -156,81 +198,200 @@ final class MomentService {
         createdAt: _now(),
       ),
     );
-  }
-
-  /// Characters decide whether to post from their card, bound knowledge, and chats.
-  Future<List<MomentPost>> maybePublishCharacterMoments({
-    required LLMConfig config,
-    String? onlyCharacterId,
-  }) async {
-    if (_transport == null || !isMemoryLlmConfigured(config)) {
-      return const [];
-    }
-
-    final characters = onlyCharacterId == null
-        ? await _characters.getAllCharacters()
-        : [
-            if (await _characters.getCharacter(onlyCharacterId)
-                case final character?)
-              character,
-          ];
-    if (characters.isEmpty) return const [];
-
-    final feed = List<MomentPost>.from(await _moments.listAll());
-    final published = <MomentPost>[];
-    for (final character in characters) {
-      if (published.length >= maxPostsPerSweep) break;
-      final ownPosts = feed
-          .where((post) => post.authorId == character.id)
-          .toList(growable: false);
-      final context = await _loadContext(character);
-      if (!_shouldConsider(ownPosts, context)) continue;
-
-      final post = await _publishFromCharacter(
-        character: character,
-        context: context,
-        ownPosts: ownPosts,
-        config: config,
+    final post = await _moments.getById(postId);
+    if (post != null) {
+      await _rememberMoment(
+        characterId: authorId == userAuthorId ? post.authorId : authorId,
+        kind: MemoryKind.event,
+        content: '$authorName commented on ${post.authorName}\'s moment: $body',
+        identity: 'moment-comment:${comment.id}',
       );
-      if (post != null) {
-        published.add(post);
-        feed.insert(0, post);
-      }
     }
-    return published;
+    return comment;
   }
 
-  Future<List<MomentPost>> maybePublishAfterChat({
+  Future<void> rememberFriendship({
     required String characterId,
-    required LLMConfig config,
+    required String friendName,
   }) {
-    return maybePublishCharacterMoments(
-      config: config,
-      onlyCharacterId: characterId,
+    return _rememberMoment(
+      characterId: characterId,
+      kind: MemoryKind.relationship,
+      content: 'Friends with $friendName on moments.',
+      identity: 'friend:$characterId:$friendName',
     );
   }
 
-  bool _shouldConsider(
-    List<MomentPost> ownPosts,
-    _CharacterMomentContext context,
-  ) {
-    if (!context.hasMaterial) return false;
-    if (ownPosts.isEmpty) return true;
-    final latest = ownPosts.first;
-    if (_now().difference(latest.createdAt) < minInterval) return false;
-    final lastChatAt = context.lastChatAt;
-    if (lastChatAt == null) return false;
-    return lastChatAt.isAfter(latest.createdAt);
+  /// One character decides, when the world clock has already woken them.
+  Future<MomentPost?> considerCharacter({
+    required Character character,
+    required LLMConfig config,
+  }) async {
+    return (await attemptCharacter(character: character, config: config)).post;
   }
 
-  Future<MomentPost?> _publishFromCharacter({
+  Future<MomentWakeResult> attemptCharacter({
+    required Character character,
+    required LLMConfig config,
+  }) async {
+    if (_transport == null || !isMemoryLlmConfigured(config)) {
+      return const MomentWakeResult.failed();
+    }
+    final context = await _loadContext(character);
+    if (!context.hasMaterial) return const MomentWakeResult.skipped();
+    final ownPosts = (await _moments.listAll())
+        .where((post) => post.authorId == character.id)
+        .toList(growable: false);
+    if (ownPosts.isNotEmpty &&
+        _now().difference(ownPosts.first.createdAt) < minInterval) {
+      return const MomentWakeResult.skipped();
+    }
+    return _publishFromCharacter(
+      character: character,
+      context: context,
+      ownPosts: ownPosts,
+      config: config,
+    );
+  }
+
+  /// Posts this character can know about: their own, friends', and the player's,
+  /// plus comments on those posts. Strangers stay hidden.
+  Future<List<MomentFeedItem>> visibleFeedFor(
+    String characterId, {
+    int limit = 8,
+  }) async {
+    final friendIds = await _friendIds(characterId);
+    final items = <MomentFeedItem>[];
+    for (final post in await _moments.listAll()) {
+      if (!isPostVisibleTo(
+        post,
+        viewerId: characterId,
+        friendIds: friendIds,
+      )) {
+        continue;
+      }
+      items.add(
+        MomentFeedItem(
+          post: post,
+          comments: await _moments.listComments(post.id),
+        ),
+      );
+      if (items.length >= limit) break;
+    }
+    return items;
+  }
+
+  static bool isMomentsKnowledgeMemory(LongTermMemory memory) {
+    final key = memory.normalizedIdentityKey;
+    if (key.startsWith('moment')) return true;
+    return key.startsWith('friend:') &&
+        memory.content.toLowerCase().contains('moments');
+  }
+
+  static bool isPostVisibleTo(
+    MomentPost post, {
+    required String viewerId,
+    required Set<String> friendIds,
+  }) {
+    if (post.authorId == viewerId) return true;
+    if (post.authorId == userAuthorId || post.origin == MomentPostOrigin.user) {
+      return true;
+    }
+    return friendIds.contains(post.authorId);
+  }
+
+  static String formatVisibleMoments(Iterable<MomentFeedItem> items) {
+    final blocks = <String>[];
+    for (final item in items) {
+      final post = item.post;
+      final body = post.publicBody.isEmpty
+          ? '[photo]'
+          : (post.hasPhoto ? '[photo] ${post.publicBody}' : post.publicBody);
+      final lines = <String>['${post.authorName}: $body'];
+      for (final comment in item.comments) {
+        lines.add('  ${comment.authorName}: ${comment.body}');
+      }
+      blocks.add(lines.join('\n'));
+    }
+    return blocks.join('\n');
+  }
+
+  /// A friend may leave a comment on a visible post instead of posting.
+  Future<MomentComment?> considerFriendComment({
+    required Character character,
+    required LLMConfig config,
+  }) async {
+    return (await attemptFriendComment(character: character, config: config))
+        .comment;
+  }
+
+  Future<MomentWakeResult> attemptFriendComment({
+    required Character character,
+    required LLMConfig config,
+  }) async {
+    final transport = _transport;
+    if (transport == null || !isMemoryLlmConfigured(config)) {
+      return const MomentWakeResult.failed();
+    }
+    final targets = [
+      for (final item in await visibleFeedFor(character.id, limit: 8))
+        if (item.post.authorId != character.id) item,
+    ];
+    if (targets.isEmpty) return const MomentWakeResult.skipped();
+    final open = [
+      for (final item in targets)
+        if (!item.comments.any((comment) => comment.authorId == character.id))
+          item,
+    ];
+    if (open.isEmpty) return const MomentWakeResult.skipped();
+    final payload = [
+      for (final item in open)
+        [
+          '${item.post.id} | ${item.post.authorName}: ${item.post.publicBody}',
+          for (final comment in item.comments)
+            '  ${comment.authorName}: ${comment.body}',
+        ].join('\n'),
+    ].join('\n');
+    String raw;
+    try {
+      raw = await transport(
+        composeFriendCommentMessages(
+          characterName: _displayName(character),
+          visiblePosts: payload,
+        ),
+        config,
+      );
+    } catch (_) {
+      return const MomentWakeResult.failed();
+    }
+    MomentFriendCommentDraft? draft;
+    try {
+      draft = parseFriendCommentDraft(
+        raw,
+        allowedPostIds: {for (final item in open) item.post.id},
+      );
+    } on FormatException {
+      return const MomentWakeResult.skipped();
+    }
+    if (draft == null) return const MomentWakeResult.skipped();
+    return MomentWakeResult.commented(
+      await comment(
+        postId: draft.postId,
+        body: draft.body,
+        authorId: character.id,
+        authorName: _displayName(character),
+      ),
+    );
+  }
+
+  Future<MomentWakeResult> _publishFromCharacter({
     required Character character,
     required _CharacterMomentContext context,
     required List<MomentPost> ownPosts,
     required LLMConfig config,
   }) async {
     final transport = _transport;
-    if (transport == null) return null;
+    if (transport == null) return const MomentWakeResult.failed();
     String raw;
     try {
       raw = await transport(
@@ -239,6 +400,8 @@ final class MomentService {
           characterCard: context.characterCard,
           knowledge: context.knowledge,
           conversations: context.conversations,
+          friends: context.friends,
+          visibleMoments: context.visibleMoments,
           recentPosts: ownPosts
               .take(3)
               .map((post) => post.publicBody)
@@ -248,31 +411,117 @@ final class MomentService {
         config,
       );
     } catch (_) {
-      return null;
+      return const MomentWakeResult.failed();
     }
 
     MomentDraft? draft;
     try {
       draft = parseMomentDraft(raw);
     } on FormatException {
-      return null;
+      return const MomentWakeResult.skipped();
     }
-    if (draft == null) return null;
+    if (draft == null) return const MomentWakeResult.skipped();
 
     String? imagePath;
     if (draft.wantsPhoto) {
-      imagePath = await _generatePhoto(draft.imagePrompt!);
-      if (imagePath == null && !draft.hasBody) return null;
+      final posted = await _generateLoggedPhoto(
+        character: character,
+        prompt: draft.imagePrompt!,
+        body: draft.body,
+      );
+      if (posted != null) return MomentWakeResult.posted(posted);
+      if (_operations != null) return const MomentWakeResult.skipped();
+      if (!draft.hasBody) return const MomentWakeResult.failed();
     }
-    if (!draft.hasBody && imagePath == null) return null;
+    if (!draft.hasBody && imagePath == null) {
+      return const MomentWakeResult.skipped();
+    }
 
-    return createPost(
+    return MomentWakeResult.posted(
+      await createPost(
+        authorId: character.id,
+        authorName: _displayName(character),
+        origin: MomentPostOrigin.character,
+        body: draft.body,
+        imagePath: imagePath,
+      ),
+    );
+  }
+
+  Future<MomentPost?> retryImageJob(OperationLog job) async {
+    final operations = _operations;
+    if (job.kind != OperationKind.momentImage) return null;
+    final prompt = '${job.payload['prompt'] ?? ''}'.trim();
+    final body = '${job.payload['body'] ?? ''}';
+    final authorId = '${job.payload['characterId'] ?? job.subjectId}';
+    final authorName = '${job.payload['authorName'] ?? 'Someone'}';
+    if (prompt.isEmpty) {
+      await operations?.markIncomplete(job, error: 'Image prompt is missing.');
+      return null;
+    }
+    final claimed = operations == null
+        ? job
+        : await operations.begin(
+            kind: OperationKind.momentImage,
+            subjectId: job.subjectId,
+            payload: job.payload,
+          );
+    final imagePath = await _generatePhoto(prompt);
+    if (imagePath == null) {
+      await operations?.markIncomplete(
+        claimed,
+        error: 'Image generation failed.',
+        dueAt: _now().add(Duration(minutes: 1 << (claimed.attempts - 1).clamp(0, 4))),
+      );
+      return null;
+    }
+    final post = await createPost(
+      authorId: authorId,
+      authorName: authorName,
+      origin: MomentPostOrigin.character,
+      body: body,
+      imagePath: imagePath,
+    );
+    await operations?.markCompleted(claimed);
+    return post;
+  }
+
+  Future<MomentPost?> _generateLoggedPhoto({
+    required Character character,
+    required String prompt,
+    required String body,
+  }) async {
+    final operations = _operations;
+    final job = await operations?.begin(
+      kind: OperationKind.momentImage,
+      subjectId: character.id,
+      payload: {
+        'characterId': character.id,
+        'authorName': _displayName(character),
+        'prompt': prompt,
+        'body': body,
+      },
+    );
+    final imagePath = await _generatePhoto(prompt);
+    if (imagePath == null) {
+      if (job != null) {
+        await operations?.markIncomplete(
+          job,
+          error: 'Image generation failed.',
+          dueAt: _now().add(const Duration(minutes: 1)),
+        );
+      }
+      return null;
+    }
+    final post = await createPost(
       authorId: character.id,
       authorName: _displayName(character),
       origin: MomentPostOrigin.character,
-      body: draft.body,
+      body: body,
       imagePath: imagePath,
     );
+    if (job != null) await operations?.markCompleted(job);
+    return post;
   }
 
   Future<String?> _generatePhoto(String prompt) async {
@@ -291,15 +540,71 @@ final class MomentService {
     final card = _characterCard(character);
     final knowledge = await _knowledgeFor(character);
     final conversation = await _conversationsFor(character);
+    final social = await _socialContext(character);
     return _CharacterMomentContext(
       characterCard: card,
       knowledge: knowledge.text,
       conversations: conversation.text,
+      friends: social.friends,
+      visibleMoments: social.posts,
       lastChatAt: conversation.lastAt,
       hasMaterial: card.isNotEmpty ||
           knowledge.text.isNotEmpty ||
-          conversation.text.isNotEmpty,
+          conversation.text.isNotEmpty ||
+          social.friends.isNotEmpty ||
+          social.posts.isNotEmpty,
     );
+  }
+
+  Future<({String friends, String posts})> _socialContext(
+    Character character,
+  ) async {
+    final social = _social;
+    final friends =
+        social == null ? const <Character>[] : await social.friendsOf(character.id);
+    final posts = formatVisibleMoments(
+      await visibleFeedFor(character.id, limit: 6),
+    );
+    return (friends: friends.map(_displayName).join(', '), posts: posts);
+  }
+
+  Future<Set<String>> _friendIds(String characterId) async {
+    final social = _social;
+    if (social == null) return const {};
+    return {
+      for (final friend in await social.friendsOf(characterId)) friend.id,
+    };
+  }
+
+  Future<void> _rememberMoment({
+    required String characterId,
+    required MemoryKind kind,
+    required String content,
+    required String identity,
+  }) async {
+    final memories = _memories;
+    if (memories == null ||
+        characterId == userAuthorId ||
+        content.trim().isEmpty) {
+      return;
+    }
+    try {
+      final now = _now();
+      await memories.create(
+        LongTermMemory(
+          id: _createId(),
+          kind: kind,
+          scope: MemoryScope.character(characterId),
+          state: MemoryState.active,
+          content: content.trim(),
+          source: MemorySource.manual(),
+          importance: 0.55,
+          confidence: 0.9,
+          createdAt: now,
+          normalizedIdentityKey: normalizeMemoryIdentity(identity),
+        ),
+      );
+    } catch (_) {}
   }
 
   String _characterCard(Character character) {
@@ -459,6 +764,8 @@ final class _CharacterMomentContext {
     required this.characterCard,
     required this.knowledge,
     required this.conversations,
+    this.friends = '',
+    this.visibleMoments = '',
     required this.lastChatAt,
     required this.hasMaterial,
   });
@@ -466,6 +773,8 @@ final class _CharacterMomentContext {
   final String characterCard;
   final String knowledge;
   final String conversations;
+  final String friends;
+  final String visibleMoments;
   final DateTime? lastChatAt;
   final bool hasMaterial;
 }

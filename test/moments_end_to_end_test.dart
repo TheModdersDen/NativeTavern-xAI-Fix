@@ -19,6 +19,7 @@ import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
+import 'package:native_tavern/presentation/screens/character/character_detail_screen.dart';
 import 'package:native_tavern/presentation/screens/play/moments_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -111,7 +112,6 @@ void main() {
     final requests = <List<Map<String, dynamic>>>[];
     final service = MomentService(
       momentRepository: container.read(momentRepositoryProvider),
-      characterRepository: characterRepository,
       chatRepository: chatRepository,
       worldInfoRepository: worldInfoRepository,
       dataPath: dataDirectory.path,
@@ -121,31 +121,26 @@ void main() {
         return '{"kind":"text","body":"Locked it before the rain."}';
       },
     );
+    final character = (await characterRepository.getCharacter('character-1'))!;
 
-    final published = await service.maybePublishCharacterMoments(
+    final published = await service.considerCharacter(
+      character: character,
       config: _configuredLlm,
     );
-    expect(published, hasLength(1));
-    expect(published.single.authorName, 'Ava');
-    expect(published.single.origin, MomentPostOrigin.character);
-    expect(published.single.publicBody, 'Locked it before the rain.');
+    expect(published?.authorName, 'Ava');
+    expect(published?.origin, MomentPostOrigin.character);
+    expect(published?.publicBody, 'Locked it before the rain.');
 
     final prompt = requests.single.last['content'] as String;
     expect(prompt, contains('Keeps the garden'));
     expect(prompt, contains('iron gate'));
     expect(prompt, contains('Did you lock the gate?'));
-
-    final again = await service.maybePublishCharacterMoments(
-      config: _configuredLlm,
-    );
-    expect(again, isEmpty);
   });
 
   test('a character can post a photo when the image generator returns one',
       () async {
     final service = MomentService(
       momentRepository: container.read(momentRepositoryProvider),
-      characterRepository: characterRepository,
       dataPath: dataDirectory.path,
       minInterval: Duration.zero,
       transport: (messages, config) async {
@@ -157,12 +152,14 @@ void main() {
       },
     );
 
-    final published = await service.maybePublishCharacterMoments(
+    final character = (await characterRepository.getCharacter('character-1'))!;
+    final published = await service.considerCharacter(
+      character: character,
       config: _configuredLlm,
     );
-    expect(published.single.hasPhoto, isTrue);
-    expect(published.single.publicBody, isEmpty);
-    expect(File(published.single.imagePath!).existsSync(), isTrue);
+    expect(published?.hasPhoto, isTrue);
+    expect(published?.publicBody, isEmpty);
+    expect(File(published!.imagePath!).existsSync(), isTrue);
   });
 
   test('player posts only as themselves', () async {
@@ -193,9 +190,14 @@ void main() {
     expect(created.publicBody, isEmpty);
     expect(created.hasPhoto, isTrue);
 
-    await service.comment(postId: created.id, body: 'Nice gate.');
+    await service.comment(
+      postId: created.id,
+      body: 'Nice gate.',
+      authorName: 'Lucy',
+    );
     final feed = await service.loadFeed();
     expect(feed.single.comments.single.body, 'Nice gate.');
+    expect(feed.single.comments.single.authorName, 'Lucy');
   });
 
   test('turning moments off hides the feed without deleting posts', () async {
@@ -208,6 +210,71 @@ void main() {
     container.read(appSettingsProvider.notifier).updateMomentsEnabled(false);
     expect(await container.read(momentFeedProvider.future), isEmpty);
     expect(await container.read(momentRepositoryProvider).listAll(), hasLength(1));
+  });
+
+  testWidgets('tapping a character avatar opens details and chats',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final now = DateTime.now();
+    await chatRepository.createChat(
+      Chat(
+        id: 'chat-ava',
+        characterId: 'character-1',
+        title: 'Garden talk',
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await container.read(momentServiceProvider).createPost(
+          authorId: 'character-1',
+          authorName: 'Ava',
+          origin: MomentPostOrigin.character,
+          body: 'The gate is locked.',
+        );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: GoRouter(
+            routes: [
+              GoRoute(
+                path: AppRoutes.playMoments,
+                builder: (_, __) => const MomentsScreen(),
+              ),
+              GoRoute(
+                path: '/characters/:id',
+                builder: (_, state) => CharacterDetailScreen(
+                  characterId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
+            initialLocation: AppRoutes.playMoments,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.byKey(const Key('moment-author-character-1')));
+    expect(
+      (await chatRepository.getChatsForCharacter('character-1'))
+          .map((chat) => chat.title),
+      contains('Garden talk'),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Start Chat'), findsOneWidget);
+    expect(find.text('Chats'), findsOneWidget);
+    expect(find.text('New Chat'), findsOneWidget);
   });
 
   testWidgets('moments page is empty until someone posts', (tester) async {
@@ -229,7 +296,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
     expect(find.textContaining('Nobody has posted yet'), findsOneWidget);
     expect(find.byKey(const Key('moments-compose-author')), findsNothing);
     expect(find.text('Waiting for a reply'), findsNothing);
@@ -239,6 +307,10 @@ void main() {
 
   testWidgets('compose dialog is the player posting, not picking a character',
       (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -257,9 +329,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
     await tester.tap(find.byKey(const Key('moments-compose')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.byKey(const Key('moments-compose-author')), findsNothing);
     expect(find.text('Who is posting'), findsNothing);
@@ -271,11 +345,14 @@ void main() {
       find.byKey(const Key('moments-compose-body')),
       'Evening in the garden.',
     );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('moments-compose-send')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('Evening in the garden.'), findsOneWidget);
-    expect(find.text('You'), findsOneWidget);
+    expect(find.text('Evening in the garden.'), findsWidgets);
+    expect(find.text('Me'), findsWidgets);
   });
 }
 

@@ -3911,7 +3911,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get moments => '动态';
 
   @override
-  String get momentsDisabledEmpty => '你把动态关掉了。想看大家在说什么，再打开就行。';
+  String get momentsDisabledEmpty => '动态已关闭。去设置里打开。';
+
+  @override
+  String get momentsEnabledSubtitle => '关闭后动态不再更新，角色也不会再发。';
+
+  @override
+  String get momentsInChat => '本聊天带入动态';
+
+  @override
+  String get momentsInChatHint => '默认关闭。打开后，这个角色才会知道好友和你的动态。';
 
   @override
   String get momentsEmpty => '还没人发过。';
@@ -3920,10 +3929,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get momentsRefreshing => '大家正在发动态…';
 
   @override
-  String get momentsCompose => '发一条';
+  String get momentsCompose => '发表';
 
   @override
-  String get momentsComposeHint => '说点什么，或者加张图。';
+  String get momentsComposeHint => '这一刻的想法…';
 
   @override
   String get momentsAuthor => '谁在发';
@@ -3942,6 +3951,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get momentsComment => '评论';
+
+  @override
+  String get momentsFriends => '好友';
+
+  @override
+  String get momentsNoFriends => '还没有好友。同一群聊里的角色可以互加。';
 
   @override
   String get momentsTalk => '开聊';
@@ -10056,7 +10071,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get moments => '動態';
 
   @override
-  String get momentsDisabledEmpty => '你把動態關掉了。想看大家在說什麼，再開回來就好。';
+  String get momentsDisabledEmpty => '動態已關閉。去設定裡打開。';
+
+  @override
+  String get momentsEnabledSubtitle => '關閉後動態不再更新，角色也不會再發。';
+
+  @override
+  String get momentsInChat => '本聊天帶入動態';
+
+  @override
+  String get momentsInChatHint => '預設關閉。打開後，這個角色才會知道好友和你的動態。';
 
   @override
   String get momentsEmpty => '還沒人發過。';
@@ -10065,10 +10089,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get momentsRefreshing => '大家正在發動態…';
 
   @override
-  String get momentsCompose => '發一則';
+  String get momentsCompose => '發表';
 
   @override
-  String get momentsComposeHint => '說點什麼，或加張圖。';
+  String get momentsComposeHint => '這一刻的想法…';
 
   @override
   String get momentsAuthor => '誰在發';
@@ -10087,6 +10111,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get momentsComment => '留言';
+
+  @override
+  String get momentsFriends => '好友';
+
+  @override
+  String get momentsNoFriends => '還沒有好友。同一群聊裡的角色可以互加。';
 
   @override
   String get momentsTalk => '開聊';
