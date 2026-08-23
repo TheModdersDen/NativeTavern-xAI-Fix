@@ -3973,11 +3973,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get momentsDisabledEmpty =>
-      'Moments stay empty until you turn them on. Nothing is generated in the background.';
+      'You turned moments off. Turn them back on to see what people are saying.';
 
   @override
   String get momentsEmpty =>
-      'Nothing happened in public. Chat long enough for a chapter, or post one yourself.';
+      'Nothing to show yet. Chat for a while, or write something yourself.';
 
   @override
   String get momentsCompose => 'Post';

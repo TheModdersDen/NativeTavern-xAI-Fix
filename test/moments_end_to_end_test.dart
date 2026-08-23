@@ -116,16 +116,15 @@ void main() {
         );
   }
 
-  test('disabled moments stay empty even when chapters exist', () async {
+  test('turning moments off hides the feed even when chapters exist', () async {
     await addChapter();
-    expect(container.read(appSettingsProvider).momentsEnabled, isFalse);
+    expect(container.read(appSettingsProvider).momentsEnabled, isTrue);
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(false);
     expect(await container.read(momentFeedProvider.future), isEmpty);
-    expect(await container.read(momentRepositoryProvider).listAll(), isEmpty);
   });
 
   test('enabled feed derives a public spin and can expose the fact', () async {
     await addChapter();
-    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     final feed = await container.read(momentFeedProvider.future);
     expect(feed, hasLength(1));
     final post = feed.single.post;
@@ -156,13 +155,11 @@ void main() {
       title: 'Sunny weather',
       summary: 'The weather was sunny and the mood was fine.',
     );
-    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     expect(await container.read(momentFeedProvider.future), isEmpty);
   });
 
   test('bookmark fork hides the old chapter post', () async {
     await addChapter();
-    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     expect(await container.read(momentFeedProvider.future), hasLength(1));
     await chatRepository.deleteMessage('m2');
     container.invalidate(momentFeedProvider);
@@ -170,7 +167,6 @@ void main() {
   });
 
   test('user can post, wait, comment, and leave unread', () async {
-    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     final created = await container.read(momentServiceProvider).createUserPost(
           chatId: 'chat-1',
           body: 'Did you lock the gate?',
@@ -188,7 +184,7 @@ void main() {
     expect(feed.single.post.status, MomentPostStatus.ignored);
   });
 
-  testWidgets('moments page stays empty until the switch is on', (tester) async {
+  testWidgets('moments page shows posts by default', (tester) async {
     await addChapter();
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -209,13 +205,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('stay empty'), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('moments-enabled-switch')));
-    await tester.pumpAndSettle();
     expect(find.textContaining('Nothing worth mentioning'), findsOneWidget);
     expect(find.textContaining('What actually happened'), findsOneWidget);
-    expect(find.byKey(Key('moment-expose-moment-missing')), findsNothing);
     expect(find.text('Expose'), findsOneWidget);
   });
 }

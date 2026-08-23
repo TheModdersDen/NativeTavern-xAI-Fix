@@ -7267,16 +7267,16 @@ abstract class AppLocalizations {
   /// **'Moments'**
   String get moments;
 
-  /// No description provided for @momentsDisabledEmpty.
+  /// Empty state when the user has turned moments off
   ///
   /// In en, this message translates to:
-  /// **'Moments stay empty until you turn them on. Nothing is generated in the background.'**
+  /// **'You turned moments off. Turn them back on to see what people are saying.'**
   String get momentsDisabledEmpty;
 
-  /// No description provided for @momentsEmpty.
+  /// Empty state when moments is on but there are no posts
   ///
   /// In en, this message translates to:
-  /// **'Nothing happened in public. Chat long enough for a chapter, or post one yourself.'**
+  /// **'Nothing to show yet. Chat for a while, or write something yourself.'**
   String get momentsEmpty;
 
   /// No description provided for @momentsCompose.

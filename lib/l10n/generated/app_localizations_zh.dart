@@ -3861,10 +3861,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get moments => '动态';
 
   @override
-  String get momentsDisabledEmpty => '动态默认关着。打开以前不会后台发帖，也没有红点。';
+  String get momentsDisabledEmpty => '你把动态关掉了。想看大家在说什么，再打开就行。';
 
   @override
-  String get momentsEmpty => '公开场还没有事。聊出章节后再来，或自己发一条。';
+  String get momentsEmpty => '还没有动态。先去聊一会儿，或者自己写一条。';
 
   @override
   String get momentsCompose => '发一条';
@@ -9941,10 +9941,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get moments => '動態';
 
   @override
-  String get momentsDisabledEmpty => '動態預設關閉。打開以前不會在背景發文，也沒有紅點。';
+  String get momentsDisabledEmpty => '你把動態關掉了。想看大家在說什麼，再開回來就好。';
 
   @override
-  String get momentsEmpty => '公開場還沒有事。聊出章節後再來，或自己發一則。';
+  String get momentsEmpty => '還沒有動態。先去聊一會兒，或自己寫一則。';
 
   @override
   String get momentsCompose => '發一則';

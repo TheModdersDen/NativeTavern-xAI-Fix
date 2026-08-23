@@ -198,16 +198,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.storyEmptyHint), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
 
+  testWidgets('moments destination stays empty without crashing', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+    final characterRepository = CharacterRepository(
+      database,
+      dataDirectory.path,
+    );
+    final chatRepository = ChatRepository(database);
     await tester.pumpWidget(
-      const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: MomentsPlaceholderScreen(),
+      ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          dataPathProvider.overrideWithValue(dataDirectory.path),
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          characterRepositoryProvider.overrideWithValue(characterRepository),
+          chatRepositoryProvider.overrideWithValue(chatRepository),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MomentsScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('not ready'), findsOneWidget);
+    expect(find.text(l10n.momentsEmpty), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -304,7 +326,7 @@ void main() {
     router.go(AppRoutes.playMoments);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, l10n.moments), findsOneWidget);
-    expect(find.text(l10n.momentsDisabledEmpty), findsOneWidget);
+    expect(find.text(l10n.momentsEmpty), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

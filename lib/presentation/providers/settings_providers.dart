@@ -717,7 +717,7 @@ class AppSettings {
     this.storyEnabled = true,
     this.storyTurnsPerChapter = 20,
     this.storyHighConfidenceThreshold = 0.8,
-    this.momentsEnabled = false,
+    this.momentsEnabled = true,
   });
 
   AppSettings copyWith({
@@ -826,7 +826,7 @@ class AppSettings {
       storyHighConfidenceThreshold: normalizeStoryHighConfidenceThreshold(
         (json['storyHighConfidenceThreshold'] as num?)?.toDouble(),
       ),
-      momentsEnabled: json['momentsEnabled'] as bool? ?? false,
+      momentsEnabled: json['momentsEnabled'] as bool? ?? true,
     );
   }
 
