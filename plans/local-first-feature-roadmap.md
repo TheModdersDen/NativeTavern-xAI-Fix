@@ -2,6 +2,9 @@
 
 更新日期：2026-08-07
 
+产品方向补充（待审核，尚未改本路线任务）：见 `docs/playable-world-requirements.md`。通过后只补默认体验与叙事层缺口，不推翻下方任务 ID。
+
+
 ## 1. 产品边界
 
 NativeTavern 是本地 App，不运营中转 API、语音、图片、向量或 MCP 云服务。

@@ -6,6 +6,7 @@ import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/locale_provider.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/core/flags/rpg_product_ui.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/privacy/ai_data_sharing_consent_gate.dart';
@@ -101,14 +102,15 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.dataBank),
           ),
-          ListTile(
-            key: const Key('rpg-scenario-editor-settings-tile'),
-            leading: const Icon(Icons.casino_outlined),
-            title: Text(l10n.rpgScenarioEditor),
-            subtitle: Text(l10n.rpgScenarioEditorSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(AppRoutes.rpgScenarioEditor),
-          ),
+          if (kRpgProductUiEnabled)
+            ListTile(
+              key: const Key('rpg-scenario-editor-settings-tile'),
+              leading: const Icon(Icons.casino_outlined),
+              title: Text(l10n.rpgScenarioEditor),
+              subtitle: Text(l10n.rpgScenarioEditorSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.rpgScenarioEditor),
+            ),
           const Divider(height: 32),
           _buildSectionHeader(context, 'Multimedia'),
           ListTile(

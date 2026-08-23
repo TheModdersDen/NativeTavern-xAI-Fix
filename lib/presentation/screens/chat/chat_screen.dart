@@ -13,6 +13,7 @@ import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/chat_background.dart';
 import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/data/models/rpg/rpg.dart';
+import 'package:native_tavern/core/flags/rpg_product_ui.dart';
 import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
@@ -1083,10 +1084,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       : _buildMessagesArea(chatState),
                 ),
 
-                RpgGamePanel(
-                  chatId: widget.chatId,
-                  onDisable: _toggleRpgMode,
-                ),
+                if (kRpgProductUiEnabled)
+                  RpgGamePanel(
+                    chatId: widget.chatId,
+                    onDisable: _toggleRpgMode,
+                  ),
 
                 ToolActivityPanel(chatId: widget.chatId),
 
@@ -1202,17 +1204,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       actions: [
         ChatTTSPlaybackControls(ownerId: widget.chatId),
-        IconButton(
-          key: const Key('rpg-mode-toggle'),
-          icon: Icon(
-            rpgState.enabled
-                ? Icons.sports_esports
-                : Icons.sports_esports_outlined,
-            color: rpgState.enabled ? AppTheme.accentColor : null,
+        if (kRpgProductUiEnabled)
+          IconButton(
+            key: const Key('rpg-mode-toggle'),
+            icon: Icon(
+              rpgState.enabled
+                  ? Icons.sports_esports
+                  : Icons.sports_esports_outlined,
+              color: rpgState.enabled ? AppTheme.accentColor : null,
+            ),
+            tooltip: rpgState.enabled ? l10n.rpgDisableMode : l10n.rpgEnableMode,
+            onPressed: rpgState.isLoading ? null : _toggleRpgMode,
           ),
-          tooltip: rpgState.enabled ? l10n.rpgDisableMode : l10n.rpgEnableMode,
-          onPressed: rpgState.isLoading ? null : _toggleRpgMode,
-        ),
         // Author's Note button
         IconButton(
           icon: Icon(

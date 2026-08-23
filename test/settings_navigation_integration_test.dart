@@ -127,10 +127,6 @@ void main() {
       ),
       (key: Key('data-bank-settings-tile'), path: AppRoutes.dataBank),
       (
-        key: Key('rpg-scenario-editor-settings-tile'),
-        path: AppRoutes.rpgScenarioEditor,
-      ),
-      (
         key: Key('capability-diagnostics-settings-tile'),
         path: AppRoutes.capabilityDiagnostics,
       ),
