@@ -11922,6 +11922,570 @@ class DataBankBindingsCompanion extends UpdateCompanion<DataBankBindingRow> {
   }
 }
 
+class $StoryChaptersTable extends StoryChapters
+    with TableInfo<$StoryChaptersTable, StoryChapterRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StoryChaptersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
+      'chat_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE CASCADE'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _summaryMeta =
+      const VerificationMeta('summary');
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+      'summary', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _startMessageIdMeta =
+      const VerificationMeta('startMessageId');
+  @override
+  late final GeneratedColumn<String> startMessageId = GeneratedColumn<String>(
+      'start_message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
+  static const VerificationMeta _endMessageIdMeta =
+      const VerificationMeta('endMessageId');
+  @override
+  late final GeneratedColumn<String> endMessageId = GeneratedColumn<String>(
+      'end_message_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
+  static const VerificationMeta _startOrdinalMeta =
+      const VerificationMeta('startOrdinal');
+  @override
+  late final GeneratedColumn<int> startOrdinal = GeneratedColumn<int>(
+      'start_ordinal', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _endOrdinalMeta =
+      const VerificationMeta('endOrdinal');
+  @override
+  late final GeneratedColumn<int> endOrdinal = GeneratedColumn<int>(
+      'end_ordinal', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+      'origin', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        chatId,
+        title,
+        summary,
+        startMessageId,
+        endMessageId,
+        startOrdinal,
+        endOrdinal,
+        origin,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'story_chapters';
+  @override
+  VerificationContext validateIntegrity(Insertable<StoryChapterRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('chat_id')) {
+      context.handle(_chatIdMeta,
+          chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
+    } else if (isInserting) {
+      context.missing(_chatIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('summary')) {
+      context.handle(_summaryMeta,
+          summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta));
+    } else if (isInserting) {
+      context.missing(_summaryMeta);
+    }
+    if (data.containsKey('start_message_id')) {
+      context.handle(
+          _startMessageIdMeta,
+          startMessageId.isAcceptableOrUnknown(
+              data['start_message_id']!, _startMessageIdMeta));
+    } else if (isInserting) {
+      context.missing(_startMessageIdMeta);
+    }
+    if (data.containsKey('end_message_id')) {
+      context.handle(
+          _endMessageIdMeta,
+          endMessageId.isAcceptableOrUnknown(
+              data['end_message_id']!, _endMessageIdMeta));
+    } else if (isInserting) {
+      context.missing(_endMessageIdMeta);
+    }
+    if (data.containsKey('start_ordinal')) {
+      context.handle(
+          _startOrdinalMeta,
+          startOrdinal.isAcceptableOrUnknown(
+              data['start_ordinal']!, _startOrdinalMeta));
+    } else if (isInserting) {
+      context.missing(_startOrdinalMeta);
+    }
+    if (data.containsKey('end_ordinal')) {
+      context.handle(
+          _endOrdinalMeta,
+          endOrdinal.isAcceptableOrUnknown(
+              data['end_ordinal']!, _endOrdinalMeta));
+    } else if (isInserting) {
+      context.missing(_endOrdinalMeta);
+    }
+    if (data.containsKey('origin')) {
+      context.handle(_originMeta,
+          origin.isAcceptableOrUnknown(data['origin']!, _originMeta));
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoryChapterRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoryChapterRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      chatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      summary: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}summary'])!,
+      startMessageId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}start_message_id'])!,
+      endMessageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}end_message_id'])!,
+      startOrdinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}start_ordinal'])!,
+      endOrdinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}end_ordinal'])!,
+      origin: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}origin'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $StoryChaptersTable createAlias(String alias) {
+    return $StoryChaptersTable(attachedDatabase, alias);
+  }
+}
+
+class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
+  final String id;
+  final String chatId;
+  final String title;
+  final String summary;
+  final String startMessageId;
+  final String endMessageId;
+  final int startOrdinal;
+  final int endOrdinal;
+  final String origin;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const StoryChapterRow(
+      {required this.id,
+      required this.chatId,
+      required this.title,
+      required this.summary,
+      required this.startMessageId,
+      required this.endMessageId,
+      required this.startOrdinal,
+      required this.endOrdinal,
+      required this.origin,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['chat_id'] = Variable<String>(chatId);
+    map['title'] = Variable<String>(title);
+    map['summary'] = Variable<String>(summary);
+    map['start_message_id'] = Variable<String>(startMessageId);
+    map['end_message_id'] = Variable<String>(endMessageId);
+    map['start_ordinal'] = Variable<int>(startOrdinal);
+    map['end_ordinal'] = Variable<int>(endOrdinal);
+    map['origin'] = Variable<String>(origin);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  StoryChaptersCompanion toCompanion(bool nullToAbsent) {
+    return StoryChaptersCompanion(
+      id: Value(id),
+      chatId: Value(chatId),
+      title: Value(title),
+      summary: Value(summary),
+      startMessageId: Value(startMessageId),
+      endMessageId: Value(endMessageId),
+      startOrdinal: Value(startOrdinal),
+      endOrdinal: Value(endOrdinal),
+      origin: Value(origin),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory StoryChapterRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoryChapterRow(
+      id: serializer.fromJson<String>(json['id']),
+      chatId: serializer.fromJson<String>(json['chatId']),
+      title: serializer.fromJson<String>(json['title']),
+      summary: serializer.fromJson<String>(json['summary']),
+      startMessageId: serializer.fromJson<String>(json['startMessageId']),
+      endMessageId: serializer.fromJson<String>(json['endMessageId']),
+      startOrdinal: serializer.fromJson<int>(json['startOrdinal']),
+      endOrdinal: serializer.fromJson<int>(json['endOrdinal']),
+      origin: serializer.fromJson<String>(json['origin']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'chatId': serializer.toJson<String>(chatId),
+      'title': serializer.toJson<String>(title),
+      'summary': serializer.toJson<String>(summary),
+      'startMessageId': serializer.toJson<String>(startMessageId),
+      'endMessageId': serializer.toJson<String>(endMessageId),
+      'startOrdinal': serializer.toJson<int>(startOrdinal),
+      'endOrdinal': serializer.toJson<int>(endOrdinal),
+      'origin': serializer.toJson<String>(origin),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  StoryChapterRow copyWith(
+          {String? id,
+          String? chatId,
+          String? title,
+          String? summary,
+          String? startMessageId,
+          String? endMessageId,
+          int? startOrdinal,
+          int? endOrdinal,
+          String? origin,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      StoryChapterRow(
+        id: id ?? this.id,
+        chatId: chatId ?? this.chatId,
+        title: title ?? this.title,
+        summary: summary ?? this.summary,
+        startMessageId: startMessageId ?? this.startMessageId,
+        endMessageId: endMessageId ?? this.endMessageId,
+        startOrdinal: startOrdinal ?? this.startOrdinal,
+        endOrdinal: endOrdinal ?? this.endOrdinal,
+        origin: origin ?? this.origin,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  StoryChapterRow copyWithCompanion(StoryChaptersCompanion data) {
+    return StoryChapterRow(
+      id: data.id.present ? data.id.value : this.id,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      title: data.title.present ? data.title.value : this.title,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      startMessageId: data.startMessageId.present
+          ? data.startMessageId.value
+          : this.startMessageId,
+      endMessageId: data.endMessageId.present
+          ? data.endMessageId.value
+          : this.endMessageId,
+      startOrdinal: data.startOrdinal.present
+          ? data.startOrdinal.value
+          : this.startOrdinal,
+      endOrdinal:
+          data.endOrdinal.present ? data.endOrdinal.value : this.endOrdinal,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoryChapterRow(')
+          ..write('id: $id, ')
+          ..write('chatId: $chatId, ')
+          ..write('title: $title, ')
+          ..write('summary: $summary, ')
+          ..write('startMessageId: $startMessageId, ')
+          ..write('endMessageId: $endMessageId, ')
+          ..write('startOrdinal: $startOrdinal, ')
+          ..write('endOrdinal: $endOrdinal, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, chatId, title, summary, startMessageId,
+      endMessageId, startOrdinal, endOrdinal, origin, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoryChapterRow &&
+          other.id == this.id &&
+          other.chatId == this.chatId &&
+          other.title == this.title &&
+          other.summary == this.summary &&
+          other.startMessageId == this.startMessageId &&
+          other.endMessageId == this.endMessageId &&
+          other.startOrdinal == this.startOrdinal &&
+          other.endOrdinal == this.endOrdinal &&
+          other.origin == this.origin &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
+  final Value<String> id;
+  final Value<String> chatId;
+  final Value<String> title;
+  final Value<String> summary;
+  final Value<String> startMessageId;
+  final Value<String> endMessageId;
+  final Value<int> startOrdinal;
+  final Value<int> endOrdinal;
+  final Value<String> origin;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const StoryChaptersCompanion({
+    this.id = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.startMessageId = const Value.absent(),
+    this.endMessageId = const Value.absent(),
+    this.startOrdinal = const Value.absent(),
+    this.endOrdinal = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StoryChaptersCompanion.insert({
+    required String id,
+    required String chatId,
+    required String title,
+    required String summary,
+    required String startMessageId,
+    required String endMessageId,
+    required int startOrdinal,
+    required int endOrdinal,
+    required String origin,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        chatId = Value(chatId),
+        title = Value(title),
+        summary = Value(summary),
+        startMessageId = Value(startMessageId),
+        endMessageId = Value(endMessageId),
+        startOrdinal = Value(startOrdinal),
+        endOrdinal = Value(endOrdinal),
+        origin = Value(origin),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<StoryChapterRow> custom({
+    Expression<String>? id,
+    Expression<String>? chatId,
+    Expression<String>? title,
+    Expression<String>? summary,
+    Expression<String>? startMessageId,
+    Expression<String>? endMessageId,
+    Expression<int>? startOrdinal,
+    Expression<int>? endOrdinal,
+    Expression<String>? origin,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (chatId != null) 'chat_id': chatId,
+      if (title != null) 'title': title,
+      if (summary != null) 'summary': summary,
+      if (startMessageId != null) 'start_message_id': startMessageId,
+      if (endMessageId != null) 'end_message_id': endMessageId,
+      if (startOrdinal != null) 'start_ordinal': startOrdinal,
+      if (endOrdinal != null) 'end_ordinal': endOrdinal,
+      if (origin != null) 'origin': origin,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StoryChaptersCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? chatId,
+      Value<String>? title,
+      Value<String>? summary,
+      Value<String>? startMessageId,
+      Value<String>? endMessageId,
+      Value<int>? startOrdinal,
+      Value<int>? endOrdinal,
+      Value<String>? origin,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return StoryChaptersCompanion(
+      id: id ?? this.id,
+      chatId: chatId ?? this.chatId,
+      title: title ?? this.title,
+      summary: summary ?? this.summary,
+      startMessageId: startMessageId ?? this.startMessageId,
+      endMessageId: endMessageId ?? this.endMessageId,
+      startOrdinal: startOrdinal ?? this.startOrdinal,
+      endOrdinal: endOrdinal ?? this.endOrdinal,
+      origin: origin ?? this.origin,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (chatId.present) {
+      map['chat_id'] = Variable<String>(chatId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (startMessageId.present) {
+      map['start_message_id'] = Variable<String>(startMessageId.value);
+    }
+    if (endMessageId.present) {
+      map['end_message_id'] = Variable<String>(endMessageId.value);
+    }
+    if (startOrdinal.present) {
+      map['start_ordinal'] = Variable<int>(startOrdinal.value);
+    }
+    if (endOrdinal.present) {
+      map['end_ordinal'] = Variable<int>(endOrdinal.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoryChaptersCompanion(')
+          ..write('id: $id, ')
+          ..write('chatId: $chatId, ')
+          ..write('title: $title, ')
+          ..write('summary: $summary, ')
+          ..write('startMessageId: $startMessageId, ')
+          ..write('endMessageId: $endMessageId, ')
+          ..write('startOrdinal: $startOrdinal, ')
+          ..write('endOrdinal: $endOrdinal, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -11956,6 +12520,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $DataBankTextChunksTable(this);
   late final $DataBankBindingsTable dataBankBindings =
       $DataBankBindingsTable(this);
+  late final $StoryChaptersTable storyChapters = $StoryChaptersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -11982,7 +12547,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         dataBankDocumentVersions,
         dataBankSections,
         dataBankTextChunks,
-        dataBankBindings
+        dataBankBindings,
+        storyChapters
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12135,6 +12701,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('data_bank_bindings', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('story_chapters', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('story_chapters', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('story_chapters', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -13091,6 +13678,21 @@ final class $$ChatsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$StoryChaptersTable, List<StoryChapterRow>>
+      _storyChaptersRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.storyChapters,
+              aliasName:
+                  $_aliasNameGenerator(db.chats.id, db.storyChapters.chatId));
+
+  $$StoryChaptersTableProcessedTableManager get storyChaptersRefs {
+    final manager = $$StoryChaptersTableTableManager($_db, $_db.storyChapters)
+        .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_storyChaptersRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
@@ -13268,6 +13870,27 @@ class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
             $$DataBankBindingsTableFilterComposer(
               $db: $db,
               $table: $db.dataBankBindings,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> storyChaptersRefs(
+      Expression<bool> Function($$StoryChaptersTableFilterComposer f) f) {
+    final $$StoryChaptersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableFilterComposer(
+              $db: $db,
+              $table: $db.storyChapters,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -13518,6 +14141,27 @@ class $$ChatsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> storyChaptersRefs<T extends Object>(
+      Expression<T> Function($$StoryChaptersTableAnnotationComposer a) f) {
+    final $$StoryChaptersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ChatsTableTableManager extends RootTableManager<
@@ -13538,7 +14182,8 @@ class $$ChatsTableTableManager extends RootTableManager<
         bool memoryScopeChat,
         bool memorySourceChat,
         bool rpgChatStatesRefs,
-        bool dataBankBindingsRefs})> {
+        bool dataBankBindingsRefs,
+        bool storyChaptersRefs})> {
   $$ChatsTableTableManager(_$AppDatabase db, $ChatsTable table)
       : super(TableManagerState(
           db: db,
@@ -13612,7 +14257,8 @@ class $$ChatsTableTableManager extends RootTableManager<
               memoryScopeChat = false,
               memorySourceChat = false,
               rpgChatStatesRefs = false,
-              dataBankBindingsRefs = false}) {
+              dataBankBindingsRefs = false,
+              storyChaptersRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -13621,7 +14267,8 @@ class $$ChatsTableTableManager extends RootTableManager<
                 if (memoryScopeChat) db.longTermMemories,
                 if (memorySourceChat) db.longTermMemories,
                 if (rpgChatStatesRefs) db.rpgChatStates,
-                if (dataBankBindingsRefs) db.dataBankBindings
+                if (dataBankBindingsRefs) db.dataBankBindings,
+                if (storyChaptersRefs) db.storyChapters
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -13724,6 +14371,19 @@ class $$ChatsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.chatId == item.id),
+                        typedResults: items),
+                  if (storyChaptersRefs)
+                    await $_getPrefetchedData<Chat, $ChatsTable,
+                            StoryChapterRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChatsTableReferences._storyChaptersRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .storyChaptersRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.chatId == item.id),
                         typedResults: items)
                 ];
               },
@@ -13750,7 +14410,8 @@ typedef $$ChatsTableProcessedTableManager = ProcessedTableManager<
         bool memoryScopeChat,
         bool memorySourceChat,
         bool rpgChatStatesRefs,
-        bool dataBankBindingsRefs})>;
+        bool dataBankBindingsRefs,
+        bool storyChaptersRefs})>;
 typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String id,
   required String chatId,
@@ -13817,6 +14478,40 @@ final class $$MessagesTableReferences
 
     final cache = $_typedResult
         .readTableOrNull(_longTermMemorySourceMessagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$StoryChaptersTable, List<StoryChapterRow>>
+      _storyChapterStartMessageTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.storyChapters,
+              aliasName: $_aliasNameGenerator(
+                  db.messages.id, db.storyChapters.startMessageId));
+
+  $$StoryChaptersTableProcessedTableManager get storyChapterStartMessage {
+    final manager = $$StoryChaptersTableTableManager($_db, $_db.storyChapters)
+        .filter(
+            (f) => f.startMessageId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_storyChapterStartMessageTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$StoryChaptersTable, List<StoryChapterRow>>
+      _storyChapterEndMessageTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.storyChapters,
+              aliasName: $_aliasNameGenerator(
+                  db.messages.id, db.storyChapters.endMessageId));
+
+  $$StoryChaptersTableProcessedTableManager get storyChapterEndMessage {
+    final manager = $$StoryChaptersTableTableManager($_db, $_db.storyChapters)
+        .filter(
+            (f) => f.endMessageId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_storyChapterEndMessageTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -13910,6 +14605,48 @@ class $$MessagesTableFilterComposer
                   $removeJoinBuilderFromRootComposer:
                       $removeJoinBuilderFromRootComposer,
                 ));
+    return f(composer);
+  }
+
+  Expression<bool> storyChapterStartMessage(
+      Expression<bool> Function($$StoryChaptersTableFilterComposer f) f) {
+    final $$StoryChaptersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.startMessageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableFilterComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> storyChapterEndMessage(
+      Expression<bool> Function($$StoryChaptersTableFilterComposer f) f) {
+    final $$StoryChaptersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.endMessageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableFilterComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
     return f(composer);
   }
 }
@@ -14072,6 +14809,48 @@ class $$MessagesTableAnnotationComposer
                 ));
     return f(composer);
   }
+
+  Expression<T> storyChapterStartMessage<T extends Object>(
+      Expression<T> Function($$StoryChaptersTableAnnotationComposer a) f) {
+    final $$StoryChaptersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.startMessageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> storyChapterEndMessage<T extends Object>(
+      Expression<T> Function($$StoryChaptersTableAnnotationComposer a) f) {
+    final $$StoryChaptersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.endMessageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$MessagesTableTableManager extends RootTableManager<
@@ -14086,7 +14865,10 @@ class $$MessagesTableTableManager extends RootTableManager<
     (Message, $$MessagesTableReferences),
     Message,
     PrefetchHooks Function(
-        {bool chatId, bool longTermMemorySourceMessagesRefs})> {
+        {bool chatId,
+        bool longTermMemorySourceMessagesRefs,
+        bool storyChapterStartMessage,
+        bool storyChapterEndMessage})> {
   $$MessagesTableTableManager(_$AppDatabase db, $MessagesTable table)
       : super(TableManagerState(
           db: db,
@@ -14166,12 +14948,17 @@ class $$MessagesTableTableManager extends RootTableManager<
                   (e.readTable(table), $$MessagesTableReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: (
-              {chatId = false, longTermMemorySourceMessagesRefs = false}) {
+              {chatId = false,
+              longTermMemorySourceMessagesRefs = false,
+              storyChapterStartMessage = false,
+              storyChapterEndMessage = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (longTermMemorySourceMessagesRefs)
-                  db.longTermMemorySourceMessages
+                  db.longTermMemorySourceMessages,
+                if (storyChapterStartMessage) db.storyChapters,
+                if (storyChapterEndMessage) db.storyChapters
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -14212,6 +14999,32 @@ class $$MessagesTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.messageId == item.id),
+                        typedResults: items),
+                  if (storyChapterStartMessage)
+                    await $_getPrefetchedData<Message, $MessagesTable,
+                            StoryChapterRow>(
+                        currentTable: table,
+                        referencedTable: $$MessagesTableReferences
+                            ._storyChapterStartMessageTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MessagesTableReferences(db, table, p0)
+                                .storyChapterStartMessage,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.startMessageId == item.id),
+                        typedResults: items),
+                  if (storyChapterEndMessage)
+                    await $_getPrefetchedData<Message, $MessagesTable,
+                            StoryChapterRow>(
+                        currentTable: table,
+                        referencedTable: $$MessagesTableReferences
+                            ._storyChapterEndMessageTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MessagesTableReferences(db, table, p0)
+                                .storyChapterEndMessage,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.endMessageId == item.id),
                         typedResults: items)
                 ];
               },
@@ -14232,7 +15045,10 @@ typedef $$MessagesTableProcessedTableManager = ProcessedTableManager<
     (Message, $$MessagesTableReferences),
     Message,
     PrefetchHooks Function(
-        {bool chatId, bool longTermMemorySourceMessagesRefs})>;
+        {bool chatId,
+        bool longTermMemorySourceMessagesRefs,
+        bool storyChapterStartMessage,
+        bool storyChapterEndMessage})>;
 typedef $$WorldInfosTableCreateCompanionBuilder = WorldInfosCompanion Function({
   required String id,
   required String name,
@@ -22392,6 +23208,529 @@ typedef $$DataBankBindingsTableProcessedTableManager = ProcessedTableManager<
     (DataBankBindingRow, $$DataBankBindingsTableReferences),
     DataBankBindingRow,
     PrefetchHooks Function({bool documentId, bool characterId, bool chatId})>;
+typedef $$StoryChaptersTableCreateCompanionBuilder = StoryChaptersCompanion
+    Function({
+  required String id,
+  required String chatId,
+  required String title,
+  required String summary,
+  required String startMessageId,
+  required String endMessageId,
+  required int startOrdinal,
+  required int endOrdinal,
+  required String origin,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$StoryChaptersTableUpdateCompanionBuilder = StoryChaptersCompanion
+    Function({
+  Value<String> id,
+  Value<String> chatId,
+  Value<String> title,
+  Value<String> summary,
+  Value<String> startMessageId,
+  Value<String> endMessageId,
+  Value<int> startOrdinal,
+  Value<int> endOrdinal,
+  Value<String> origin,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$StoryChaptersTableReferences extends BaseReferences<_$AppDatabase,
+    $StoryChaptersTable, StoryChapterRow> {
+  $$StoryChaptersTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats
+      .createAlias($_aliasNameGenerator(db.storyChapters.chatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager get chatId {
+    final $_column = $_itemColumn<String>('chat_id')!;
+
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $MessagesTable _startMessageIdTable(_$AppDatabase db) =>
+      db.messages.createAlias($_aliasNameGenerator(
+          db.storyChapters.startMessageId, db.messages.id));
+
+  $$MessagesTableProcessedTableManager get startMessageId {
+    final $_column = $_itemColumn<String>('start_message_id')!;
+
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_startMessageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $MessagesTable _endMessageIdTable(_$AppDatabase db) =>
+      db.messages.createAlias(
+          $_aliasNameGenerator(db.storyChapters.endMessageId, db.messages.id));
+
+  $$MessagesTableProcessedTableManager get endMessageId {
+    final $_column = $_itemColumn<String>('end_message_id')!;
+
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_endMessageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$StoryChaptersTableFilterComposer
+    extends Composer<_$AppDatabase, $StoryChaptersTable> {
+  $$StoryChaptersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get summary => $composableBuilder(
+      column: $table.summary, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get startOrdinal => $composableBuilder(
+      column: $table.startOrdinal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get endOrdinal => $composableBuilder(
+      column: $table.endOrdinal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$ChatsTableFilterComposer get chatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableFilterComposer get startMessageId {
+    final $$MessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.startMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableFilterComposer get endMessageId {
+    final $$MessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.endMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$StoryChaptersTableOrderingComposer
+    extends Composer<_$AppDatabase, $StoryChaptersTable> {
+  $$StoryChaptersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+      column: $table.summary, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startOrdinal => $composableBuilder(
+      column: $table.startOrdinal,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get endOrdinal => $composableBuilder(
+      column: $table.endOrdinal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$ChatsTableOrderingComposer get chatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableOrderingComposer get startMessageId {
+    final $$MessagesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.startMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableOrderingComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableOrderingComposer get endMessageId {
+    final $$MessagesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.endMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableOrderingComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$StoryChaptersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StoryChaptersTable> {
+  $$StoryChaptersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<int> get startOrdinal => $composableBuilder(
+      column: $table.startOrdinal, builder: (column) => column);
+
+  GeneratedColumn<int> get endOrdinal => $composableBuilder(
+      column: $table.endOrdinal, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$ChatsTableAnnotationComposer get chatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableAnnotationComposer get startMessageId {
+    final $$MessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.startMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableAnnotationComposer get endMessageId {
+    final $$MessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.endMessageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$StoryChaptersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $StoryChaptersTable,
+    StoryChapterRow,
+    $$StoryChaptersTableFilterComposer,
+    $$StoryChaptersTableOrderingComposer,
+    $$StoryChaptersTableAnnotationComposer,
+    $$StoryChaptersTableCreateCompanionBuilder,
+    $$StoryChaptersTableUpdateCompanionBuilder,
+    (StoryChapterRow, $$StoryChaptersTableReferences),
+    StoryChapterRow,
+    PrefetchHooks Function(
+        {bool chatId, bool startMessageId, bool endMessageId})> {
+  $$StoryChaptersTableTableManager(_$AppDatabase db, $StoryChaptersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StoryChaptersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StoryChaptersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StoryChaptersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> chatId = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> summary = const Value.absent(),
+            Value<String> startMessageId = const Value.absent(),
+            Value<String> endMessageId = const Value.absent(),
+            Value<int> startOrdinal = const Value.absent(),
+            Value<int> endOrdinal = const Value.absent(),
+            Value<String> origin = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StoryChaptersCompanion(
+            id: id,
+            chatId: chatId,
+            title: title,
+            summary: summary,
+            startMessageId: startMessageId,
+            endMessageId: endMessageId,
+            startOrdinal: startOrdinal,
+            endOrdinal: endOrdinal,
+            origin: origin,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String chatId,
+            required String title,
+            required String summary,
+            required String startMessageId,
+            required String endMessageId,
+            required int startOrdinal,
+            required int endOrdinal,
+            required String origin,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StoryChaptersCompanion.insert(
+            id: id,
+            chatId: chatId,
+            title: title,
+            summary: summary,
+            startMessageId: startMessageId,
+            endMessageId: endMessageId,
+            startOrdinal: startOrdinal,
+            endOrdinal: endOrdinal,
+            origin: origin,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$StoryChaptersTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {chatId = false, startMessageId = false, endMessageId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (chatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chatId,
+                    referencedTable:
+                        $$StoryChaptersTableReferences._chatIdTable(db),
+                    referencedColumn:
+                        $$StoryChaptersTableReferences._chatIdTable(db).id,
+                  ) as T;
+                }
+                if (startMessageId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.startMessageId,
+                    referencedTable:
+                        $$StoryChaptersTableReferences._startMessageIdTable(db),
+                    referencedColumn: $$StoryChaptersTableReferences
+                        ._startMessageIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (endMessageId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.endMessageId,
+                    referencedTable:
+                        $$StoryChaptersTableReferences._endMessageIdTable(db),
+                    referencedColumn: $$StoryChaptersTableReferences
+                        ._endMessageIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$StoryChaptersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $StoryChaptersTable,
+    StoryChapterRow,
+    $$StoryChaptersTableFilterComposer,
+    $$StoryChaptersTableOrderingComposer,
+    $$StoryChaptersTableAnnotationComposer,
+    $$StoryChaptersTableCreateCompanionBuilder,
+    $$StoryChaptersTableUpdateCompanionBuilder,
+    (StoryChapterRow, $$StoryChaptersTableReferences),
+    StoryChapterRow,
+    PrefetchHooks Function(
+        {bool chatId, bool startMessageId, bool endMessageId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -22442,4 +23781,6 @@ class $AppDatabaseManager {
       $$DataBankTextChunksTableTableManager(_db, _db.dataBankTextChunks);
   $$DataBankBindingsTableTableManager get dataBankBindings =>
       $$DataBankBindingsTableTableManager(_db, _db.dataBankBindings);
+  $$StoryChaptersTableTableManager get storyChapters =>
+      $$StoryChaptersTableTableManager(_db, _db.storyChapters);
 }
