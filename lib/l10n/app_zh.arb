@@ -1831,5 +1831,7 @@
   "useLocalAiOnly": "仅使用本地 AI",
   "aiDataSharingSettingsTitle": "远程 AI 数据共享",
   "aiDataSharingAllowedDescription": "已允许向你配置的服务商和端点发送数据",
-  "aiDataSharingLocalOnlyDescription": "已阻止；本地 AI 端点仍可使用"
+  "aiDataSharingLocalOnlyDescription": "已阻止；本地 AI 端点仍可使用",
+  "imagine": "生图",
+  "fillImagePromptWithAi": "AI 填写提示词"
 }

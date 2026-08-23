@@ -3373,6 +3373,18 @@ abstract class AppLocalizations {
   /// **'Generate images using AI models. Use the /imagine command in chat or generate character portraits from the character editor.'**
   String get aboutImageGenerationDescription;
 
+  /// Chat input action that opens image generation
+  ///
+  /// In en, this message translates to:
+  /// **'Imagine'**
+  String get imagine;
+
+  /// Ask the chat model to write an image prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Fill with AI'**
+  String get fillImagePromptWithAi;
+
   /// Imagine command label
   ///
   /// In en, this message translates to:

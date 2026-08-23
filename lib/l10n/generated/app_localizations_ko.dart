@@ -1777,6 +1777,12 @@ class AppLocalizationsKo extends AppLocalizations {
       'Generate images using AI models. Use the /imagine command in chat or generate character portraits from the character editor.';
 
   @override
+  String get imagine => 'Imagine';
+
+  @override
+  String get fillImagePromptWithAi => 'Fill with AI';
+
+  @override
   String get imagineCommand => '/imagine Command';
 
   @override
