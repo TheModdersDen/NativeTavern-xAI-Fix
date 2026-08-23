@@ -65,6 +65,7 @@ void main() {
 
   test('chat turns obey the extraction switch and stage inspectable sources',
       () async {
+    container.read(appSettingsProvider.notifier).updateStoryEnabled(false);
     final chat = container.read(activeChatProvider.notifier);
     final chatId = await chat.createChat('character-1');
     expect(chatId, isNotNull);

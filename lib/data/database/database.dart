@@ -496,6 +496,36 @@ class DataBankTextChunks extends Table {
       ];
 }
 
+@DataClassName('StoryChapterRow')
+class StoryChapters extends Table {
+  TextColumn get id => text()();
+  TextColumn get chatId =>
+      text().references(Chats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text()();
+  TextColumn get summary => text()();
+  @ReferenceName('storyChapterStartMessage')
+  TextColumn get startMessageId =>
+      text().references(Messages, #id, onDelete: KeyAction.cascade)();
+  @ReferenceName('storyChapterEndMessage')
+  TextColumn get endMessageId =>
+      text().references(Messages, #id, onDelete: KeyAction.cascade)();
+  IntColumn get startOrdinal => integer()();
+  IntColumn get endOrdinal => integer()();
+  TextColumn get origin => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => const [
+        'CHECK (start_ordinal >= 0)',
+        'CHECK (end_ordinal >= start_ordinal)',
+        "CHECK (origin IN ('auto', 'manual'))",
+      ];
+}
+
 @DataClassName('DataBankBindingRow')
 class DataBankBindings extends Table {
   TextColumn get id => text()();
@@ -553,13 +583,14 @@ class DataBankBindings extends Table {
   DataBankSections,
   DataBankTextChunks,
   DataBankBindings,
+  StoryChapters,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration {
@@ -568,6 +599,7 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
         await _createV15Indexes();
         await _createV15Triggers();
+        await _createV16Indexes();
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from > to) {
@@ -585,6 +617,7 @@ class AppDatabase extends _$AppDatabase {
           if (to == schemaVersion && await _hasCompleteCurrentTableLayout()) {
             await _createV15Indexes();
             await _createV15Triggers();
+            await _createV16Indexes();
             return;
           }
 
@@ -681,6 +714,11 @@ class AppDatabase extends _$AppDatabase {
             await _createV15Indexes();
             await _createV15Triggers();
           }
+          if (from < 16) {
+            await _assertNoPartialV16Schema();
+            await m.createTable(storyChapters);
+            await _createV16Indexes();
+          }
         });
       },
       beforeOpen: (details) async {
@@ -693,6 +731,10 @@ class AppDatabase extends _$AppDatabase {
         final dataBankSearchIndexCreated = await _ensureDataBankSearchIndex();
         if (dataBankSearchIndexCreated) {
           await _rebuildDataBankSearchIndex();
+        }
+        final storySearchIndexCreated = await _ensureStoryChapterSearchIndex();
+        if (storySearchIndexCreated) {
+          await _rebuildStoryChapterSearchIndex();
         }
       },
     );
@@ -708,6 +750,12 @@ class AppDatabase extends _$AppDatabase {
   Future<void> rebuildDataBankSearchIndex() async {
     await _ensureDataBankSearchIndex();
     await _rebuildDataBankSearchIndex();
+  }
+
+  /// Recreates the derived story-chapter FTS index from chapter records.
+  Future<void> rebuildStoryChapterSearchIndex() async {
+    await _ensureStoryChapterSearchIndex();
+    await _rebuildStoryChapterSearchIndex();
   }
 
   Future<bool> _ensureDataBankSearchIndex() async {
@@ -863,6 +911,70 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<bool> _ensureStoryChapterSearchIndex() async {
+    final existing = await customSelect(
+      'SELECT 1 AS found FROM sqlite_master '
+      "WHERE type = 'table' AND name = 'story_chapters_fts'",
+    ).getSingleOrNull();
+    final created = existing == null;
+
+    await customStatement('''
+      CREATE VIRTUAL TABLE IF NOT EXISTS story_chapters_fts USING fts5(
+        id UNINDEXED,
+        title,
+        summary,
+        content = 'story_chapters',
+        content_rowid = 'rowid',
+        tokenize = 'unicode61 remove_diacritics 2'
+      )
+    ''');
+    await _createStoryChapterSearchTriggers();
+    return created;
+  }
+
+  Future<void> _createStoryChapterSearchTriggers() async {
+    const statements = [
+      '''
+        CREATE TRIGGER IF NOT EXISTS story_chapter_fts_insert
+        AFTER INSERT ON story_chapters
+        BEGIN
+          INSERT INTO story_chapters_fts(rowid, id, title, summary)
+          VALUES (NEW.rowid, NEW.id, NEW.title, NEW.summary);
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS story_chapter_fts_delete
+        AFTER DELETE ON story_chapters
+        BEGIN
+          INSERT INTO story_chapters_fts(
+            story_chapters_fts, rowid, id, title, summary
+          ) VALUES ('delete', OLD.rowid, OLD.id, OLD.title, OLD.summary);
+        END
+      ''',
+      '''
+        CREATE TRIGGER IF NOT EXISTS story_chapter_fts_update
+        AFTER UPDATE OF title, summary ON story_chapters
+        BEGIN
+          INSERT INTO story_chapters_fts(
+            story_chapters_fts, rowid, id, title, summary
+          ) VALUES ('delete', OLD.rowid, OLD.id, OLD.title, OLD.summary);
+          INSERT INTO story_chapters_fts(rowid, id, title, summary)
+          VALUES (NEW.rowid, NEW.id, NEW.title, NEW.summary);
+        END
+      ''',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _rebuildStoryChapterSearchIndex() {
+    return customStatement(
+      'INSERT INTO story_chapters_fts(story_chapters_fts) '
+      "VALUES ('rebuild')",
+    );
+  }
+
   Future<void> _createV15Indexes() async {
     const statements = [
       'CREATE INDEX IF NOT EXISTS long_term_memories_scope_idx '
@@ -890,6 +1002,21 @@ class AppDatabase extends _$AppDatabase {
       'CREATE UNIQUE INDEX IF NOT EXISTS data_bank_binding_chat_unique '
           'ON data_bank_bindings (document_id, chat_id) '
           "WHERE scope = 'chat'",
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _createV16Indexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS story_chapters_chat_idx '
+          'ON story_chapters (chat_id, end_ordinal, created_at)',
+      'CREATE INDEX IF NOT EXISTS story_chapters_start_message_idx '
+          'ON story_chapters (start_message_id)',
+      'CREATE INDEX IF NOT EXISTS story_chapters_end_message_idx '
+          'ON story_chapters (end_message_id)',
     ];
     for (final statement in statements) {
       await customStatement(statement);
@@ -934,6 +1061,22 @@ class AppDatabase extends _$AppDatabase {
     if (rows.isNotEmpty) {
       throw StateError(
         'Partial v15 schema detected: '
+        '${rows.map((row) => row.read<String>('name')).join(', ')}',
+      );
+    }
+  }
+
+  Future<void> _assertNoPartialV16Schema() async {
+    const tableNames = ['story_chapters'];
+    final placeholders = List.filled(tableNames.length, '?').join(', ');
+    final rows = await customSelect(
+      'SELECT name FROM sqlite_master '
+      "WHERE type = 'table' AND name IN ($placeholders)",
+      variables: tableNames.map(Variable<String>.new).toList(),
+    ).get();
+    if (rows.isNotEmpty) {
+      throw StateError(
+        'Partial v16 schema detected: '
         '${rows.map((row) => row.read<String>('name')).join(', ')}',
       );
     }

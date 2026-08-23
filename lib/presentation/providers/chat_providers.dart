@@ -26,8 +26,8 @@ import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
-import 'package:native_tavern/presentation/providers/memory_context_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
+import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/providers/locale_provider.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/prompt_manager_providers.dart';
@@ -902,16 +902,13 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.addMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
-      if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled) {
-        unawaited(
-          _ref.read(memoryInboxProvider.notifier).extractChat(
-                state.chat!.id,
-                automatic: true,
-                turnMessages: [userMessage, finalMessage],
-                config: config,
-              ),
-        );
-      }
+      unawaited(
+        _writeStoryAfterTurn(
+          chatId: state.chat!.id,
+          turnMessages: [userMessage, finalMessage],
+          config: config,
+        ),
+      );
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -2899,16 +2896,47 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _generateGroupCharacterResponse(characterId, config);
     }
     final turnMessages = state.messages.skip(turnStart).toList(growable: false);
-    if (_ref.read(appSettingsProvider).memoryAutoExtractionEnabled &&
-        turnMessages.any((message) => message.role == MessageRole.assistant)) {
+    if (turnMessages.any((message) => message.role == MessageRole.assistant)) {
       unawaited(
-        _ref.read(memoryInboxProvider.notifier).extractChat(
-              state.chat!.id,
-              automatic: true,
-              turnMessages: turnMessages,
-              config: config,
-            ),
+        _writeStoryAfterTurn(
+          chatId: state.chat!.id,
+          turnMessages: turnMessages,
+          config: config,
+        ),
       );
+    }
+  }
+
+  Future<void> _writeStoryAfterTurn({
+    required String chatId,
+    required List<ChatMessage> turnMessages,
+    required LLMConfig config,
+  }) async {
+    if (!mounted) return;
+    final settings = _ref.read(appSettingsProvider);
+    if (settings.storyEnabled) {
+      try {
+        final story = _ref.read(storyServiceProvider);
+        await story.extractAndWriteSilently(
+          scope: await resolveStoryMemoryScope(_ref, chatId),
+          chatId: chatId,
+          messages: turnMessages,
+          config: config,
+        );
+        if (!mounted) return;
+        await story.maybeCloseAfterTurn(chatId: chatId, config: config);
+      } catch (error, stackTrace) {
+        debugPrint('Story write failed: $error\n$stackTrace');
+      }
+      return;
+    }
+    if (settings.memoryAutoExtractionEnabled) {
+      await _ref.read(memoryInboxProvider.notifier).extractChat(
+            chatId,
+            automatic: true,
+            turnMessages: turnMessages,
+            config: config,
+          );
     }
   }
 
@@ -3305,7 +3333,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 final activeChatProvider =
     StateNotifierProvider<ActiveChatNotifier, ActiveChatState>((ref) {
   ref.watch(dataBankContextRegistrationProvider);
-  ref.watch(longTermMemoryContextRegistrationProvider);
+  ref.watch(storyExtensionsProvider);
   final chatRepo = ref.watch(chatRepositoryProvider);
   final characterRepo = ref.watch(characterRepositoryProvider);
   final groupRepo = ref.watch(groupRepositoryProvider);

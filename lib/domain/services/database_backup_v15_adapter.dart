@@ -63,6 +63,10 @@ final class DatabaseBackupV15Adapter {
       'dataBankBindings': _mapById(
         bindings.map((row) => row.toJson()),
       ),
+      'storyChapters': _mapById(
+        (await _database.select(_database.storyChapters).get())
+            .map((row) => row.toJson()),
+      ),
     };
   }
 
@@ -160,6 +164,13 @@ final class DatabaseBackupV15Adapter {
         await _insert(
           _database.dataBankBindings,
           DataBankBindingRow.fromJson(json),
+          overwriteExisting,
+        );
+      }
+      for (final json in _rows(data, 'storyChapters')) {
+        await _insert(
+          _database.storyChapters,
+          StoryChapterRow.fromJson(json),
           overwriteExisting,
         );
       }

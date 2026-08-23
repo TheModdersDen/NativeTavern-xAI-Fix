@@ -24,7 +24,10 @@ final longTermMemoryContextContributorProvider =
   return LongTermMemoryContextContributor(
     service: ref.watch(longTermMemoryContextServiceProvider),
     resolveScopes: (request) => _resolveScopes(ref, request),
-    enabled: () => ref.read(appSettingsProvider).memoryContextEnabled,
+    enabled: () {
+      final settings = ref.read(appSettingsProvider);
+      return settings.storyEnabled && settings.memoryContextEnabled;
+    },
     tokenBudget: () => ref.read(appSettingsProvider).memoryContextTokenBudget,
     semanticEnabled: () =>
         ref.read(appSettingsProvider).memorySemanticSearchEnabled,

@@ -692,6 +692,9 @@ class AppSettings {
   final bool memoryContextEnabled;
   final bool memorySemanticSearchEnabled;
   final int memoryContextTokenBudget;
+  final bool storyEnabled;
+  final int storyTurnsPerChapter;
+  final double storyHighConfidenceThreshold;
 
   const AppSettings({
     this.theme = 'dark',
@@ -710,6 +713,9 @@ class AppSettings {
     this.memoryContextEnabled = true,
     this.memorySemanticSearchEnabled = false,
     this.memoryContextTokenBudget = 512,
+    this.storyEnabled = true,
+    this.storyTurnsPerChapter = 20,
+    this.storyHighConfidenceThreshold = 0.8,
   });
 
   AppSettings copyWith({
@@ -729,6 +735,9 @@ class AppSettings {
     bool? memoryContextEnabled,
     bool? memorySemanticSearchEnabled,
     int? memoryContextTokenBudget,
+    bool? storyEnabled,
+    int? storyTurnsPerChapter,
+    double? storyHighConfidenceThreshold,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -752,6 +761,10 @@ class AppSettings {
           memorySemanticSearchEnabled ?? this.memorySemanticSearchEnabled,
       memoryContextTokenBudget:
           memoryContextTokenBudget ?? this.memoryContextTokenBudget,
+      storyEnabled: storyEnabled ?? this.storyEnabled,
+      storyTurnsPerChapter: storyTurnsPerChapter ?? this.storyTurnsPerChapter,
+      storyHighConfidenceThreshold:
+          storyHighConfidenceThreshold ?? this.storyHighConfidenceThreshold,
     );
   }
 
@@ -772,6 +785,9 @@ class AppSettings {
         'memoryContextEnabled': memoryContextEnabled,
         'memorySemanticSearchEnabled': memorySemanticSearchEnabled,
         'memoryContextTokenBudget': memoryContextTokenBudget,
+        'storyEnabled': storyEnabled,
+        'storyTurnsPerChapter': storyTurnsPerChapter,
+        'storyHighConfidenceThreshold': storyHighConfidenceThreshold,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -798,11 +814,28 @@ class AppSettings {
       memoryContextTokenBudget: normalizeMemoryContextTokenBudget(
         (json['memoryContextTokenBudget'] as num?)?.toInt(),
       ),
+      storyEnabled: json['storyEnabled'] as bool? ?? true,
+      storyTurnsPerChapter: normalizeStoryTurnsPerChapter(
+        (json['storyTurnsPerChapter'] as num?)?.toInt(),
+      ),
+      storyHighConfidenceThreshold: normalizeStoryHighConfidenceThreshold(
+        (json['storyHighConfidenceThreshold'] as num?)?.toDouble(),
+      ),
     );
   }
 
   static int normalizeMemoryContextTokenBudget(int? value) {
     return memoryContextTokenBudgets.contains(value) ? value! : 512;
+  }
+
+  static int normalizeStoryTurnsPerChapter(int? value) {
+    if (value == null || value < 5 || value > 80) return 20;
+    return value;
+  }
+
+  static double normalizeStoryHighConfidenceThreshold(double? value) {
+    if (value == null || !value.isFinite) return 0.8;
+    return value.clamp(0.5, 1.0).toDouble();
   }
 }
 
@@ -946,6 +979,26 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(
       memoryContextTokenBudget:
           AppSettings.normalizeMemoryContextTokenBudget(tokens),
+    );
+    _saveSettings();
+  }
+
+  void updateStoryEnabled(bool enabled) {
+    state = state.copyWith(storyEnabled: enabled);
+    _saveSettings();
+  }
+
+  void updateStoryTurnsPerChapter(int turns) {
+    state = state.copyWith(
+      storyTurnsPerChapter: AppSettings.normalizeStoryTurnsPerChapter(turns),
+    );
+    _saveSettings();
+  }
+
+  void updateStoryHighConfidenceThreshold(double threshold) {
+    state = state.copyWith(
+      storyHighConfidenceThreshold:
+          AppSettings.normalizeStoryHighConfidenceThreshold(threshold),
     );
     _saveSettings();
   }
