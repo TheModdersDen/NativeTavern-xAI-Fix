@@ -323,6 +323,8 @@ const currentSnapshotTables = <SnapshotTable>[
   SnapshotTable('data_bank_text_chunks', orderBy: ['id']),
   SnapshotTable('data_bank_bindings', orderBy: ['id']),
   SnapshotTable('story_chapters', orderBy: ['id']),
+  SnapshotTable('moment_posts', orderBy: ['id']),
+  SnapshotTable('moment_comments', orderBy: ['id']),
 ];
 
 const legacyV10PreservedSnapshotTables = <SnapshotTable>[
@@ -903,6 +905,16 @@ const _currentOnlySeedStatements = <String>[
       'chapter-1', 'chat-1', 'Fixture chapter',
       'A representative persisted chapter.', 'message-1', 'message-1',
       0, 0, 'auto', 1704240500, 1704240500
+    )
+  ''',
+  '''
+    INSERT INTO moment_posts (
+      id, chat_id, author_id, author_name, public_body, fact_body,
+      chapter_id, origin, status, write_to_world, created_at, updated_at
+    ) VALUES (
+      'moment-1', 'chat-1', 'character-1', 'Fixture',
+      'Nothing worth mentioning.', 'A representative persisted chapter.',
+      'chapter-1', 'chapter', 'open', 0, 1704240600, 1704240600
     )
   ''',
 ];

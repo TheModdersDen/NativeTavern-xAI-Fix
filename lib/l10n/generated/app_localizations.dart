@@ -80,7 +80,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -103,11 +103,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -130,7 +130,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('vi'),
     Locale('zh'),
-    Locale('zh', 'TW'),
+    Locale('zh', 'TW')
   ];
 
   /// The application title
@@ -7255,6 +7255,90 @@ abstract class AppLocalizations {
   /// **'Moments'**
   String get moments;
 
+  /// No description provided for @momentsDisabledEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Moments stay empty until you turn them on. Nothing is generated in the background.'**
+  String get momentsDisabledEmpty;
+
+  /// No description provided for @momentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing happened in public. Chat long enough for a chapter, or post one yourself.'**
+  String get momentsEmpty;
+
+  /// No description provided for @momentsCompose.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get momentsCompose;
+
+  /// No description provided for @momentsComposeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want people to see?'**
+  String get momentsComposeHint;
+
+  /// No description provided for @momentsNeedChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a chat first, then come back to post.'**
+  String get momentsNeedChat;
+
+  /// No description provided for @momentsComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get momentsComment;
+
+  /// No description provided for @momentsTalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk'**
+  String get momentsTalk;
+
+  /// No description provided for @momentsExpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Expose'**
+  String get momentsExpose;
+
+  /// No description provided for @momentsIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it'**
+  String get momentsIgnore;
+
+  /// No description provided for @momentsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a reply'**
+  String get momentsWaiting;
+
+  /// No description provided for @momentsWaitingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get momentsWaitingBadge;
+
+  /// No description provided for @momentsIgnoredBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Left unread'**
+  String get momentsIgnoredBadge;
+
+  /// No description provided for @momentsWriteToWorld.
+  ///
+  /// In en, this message translates to:
+  /// **'Write this into the world'**
+  String get momentsWriteToWorld;
+
+  /// No description provided for @momentsFact.
+  ///
+  /// In en, this message translates to:
+  /// **'What actually happened: {fact}'**
+  String momentsFact(String fact);
+
   /// Placeholder body for unfinished play destinations
   ///
   /// In en, this message translates to:
@@ -8040,11 +8124,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{versions} version(s), {chunks} chunk(s), {bindings} binding(s), and {files} managed file(s) will be removed.'**
   String dataBankDeleteDocumentBody(
-    int versions,
-    int chunks,
-    int bindings,
-    int files,
-  );
+      int versions, int chunks, int bindings, int files);
 
   /// No description provided for @dataBankChatRetrieval.
   ///
@@ -9359,11 +9439,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supports macros such as {userMacro}, {charMacro}, {timeMacro}, and {dateMacro}.'**
   String supportedPromptMacros(
-    String userMacro,
-    String charMacro,
-    String timeMacro,
-    String dateMacro,
-  );
+      String userMacro, String charMacro, String timeMacro, String dateMacro);
 
   /// No description provided for @enterPromptContent.
   ///
@@ -11141,26 +11217,26 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-    'ar',
-    'de',
-    'en',
-    'es',
-    'fr',
-    'hi',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'ms',
-    'nl',
-    'pl',
-    'pt',
-    'ru',
-    'th',
-    'tr',
-    'vi',
-    'zh',
-  ].contains(locale.languageCode);
+        'ar',
+        'de',
+        'en',
+        'es',
+        'fr',
+        'hi',
+        'id',
+        'it',
+        'ja',
+        'ko',
+        'ms',
+        'nl',
+        'pl',
+        'pt',
+        'ru',
+        'th',
+        'tr',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -11222,9 +11298,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

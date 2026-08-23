@@ -695,6 +695,7 @@ class AppSettings {
   final bool storyEnabled;
   final int storyTurnsPerChapter;
   final double storyHighConfidenceThreshold;
+  final bool momentsEnabled;
 
   const AppSettings({
     this.theme = 'dark',
@@ -716,6 +717,7 @@ class AppSettings {
     this.storyEnabled = true,
     this.storyTurnsPerChapter = 20,
     this.storyHighConfidenceThreshold = 0.8,
+    this.momentsEnabled = false,
   });
 
   AppSettings copyWith({
@@ -738,6 +740,7 @@ class AppSettings {
     bool? storyEnabled,
     int? storyTurnsPerChapter,
     double? storyHighConfidenceThreshold,
+    bool? momentsEnabled,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -765,6 +768,7 @@ class AppSettings {
       storyTurnsPerChapter: storyTurnsPerChapter ?? this.storyTurnsPerChapter,
       storyHighConfidenceThreshold:
           storyHighConfidenceThreshold ?? this.storyHighConfidenceThreshold,
+      momentsEnabled: momentsEnabled ?? this.momentsEnabled,
     );
   }
 
@@ -788,6 +792,7 @@ class AppSettings {
         'storyEnabled': storyEnabled,
         'storyTurnsPerChapter': storyTurnsPerChapter,
         'storyHighConfidenceThreshold': storyHighConfidenceThreshold,
+        'momentsEnabled': momentsEnabled,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -821,6 +826,7 @@ class AppSettings {
       storyHighConfidenceThreshold: normalizeStoryHighConfidenceThreshold(
         (json['storyHighConfidenceThreshold'] as num?)?.toDouble(),
       ),
+      momentsEnabled: json['momentsEnabled'] as bool? ?? false,
     );
   }
 
@@ -1000,6 +1006,11 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
       storyHighConfidenceThreshold:
           AppSettings.normalizeStoryHighConfidenceThreshold(threshold),
     );
+    _saveSettings();
+  }
+
+  void updateMomentsEnabled(bool enabled) {
+    state = state.copyWith(momentsEnabled: enabled);
     _saveSettings();
   }
 

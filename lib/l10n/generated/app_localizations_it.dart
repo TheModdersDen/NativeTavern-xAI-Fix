@@ -3966,6 +3966,52 @@ class AppLocalizationsIt extends AppLocalizations {
   String get moments => 'Moments';
 
   @override
+  String get momentsDisabledEmpty =>
+      'Moments stay empty until you turn them on. Nothing is generated in the background.';
+
+  @override
+  String get momentsEmpty =>
+      'Nothing happened in public. Chat long enough for a chapter, or post one yourself.';
+
+  @override
+  String get momentsCompose => 'Post';
+
+  @override
+  String get momentsComposeHint => 'What do you want people to see?';
+
+  @override
+  String get momentsNeedChat => 'Open a chat first, then come back to post.';
+
+  @override
+  String get momentsComment => 'Comment';
+
+  @override
+  String get momentsTalk => 'Talk';
+
+  @override
+  String get momentsExpose => 'Expose';
+
+  @override
+  String get momentsIgnore => 'Leave it';
+
+  @override
+  String get momentsWaiting => 'Waiting for a reply';
+
+  @override
+  String get momentsWaitingBadge => 'Waiting';
+
+  @override
+  String get momentsIgnoredBadge => 'Left unread';
+
+  @override
+  String get momentsWriteToWorld => 'Write this into the world';
+
+  @override
+  String momentsFact(String fact) {
+    return 'What actually happened: $fact';
+  }
+
+  @override
   String get playFeatureComingSoon => 'This play feature is not ready yet.';
 
   @override
@@ -4396,67 +4442,70 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(field, {
-      'metadata': 'Metadata',
-      'compatibility': 'Compatibility',
-      'initialState': 'Initial State',
-      'initialSeed': 'Initial Seed',
-      'schemaVersion': 'Schema Version',
-      'protectedFields': 'Protected Fields',
-      'minimumEngineVersion': 'Minimum Engine Version',
-      'maximumEngineVersion': 'Maximum Engine Version',
-      'requiredCapabilities': 'Required Capabilities',
-      'actors': 'Actors',
-      'attributes': 'Attributes',
-      'author': 'Author',
-      'availability': 'Availability',
-      'branchId': 'Branch ID',
-      'conditions': 'Conditions',
-      'cooldowns': 'Cooldowns',
-      'costs': 'Costs',
-      'createdAt': 'Created At',
-      'data': 'Data',
-      'day': 'Day',
-      'description': 'Description',
-      'difficulty': 'Difficulty',
-      'effects': 'Effects',
-      'elapsedMinutes': 'Elapsed Minutes',
-      'eventHistory': 'Event History',
-      'expression': 'Expression',
-      'failureEffects': 'Failure Effects',
-      'format': 'Format',
-      'id': 'ID',
-      'initialValue': 'Initial Value',
-      'inventory': 'Inventory',
-      'items': 'Items',
-      'label': 'Label',
-      'locations': 'Locations',
-      'maximum': 'Maximum',
-      'minimum': 'Minimum',
-      'minuteOfDay': 'Minute of Day',
-      'name': 'Name',
-      'narrative': 'Narrative',
-      'objectiveIds': 'Objective IDs',
-      'objectiveProgress': 'Objective Progress',
-      'operator': 'Operator',
-      'quantity': 'Quantity',
-      'quests': 'Quests',
-      'relationships': 'Relationships',
-      'source': 'Source',
-      'stages': 'Stages',
-      'status': 'Status',
-      'successEffects': 'Success Effects',
-      'summary': 'Summary',
-      'tags': 'Tags',
-      'target': 'Target',
-      'turn': 'Turn',
-      'type': 'Type',
-      'updatedAt': 'Updated At',
-      'value': 'Value',
-      'variables': 'Variables',
-      'version': 'Version',
-      'other': '$field',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': 'Metadata',
+        'compatibility': 'Compatibility',
+        'initialState': 'Initial State',
+        'initialSeed': 'Initial Seed',
+        'schemaVersion': 'Schema Version',
+        'protectedFields': 'Protected Fields',
+        'minimumEngineVersion': 'Minimum Engine Version',
+        'maximumEngineVersion': 'Maximum Engine Version',
+        'requiredCapabilities': 'Required Capabilities',
+        'actors': 'Actors',
+        'attributes': 'Attributes',
+        'author': 'Author',
+        'availability': 'Availability',
+        'branchId': 'Branch ID',
+        'conditions': 'Conditions',
+        'cooldowns': 'Cooldowns',
+        'costs': 'Costs',
+        'createdAt': 'Created At',
+        'data': 'Data',
+        'day': 'Day',
+        'description': 'Description',
+        'difficulty': 'Difficulty',
+        'effects': 'Effects',
+        'elapsedMinutes': 'Elapsed Minutes',
+        'eventHistory': 'Event History',
+        'expression': 'Expression',
+        'failureEffects': 'Failure Effects',
+        'format': 'Format',
+        'id': 'ID',
+        'initialValue': 'Initial Value',
+        'inventory': 'Inventory',
+        'items': 'Items',
+        'label': 'Label',
+        'locations': 'Locations',
+        'maximum': 'Maximum',
+        'minimum': 'Minimum',
+        'minuteOfDay': 'Minute of Day',
+        'name': 'Name',
+        'narrative': 'Narrative',
+        'objectiveIds': 'Objective IDs',
+        'objectiveProgress': 'Objective Progress',
+        'operator': 'Operator',
+        'quantity': 'Quantity',
+        'quests': 'Quests',
+        'relationships': 'Relationships',
+        'source': 'Source',
+        'stages': 'Stages',
+        'status': 'Status',
+        'successEffects': 'Success Effects',
+        'summary': 'Summary',
+        'tags': 'Tags',
+        'target': 'Target',
+        'turn': 'Turn',
+        'type': 'Type',
+        'updatedAt': 'Updated At',
+        'value': 'Value',
+        'variables': 'Variables',
+        'version': 'Version',
+        'other': '$field',
+      },
+    );
     return '$_temp0';
   }
 
@@ -4491,11 +4540,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String dataBankDeleteDocumentBody(
-    int versions,
-    int chunks,
-    int bindings,
-    int files,
-  ) {
+      int versions, int chunks, int bindings, int files) {
     return '$versions version(s), $chunks chunk(s), $bindings binding(s), and $files managed file(s) will be removed.';
   }
 
@@ -5257,11 +5302,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String supportedPromptMacros(
-    String userMacro,
-    String charMacro,
-    String timeMacro,
-    String dateMacro,
-  ) {
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
     return 'Supports macros such as $userMacro, $charMacro, $timeMacro, and $dateMacro.';
   }
 

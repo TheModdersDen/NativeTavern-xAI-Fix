@@ -41,7 +41,7 @@ import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.da
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
 import 'package:native_tavern/presentation/screens/personas/personas_screen.dart';
 import 'package:native_tavern/presentation/screens/world_info/world_info_screen.dart';
-import 'package:native_tavern/presentation/screens/play/moments_placeholder_screen.dart';
+import 'package:native_tavern/presentation/screens/play/moments_screen.dart';
 import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
 import 'package:native_tavern/presentation/screens/play/story_screen.dart';
 import 'package:native_tavern/presentation/screens/groups/groups_screen.dart';
@@ -197,6 +197,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return ChatScreen(
             chatId: id,
             initialMessageId: state.uri.queryParameters['message'],
+            initialDraft: state.uri.queryParameters['draft'],
           );
         },
       ),
@@ -431,7 +432,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.playMoments,
         name: 'playMoments',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const MomentsPlaceholderScreen(),
+        builder: (context, state) => const MomentsScreen(),
       ),
       GoRoute(
         path: AppRoutes.dataBank,

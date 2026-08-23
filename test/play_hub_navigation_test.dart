@@ -19,7 +19,7 @@ import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/presentation/screens/chat/chat_screen.dart';
 import 'package:native_tavern/presentation/screens/data_bank/data_bank_screen.dart';
-import 'package:native_tavern/presentation/screens/play/moments_placeholder_screen.dart';
+import 'package:native_tavern/presentation/screens/play/moments_screen.dart';
 import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
 import 'package:native_tavern/presentation/screens/play/story_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/settings_screen.dart';
@@ -247,7 +247,7 @@ void main() {
         ),
         GoRoute(
           path: AppRoutes.playMoments,
-          builder: (_, __) => const MomentsPlaceholderScreen(),
+          builder: (_, __) => const MomentsScreen(),
         ),
         GoRoute(
           path: AppRoutes.dataBank,
@@ -304,7 +304,7 @@ void main() {
     router.go(AppRoutes.playMoments);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, l10n.moments), findsOneWidget);
-    expect(find.text(l10n.playFeatureComingSoon), findsOneWidget);
+    expect(find.text(l10n.momentsDisabledEmpty), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
