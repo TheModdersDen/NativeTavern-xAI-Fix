@@ -13,6 +13,7 @@ class PlayHubScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.playHub)),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
         children: [
           _PlayHubRow(
             key: const Key('play-hub-moments'),
@@ -58,10 +59,14 @@ class _PlayHubRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      minVerticalPadding: 18,
+      minTileHeight: 80,
+      leading: Icon(icon, size: 32),
+      title: Text(title, style: theme.textTheme.titleLarge),
+      trailing: const Icon(Icons.chevron_right, size: 28),
       onTap: onTap,
     );
   }

@@ -152,6 +152,10 @@ void main() {
     expect(find.text(l10n.story), findsOneWidget);
     expect(find.text(l10n.worldInfo), findsOneWidget);
     expect(find.text(l10n.dataBank), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('play-hub-moments'))).height,
+      greaterThanOrEqualTo(80),
+    );
     expect(find.byType(Switch), findsNothing);
     expect(find.byType(SwitchListTile), findsNothing);
 

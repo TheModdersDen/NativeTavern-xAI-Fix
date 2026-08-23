@@ -212,9 +212,6 @@ final class WorldRuntime {
     final state = await _store.load();
     var feedChanged = 0;
     final published = <MomentPost>[];
-    if (storyOn) {
-      await _enqueueDueStoryChapters(now);
-    }
     final recovered = await _retryOpenOperations(
       config: config,
       now: now,
@@ -334,8 +331,16 @@ final class WorldRuntime {
             if (result.post != null) {
               published.add(result.post!);
               feedChanged++;
+              debugPrint(
+                'WorldRuntime posted: ${character.name} — '
+                '${result.post!.publicBody}',
+              );
             } else if (result.comment != null) {
               feedChanged++;
+              debugPrint(
+                'WorldRuntime commented: ${character.name} — '
+                '${result.comment!.body}',
+              );
             }
           case OperationKind.momentImage:
             final posted = await _moments.retryImageJob(job);
@@ -350,52 +355,59 @@ final class WorldRuntime {
     return (feedChanged: feedChanged, woken: woken);
   }
 
-  Future<void> _enqueueDueStoryChapters(DateTime now) async {
+  Future<bool> _writeDueStoryChapters(LLMConfig config, DateTime now) async {
     final story = _story;
+    if (story == null) return false;
+    var wrote = false;
+    var remaining = maxChaptersPerTick;
+    final resumed = <String>{};
+
     final operations = _operations;
-    if (story == null || operations == null) return;
+    if (operations != null) {
+      final due = await operations.listRetryable(
+        now: now,
+        limit: maxChaptersPerTick,
+        kinds: const {OperationKind.storyChapter},
+      );
+      for (final job in due) {
+        if (remaining <= 0) break;
+        resumed.add(job.subjectId);
+        final wroteThis = await _closeDueChapter(
+          job.subjectId,
+          config,
+          now,
+          existing: job,
+        );
+        wrote = wrote || wroteThis;
+        remaining--;
+        while (wroteThis &&
+            remaining > 0 &&
+            await story.isChapterWindowDue(job.subjectId)) {
+          final continued = await _closeDueChapter(job.subjectId, config, now);
+          wrote = wrote || continued;
+          remaining--;
+          if (!continued) break;
+        }
+      }
+    }
+
     for (final chatId in await story.listDueChatIds()) {
-      if (await operations.findOpen(
+      if (remaining <= 0) break;
+      if (resumed.contains(chatId)) continue;
+      if (await operations?.findOpen(
             kind: OperationKind.storyChapter,
             subjectId: chatId,
           ) !=
           null) {
         continue;
       }
-      await operations.begin(
-        kind: OperationKind.storyChapter,
-        subjectId: chatId,
-        now: now,
-      );
-      debugPrint('WorldRuntime queued leftover story for $chatId');
-    }
-  }
-
-  Future<bool> _writeDueStoryChapters(LLMConfig config, DateTime now) async {
-    final operations = _operations;
-    final story = _story;
-    if (operations == null || story == null) return false;
-    final due = await operations.listRetryable(
-      now: now,
-      limit: maxChaptersPerTick,
-      kinds: const {OperationKind.storyChapter},
-    );
-    var wrote = false;
-    var remaining = maxChaptersPerTick;
-    for (final job in due) {
-      if (remaining <= 0) break;
-      final wroteThis = await _retryStoryChapter(job, config, now);
+      final wroteThis = await _closeDueChapter(chatId, config, now);
       wrote = wrote || wroteThis;
       remaining--;
       while (wroteThis &&
           remaining > 0 &&
-          await story.isChapterWindowDue(job.subjectId)) {
-        final next = await operations.begin(
-          kind: OperationKind.storyChapter,
-          subjectId: job.subjectId,
-          now: now,
-        );
-        final continued = await _retryStoryChapter(next, config, now);
+          await story.isChapterWindowDue(chatId)) {
+        final continued = await _closeDueChapter(chatId, config, now);
         wrote = wrote || continued;
         remaining--;
         if (!continued) break;
@@ -411,41 +423,52 @@ final class WorldRuntime {
     });
   }
 
-  Future<bool> _retryStoryChapter(
-    OperationLog job,
+  Future<bool> _closeDueChapter(
+    String chatId,
     LLMConfig config,
-    DateTime now,
-  ) async {
+    DateTime now, {
+    OperationLog? existing,
+  }) async {
     final story = _story;
+    if (story == null) return false;
     final operations = _operations;
-    if (story == null || operations == null) return false;
+    final job = existing ??
+        await operations?.begin(
+          kind: OperationKind.storyChapter,
+          subjectId: chatId,
+          now: now,
+        );
     try {
       final result = await story.maybeCloseAfterTurn(
-        chatId: job.subjectId,
+        chatId: chatId,
         config: config,
       );
       if (result.chapter != null) {
-        await operations.markCompleted(job, now: now);
-        debugPrint('WorldRuntime recovered story chapter for ${job.subjectId}');
+        if (job != null) await operations?.markCompleted(job, now: now);
+        debugPrint('WorldRuntime wrote story chapter for $chatId');
         return true;
       }
       if (result.skipped && result.failure == null) {
-        await operations.markCompleted(job, now: now);
+        if (job != null) await operations?.markCompleted(job, now: now);
         return false;
       }
-      await operations.markIncomplete(
-        job,
-        error: result.failure?.message ?? 'Chapter write failed.',
-        dueAt: now.add(_retryDelay(job.attempts)),
-        now: now,
-      );
+      if (job != null) {
+        await operations?.markIncomplete(
+          job,
+          error: result.failure?.message ?? 'Chapter write failed.',
+          dueAt: now.add(_retryDelay(job.attempts)),
+          now: now,
+        );
+      }
     } catch (error) {
-      await operations.markIncomplete(
-        job,
-        error: '$error',
-        dueAt: now.add(_retryDelay(job.attempts)),
-        now: now,
-      );
+      if (job != null) {
+        await operations?.markIncomplete(
+          job,
+          error: '$error',
+          dueAt: now.add(_retryDelay(job.attempts)),
+          now: now,
+        );
+      }
     }
     return false;
   }
@@ -497,12 +520,7 @@ final class WorldRuntime {
     Character character,
     LLMConfig config,
   ) async {
-    final posted = await _moments.attemptCharacter(
-      character: character,
-      config: config,
-    );
-    if (posted.failed || posted.post != null) return posted;
-    return _moments.attemptFriendComment(
+    return _moments.attemptCharacter(
       character: character,
       config: config,
     );

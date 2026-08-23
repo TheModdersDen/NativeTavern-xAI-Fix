@@ -1,5 +1,6 @@
-/// One durable background action. Kinds stay open-ended so new work can
-/// reuse this table instead of a feature-specific store.
+/// Resume log for one background attempt: running, completed, or incomplete.
+/// Features still decide what to do; this table only records that attempt so
+/// a crash or failed request can continue later.
 enum OperationKind {
   momentWake,
   storyChapter,

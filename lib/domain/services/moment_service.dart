@@ -108,6 +108,7 @@ final class MomentService {
   final Duration minInterval;
 
   Future<List<MomentFeedItem>> loadFeed() async {
+    await rehomeMispostedReplies();
     final posts = await _moments.listAll();
     final items = <MomentFeedItem>[];
     for (final post in posts) {
@@ -210,6 +211,52 @@ final class MomentService {
     return comment;
   }
 
+  /// Move standalone character replies onto the player/friend post they
+  /// were answering, so they stop looking like their own moments.
+  Future<int> rehomeMispostedReplies() async {
+    final posts = await _moments.listAll();
+    final targets = [
+      for (final post in posts)
+        if (post.origin == MomentPostOrigin.user || post.authorId == userAuthorId)
+          MomentCommentTarget(
+            id: post.id,
+            body: post.publicBody,
+            fromPlayer: true,
+          ),
+    ];
+    if (targets.isEmpty) return 0;
+
+    var moved = 0;
+    for (final post in posts) {
+      if (post.origin != MomentPostOrigin.character || post.hasPhoto) {
+        continue;
+      }
+      final targetId = bestReplyPostId(post.publicBody, targets: targets);
+      if (targetId == null || targetId == post.id) continue;
+      final existing = await _moments.listComments(targetId);
+      final already = existing.any(
+        (comment) =>
+            comment.authorId == post.authorId &&
+            comment.body.trim() == post.publicBody.trim(),
+      );
+      if (!already) {
+        try {
+          await comment(
+            postId: targetId,
+            body: post.publicBody,
+            authorId: post.authorId,
+            authorName: post.authorName,
+          );
+        } catch (_) {
+          continue;
+        }
+      }
+      await _moments.delete(post.id);
+      moved++;
+    }
+    return moved;
+  }
+
   Future<void> rememberFriendship({
     required String characterId,
     required String friendName,
@@ -238,20 +285,35 @@ final class MomentService {
       return const MomentWakeResult.failed();
     }
     final context = await _loadContext(character);
-    if (!context.hasMaterial) return const MomentWakeResult.skipped();
     final ownPosts = (await _moments.listAll())
         .where((post) => post.authorId == character.id)
         .toList(growable: false);
-    if (ownPosts.isNotEmpty &&
-        _now().difference(ownPosts.first.createdAt) < minInterval) {
+    final recentlyPosted = ownPosts.isNotEmpty &&
+        _now().difference(ownPosts.first.createdAt) < minInterval;
+    final commentTargets = await _commentTargets(character);
+    if (!context.hasMaterial && commentTargets.isEmpty) {
+      return const MomentWakeResult.skipped();
+    }
+    if (recentlyPosted && commentTargets.isEmpty) {
       return const MomentWakeResult.skipped();
     }
     return _publishFromCharacter(
       character: character,
       context: context,
       ownPosts: ownPosts,
+      commentTargets: commentTargets,
+      mayPost: !recentlyPosted,
       config: config,
     );
+  }
+
+  Future<List<MomentFeedItem>> _commentTargets(Character character) async {
+    return [
+      for (final item in await visibleFeedFor(character.id, limit: 8))
+        if (item.post.authorId != character.id &&
+            !item.comments.any((comment) => comment.authorId == character.id))
+          item,
+    ];
   }
 
   /// Posts this character can know about: their own, friends', and the player's,
@@ -300,14 +362,20 @@ final class MomentService {
     return friendIds.contains(post.authorId);
   }
 
-  static String formatVisibleMoments(Iterable<MomentFeedItem> items) {
+  static String formatVisibleMoments(
+    Iterable<MomentFeedItem> items, {
+    bool includeIds = false,
+  }) {
     final blocks = <String>[];
     for (final item in items) {
       final post = item.post;
       final body = post.publicBody.isEmpty
           ? '[photo]'
           : (post.hasPhoto ? '[photo] ${post.publicBody}' : post.publicBody);
-      final lines = <String>['${post.authorName}: $body'];
+      final headline = includeIds
+          ? '${post.id} | ${post.authorName}: $body'
+          : '${post.authorName}: $body';
+      final lines = <String>[headline];
       for (final comment in item.comments) {
         lines.add('  ${comment.authorName}: ${comment.body}');
       }
@@ -388,6 +456,8 @@ final class MomentService {
     required Character character,
     required _CharacterMomentContext context,
     required List<MomentPost> ownPosts,
+    required List<MomentFeedItem> commentTargets,
+    required bool mayPost,
     required LLMConfig config,
   }) async {
     final transport = _transport;
@@ -402,11 +472,16 @@ final class MomentService {
           conversations: context.conversations,
           friends: context.friends,
           visibleMoments: context.visibleMoments,
+          commentTargets: formatVisibleMoments(
+            commentTargets,
+            includeIds: true,
+          ),
           recentPosts: ownPosts
               .take(3)
               .map((post) => post.publicBody)
               .where((body) => body.isNotEmpty)
               .join('\n'),
+          mayPost: mayPost,
         ),
         config,
       );
@@ -414,15 +489,44 @@ final class MomentService {
       return const MomentWakeResult.failed();
     }
 
-    MomentDraft? draft;
+    final targets = [
+      for (final item in commentTargets)
+        MomentCommentTarget(
+          id: item.post.id,
+          body: item.post.publicBody,
+          fromPlayer: item.post.authorId == userAuthorId ||
+              item.post.origin == MomentPostOrigin.user,
+        ),
+    ];
+    MomentWakePlan? plan;
     try {
-      draft = parseMomentDraft(raw);
+      plan = parseMomentWakePlan(
+        raw,
+        allowedPostIds: {for (final item in commentTargets) item.post.id},
+        targets: targets,
+        mayPost: mayPost,
+      );
     } on FormatException {
       return const MomentWakeResult.skipped();
     }
+    if (plan == null) return const MomentWakeResult.skipped();
+    if (plan.comment != null) {
+      try {
+        return MomentWakeResult.commented(
+          await comment(
+            postId: plan.comment!.postId,
+            body: plan.comment!.body,
+            authorId: character.id,
+            authorName: _displayName(character),
+          ),
+        );
+      } catch (_) {
+        return const MomentWakeResult.failed();
+      }
+    }
+    final draft = plan.draft;
     if (draft == null) return const MomentWakeResult.skipped();
 
-    String? imagePath;
     if (draft.wantsPhoto) {
       final posted = await _generateLoggedPhoto(
         character: character,
@@ -433,7 +537,7 @@ final class MomentService {
       if (_operations != null) return const MomentWakeResult.skipped();
       if (!draft.hasBody) return const MomentWakeResult.failed();
     }
-    if (!draft.hasBody && imagePath == null) {
+    if (!draft.hasBody) {
       return const MomentWakeResult.skipped();
     }
 
@@ -443,7 +547,6 @@ final class MomentService {
         authorName: _displayName(character),
         origin: MomentPostOrigin.character,
         body: draft.body,
-        imagePath: imagePath,
       ),
     );
   }

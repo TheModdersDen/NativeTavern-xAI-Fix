@@ -28,26 +28,44 @@ List<Map<String, dynamic>> composeMomentMessages({
   required String recentPosts,
   String friends = '',
   String visibleMoments = '',
+  String commentTargets = '',
+  bool mayPost = true,
 }) {
+  final postRule = mayPost
+      ? '''
+- action=post: something from YOUR life. Never reply to, quote, congratulate, or address someone else's moment as your own post.
+- kind=text: body required, 1-4 short sentences in your voice.
+- kind=image: image_prompt required; body may be empty.
+- kind=text_image: body and image_prompt required.
+- image_prompt describes the photo you would post. It is not shown to others.'''
+      : '''
+- You already posted recently. Do not create another post.
+- If you want to react, use action=comment.''';
   return [
     {
       'role': 'system',
       'content': '''
-You are $characterName posting on a friends-circle moments feed.
+You are $characterName on a friends-circle moments feed.
 Speak as yourself. Do not summarize a chapter. Do not write a recap.
 You only see your own posts, posts by your friends, posts by the player, and comments on those posts.
-You cannot see strangers' moments. You may react to what you can see, but this output is your own post.
-Decide whether you have something natural to share right now.
+You cannot see strangers' moments.
+
+Do exactly one thing:
+- comment: a short reply under one existing post listed in comment_targets.
+- post: a new moment about your own life.
+- skip: do nothing.
+
+If you are reacting to the player or a friend, you MUST comment. Never publish that reply as your own post.
 
 Return JSON only:
-{"skip": false, "kind": "text"|"image"|"text_image", "body": "...", "image_prompt": "..."}
+{"action":"comment","post_id":"...","body":"..."}
+{"action":"post","kind":"text"|"image"|"text_image","body":"...","image_prompt":"..."}
+{"action":"skip"}
 
 Rules:
-- kind=text: body required, 1-4 short sentences in your voice.
-- kind=image: image_prompt required; body may be empty.
-- kind=text_image: body and image_prompt required.
-- image_prompt describes the photo you would post. It is not shown to others.
-- If nothing feels natural, return {"skip": true}.
+- action=comment: post_id must be one of comment_targets. One short comment only.
+$postRule
+- If nothing feels natural, return {"action":"skip"}.
 ''',
     },
     {
@@ -58,7 +76,9 @@ Rules:
         'conversations': conversations,
         'friends': friends,
         'visible_moments': visibleMoments,
+        'comment_targets': commentTargets,
         'recent_posts': recentPosts,
+        'may_post': mayPost,
       }),
     },
   ];
@@ -95,6 +115,78 @@ final class MomentFriendCommentDraft {
   final String body;
 }
 
+final class MomentCommentTarget {
+  const MomentCommentTarget({
+    required this.id,
+    required this.body,
+    this.fromPlayer = false,
+  });
+
+  final String id;
+  final String body;
+  final bool fromPlayer;
+}
+
+/// If [body] is reacting to someone else's moment, the post it belongs under.
+String? bestReplyPostId(
+  String body, {
+  required Iterable<MomentCommentTarget> targets,
+}) {
+  final reply = body.trim();
+  if (reply.isEmpty || targets.isEmpty) return null;
+  final lowered = reply.toLowerCase();
+  final reacting = _looksLikeReply(lowered);
+  String? bestId;
+  var bestScore = 0;
+  for (final target in targets) {
+    var score = 0;
+    for (final phrase in _distinctivePhrases(target.body)) {
+      if (lowered.contains(phrase.toLowerCase())) {
+        score += phrase.length >= 4 ? 4 : 3;
+      }
+    }
+    if (target.fromPlayer && reacting) score += 2;
+    if (score > bestScore) {
+      bestScore = score;
+      bestId = target.id;
+    }
+  }
+  return bestScore >= 3 ? bestId : null;
+}
+
+bool _looksLikeReply(String lowered) {
+  const markers = [
+    '恭喜',
+    '祝福',
+    '脱单',
+    '官宣',
+    '新女友',
+    '女朋友',
+    '你们',
+    '你这',
+    '你的',
+    '祝顺利',
+    '祝贺',
+    '第一天',
+    'congrats',
+    'congratulations',
+  ];
+  return markers.any(lowered.contains);
+}
+
+Iterable<String> _distinctivePhrases(String body) sync* {
+  final matches =
+      RegExp(r'[\u4e00-\u9fff]{2,}|[a-zA-Z0-9]{3,}').allMatches(body);
+  for (final match in matches) {
+    final token = match.group(0)!;
+    yield token;
+    if (token.length >= 4) {
+      yield token.substring(token.length - 2);
+      yield token.substring(token.length - 3);
+    }
+  }
+}
+
 MomentFriendCommentDraft? parseFriendCommentDraft(
   String response, {
   required Set<String> allowedPostIds,
@@ -114,6 +206,55 @@ MomentFriendCommentDraft? parseFriendCommentDraft(
     return null;
   }
   return MomentFriendCommentDraft(postId: postId, body: _clip(body, 200));
+}
+
+/// One wake decision: a new post, a comment on someone else's post, or skip.
+final class MomentWakePlan {
+  const MomentWakePlan.post(this.draft) : comment = null;
+  const MomentWakePlan.comment(this.comment) : draft = null;
+
+  final MomentDraft? draft;
+  final MomentFriendCommentDraft? comment;
+
+  bool get isComment => comment != null;
+}
+
+MomentWakePlan? parseMomentWakePlan(
+  String response, {
+  required Set<String> allowedPostIds,
+  Iterable<MomentCommentTarget> targets = const [],
+  bool mayPost = true,
+}) {
+  final document = jsonDecode(_jsonObjectFromResponse(response));
+  if (document is! Map<String, dynamic>) return null;
+  if (document['skip'] == true || document['action'] == 'skip') {
+    return null;
+  }
+  final action = document['action'] is String
+      ? (document['action'] as String).trim()
+      : '';
+  final hasPostId = (document['post_id'] is String &&
+          (document['post_id'] as String).trim().isNotEmpty) ||
+      (document['postId'] is String &&
+          (document['postId'] as String).trim().isNotEmpty);
+  if (action == 'comment' || (hasPostId && action != 'post')) {
+    final comment = parseFriendCommentDraft(
+      response,
+      allowedPostIds: allowedPostIds,
+    );
+    return comment == null ? null : MomentWakePlan.comment(comment);
+  }
+  final draft = parseMomentDraft(response);
+  if (draft != null && draft.hasBody) {
+    final replyId = bestReplyPostId(draft.body, targets: targets);
+    if (replyId != null) {
+      return MomentWakePlan.comment(
+        MomentFriendCommentDraft(postId: replyId, body: _clip(draft.body, 200)),
+      );
+    }
+  }
+  if (!mayPost) return null;
+  return draft == null ? null : MomentWakePlan.post(draft);
 }
 
 MomentDraft? parseMomentDraft(String response) {

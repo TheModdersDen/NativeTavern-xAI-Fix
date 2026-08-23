@@ -162,6 +162,70 @@ void main() {
     expect(File(published!.imagePath!).existsSync(), isTrue);
   });
 
+  test('a reply to the player stays a comment, not a new post', () async {
+    final player = await container.read(momentServiceProvider).publishPlayerPost(
+          body: '我的新女友，你们感受一下',
+        );
+    final service = MomentService(
+      momentRepository: container.read(momentRepositoryProvider),
+      chatRepository: chatRepository,
+      worldInfoRepository: worldInfoRepository,
+      dataPath: dataDirectory.path,
+      minInterval: Duration.zero,
+      transport: (messages, config) async {
+        final user = messages.last['content'] as String;
+        expect(user, contains(player.id));
+        return '{"action":"comment","post_id":"${player.id}",'
+            '"body":"收到，已建立观察记录。"}';
+      },
+    );
+    final character = (await characterRepository.getCharacter('character-1'))!;
+    final result = await service.attemptCharacter(
+      character: character,
+      config: _configuredLlm,
+    );
+
+    expect(result.post, isNull);
+    expect(result.comment?.body, '收到，已建立观察记录。');
+    expect(result.comment?.postId, player.id);
+    final feed = await service.loadFeed();
+    expect(feed, hasLength(1));
+    expect(feed.single.post.id, player.id);
+    expect(feed.single.comments.single.body, '收到，已建立观察记录。');
+  });
+
+  test('a reply posted as its own moment is moved under the player post',
+      () async {
+    final service = container.read(momentServiceProvider);
+    final player = await service.publishPlayerPost(body: '我的新女友，你们感受一下');
+    await service.createPost(
+      authorId: 'character-1',
+      authorName: 'Ava',
+      origin: MomentPostOrigin.character,
+      body: '等等，第一天就直接官宣新女友？求后续。',
+    );
+    await service.createPost(
+      authorId: 'character-1',
+      authorName: 'Ava',
+      origin: MomentPostOrigin.character,
+      body: '今日加练刀法三百式，心很静。',
+    );
+
+    final feed = await service.loadFeed();
+    expect(feed.map((item) => item.post.publicBody), isNot(contains('求后续')));
+    expect(
+      feed
+          .firstWhere((item) => item.post.id == player.id)
+          .comments
+          .map((comment) => comment.body),
+      contains('等等，第一天就直接官宣新女友？求后续。'),
+    );
+    expect(
+      feed.map((item) => item.post.publicBody),
+      contains('今日加练刀法三百式，心很静。'),
+    );
+  });
+
   test('player posts only as themselves', () async {
     final service = container.read(momentServiceProvider);
     final created = await service.publishPlayerPost(body: 'Did you lock the gate?');
