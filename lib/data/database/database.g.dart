@@ -12486,6 +12486,991 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
   }
 }
 
+class $MomentPostsTable extends MomentPosts
+    with TableInfo<$MomentPostsTable, MomentPostRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MomentPostsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
+      'chat_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES chats (id) ON DELETE CASCADE'));
+  static const VerificationMeta _authorIdMeta =
+      const VerificationMeta('authorId');
+  @override
+  late final GeneratedColumn<String> authorId = GeneratedColumn<String>(
+      'author_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _authorNameMeta =
+      const VerificationMeta('authorName');
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+      'author_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _publicBodyMeta =
+      const VerificationMeta('publicBody');
+  @override
+  late final GeneratedColumn<String> publicBody = GeneratedColumn<String>(
+      'public_body', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _factBodyMeta =
+      const VerificationMeta('factBody');
+  @override
+  late final GeneratedColumn<String> factBody = GeneratedColumn<String>(
+      'fact_body', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _chapterIdMeta =
+      const VerificationMeta('chapterId');
+  @override
+  late final GeneratedColumn<String> chapterId = GeneratedColumn<String>(
+      'chapter_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES story_chapters (id) ON DELETE CASCADE'));
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+      'origin', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _writeToWorldMeta =
+      const VerificationMeta('writeToWorld');
+  @override
+  late final GeneratedColumn<bool> writeToWorld = GeneratedColumn<bool>(
+      'write_to_world', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("write_to_world" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        chatId,
+        authorId,
+        authorName,
+        publicBody,
+        factBody,
+        chapterId,
+        origin,
+        status,
+        writeToWorld,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'moment_posts';
+  @override
+  VerificationContext validateIntegrity(Insertable<MomentPostRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('chat_id')) {
+      context.handle(_chatIdMeta,
+          chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
+    } else if (isInserting) {
+      context.missing(_chatIdMeta);
+    }
+    if (data.containsKey('author_id')) {
+      context.handle(_authorIdMeta,
+          authorId.isAcceptableOrUnknown(data['author_id']!, _authorIdMeta));
+    } else if (isInserting) {
+      context.missing(_authorIdMeta);
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+          _authorNameMeta,
+          authorName.isAcceptableOrUnknown(
+              data['author_name']!, _authorNameMeta));
+    } else if (isInserting) {
+      context.missing(_authorNameMeta);
+    }
+    if (data.containsKey('public_body')) {
+      context.handle(
+          _publicBodyMeta,
+          publicBody.isAcceptableOrUnknown(
+              data['public_body']!, _publicBodyMeta));
+    } else if (isInserting) {
+      context.missing(_publicBodyMeta);
+    }
+    if (data.containsKey('fact_body')) {
+      context.handle(_factBodyMeta,
+          factBody.isAcceptableOrUnknown(data['fact_body']!, _factBodyMeta));
+    }
+    if (data.containsKey('chapter_id')) {
+      context.handle(_chapterIdMeta,
+          chapterId.isAcceptableOrUnknown(data['chapter_id']!, _chapterIdMeta));
+    }
+    if (data.containsKey('origin')) {
+      context.handle(_originMeta,
+          origin.isAcceptableOrUnknown(data['origin']!, _originMeta));
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('write_to_world')) {
+      context.handle(
+          _writeToWorldMeta,
+          writeToWorld.isAcceptableOrUnknown(
+              data['write_to_world']!, _writeToWorldMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MomentPostRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MomentPostRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      chatId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
+      authorId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}author_id'])!,
+      authorName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}author_name'])!,
+      publicBody: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}public_body'])!,
+      factBody: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fact_body']),
+      chapterId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}chapter_id']),
+      origin: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}origin'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      writeToWorld: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}write_to_world'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $MomentPostsTable createAlias(String alias) {
+    return $MomentPostsTable(attachedDatabase, alias);
+  }
+}
+
+class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
+  final String id;
+  final String chatId;
+  final String authorId;
+  final String authorName;
+  final String publicBody;
+  final String? factBody;
+  final String? chapterId;
+  final String origin;
+  final String status;
+  final bool writeToWorld;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const MomentPostRow(
+      {required this.id,
+      required this.chatId,
+      required this.authorId,
+      required this.authorName,
+      required this.publicBody,
+      this.factBody,
+      this.chapterId,
+      required this.origin,
+      required this.status,
+      required this.writeToWorld,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['chat_id'] = Variable<String>(chatId);
+    map['author_id'] = Variable<String>(authorId);
+    map['author_name'] = Variable<String>(authorName);
+    map['public_body'] = Variable<String>(publicBody);
+    if (!nullToAbsent || factBody != null) {
+      map['fact_body'] = Variable<String>(factBody);
+    }
+    if (!nullToAbsent || chapterId != null) {
+      map['chapter_id'] = Variable<String>(chapterId);
+    }
+    map['origin'] = Variable<String>(origin);
+    map['status'] = Variable<String>(status);
+    map['write_to_world'] = Variable<bool>(writeToWorld);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  MomentPostsCompanion toCompanion(bool nullToAbsent) {
+    return MomentPostsCompanion(
+      id: Value(id),
+      chatId: Value(chatId),
+      authorId: Value(authorId),
+      authorName: Value(authorName),
+      publicBody: Value(publicBody),
+      factBody: factBody == null && nullToAbsent
+          ? const Value.absent()
+          : Value(factBody),
+      chapterId: chapterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chapterId),
+      origin: Value(origin),
+      status: Value(status),
+      writeToWorld: Value(writeToWorld),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory MomentPostRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MomentPostRow(
+      id: serializer.fromJson<String>(json['id']),
+      chatId: serializer.fromJson<String>(json['chatId']),
+      authorId: serializer.fromJson<String>(json['authorId']),
+      authorName: serializer.fromJson<String>(json['authorName']),
+      publicBody: serializer.fromJson<String>(json['publicBody']),
+      factBody: serializer.fromJson<String?>(json['factBody']),
+      chapterId: serializer.fromJson<String?>(json['chapterId']),
+      origin: serializer.fromJson<String>(json['origin']),
+      status: serializer.fromJson<String>(json['status']),
+      writeToWorld: serializer.fromJson<bool>(json['writeToWorld']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'chatId': serializer.toJson<String>(chatId),
+      'authorId': serializer.toJson<String>(authorId),
+      'authorName': serializer.toJson<String>(authorName),
+      'publicBody': serializer.toJson<String>(publicBody),
+      'factBody': serializer.toJson<String?>(factBody),
+      'chapterId': serializer.toJson<String?>(chapterId),
+      'origin': serializer.toJson<String>(origin),
+      'status': serializer.toJson<String>(status),
+      'writeToWorld': serializer.toJson<bool>(writeToWorld),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  MomentPostRow copyWith(
+          {String? id,
+          String? chatId,
+          String? authorId,
+          String? authorName,
+          String? publicBody,
+          Value<String?> factBody = const Value.absent(),
+          Value<String?> chapterId = const Value.absent(),
+          String? origin,
+          String? status,
+          bool? writeToWorld,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      MomentPostRow(
+        id: id ?? this.id,
+        chatId: chatId ?? this.chatId,
+        authorId: authorId ?? this.authorId,
+        authorName: authorName ?? this.authorName,
+        publicBody: publicBody ?? this.publicBody,
+        factBody: factBody.present ? factBody.value : this.factBody,
+        chapterId: chapterId.present ? chapterId.value : this.chapterId,
+        origin: origin ?? this.origin,
+        status: status ?? this.status,
+        writeToWorld: writeToWorld ?? this.writeToWorld,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  MomentPostRow copyWithCompanion(MomentPostsCompanion data) {
+    return MomentPostRow(
+      id: data.id.present ? data.id.value : this.id,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      authorId: data.authorId.present ? data.authorId.value : this.authorId,
+      authorName:
+          data.authorName.present ? data.authorName.value : this.authorName,
+      publicBody:
+          data.publicBody.present ? data.publicBody.value : this.publicBody,
+      factBody: data.factBody.present ? data.factBody.value : this.factBody,
+      chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      status: data.status.present ? data.status.value : this.status,
+      writeToWorld: data.writeToWorld.present
+          ? data.writeToWorld.value
+          : this.writeToWorld,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPostRow(')
+          ..write('id: $id, ')
+          ..write('chatId: $chatId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('publicBody: $publicBody, ')
+          ..write('factBody: $factBody, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('origin: $origin, ')
+          ..write('status: $status, ')
+          ..write('writeToWorld: $writeToWorld, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, chatId, authorId, authorName, publicBody,
+      factBody, chapterId, origin, status, writeToWorld, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MomentPostRow &&
+          other.id == this.id &&
+          other.chatId == this.chatId &&
+          other.authorId == this.authorId &&
+          other.authorName == this.authorName &&
+          other.publicBody == this.publicBody &&
+          other.factBody == this.factBody &&
+          other.chapterId == this.chapterId &&
+          other.origin == this.origin &&
+          other.status == this.status &&
+          other.writeToWorld == this.writeToWorld &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
+  final Value<String> id;
+  final Value<String> chatId;
+  final Value<String> authorId;
+  final Value<String> authorName;
+  final Value<String> publicBody;
+  final Value<String?> factBody;
+  final Value<String?> chapterId;
+  final Value<String> origin;
+  final Value<String> status;
+  final Value<bool> writeToWorld;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const MomentPostsCompanion({
+    this.id = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.authorId = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.publicBody = const Value.absent(),
+    this.factBody = const Value.absent(),
+    this.chapterId = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.status = const Value.absent(),
+    this.writeToWorld = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MomentPostsCompanion.insert({
+    required String id,
+    required String chatId,
+    required String authorId,
+    required String authorName,
+    required String publicBody,
+    this.factBody = const Value.absent(),
+    this.chapterId = const Value.absent(),
+    required String origin,
+    required String status,
+    this.writeToWorld = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        chatId = Value(chatId),
+        authorId = Value(authorId),
+        authorName = Value(authorName),
+        publicBody = Value(publicBody),
+        origin = Value(origin),
+        status = Value(status),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<MomentPostRow> custom({
+    Expression<String>? id,
+    Expression<String>? chatId,
+    Expression<String>? authorId,
+    Expression<String>? authorName,
+    Expression<String>? publicBody,
+    Expression<String>? factBody,
+    Expression<String>? chapterId,
+    Expression<String>? origin,
+    Expression<String>? status,
+    Expression<bool>? writeToWorld,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (chatId != null) 'chat_id': chatId,
+      if (authorId != null) 'author_id': authorId,
+      if (authorName != null) 'author_name': authorName,
+      if (publicBody != null) 'public_body': publicBody,
+      if (factBody != null) 'fact_body': factBody,
+      if (chapterId != null) 'chapter_id': chapterId,
+      if (origin != null) 'origin': origin,
+      if (status != null) 'status': status,
+      if (writeToWorld != null) 'write_to_world': writeToWorld,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MomentPostsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? chatId,
+      Value<String>? authorId,
+      Value<String>? authorName,
+      Value<String>? publicBody,
+      Value<String?>? factBody,
+      Value<String?>? chapterId,
+      Value<String>? origin,
+      Value<String>? status,
+      Value<bool>? writeToWorld,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return MomentPostsCompanion(
+      id: id ?? this.id,
+      chatId: chatId ?? this.chatId,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      publicBody: publicBody ?? this.publicBody,
+      factBody: factBody ?? this.factBody,
+      chapterId: chapterId ?? this.chapterId,
+      origin: origin ?? this.origin,
+      status: status ?? this.status,
+      writeToWorld: writeToWorld ?? this.writeToWorld,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (chatId.present) {
+      map['chat_id'] = Variable<String>(chatId.value);
+    }
+    if (authorId.present) {
+      map['author_id'] = Variable<String>(authorId.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (publicBody.present) {
+      map['public_body'] = Variable<String>(publicBody.value);
+    }
+    if (factBody.present) {
+      map['fact_body'] = Variable<String>(factBody.value);
+    }
+    if (chapterId.present) {
+      map['chapter_id'] = Variable<String>(chapterId.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (writeToWorld.present) {
+      map['write_to_world'] = Variable<bool>(writeToWorld.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPostsCompanion(')
+          ..write('id: $id, ')
+          ..write('chatId: $chatId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('publicBody: $publicBody, ')
+          ..write('factBody: $factBody, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('origin: $origin, ')
+          ..write('status: $status, ')
+          ..write('writeToWorld: $writeToWorld, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MomentCommentsTable extends MomentComments
+    with TableInfo<$MomentCommentsTable, MomentCommentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MomentCommentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _postIdMeta = const VerificationMeta('postId');
+  @override
+  late final GeneratedColumn<String> postId = GeneratedColumn<String>(
+      'post_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES moment_posts (id) ON DELETE CASCADE'));
+  static const VerificationMeta _authorIdMeta =
+      const VerificationMeta('authorId');
+  @override
+  late final GeneratedColumn<String> authorId = GeneratedColumn<String>(
+      'author_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _authorNameMeta =
+      const VerificationMeta('authorName');
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+      'author_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+      'body', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, postId, authorId, authorName, body, kind, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'moment_comments';
+  @override
+  VerificationContext validateIntegrity(Insertable<MomentCommentRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('post_id')) {
+      context.handle(_postIdMeta,
+          postId.isAcceptableOrUnknown(data['post_id']!, _postIdMeta));
+    } else if (isInserting) {
+      context.missing(_postIdMeta);
+    }
+    if (data.containsKey('author_id')) {
+      context.handle(_authorIdMeta,
+          authorId.isAcceptableOrUnknown(data['author_id']!, _authorIdMeta));
+    } else if (isInserting) {
+      context.missing(_authorIdMeta);
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+          _authorNameMeta,
+          authorName.isAcceptableOrUnknown(
+              data['author_name']!, _authorNameMeta));
+    } else if (isInserting) {
+      context.missing(_authorNameMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+          _bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MomentCommentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MomentCommentRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      postId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}post_id'])!,
+      authorId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}author_id'])!,
+      authorName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}author_name'])!,
+      body: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $MomentCommentsTable createAlias(String alias) {
+    return $MomentCommentsTable(attachedDatabase, alias);
+  }
+}
+
+class MomentCommentRow extends DataClass
+    implements Insertable<MomentCommentRow> {
+  final String id;
+  final String postId;
+  final String authorId;
+  final String authorName;
+  final String body;
+  final String kind;
+  final DateTime createdAt;
+  const MomentCommentRow(
+      {required this.id,
+      required this.postId,
+      required this.authorId,
+      required this.authorName,
+      required this.body,
+      required this.kind,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['post_id'] = Variable<String>(postId);
+    map['author_id'] = Variable<String>(authorId);
+    map['author_name'] = Variable<String>(authorName);
+    map['body'] = Variable<String>(body);
+    map['kind'] = Variable<String>(kind);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  MomentCommentsCompanion toCompanion(bool nullToAbsent) {
+    return MomentCommentsCompanion(
+      id: Value(id),
+      postId: Value(postId),
+      authorId: Value(authorId),
+      authorName: Value(authorName),
+      body: Value(body),
+      kind: Value(kind),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MomentCommentRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MomentCommentRow(
+      id: serializer.fromJson<String>(json['id']),
+      postId: serializer.fromJson<String>(json['postId']),
+      authorId: serializer.fromJson<String>(json['authorId']),
+      authorName: serializer.fromJson<String>(json['authorName']),
+      body: serializer.fromJson<String>(json['body']),
+      kind: serializer.fromJson<String>(json['kind']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'postId': serializer.toJson<String>(postId),
+      'authorId': serializer.toJson<String>(authorId),
+      'authorName': serializer.toJson<String>(authorName),
+      'body': serializer.toJson<String>(body),
+      'kind': serializer.toJson<String>(kind),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  MomentCommentRow copyWith(
+          {String? id,
+          String? postId,
+          String? authorId,
+          String? authorName,
+          String? body,
+          String? kind,
+          DateTime? createdAt}) =>
+      MomentCommentRow(
+        id: id ?? this.id,
+        postId: postId ?? this.postId,
+        authorId: authorId ?? this.authorId,
+        authorName: authorName ?? this.authorName,
+        body: body ?? this.body,
+        kind: kind ?? this.kind,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  MomentCommentRow copyWithCompanion(MomentCommentsCompanion data) {
+    return MomentCommentRow(
+      id: data.id.present ? data.id.value : this.id,
+      postId: data.postId.present ? data.postId.value : this.postId,
+      authorId: data.authorId.present ? data.authorId.value : this.authorId,
+      authorName:
+          data.authorName.present ? data.authorName.value : this.authorName,
+      body: data.body.present ? data.body.value : this.body,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentCommentRow(')
+          ..write('id: $id, ')
+          ..write('postId: $postId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('body: $body, ')
+          ..write('kind: $kind, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, postId, authorId, authorName, body, kind, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MomentCommentRow &&
+          other.id == this.id &&
+          other.postId == this.postId &&
+          other.authorId == this.authorId &&
+          other.authorName == this.authorName &&
+          other.body == this.body &&
+          other.kind == this.kind &&
+          other.createdAt == this.createdAt);
+}
+
+class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
+  final Value<String> id;
+  final Value<String> postId;
+  final Value<String> authorId;
+  final Value<String> authorName;
+  final Value<String> body;
+  final Value<String> kind;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const MomentCommentsCompanion({
+    this.id = const Value.absent(),
+    this.postId = const Value.absent(),
+    this.authorId = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.body = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MomentCommentsCompanion.insert({
+    required String id,
+    required String postId,
+    required String authorId,
+    required String authorName,
+    required String body,
+    required String kind,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        postId = Value(postId),
+        authorId = Value(authorId),
+        authorName = Value(authorName),
+        body = Value(body),
+        kind = Value(kind),
+        createdAt = Value(createdAt);
+  static Insertable<MomentCommentRow> custom({
+    Expression<String>? id,
+    Expression<String>? postId,
+    Expression<String>? authorId,
+    Expression<String>? authorName,
+    Expression<String>? body,
+    Expression<String>? kind,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (postId != null) 'post_id': postId,
+      if (authorId != null) 'author_id': authorId,
+      if (authorName != null) 'author_name': authorName,
+      if (body != null) 'body': body,
+      if (kind != null) 'kind': kind,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MomentCommentsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? postId,
+      Value<String>? authorId,
+      Value<String>? authorName,
+      Value<String>? body,
+      Value<String>? kind,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return MomentCommentsCompanion(
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      body: body ?? this.body,
+      kind: kind ?? this.kind,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (postId.present) {
+      map['post_id'] = Variable<String>(postId.value);
+    }
+    if (authorId.present) {
+      map['author_id'] = Variable<String>(authorId.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentCommentsCompanion(')
+          ..write('id: $id, ')
+          ..write('postId: $postId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('body: $body, ')
+          ..write('kind: $kind, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -12521,6 +13506,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DataBankBindingsTable dataBankBindings =
       $DataBankBindingsTable(this);
   late final $StoryChaptersTable storyChapters = $StoryChaptersTable(this);
+  late final $MomentPostsTable momentPosts = $MomentPostsTable(this);
+  late final $MomentCommentsTable momentComments = $MomentCommentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -12548,7 +13535,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         dataBankSections,
         dataBankTextChunks,
         dataBankBindings,
-        storyChapters
+        storyChapters,
+        momentPosts,
+        momentComments
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12722,6 +13711,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('story_chapters', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('chats',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('moment_posts', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('story_chapters',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('moment_posts', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('moment_posts',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('moment_comments', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -13693,6 +14703,20 @@ final class $$ChatsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$MomentPostsTable, List<MomentPostRow>>
+      _momentPostsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.momentPosts,
+          aliasName: $_aliasNameGenerator(db.chats.id, db.momentPosts.chatId));
+
+  $$MomentPostsTableProcessedTableManager get momentPostsRefs {
+    final manager = $$MomentPostsTableTableManager($_db, $_db.momentPosts)
+        .filter((f) => f.chatId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_momentPostsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
@@ -13891,6 +14915,27 @@ class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
             $$StoryChaptersTableFilterComposer(
               $db: $db,
               $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> momentPostsRefs(
+      Expression<bool> Function($$MomentPostsTableFilterComposer f) f) {
+    final $$MomentPostsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableFilterComposer(
+              $db: $db,
+              $table: $db.momentPosts,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -14162,6 +15207,27 @@ class $$ChatsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> momentPostsRefs<T extends Object>(
+      Expression<T> Function($$MomentPostsTableAnnotationComposer a) f) {
+    final $$MomentPostsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.chatId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ChatsTableTableManager extends RootTableManager<
@@ -14183,7 +15249,8 @@ class $$ChatsTableTableManager extends RootTableManager<
         bool memorySourceChat,
         bool rpgChatStatesRefs,
         bool dataBankBindingsRefs,
-        bool storyChaptersRefs})> {
+        bool storyChaptersRefs,
+        bool momentPostsRefs})> {
   $$ChatsTableTableManager(_$AppDatabase db, $ChatsTable table)
       : super(TableManagerState(
           db: db,
@@ -14258,7 +15325,8 @@ class $$ChatsTableTableManager extends RootTableManager<
               memorySourceChat = false,
               rpgChatStatesRefs = false,
               dataBankBindingsRefs = false,
-              storyChaptersRefs = false}) {
+              storyChaptersRefs = false,
+              momentPostsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
@@ -14268,7 +15336,8 @@ class $$ChatsTableTableManager extends RootTableManager<
                 if (memorySourceChat) db.longTermMemories,
                 if (rpgChatStatesRefs) db.rpgChatStates,
                 if (dataBankBindingsRefs) db.dataBankBindings,
-                if (storyChaptersRefs) db.storyChapters
+                if (storyChaptersRefs) db.storyChapters,
+                if (momentPostsRefs) db.momentPosts
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -14384,6 +15453,18 @@ class $$ChatsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.chatId == item.id),
+                        typedResults: items),
+                  if (momentPostsRefs)
+                    await $_getPrefetchedData<Chat, $ChatsTable, MomentPostRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChatsTableReferences._momentPostsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChatsTableReferences(db, table, p0)
+                                .momentPostsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.chatId == item.id),
                         typedResults: items)
                 ];
               },
@@ -14411,7 +15492,8 @@ typedef $$ChatsTableProcessedTableManager = ProcessedTableManager<
         bool memorySourceChat,
         bool rpgChatStatesRefs,
         bool dataBankBindingsRefs,
-        bool storyChaptersRefs})>;
+        bool storyChaptersRefs,
+        bool momentPostsRefs})>;
 typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String id,
   required String chatId,
@@ -23287,6 +24369,21 @@ final class $$StoryChaptersTableReferences extends BaseReferences<_$AppDatabase,
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
   }
+
+  static MultiTypedResultKey<$MomentPostsTable, List<MomentPostRow>>
+      _momentPostsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.momentPosts,
+              aliasName: $_aliasNameGenerator(
+                  db.storyChapters.id, db.momentPosts.chapterId));
+
+  $$MomentPostsTableProcessedTableManager get momentPostsRefs {
+    final manager = $$MomentPostsTableTableManager($_db, $_db.momentPosts)
+        .filter((f) => f.chapterId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_momentPostsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$StoryChaptersTableFilterComposer
@@ -23380,6 +24477,27 @@ class $$StoryChaptersTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> momentPostsRefs(
+      Expression<bool> Function($$MomentPostsTableFilterComposer f) f) {
+    final $$MomentPostsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.chapterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableFilterComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 }
 
@@ -23570,6 +24688,27 @@ class $$StoryChaptersTableAnnotationComposer
             ));
     return composer;
   }
+
+  Expression<T> momentPostsRefs<T extends Object>(
+      Expression<T> Function($$MomentPostsTableAnnotationComposer a) f) {
+    final $$MomentPostsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.chapterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$StoryChaptersTableTableManager extends RootTableManager<
@@ -23584,7 +24723,10 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
     (StoryChapterRow, $$StoryChaptersTableReferences),
     StoryChapterRow,
     PrefetchHooks Function(
-        {bool chatId, bool startMessageId, bool endMessageId})> {
+        {bool chatId,
+        bool startMessageId,
+        bool endMessageId,
+        bool momentPostsRefs})> {
   $$StoryChaptersTableTableManager(_$AppDatabase db, $StoryChaptersTable table)
       : super(TableManagerState(
           db: db,
@@ -23658,10 +24800,13 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
                   ))
               .toList(),
           prefetchHooksCallback: (
-              {chatId = false, startMessageId = false, endMessageId = false}) {
+              {chatId = false,
+              startMessageId = false,
+              endMessageId = false,
+              momentPostsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (momentPostsRefs) db.momentPosts],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -23711,7 +24856,21 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (momentPostsRefs)
+                    await $_getPrefetchedData<StoryChapterRow,
+                            $StoryChaptersTable, MomentPostRow>(
+                        currentTable: table,
+                        referencedTable: $$StoryChaptersTableReferences
+                            ._momentPostsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$StoryChaptersTableReferences(db, table, p0)
+                                .momentPostsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.chapterId == item.id),
+                        typedResults: items)
+                ];
               },
             );
           },
@@ -23730,7 +24889,849 @@ typedef $$StoryChaptersTableProcessedTableManager = ProcessedTableManager<
     (StoryChapterRow, $$StoryChaptersTableReferences),
     StoryChapterRow,
     PrefetchHooks Function(
-        {bool chatId, bool startMessageId, bool endMessageId})>;
+        {bool chatId,
+        bool startMessageId,
+        bool endMessageId,
+        bool momentPostsRefs})>;
+typedef $$MomentPostsTableCreateCompanionBuilder = MomentPostsCompanion
+    Function({
+  required String id,
+  required String chatId,
+  required String authorId,
+  required String authorName,
+  required String publicBody,
+  Value<String?> factBody,
+  Value<String?> chapterId,
+  required String origin,
+  required String status,
+  Value<bool> writeToWorld,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$MomentPostsTableUpdateCompanionBuilder = MomentPostsCompanion
+    Function({
+  Value<String> id,
+  Value<String> chatId,
+  Value<String> authorId,
+  Value<String> authorName,
+  Value<String> publicBody,
+  Value<String?> factBody,
+  Value<String?> chapterId,
+  Value<String> origin,
+  Value<String> status,
+  Value<bool> writeToWorld,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$MomentPostsTableReferences
+    extends BaseReferences<_$AppDatabase, $MomentPostsTable, MomentPostRow> {
+  $$MomentPostsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats
+      .createAlias($_aliasNameGenerator(db.momentPosts.chatId, db.chats.id));
+
+  $$ChatsTableProcessedTableManager get chatId {
+    final $_column = $_itemColumn<String>('chat_id')!;
+
+    final manager = $$ChatsTableTableManager($_db, $_db.chats)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $StoryChaptersTable _chapterIdTable(_$AppDatabase db) =>
+      db.storyChapters.createAlias(
+          $_aliasNameGenerator(db.momentPosts.chapterId, db.storyChapters.id));
+
+  $$StoryChaptersTableProcessedTableManager? get chapterId {
+    final $_column = $_itemColumn<String>('chapter_id');
+    if ($_column == null) return null;
+    final manager = $$StoryChaptersTableTableManager($_db, $_db.storyChapters)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chapterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$MomentCommentsTable, List<MomentCommentRow>>
+      _momentCommentsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.momentComments,
+              aliasName: $_aliasNameGenerator(
+                  db.momentPosts.id, db.momentComments.postId));
+
+  $$MomentCommentsTableProcessedTableManager get momentCommentsRefs {
+    final manager = $$MomentCommentsTableTableManager($_db, $_db.momentComments)
+        .filter((f) => f.postId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_momentCommentsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$MomentPostsTableFilterComposer
+    extends Composer<_$AppDatabase, $MomentPostsTable> {
+  $$MomentPostsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get publicBody => $composableBuilder(
+      column: $table.publicBody, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get factBody => $composableBuilder(
+      column: $table.factBody, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get writeToWorld => $composableBuilder(
+      column: $table.writeToWorld, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$ChatsTableFilterComposer get chatId {
+    final $$ChatsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableFilterComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$StoryChaptersTableFilterComposer get chapterId {
+    final $$StoryChaptersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chapterId,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableFilterComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> momentCommentsRefs(
+      Expression<bool> Function($$MomentCommentsTableFilterComposer f) f) {
+    final $$MomentCommentsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentComments,
+        getReferencedColumn: (t) => t.postId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentCommentsTableFilterComposer(
+              $db: $db,
+              $table: $db.momentComments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$MomentPostsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MomentPostsTable> {
+  $$MomentPostsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get publicBody => $composableBuilder(
+      column: $table.publicBody, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get factBody => $composableBuilder(
+      column: $table.factBody, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get writeToWorld => $composableBuilder(
+      column: $table.writeToWorld,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$ChatsTableOrderingComposer get chatId {
+    final $$ChatsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableOrderingComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$StoryChaptersTableOrderingComposer get chapterId {
+    final $$StoryChaptersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chapterId,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableOrderingComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentPostsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MomentPostsTable> {
+  $$MomentPostsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get authorId =>
+      $composableBuilder(column: $table.authorId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => column);
+
+  GeneratedColumn<String> get publicBody => $composableBuilder(
+      column: $table.publicBody, builder: (column) => column);
+
+  GeneratedColumn<String> get factBody =>
+      $composableBuilder(column: $table.factBody, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<bool> get writeToWorld => $composableBuilder(
+      column: $table.writeToWorld, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$ChatsTableAnnotationComposer get chatId {
+    final $$ChatsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chatId,
+        referencedTable: $db.chats,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChatsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.chats,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$StoryChaptersTableAnnotationComposer get chapterId {
+    final $$StoryChaptersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.chapterId,
+        referencedTable: $db.storyChapters,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$StoryChaptersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.storyChapters,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> momentCommentsRefs<T extends Object>(
+      Expression<T> Function($$MomentCommentsTableAnnotationComposer a) f) {
+    final $$MomentCommentsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentComments,
+        getReferencedColumn: (t) => t.postId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentCommentsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentComments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$MomentPostsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MomentPostsTable,
+    MomentPostRow,
+    $$MomentPostsTableFilterComposer,
+    $$MomentPostsTableOrderingComposer,
+    $$MomentPostsTableAnnotationComposer,
+    $$MomentPostsTableCreateCompanionBuilder,
+    $$MomentPostsTableUpdateCompanionBuilder,
+    (MomentPostRow, $$MomentPostsTableReferences),
+    MomentPostRow,
+    PrefetchHooks Function(
+        {bool chatId, bool chapterId, bool momentCommentsRefs})> {
+  $$MomentPostsTableTableManager(_$AppDatabase db, $MomentPostsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MomentPostsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MomentPostsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MomentPostsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> chatId = const Value.absent(),
+            Value<String> authorId = const Value.absent(),
+            Value<String> authorName = const Value.absent(),
+            Value<String> publicBody = const Value.absent(),
+            Value<String?> factBody = const Value.absent(),
+            Value<String?> chapterId = const Value.absent(),
+            Value<String> origin = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<bool> writeToWorld = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentPostsCompanion(
+            id: id,
+            chatId: chatId,
+            authorId: authorId,
+            authorName: authorName,
+            publicBody: publicBody,
+            factBody: factBody,
+            chapterId: chapterId,
+            origin: origin,
+            status: status,
+            writeToWorld: writeToWorld,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String chatId,
+            required String authorId,
+            required String authorName,
+            required String publicBody,
+            Value<String?> factBody = const Value.absent(),
+            Value<String?> chapterId = const Value.absent(),
+            required String origin,
+            required String status,
+            Value<bool> writeToWorld = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentPostsCompanion.insert(
+            id: id,
+            chatId: chatId,
+            authorId: authorId,
+            authorName: authorName,
+            publicBody: publicBody,
+            factBody: factBody,
+            chapterId: chapterId,
+            origin: origin,
+            status: status,
+            writeToWorld: writeToWorld,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$MomentPostsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {chatId = false, chapterId = false, momentCommentsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (momentCommentsRefs) db.momentComments
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (chatId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chatId,
+                    referencedTable:
+                        $$MomentPostsTableReferences._chatIdTable(db),
+                    referencedColumn:
+                        $$MomentPostsTableReferences._chatIdTable(db).id,
+                  ) as T;
+                }
+                if (chapterId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.chapterId,
+                    referencedTable:
+                        $$MomentPostsTableReferences._chapterIdTable(db),
+                    referencedColumn:
+                        $$MomentPostsTableReferences._chapterIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (momentCommentsRefs)
+                    await $_getPrefetchedData<MomentPostRow, $MomentPostsTable,
+                            MomentCommentRow>(
+                        currentTable: table,
+                        referencedTable: $$MomentPostsTableReferences
+                            ._momentCommentsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MomentPostsTableReferences(db, table, p0)
+                                .momentCommentsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.postId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$MomentPostsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MomentPostsTable,
+    MomentPostRow,
+    $$MomentPostsTableFilterComposer,
+    $$MomentPostsTableOrderingComposer,
+    $$MomentPostsTableAnnotationComposer,
+    $$MomentPostsTableCreateCompanionBuilder,
+    $$MomentPostsTableUpdateCompanionBuilder,
+    (MomentPostRow, $$MomentPostsTableReferences),
+    MomentPostRow,
+    PrefetchHooks Function(
+        {bool chatId, bool chapterId, bool momentCommentsRefs})>;
+typedef $$MomentCommentsTableCreateCompanionBuilder = MomentCommentsCompanion
+    Function({
+  required String id,
+  required String postId,
+  required String authorId,
+  required String authorName,
+  required String body,
+  required String kind,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$MomentCommentsTableUpdateCompanionBuilder = MomentCommentsCompanion
+    Function({
+  Value<String> id,
+  Value<String> postId,
+  Value<String> authorId,
+  Value<String> authorName,
+  Value<String> body,
+  Value<String> kind,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$MomentCommentsTableReferences extends BaseReferences<
+    _$AppDatabase, $MomentCommentsTable, MomentCommentRow> {
+  $$MomentCommentsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $MomentPostsTable _postIdTable(_$AppDatabase db) =>
+      db.momentPosts.createAlias(
+          $_aliasNameGenerator(db.momentComments.postId, db.momentPosts.id));
+
+  $$MomentPostsTableProcessedTableManager get postId {
+    final $_column = $_itemColumn<String>('post_id')!;
+
+    final manager = $$MomentPostsTableTableManager($_db, $_db.momentPosts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_postIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$MomentCommentsTableFilterComposer
+    extends Composer<_$AppDatabase, $MomentCommentsTable> {
+  $$MomentCommentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get body => $composableBuilder(
+      column: $table.body, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$MomentPostsTableFilterComposer get postId {
+    final $$MomentPostsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableFilterComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentCommentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MomentCommentsTable> {
+  $$MomentCommentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get body => $composableBuilder(
+      column: $table.body, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$MomentPostsTableOrderingComposer get postId {
+    final $$MomentPostsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableOrderingComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentCommentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MomentCommentsTable> {
+  $$MomentCommentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get authorId =>
+      $composableBuilder(column: $table.authorId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+      column: $table.authorName, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$MomentPostsTableAnnotationComposer get postId {
+    final $$MomentPostsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentCommentsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MomentCommentsTable,
+    MomentCommentRow,
+    $$MomentCommentsTableFilterComposer,
+    $$MomentCommentsTableOrderingComposer,
+    $$MomentCommentsTableAnnotationComposer,
+    $$MomentCommentsTableCreateCompanionBuilder,
+    $$MomentCommentsTableUpdateCompanionBuilder,
+    (MomentCommentRow, $$MomentCommentsTableReferences),
+    MomentCommentRow,
+    PrefetchHooks Function({bool postId})> {
+  $$MomentCommentsTableTableManager(
+      _$AppDatabase db, $MomentCommentsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MomentCommentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MomentCommentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MomentCommentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> postId = const Value.absent(),
+            Value<String> authorId = const Value.absent(),
+            Value<String> authorName = const Value.absent(),
+            Value<String> body = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentCommentsCompanion(
+            id: id,
+            postId: postId,
+            authorId: authorId,
+            authorName: authorName,
+            body: body,
+            kind: kind,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String postId,
+            required String authorId,
+            required String authorName,
+            required String body,
+            required String kind,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentCommentsCompanion.insert(
+            id: id,
+            postId: postId,
+            authorId: authorId,
+            authorName: authorName,
+            body: body,
+            kind: kind,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$MomentCommentsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({postId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (postId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.postId,
+                    referencedTable:
+                        $$MomentCommentsTableReferences._postIdTable(db),
+                    referencedColumn:
+                        $$MomentCommentsTableReferences._postIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$MomentCommentsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MomentCommentsTable,
+    MomentCommentRow,
+    $$MomentCommentsTableFilterComposer,
+    $$MomentCommentsTableOrderingComposer,
+    $$MomentCommentsTableAnnotationComposer,
+    $$MomentCommentsTableCreateCompanionBuilder,
+    $$MomentCommentsTableUpdateCompanionBuilder,
+    (MomentCommentRow, $$MomentCommentsTableReferences),
+    MomentCommentRow,
+    PrefetchHooks Function({bool postId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -23783,4 +25784,8 @@ class $AppDatabaseManager {
       $$DataBankBindingsTableTableManager(_db, _db.dataBankBindings);
   $$StoryChaptersTableTableManager get storyChapters =>
       $$StoryChaptersTableTableManager(_db, _db.storyChapters);
+  $$MomentPostsTableTableManager get momentPosts =>
+      $$MomentPostsTableTableManager(_db, _db.momentPosts);
+  $$MomentCommentsTableTableManager get momentComments =>
+      $$MomentCommentsTableTableManager(_db, _db.momentComments);
 }

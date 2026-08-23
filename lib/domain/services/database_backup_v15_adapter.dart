@@ -67,6 +67,14 @@ final class DatabaseBackupV15Adapter {
         (await _database.select(_database.storyChapters).get())
             .map((row) => row.toJson()),
       ),
+      'momentPosts': _mapById(
+        (await _database.select(_database.momentPosts).get())
+            .map((row) => row.toJson()),
+      ),
+      'momentComments': _mapById(
+        (await _database.select(_database.momentComments).get())
+            .map((row) => row.toJson()),
+      ),
     };
   }
 
@@ -171,6 +179,20 @@ final class DatabaseBackupV15Adapter {
         await _insert(
           _database.storyChapters,
           StoryChapterRow.fromJson(json),
+          overwriteExisting,
+        );
+      }
+      for (final json in _rows(data, 'momentPosts')) {
+        await _insert(
+          _database.momentPosts,
+          MomentPostRow.fromJson(json),
+          overwriteExisting,
+        );
+      }
+      for (final json in _rows(data, 'momentComments')) {
+        await _insert(
+          _database.momentComments,
+          MomentCommentRow.fromJson(json),
           overwriteExisting,
         );
       }

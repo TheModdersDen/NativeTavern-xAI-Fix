@@ -526,6 +526,58 @@ class StoryChapters extends Table {
       ];
 }
 
+@DataClassName('MomentPostRow')
+class MomentPosts extends Table {
+  TextColumn get id => text()();
+  TextColumn get chatId =>
+      text().references(Chats, #id, onDelete: KeyAction.cascade)();
+  TextColumn get authorId => text()();
+  TextColumn get authorName => text()();
+  TextColumn get publicBody => text()();
+  TextColumn get factBody => text().nullable()();
+  TextColumn get chapterId => text().nullable().references(
+        StoryChapters,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+  TextColumn get origin => text()();
+  TextColumn get status => text()();
+  BoolColumn get writeToWorld =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => const [
+        "CHECK (origin IN ('chapter', 'user'))",
+        "CHECK (status IN ('open', 'waiting', 'ignored'))",
+        "CHECK (origin != 'chapter' OR chapter_id IS NOT NULL)",
+      ];
+}
+
+@DataClassName('MomentCommentRow')
+class MomentComments extends Table {
+  TextColumn get id => text()();
+  TextColumn get postId =>
+      text().references(MomentPosts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get authorId => text()();
+  TextColumn get authorName => text()();
+  TextColumn get body => text()();
+  TextColumn get kind => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => const [
+        "CHECK (kind IN ('comment', 'expose', 'character'))",
+      ];
+}
+
 @DataClassName('DataBankBindingRow')
 class DataBankBindings extends Table {
   TextColumn get id => text()();
@@ -584,13 +636,15 @@ class DataBankBindings extends Table {
   DataBankTextChunks,
   DataBankBindings,
   StoryChapters,
+  MomentPosts,
+  MomentComments,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration {
@@ -600,6 +654,7 @@ class AppDatabase extends _$AppDatabase {
         await _createV15Indexes();
         await _createV15Triggers();
         await _createV16Indexes();
+        await _createV17Indexes();
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from > to) {
@@ -618,6 +673,7 @@ class AppDatabase extends _$AppDatabase {
             await _createV15Indexes();
             await _createV15Triggers();
             await _createV16Indexes();
+            await _createV17Indexes();
             return;
           }
 
@@ -718,6 +774,12 @@ class AppDatabase extends _$AppDatabase {
             await _assertNoPartialV16Schema();
             await m.createTable(storyChapters);
             await _createV16Indexes();
+          }
+          if (from < 17) {
+            await _assertNoPartialV17Schema();
+            await m.createTable(momentPosts);
+            await m.createTable(momentComments);
+            await _createV17Indexes();
           }
         });
       },
@@ -1023,6 +1085,20 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  Future<void> _createV17Indexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS moment_posts_chat_idx '
+          'ON moment_posts (chat_id, created_at)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS moment_posts_chapter_unique '
+          'ON moment_posts (chapter_id) WHERE chapter_id IS NOT NULL',
+      'CREATE INDEX IF NOT EXISTS moment_comments_post_idx '
+          'ON moment_comments (post_id, created_at)',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
   Future<bool> _hasCompleteCurrentTableLayout() async {
     for (final table in allTables) {
       final tableName = table.actualTableName.replaceAll('"', '""');
@@ -1077,6 +1153,22 @@ class AppDatabase extends _$AppDatabase {
     if (rows.isNotEmpty) {
       throw StateError(
         'Partial v16 schema detected: '
+        '${rows.map((row) => row.read<String>('name')).join(', ')}',
+      );
+    }
+  }
+
+  Future<void> _assertNoPartialV17Schema() async {
+    const tableNames = ['moment_posts', 'moment_comments'];
+    final placeholders = List.filled(tableNames.length, '?').join(', ');
+    final rows = await customSelect(
+      'SELECT name FROM sqlite_master '
+      "WHERE type = 'table' AND name IN ($placeholders)",
+      variables: tableNames.map(Variable<String>.new).toList(),
+    ).get();
+    if (rows.isNotEmpty) {
+      throw StateError(
+        'Partial v17 schema detected: '
         '${rows.map((row) => row.read<String>('name')).join(', ')}',
       );
     }

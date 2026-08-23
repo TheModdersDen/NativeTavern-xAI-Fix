@@ -75,8 +75,14 @@ final chatExportServiceProvider = Provider<ChatExportService>((ref) {
 class ChatScreen extends ConsumerStatefulWidget {
   final String chatId;
   final String? initialMessageId;
+  final String? initialDraft;
 
-  const ChatScreen({super.key, required this.chatId, this.initialMessageId});
+  const ChatScreen({
+    super.key,
+    required this.chatId,
+    this.initialMessageId,
+    this.initialDraft,
+  });
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -114,6 +120,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       // Refresh context usage to ensure fresh calculation
       // This handles cases where world info was updated while not in chat
       refreshContextUsageProviders(ref);
+      final draft = widget.initialDraft?.trim();
+      if (draft != null && draft.isNotEmpty) {
+        _messageController.text = draft;
+      }
     });
 
     // Listen for text changes to show/hide slash command suggestions

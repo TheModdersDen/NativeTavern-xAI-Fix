@@ -5397,6 +5397,27 @@
   "@moments": {
     "description": "Play hub row for the public moments feed"
   },
+  "momentsDisabledEmpty": "Moments stay empty until you turn them on. Nothing is generated in the background.",
+  "momentsEmpty": "Nothing happened in public. Chat long enough for a chapter, or post one yourself.",
+  "momentsCompose": "Post",
+  "momentsComposeHint": "What do you want people to see?",
+  "momentsNeedChat": "Open a chat first, then come back to post.",
+  "momentsComment": "Comment",
+  "momentsTalk": "Talk",
+  "momentsExpose": "Expose",
+  "momentsIgnore": "Leave it",
+  "momentsWaiting": "Waiting for a reply",
+  "momentsWaitingBadge": "Waiting",
+  "momentsIgnoredBadge": "Left unread",
+  "momentsWriteToWorld": "Write this into the world",
+  "momentsFact": "What actually happened: {fact}",
+  "@momentsFact": {
+    "placeholders": {
+      "fact": {
+        "type": "String"
+      }
+    }
+  },
   "playFeatureComingSoon": "This play feature is not ready yet.",
   "@playFeatureComingSoon": {
     "description": "Placeholder body for unfinished play destinations"

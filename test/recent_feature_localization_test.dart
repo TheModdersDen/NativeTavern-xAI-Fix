@@ -35,6 +35,9 @@ void main() {
     expect(l10n.storyGoToChat, '去聊天');
     expect(l10n.storyJotNote, '记一笔');
     expect(l10n.moments, '动态');
+    expect(l10n.momentsComment, '评论');
+    expect(l10n.momentsTalk, '开聊');
+    expect(l10n.momentsExpose, '拆穿');
     expect(l10n.openDataBank, '打开资料');
     expect(l10n.dataBank, '资料库');
     expect(l10n.rpgScenarioEditor, 'RPG 剧本编辑器');
