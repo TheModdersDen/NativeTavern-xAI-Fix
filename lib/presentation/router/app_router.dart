@@ -425,7 +425,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.playStory,
         name: 'playStory',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const StoryScreen(),
+        builder: (context, state) => StoryScreen(
+          initialChatId: state.uri.queryParameters['chat'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.playMoments,

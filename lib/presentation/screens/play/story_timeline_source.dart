@@ -1,4 +1,4 @@
-import 'package:native_tavern/domain/services/story_query_service.dart';
+import 'package:native_tavern/domain/services/story_play_service.dart';
 import 'package:native_tavern/presentation/screens/play/story_models.dart';
 
 /// Chapter list used by the story page.
@@ -7,23 +7,30 @@ abstract interface class StoryTimelineSource {
 }
 
 final class RepositoryStoryTimelineSource implements StoryTimelineSource {
-  const RepositoryStoryTimelineSource(this._query);
+  const RepositoryStoryTimelineSource(this._play);
 
-  final StoryQueryService _query;
+  final StoryPlayService _play;
 
   @override
   Future<List<StoryChapterTimelineItem>> listChapters() async {
-    final chapters = await _query.listRecent();
+    final lines = await _play.listLines();
     return [
-      for (final chapter in chapters)
-        StoryChapterTimelineItem(
-          id: chapter.id,
-          chatId: chapter.chatId,
-          title: chapter.title,
-          summary: chapter.summary,
-          jumpMessageId: chapter.jumpMessageId,
-          createdAt: chapter.createdAt,
-        ),
+      for (final line in lines)
+        for (final chapter in line.chapters)
+          StoryChapterTimelineItem(
+            id: chapter.id,
+            chatId: chapter.chatId,
+            title: chapter.title,
+            summary: chapter.summary,
+            narrative: chapter.narrative,
+            jumpMessageId: chapter.jumpMessageId,
+            createdAt: chapter.createdAt,
+            chatTitle: line.chat.title,
+            rootChatId: line.rootChatId,
+            parentChatId: line.parentChatId,
+            branchTitle: line.branchTitle,
+            forkOrdinal: line.forkOrdinal,
+          ),
     ];
   }
 }

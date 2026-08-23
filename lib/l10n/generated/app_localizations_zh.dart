@@ -3908,6 +3908,85 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyJotNoteHint => '写一句短记事。这里不是章节编辑器。';
 
   @override
+  String get storyKeyEvents => '发生了什么';
+
+  @override
+  String get storyStateChanges => '改变了什么';
+
+  @override
+  String get storyOpenThreads => '还没解决';
+
+  @override
+  String get storyNextSteps => '可以怎么继续';
+
+  @override
+  String get storyContinue => '接着演';
+
+  @override
+  String get storyFork => '从这里分叉';
+
+  @override
+  String get storyCompare => '对照后果';
+
+  @override
+  String get storyViewSource => '查看原文';
+
+  @override
+  String get storyOriginalLine => '原始路线';
+
+  @override
+  String get storyBranchName => '分支名称';
+
+  @override
+  String get storyBranchNameHint => '例如：这次我选择留下';
+
+  @override
+  String get storyCreateBranch => '创建分支';
+
+  @override
+  String get storyDefaultDirection => '从这一章尚未解决的时刻继续。';
+
+  @override
+  String storyContinueDraft(String title, String direction) {
+    return '接着「$title」往下演：$direction';
+  }
+
+  @override
+  String storyForkCreated(String name) {
+    return '分支“$name”已经准备好。';
+  }
+
+  @override
+  String get storyNoOutcome => '这条路线还没有形成新的章节后果。';
+
+  @override
+  String get storyChooseTwoLines => '选择两条路线进行对照。';
+
+  @override
+  String get storyLeftLine => '第一条路线';
+
+  @override
+  String get storyRightLine => '第二条路线';
+
+  @override
+  String get storySearch => '搜索故事';
+
+  @override
+  String get storyNoSearchResults => '没有匹配的章节。';
+
+  @override
+  String get storySelectLine => '故事线';
+
+  @override
+  String get storyNoteSaved => '已经记进故事。';
+
+  @override
+  String get storyNoChats => '先开始一场聊天，才能记故事。';
+
+  @override
+  String get storyConsequencesAfterFork => '分叉之后';
+
+  @override
   String get moments => '动态';
 
   @override
@@ -10066,6 +10145,85 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get storyJotNoteHint => '寫一句短記事。這裡不是章節編輯器。';
+
+  @override
+  String get storyKeyEvents => '發生了什麼';
+
+  @override
+  String get storyStateChanges => '改變了什麼';
+
+  @override
+  String get storyOpenThreads => '還沒解決';
+
+  @override
+  String get storyNextSteps => '可以怎麼繼續';
+
+  @override
+  String get storyContinue => '接著演';
+
+  @override
+  String get storyFork => '從這裡分支';
+
+  @override
+  String get storyCompare => '對照後果';
+
+  @override
+  String get storyViewSource => '查看原文';
+
+  @override
+  String get storyOriginalLine => '原始路線';
+
+  @override
+  String get storyBranchName => '分支名稱';
+
+  @override
+  String get storyBranchNameHint => '例如：這次我選擇留下';
+
+  @override
+  String get storyCreateBranch => '建立分支';
+
+  @override
+  String get storyDefaultDirection => '從這一章尚未解決的時刻繼續。';
+
+  @override
+  String storyContinueDraft(String title, String direction) {
+    return '接著「$title」往下演：$direction';
+  }
+
+  @override
+  String storyForkCreated(String name) {
+    return '分支「$name」已經準備好。';
+  }
+
+  @override
+  String get storyNoOutcome => '這條路線還沒有形成新的章節後果。';
+
+  @override
+  String get storyChooseTwoLines => '選擇兩條路線進行對照。';
+
+  @override
+  String get storyLeftLine => '第一條路線';
+
+  @override
+  String get storyRightLine => '第二條路線';
+
+  @override
+  String get storySearch => '搜尋故事';
+
+  @override
+  String get storyNoSearchResults => '沒有符合的章節。';
+
+  @override
+  String get storySelectLine => '故事線';
+
+  @override
+  String get storyNoteSaved => '已經記進故事。';
+
+  @override
+  String get storyNoChats => '先開始一場聊天，才能記故事。';
+
+  @override
+  String get storyConsequencesAfterFork => '分支之後';
 
   @override
   String get moments => '動態';

@@ -5417,6 +5417,40 @@
   "@storyJotNoteHint": {
     "description": "Hint inside the story jot-a-note sheet"
   },
+  "storyKeyEvents": "What happened",
+  "storyStateChanges": "What changed",
+  "storyOpenThreads": "Still unresolved",
+  "storyNextSteps": "Where this could go",
+  "storyContinue": "Continue",
+  "storyFork": "Fork from here",
+  "storyCompare": "Compare outcomes",
+  "storyViewSource": "View source",
+  "storyOriginalLine": "Original line",
+  "storyBranchName": "Branch name",
+  "storyBranchNameHint": "For example: I stayed instead",
+  "storyCreateBranch": "Create branch",
+  "storyDefaultDirection": "Continue from the unresolved moment in this chapter.",
+  "storyContinueDraft": "Continue \"{title}\" from here: {direction}",
+  "@storyContinueDraft": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "direction": {"type": "String"}
+    }
+  },
+  "storyForkCreated": "Branch \"{name}\" is ready.",
+  "@storyForkCreated": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "storyNoOutcome": "No new chapter has formed on this line yet.",
+  "storyChooseTwoLines": "Choose two lines to compare.",
+  "storyLeftLine": "First line",
+  "storyRightLine": "Second line",
+  "storySearch": "Search stories",
+  "storyNoSearchResults": "No matching chapters.",
+  "storySelectLine": "Story line",
+  "storyNoteSaved": "The note was added to the story.",
+  "storyNoChats": "Start a chat before writing a story note.",
+  "storyConsequencesAfterFork": "After the fork",
   "moments": "Moments",
   "@moments": {
     "description": "Play hub row for the public moments feed"

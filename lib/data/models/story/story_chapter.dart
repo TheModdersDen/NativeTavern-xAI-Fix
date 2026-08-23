@@ -3,6 +3,54 @@ import 'package:equatable/equatable.dart';
 /// How a chapter entered the story timeline.
 enum StoryChapterOrigin { auto, manual }
 
+/// Playable information extracted alongside a readable chapter summary.
+class StoryChapterNarrative extends Equatable {
+  final List<String> keyEvents;
+  final List<String> stateChanges;
+  final List<String> openThreads;
+  final List<String> nextSteps;
+
+  const StoryChapterNarrative({
+    this.keyEvents = const [],
+    this.stateChanges = const [],
+    this.openThreads = const [],
+    this.nextSteps = const [],
+  });
+
+  bool get isEmpty =>
+      keyEvents.isEmpty &&
+      stateChanges.isEmpty &&
+      openThreads.isEmpty &&
+      nextSteps.isEmpty;
+
+  factory StoryChapterNarrative.fromJson(Map<String, dynamic> json) {
+    List<String> strings(String key) =>
+        (json[key] as List?)
+            ?.whereType<String>()
+            .map((value) => value.trim())
+            .where((value) => value.isNotEmpty)
+            .toList(growable: false) ??
+        const [];
+
+    return StoryChapterNarrative(
+      keyEvents: strings('keyEvents'),
+      stateChanges: strings('stateChanges'),
+      openThreads: strings('openThreads'),
+      nextSteps: strings('nextSteps'),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'keyEvents': keyEvents,
+        'stateChanges': stateChanges,
+        'openThreads': openThreads,
+        'nextSteps': nextSteps,
+      };
+
+  @override
+  List<Object?> get props => [keyEvents, stateChanges, openThreads, nextSteps];
+}
+
 /// A readable chapter for one chat world-line.
 ///
 /// Chapters bind to concrete messages. After a bookmark fork deletes later
@@ -13,6 +61,7 @@ class StoryChapter extends Equatable {
   final String chatId;
   final String title;
   final String summary;
+  final StoryChapterNarrative narrative;
   final String startMessageId;
   final String endMessageId;
   final int startOrdinal;
@@ -26,6 +75,7 @@ class StoryChapter extends Equatable {
     required this.chatId,
     required this.title,
     required this.summary,
+    required this.narrative,
     required this.startMessageId,
     required this.endMessageId,
     required this.startOrdinal,
@@ -40,6 +90,7 @@ class StoryChapter extends Equatable {
     required String chatId,
     required String title,
     required String summary,
+    StoryChapterNarrative narrative = const StoryChapterNarrative(),
     required String startMessageId,
     required String endMessageId,
     required int startOrdinal,
@@ -71,6 +122,7 @@ class StoryChapter extends Equatable {
       chatId: chatId,
       title: title.trim(),
       summary: summary.trim(),
+      narrative: narrative,
       startMessageId: startMessageId,
       endMessageId: endMessageId,
       startOrdinal: startOrdinal,
@@ -87,6 +139,11 @@ class StoryChapter extends Equatable {
       chatId: _requiredString(json, 'chatId'),
       title: _requiredString(json, 'title'),
       summary: _requiredString(json, 'summary'),
+      narrative: json['narrative'] is Map
+          ? StoryChapterNarrative.fromJson(
+              Map<String, dynamic>.from(json['narrative'] as Map),
+            )
+          : const StoryChapterNarrative(),
       startMessageId: _requiredString(json, 'startMessageId'),
       endMessageId: _requiredString(json, 'endMessageId'),
       startOrdinal: _requiredInt(json, 'startOrdinal'),
@@ -105,6 +162,7 @@ class StoryChapter extends Equatable {
     String? chatId,
     String? title,
     String? summary,
+    StoryChapterNarrative? narrative,
     String? startMessageId,
     String? endMessageId,
     int? startOrdinal,
@@ -118,6 +176,7 @@ class StoryChapter extends Equatable {
       chatId: chatId ?? this.chatId,
       title: title ?? this.title,
       summary: summary ?? this.summary,
+      narrative: narrative ?? this.narrative,
       startMessageId: startMessageId ?? this.startMessageId,
       endMessageId: endMessageId ?? this.endMessageId,
       startOrdinal: startOrdinal ?? this.startOrdinal,
@@ -133,6 +192,7 @@ class StoryChapter extends Equatable {
         'chatId': chatId,
         'title': title,
         'summary': summary,
+        'narrative': narrative.toJson(),
         'startMessageId': startMessageId,
         'endMessageId': endMessageId,
         'startOrdinal': startOrdinal,
@@ -148,6 +208,7 @@ class StoryChapter extends Equatable {
         chatId,
         title,
         summary,
+        narrative,
         startMessageId,
         endMessageId,
         startOrdinal,

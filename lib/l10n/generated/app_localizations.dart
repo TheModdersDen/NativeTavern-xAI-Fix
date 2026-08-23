@@ -7357,6 +7357,156 @@ abstract class AppLocalizations {
   /// **'Write a short note. This is not a chapter editor.'**
   String get storyJotNoteHint;
 
+  /// No description provided for @storyKeyEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get storyKeyEvents;
+
+  /// No description provided for @storyStateChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'What changed'**
+  String get storyStateChanges;
+
+  /// No description provided for @storyOpenThreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Still unresolved'**
+  String get storyOpenThreads;
+
+  /// No description provided for @storyNextSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Where this could go'**
+  String get storyNextSteps;
+
+  /// No description provided for @storyContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get storyContinue;
+
+  /// No description provided for @storyFork.
+  ///
+  /// In en, this message translates to:
+  /// **'Fork from here'**
+  String get storyFork;
+
+  /// No description provided for @storyCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare outcomes'**
+  String get storyCompare;
+
+  /// No description provided for @storyViewSource.
+  ///
+  /// In en, this message translates to:
+  /// **'View source'**
+  String get storyViewSource;
+
+  /// No description provided for @storyOriginalLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Original line'**
+  String get storyOriginalLine;
+
+  /// No description provided for @storyBranchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch name'**
+  String get storyBranchName;
+
+  /// No description provided for @storyBranchNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: I stayed instead'**
+  String get storyBranchNameHint;
+
+  /// No description provided for @storyCreateBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Create branch'**
+  String get storyCreateBranch;
+
+  /// No description provided for @storyDefaultDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue from the unresolved moment in this chapter.'**
+  String get storyDefaultDirection;
+
+  /// No description provided for @storyContinueDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue \"{title}\" from here: {direction}'**
+  String storyContinueDraft(String title, String direction);
+
+  /// No description provided for @storyForkCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch \"{name}\" is ready.'**
+  String storyForkCreated(String name);
+
+  /// No description provided for @storyNoOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'No new chapter has formed on this line yet.'**
+  String get storyNoOutcome;
+
+  /// No description provided for @storyChooseTwoLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose two lines to compare.'**
+  String get storyChooseTwoLines;
+
+  /// No description provided for @storyLeftLine.
+  ///
+  /// In en, this message translates to:
+  /// **'First line'**
+  String get storyLeftLine;
+
+  /// No description provided for @storyRightLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Second line'**
+  String get storyRightLine;
+
+  /// No description provided for @storySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search stories'**
+  String get storySearch;
+
+  /// No description provided for @storyNoSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching chapters.'**
+  String get storyNoSearchResults;
+
+  /// No description provided for @storySelectLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Story line'**
+  String get storySelectLine;
+
+  /// No description provided for @storyNoteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'The note was added to the story.'**
+  String get storyNoteSaved;
+
+  /// No description provided for @storyNoChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a chat before writing a story note.'**
+  String get storyNoChats;
+
+  /// No description provided for @storyConsequencesAfterFork.
+  ///
+  /// In en, this message translates to:
+  /// **'After the fork'**
+  String get storyConsequencesAfterFork;
+
   /// Play hub row for the public moments feed
   ///
   /// In en, this message translates to:

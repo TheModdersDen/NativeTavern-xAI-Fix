@@ -4025,6 +4025,86 @@ class AppLocalizationsIt extends AppLocalizations {
       'Write a short note. This is not a chapter editor.';
 
   @override
+  String get storyKeyEvents => 'What happened';
+
+  @override
+  String get storyStateChanges => 'What changed';
+
+  @override
+  String get storyOpenThreads => 'Still unresolved';
+
+  @override
+  String get storyNextSteps => 'Where this could go';
+
+  @override
+  String get storyContinue => 'Continue';
+
+  @override
+  String get storyFork => 'Fork from here';
+
+  @override
+  String get storyCompare => 'Compare outcomes';
+
+  @override
+  String get storyViewSource => 'View source';
+
+  @override
+  String get storyOriginalLine => 'Original line';
+
+  @override
+  String get storyBranchName => 'Branch name';
+
+  @override
+  String get storyBranchNameHint => 'For example: I stayed instead';
+
+  @override
+  String get storyCreateBranch => 'Create branch';
+
+  @override
+  String get storyDefaultDirection =>
+      'Continue from the unresolved moment in this chapter.';
+
+  @override
+  String storyContinueDraft(String title, String direction) {
+    return 'Continue \"$title\" from here: $direction';
+  }
+
+  @override
+  String storyForkCreated(String name) {
+    return 'Branch \"$name\" is ready.';
+  }
+
+  @override
+  String get storyNoOutcome => 'No new chapter has formed on this line yet.';
+
+  @override
+  String get storyChooseTwoLines => 'Choose two lines to compare.';
+
+  @override
+  String get storyLeftLine => 'First line';
+
+  @override
+  String get storyRightLine => 'Second line';
+
+  @override
+  String get storySearch => 'Search stories';
+
+  @override
+  String get storyNoSearchResults => 'No matching chapters.';
+
+  @override
+  String get storySelectLine => 'Story line';
+
+  @override
+  String get storyNoteSaved => 'The note was added to the story.';
+
+  @override
+  String get storyNoChats => 'Start a chat before writing a story note.';
+
+  @override
+  String get storyConsequencesAfterFork => 'After the fork';
+
+  @override
   String get moments => 'Moments';
 
   @override

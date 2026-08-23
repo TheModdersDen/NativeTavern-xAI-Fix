@@ -8,6 +8,7 @@ import 'package:native_tavern/data/repositories/drift_story_repository.dart';
 import 'package:native_tavern/data/repositories/persona_repository.dart';
 import 'package:native_tavern/domain/repositories/story_repository.dart';
 import 'package:native_tavern/domain/services/story_pipeline.dart';
+import 'package:native_tavern/domain/services/story_play_service.dart';
 import 'package:native_tavern/domain/services/story_query_service.dart';
 import 'package:native_tavern/domain/services/story_service.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
@@ -39,12 +40,24 @@ final storyQueryServiceProvider = Provider<StoryQueryService>((ref) {
   );
 });
 
+final storyPlayServiceProvider = Provider<StoryPlayService>((ref) {
+  return StoryPlayService(
+    chatRepository: ref.watch(chatRepositoryProvider),
+    storyRepository: ref.watch(storyRepositoryProvider),
+  );
+});
+
+final storyLinesProvider = FutureProvider<List<StoryLine>>((ref) {
+  return ref.watch(storyPlayServiceProvider).listLines();
+});
+
 final storyChaptersProvider =
     FutureProvider.family<List<StoryChapter>, String>((ref, chatId) {
   return ref.watch(storyQueryServiceProvider).listChapters(chatId);
 });
 
-final storyContextContributorProvider = Provider<StoryContextContributor>((ref) {
+final storyContextContributorProvider =
+    Provider<StoryContextContributor>((ref) {
   return StoryContextContributor(
     memoryContributor: ref.watch(longTermMemoryContextContributorProvider),
     enabled: () => ref.read(appSettingsProvider).storyEnabled,

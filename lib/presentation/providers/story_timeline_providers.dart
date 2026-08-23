@@ -6,7 +6,7 @@ import 'package:native_tavern/presentation/screens/play/story_timeline_source.da
 final storyRevisionProvider = StateProvider<int>((ref) => 0);
 
 final storyTimelineSourceProvider = Provider<StoryTimelineSource>((ref) {
-  return RepositoryStoryTimelineSource(ref.watch(storyQueryServiceProvider));
+  return RepositoryStoryTimelineSource(ref.watch(storyPlayServiceProvider));
 });
 
 final storyTimelineProvider =

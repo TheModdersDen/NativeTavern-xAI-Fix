@@ -32,6 +32,7 @@ import 'package:native_tavern/presentation/providers/persona_providers.dart';
 import 'package:native_tavern/presentation/providers/quick_reply_providers.dart';
 import 'package:native_tavern/presentation/providers/rpg_chat_providers.dart';
 import 'package:native_tavern/presentation/providers/settings_providers.dart';
+import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/providers/tts_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
@@ -1175,6 +1176,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         (chatState.chat?.authorNote.isNotEmpty ?? false);
     final llmConfig = ref.watch(llmConfigProvider);
     final rpgState = ref.watch(rpgChatProvider(widget.chatId));
+    final hasStory = ref
+            .watch(storyChaptersProvider(widget.chatId))
+            .valueOrNull
+            ?.isNotEmpty ==
+        true;
 
     return AppBar(
       title: Column(
@@ -1401,6 +1407,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
+            if (hasStory)
+              PopupMenuItem(
+                value: 'story',
+                child: ListTile(
+                  leading: const Icon(Icons.auto_stories_outlined),
+                  title: Text(l10n.story),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
             PopupMenuItem(
               key: const Key('memory-usage-menu'),
               value: 'memory_usage',
@@ -1478,6 +1493,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 break;
               case 'bookmarks':
                 _showBookmarksDialog(context);
+                break;
+              case 'story':
+                context.push(
+                  Uri(
+                    path: AppRoutes.playStory,
+                    queryParameters: {'chat': widget.chatId},
+                  ).toString(),
+                );
                 break;
               case 'memory_usage':
                 _showMemoryUsage();

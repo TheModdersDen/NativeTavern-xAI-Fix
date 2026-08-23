@@ -503,6 +503,7 @@ class StoryChapters extends Table {
       text().references(Chats, #id, onDelete: KeyAction.cascade)();
   TextColumn get title => text()();
   TextColumn get summary => text()();
+  TextColumn get narrativeJson => text().withDefault(const Constant('{}'))();
   @ReferenceName('storyChapterStartMessage')
   TextColumn get startMessageId =>
       text().references(Messages, #id, onDelete: KeyAction.cascade)();
@@ -543,8 +544,7 @@ class MomentPosts extends Table {
       )();
   TextColumn get origin => text()();
   TextColumn get status => text()();
-  BoolColumn get writeToWorld =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get writeToWorld => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -646,7 +646,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration {
@@ -800,6 +800,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 21) {
             await _ensureOperationLogsTable();
+          }
+          if (from < 22) {
+            await m.addColumn(storyChapters, storyChapters.narrativeJson);
           }
         });
       },
@@ -1119,7 +1122,8 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _migrateMomentPostsToV18() async {
-    await customStatement('ALTER TABLE moment_posts RENAME TO moment_posts_v17');
+    await customStatement(
+        'ALTER TABLE moment_posts RENAME TO moment_posts_v17');
     await customStatement('DROP INDEX IF EXISTS moment_posts_chat_idx');
     await customStatement('DROP INDEX IF EXISTS moment_posts_chapter_unique');
     await customStatement('''

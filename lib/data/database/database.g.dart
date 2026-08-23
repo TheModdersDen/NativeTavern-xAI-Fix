@@ -11952,6 +11952,14 @@ class $StoryChaptersTable extends StoryChapters
   late final GeneratedColumn<String> summary = GeneratedColumn<String>(
       'summary', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _narrativeJsonMeta =
+      const VerificationMeta('narrativeJson');
+  @override
+  late final GeneratedColumn<String> narrativeJson = GeneratedColumn<String>(
+      'narrative_json', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('{}'));
   static const VerificationMeta _startMessageIdMeta =
       const VerificationMeta('startMessageId');
   @override
@@ -12005,6 +12013,7 @@ class $StoryChaptersTable extends StoryChapters
         chatId,
         title,
         summary,
+        narrativeJson,
         startMessageId,
         endMessageId,
         startOrdinal,
@@ -12045,6 +12054,12 @@ class $StoryChaptersTable extends StoryChapters
           summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta));
     } else if (isInserting) {
       context.missing(_summaryMeta);
+    }
+    if (data.containsKey('narrative_json')) {
+      context.handle(
+          _narrativeJsonMeta,
+          narrativeJson.isAcceptableOrUnknown(
+              data['narrative_json']!, _narrativeJsonMeta));
     }
     if (data.containsKey('start_message_id')) {
       context.handle(
@@ -12113,6 +12128,8 @@ class $StoryChaptersTable extends StoryChapters
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       summary: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}summary'])!,
+      narrativeJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}narrative_json'])!,
       startMessageId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}start_message_id'])!,
       endMessageId: attachedDatabase.typeMapping
@@ -12141,6 +12158,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
   final String chatId;
   final String title;
   final String summary;
+  final String narrativeJson;
   final String startMessageId;
   final String endMessageId;
   final int startOrdinal;
@@ -12153,6 +12171,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
       required this.chatId,
       required this.title,
       required this.summary,
+      required this.narrativeJson,
       required this.startMessageId,
       required this.endMessageId,
       required this.startOrdinal,
@@ -12167,6 +12186,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
     map['chat_id'] = Variable<String>(chatId);
     map['title'] = Variable<String>(title);
     map['summary'] = Variable<String>(summary);
+    map['narrative_json'] = Variable<String>(narrativeJson);
     map['start_message_id'] = Variable<String>(startMessageId);
     map['end_message_id'] = Variable<String>(endMessageId);
     map['start_ordinal'] = Variable<int>(startOrdinal);
@@ -12183,6 +12203,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
       chatId: Value(chatId),
       title: Value(title),
       summary: Value(summary),
+      narrativeJson: Value(narrativeJson),
       startMessageId: Value(startMessageId),
       endMessageId: Value(endMessageId),
       startOrdinal: Value(startOrdinal),
@@ -12201,6 +12222,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
       chatId: serializer.fromJson<String>(json['chatId']),
       title: serializer.fromJson<String>(json['title']),
       summary: serializer.fromJson<String>(json['summary']),
+      narrativeJson: serializer.fromJson<String>(json['narrativeJson']),
       startMessageId: serializer.fromJson<String>(json['startMessageId']),
       endMessageId: serializer.fromJson<String>(json['endMessageId']),
       startOrdinal: serializer.fromJson<int>(json['startOrdinal']),
@@ -12218,6 +12240,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
       'chatId': serializer.toJson<String>(chatId),
       'title': serializer.toJson<String>(title),
       'summary': serializer.toJson<String>(summary),
+      'narrativeJson': serializer.toJson<String>(narrativeJson),
       'startMessageId': serializer.toJson<String>(startMessageId),
       'endMessageId': serializer.toJson<String>(endMessageId),
       'startOrdinal': serializer.toJson<int>(startOrdinal),
@@ -12233,6 +12256,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
           String? chatId,
           String? title,
           String? summary,
+          String? narrativeJson,
           String? startMessageId,
           String? endMessageId,
           int? startOrdinal,
@@ -12245,6 +12269,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
         chatId: chatId ?? this.chatId,
         title: title ?? this.title,
         summary: summary ?? this.summary,
+        narrativeJson: narrativeJson ?? this.narrativeJson,
         startMessageId: startMessageId ?? this.startMessageId,
         endMessageId: endMessageId ?? this.endMessageId,
         startOrdinal: startOrdinal ?? this.startOrdinal,
@@ -12259,6 +12284,9 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
       chatId: data.chatId.present ? data.chatId.value : this.chatId,
       title: data.title.present ? data.title.value : this.title,
       summary: data.summary.present ? data.summary.value : this.summary,
+      narrativeJson: data.narrativeJson.present
+          ? data.narrativeJson.value
+          : this.narrativeJson,
       startMessageId: data.startMessageId.present
           ? data.startMessageId.value
           : this.startMessageId,
@@ -12283,6 +12311,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
           ..write('chatId: $chatId, ')
           ..write('title: $title, ')
           ..write('summary: $summary, ')
+          ..write('narrativeJson: $narrativeJson, ')
           ..write('startMessageId: $startMessageId, ')
           ..write('endMessageId: $endMessageId, ')
           ..write('startOrdinal: $startOrdinal, ')
@@ -12295,8 +12324,19 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
   }
 
   @override
-  int get hashCode => Object.hash(id, chatId, title, summary, startMessageId,
-      endMessageId, startOrdinal, endOrdinal, origin, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id,
+      chatId,
+      title,
+      summary,
+      narrativeJson,
+      startMessageId,
+      endMessageId,
+      startOrdinal,
+      endOrdinal,
+      origin,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -12305,6 +12345,7 @@ class StoryChapterRow extends DataClass implements Insertable<StoryChapterRow> {
           other.chatId == this.chatId &&
           other.title == this.title &&
           other.summary == this.summary &&
+          other.narrativeJson == this.narrativeJson &&
           other.startMessageId == this.startMessageId &&
           other.endMessageId == this.endMessageId &&
           other.startOrdinal == this.startOrdinal &&
@@ -12319,6 +12360,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
   final Value<String> chatId;
   final Value<String> title;
   final Value<String> summary;
+  final Value<String> narrativeJson;
   final Value<String> startMessageId;
   final Value<String> endMessageId;
   final Value<int> startOrdinal;
@@ -12332,6 +12374,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
     this.chatId = const Value.absent(),
     this.title = const Value.absent(),
     this.summary = const Value.absent(),
+    this.narrativeJson = const Value.absent(),
     this.startMessageId = const Value.absent(),
     this.endMessageId = const Value.absent(),
     this.startOrdinal = const Value.absent(),
@@ -12346,6 +12389,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
     required String chatId,
     required String title,
     required String summary,
+    this.narrativeJson = const Value.absent(),
     required String startMessageId,
     required String endMessageId,
     required int startOrdinal,
@@ -12370,6 +12414,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
     Expression<String>? chatId,
     Expression<String>? title,
     Expression<String>? summary,
+    Expression<String>? narrativeJson,
     Expression<String>? startMessageId,
     Expression<String>? endMessageId,
     Expression<int>? startOrdinal,
@@ -12384,6 +12429,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
       if (chatId != null) 'chat_id': chatId,
       if (title != null) 'title': title,
       if (summary != null) 'summary': summary,
+      if (narrativeJson != null) 'narrative_json': narrativeJson,
       if (startMessageId != null) 'start_message_id': startMessageId,
       if (endMessageId != null) 'end_message_id': endMessageId,
       if (startOrdinal != null) 'start_ordinal': startOrdinal,
@@ -12400,6 +12446,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
       Value<String>? chatId,
       Value<String>? title,
       Value<String>? summary,
+      Value<String>? narrativeJson,
       Value<String>? startMessageId,
       Value<String>? endMessageId,
       Value<int>? startOrdinal,
@@ -12413,6 +12460,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
       chatId: chatId ?? this.chatId,
       title: title ?? this.title,
       summary: summary ?? this.summary,
+      narrativeJson: narrativeJson ?? this.narrativeJson,
       startMessageId: startMessageId ?? this.startMessageId,
       endMessageId: endMessageId ?? this.endMessageId,
       startOrdinal: startOrdinal ?? this.startOrdinal,
@@ -12438,6 +12486,9 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
     }
     if (summary.present) {
       map['summary'] = Variable<String>(summary.value);
+    }
+    if (narrativeJson.present) {
+      map['narrative_json'] = Variable<String>(narrativeJson.value);
     }
     if (startMessageId.present) {
       map['start_message_id'] = Variable<String>(startMessageId.value);
@@ -12473,6 +12524,7 @@ class StoryChaptersCompanion extends UpdateCompanion<StoryChapterRow> {
           ..write('chatId: $chatId, ')
           ..write('title: $title, ')
           ..write('summary: $summary, ')
+          ..write('narrativeJson: $narrativeJson, ')
           ..write('startMessageId: $startMessageId, ')
           ..write('endMessageId: $endMessageId, ')
           ..write('startOrdinal: $startOrdinal, ')
@@ -24347,6 +24399,7 @@ typedef $$StoryChaptersTableCreateCompanionBuilder = StoryChaptersCompanion
   required String chatId,
   required String title,
   required String summary,
+  Value<String> narrativeJson,
   required String startMessageId,
   required String endMessageId,
   required int startOrdinal,
@@ -24362,6 +24415,7 @@ typedef $$StoryChaptersTableUpdateCompanionBuilder = StoryChaptersCompanion
   Value<String> chatId,
   Value<String> title,
   Value<String> summary,
+  Value<String> narrativeJson,
   Value<String> startMessageId,
   Value<String> endMessageId,
   Value<int> startOrdinal,
@@ -24454,6 +24508,9 @@ class $$StoryChaptersTableFilterComposer
 
   ColumnFilters<String> get summary => $composableBuilder(
       column: $table.summary, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get narrativeJson => $composableBuilder(
+      column: $table.narrativeJson, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get startOrdinal => $composableBuilder(
       column: $table.startOrdinal, builder: (column) => ColumnFilters(column));
@@ -24570,6 +24627,10 @@ class $$StoryChaptersTableOrderingComposer
   ColumnOrderings<String> get summary => $composableBuilder(
       column: $table.summary, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get narrativeJson => $composableBuilder(
+      column: $table.narrativeJson,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get startOrdinal => $composableBuilder(
       column: $table.startOrdinal,
       builder: (column) => ColumnOrderings(column));
@@ -24664,6 +24725,9 @@ class $$StoryChaptersTableAnnotationComposer
 
   GeneratedColumn<String> get summary =>
       $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<String> get narrativeJson => $composableBuilder(
+      column: $table.narrativeJson, builder: (column) => column);
 
   GeneratedColumn<int> get startOrdinal => $composableBuilder(
       column: $table.startOrdinal, builder: (column) => column);
@@ -24793,6 +24857,7 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
             Value<String> chatId = const Value.absent(),
             Value<String> title = const Value.absent(),
             Value<String> summary = const Value.absent(),
+            Value<String> narrativeJson = const Value.absent(),
             Value<String> startMessageId = const Value.absent(),
             Value<String> endMessageId = const Value.absent(),
             Value<int> startOrdinal = const Value.absent(),
@@ -24807,6 +24872,7 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
             chatId: chatId,
             title: title,
             summary: summary,
+            narrativeJson: narrativeJson,
             startMessageId: startMessageId,
             endMessageId: endMessageId,
             startOrdinal: startOrdinal,
@@ -24821,6 +24887,7 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
             required String chatId,
             required String title,
             required String summary,
+            Value<String> narrativeJson = const Value.absent(),
             required String startMessageId,
             required String endMessageId,
             required int startOrdinal,
@@ -24835,6 +24902,7 @@ class $$StoryChaptersTableTableManager extends RootTableManager<
             chatId: chatId,
             title: title,
             summary: summary,
+            narrativeJson: narrativeJson,
             startMessageId: startMessageId,
             endMessageId: endMessageId,
             startOrdinal: startOrdinal,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:native_tavern/data/database/database.dart';
 import 'package:native_tavern/data/models/story/story_chapter.dart';
@@ -60,7 +62,9 @@ class DriftStoryRepository implements StoryRepository {
   Future<StoryChapter?> latestByChatId(String chatId) async {
     final query = _survivingChapterQuery(chatId: chatId)..limit(1);
     final row = await query.getSingleOrNull();
-    return row == null ? null : _toModel(row.readTable(_database.storyChapters));
+    return row == null
+        ? null
+        : _toModel(row.readTable(_database.storyChapters));
   }
 
   @override
@@ -75,9 +79,8 @@ class DriftStoryRepository implements StoryRepository {
     final matchQuery = _plainTextFtsQuery(query);
     if (matchQuery == null) return const [];
 
-    final rows = await _database
-        .customSelect(
-          '''
+    final rows = await _database.customSelect(
+      '''
         SELECT c.id AS chapter_id, bm25(story_chapters_fts) AS rank
         FROM story_chapters_fts
         JOIN story_chapters AS c
@@ -96,17 +99,16 @@ class DriftStoryRepository implements StoryRepository {
                  c.id ASC
         LIMIT ?
       ''',
-          variables: [
-            Variable<String>(matchQuery),
-            Variable<String>(chatId),
-            Variable<int>(topK),
-          ],
-          readsFrom: {
-            _database.storyChapters,
-            _database.messages,
-          },
-        )
-        .get();
+      variables: [
+        Variable<String>(matchQuery),
+        Variable<String>(chatId),
+        Variable<int>(topK),
+      ],
+      readsFrom: {
+        _database.storyChapters,
+        _database.messages,
+      },
+    ).get();
 
     final results = <StoryChapterSearchResult>[];
     for (final row in rows) {
@@ -173,6 +175,7 @@ class DriftStoryRepository implements StoryRepository {
       chatId: row.chatId,
       title: row.title,
       summary: row.summary,
+      narrative: _decodeNarrative(row.narrativeJson),
       startMessageId: row.startMessageId,
       endMessageId: row.endMessageId,
       startOrdinal: row.startOrdinal,
@@ -194,6 +197,7 @@ class DriftStoryRepository implements StoryRepository {
       chatId: Value(chapter.chatId),
       title: Value(chapter.title),
       summary: Value(chapter.summary),
+      narrativeJson: Value(jsonEncode(chapter.narrative.toJson())),
       startMessageId: Value(chapter.startMessageId),
       endMessageId: Value(chapter.endMessageId),
       startOrdinal: Value(chapter.startOrdinal),
@@ -208,6 +212,17 @@ class DriftStoryRepository implements StoryRepository {
     if (await getById(id) == null) {
       throw StateError('Chapter $id does not exist.');
     }
+  }
+}
+
+StoryChapterNarrative _decodeNarrative(String source) {
+  try {
+    final value = jsonDecode(source);
+    return value is Map
+        ? StoryChapterNarrative.fromJson(Map<String, dynamic>.from(value))
+        : const StoryChapterNarrative();
+  } catch (_) {
+    return const StoryChapterNarrative();
   }
 }
 
