@@ -8,6 +8,7 @@ import 'package:native_tavern/domain/services/chat_generation_pipeline.dart';
 import 'package:native_tavern/domain/services/long_term_memory_context_service.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/domain/services/moment_service.dart';
+import 'package:native_tavern/domain/services/story_memory_scope_service.dart';
 import 'package:native_tavern/presentation/providers/chat_extension_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
@@ -38,10 +39,15 @@ final longTermMemoryContextContributorProvider =
     semanticScorer: (query, candidates) =>
         _scoreSemantically(ref, query, candidates),
     includeMemory: (request, memory) async {
-      if (!MomentService.isMomentsKnowledgeMemory(memory)) return true;
-      if (!ref.read(appSettingsProvider).momentsEnabled) return false;
-      final chat = await ref.read(chatRepositoryProvider).getChat(request.chatId);
-      return chat?.momentsInChat == true;
+      if (MomentService.isMomentsKnowledgeMemory(memory)) {
+        if (!ref.read(appSettingsProvider).momentsEnabled) return false;
+        final chat =
+            await ref.read(chatRepositoryProvider).getChat(request.chatId);
+        if (chat?.momentsInChat != true) return false;
+      }
+      return StoryMemoryScopeService(
+        chatRepository: ref.read(chatRepositoryProvider),
+      ).isMemoryVisible(chatId: request.chatId, memory: memory);
     },
   );
 });
@@ -166,7 +172,11 @@ Future<List<MemoryScope>> _resolveScopes(
   Ref ref,
   ChatContextRequest request,
 ) async {
-  final scopes = <MemoryScope>[MemoryScope.chat(request.chatId)];
+  final scopes = <MemoryScope>[
+    ...await StoryMemoryScopeService(
+      chatRepository: ref.read(chatRepositoryProvider),
+    ).readableChatScopes(request.chatId),
+  ];
   final groupId = request.groupId;
   if (groupId != null && groupId.trim().isNotEmpty) {
     scopes.add(MemoryScope.group(groupId));

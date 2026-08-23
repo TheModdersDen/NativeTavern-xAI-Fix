@@ -101,6 +101,10 @@ void main() {
     expect(chapters, isNotEmpty);
     expect(chapters.first.title, 'The Hidden Garden');
     expect(chapters.first.summary, contains('garden'));
+    expect(chapters.first.narrative.keyEvents, ['They found the hidden gate.']);
+    expect(chapters.first.narrative.stateChanges, ['The garden is now open.']);
+    expect(chapters.first.narrative.openThreads, ['Who left the key?']);
+    expect(chapters.first.narrative.nextSteps, ['Follow the garden path.']);
     expect(
       await container
           .read(storyQueryServiceProvider)
@@ -198,9 +202,8 @@ void main() {
     List<StoryChapter> chapters = const [];
     for (var attempt = 0; attempt < 80 && chapters.isEmpty; attempt++) {
       await Future<void>.delayed(const Duration(milliseconds: 25));
-      chapters = await container
-          .read(storyQueryServiceProvider)
-          .listChapters(chatId);
+      chapters =
+          await container.read(storyQueryServiceProvider).listChapters(chatId);
     }
     expect(chapters, isNotEmpty);
     final oldChapterId = chapters.first.id;
@@ -217,10 +220,10 @@ void main() {
       ),
     );
 
-    final surviving = await container
-        .read(storyQueryServiceProvider)
-        .listChapters(chatId);
-    expect(surviving.map((chapter) => chapter.id), isNot(contains(oldChapterId)));
+    final surviving =
+        await container.read(storyQueryServiceProvider).listChapters(chatId);
+    expect(
+        surviving.map((chapter) => chapter.id), isNot(contains(oldChapterId)));
     expect(
       await container
           .read(storyQueryServiceProvider)
@@ -235,11 +238,11 @@ void main() {
           startMessageId: container.read(activeChatProvider).messages.first.id,
           endMessageId: container.read(activeChatProvider).messages.last.id,
         );
-    final afterFork = await container
-        .read(storyQueryServiceProvider)
-        .listChapters(chatId);
+    final afterFork =
+        await container.read(storyQueryServiceProvider).listChapters(chatId);
     expect(
-      (await container.read(storyTimelineProvider.future)).map((item) => item.title),
+      (await container.read(storyTimelineProvider.future))
+          .map((item) => item.title),
       contains('New branch note'),
     );
     expect(afterFork.single.title, 'New branch note');
@@ -295,9 +298,9 @@ void main() {
     );
     expect(
       (await container.read(storyQueryServiceProvider).searchMemories(
-            'clock',
-            scope: MemoryScope.character('character-1'),
-          ))
+                'clock',
+                scope: MemoryScope.character('character-1'),
+              ))
           .single
           .memory
           .id,
@@ -351,9 +354,8 @@ void main() {
     );
     await runtime.tick();
 
-    final chapters = await container
-        .read(storyQueryServiceProvider)
-        .listChapters(chatId);
+    final chapters =
+        await container.read(storyQueryServiceProvider).listChapters(chatId);
     expect(chapters, isNotEmpty);
     expect(
       await container.read(operationLogRepositoryProvider).findOpen(
@@ -494,7 +496,9 @@ void main() {
     await runtime.tick();
 
     expect(
-      await container.read(storyQueryServiceProvider).listChapters('quiet-chat'),
+      await container
+          .read(storyQueryServiceProvider)
+          .listChapters('quiet-chat'),
       isEmpty,
     );
     expect(llmService.chapterRequests, 0);
@@ -537,8 +541,9 @@ class _StoryLlmService extends LLMService {
           'memories': [
             {
               'kind': 'preference',
-              'content':
-                  highConfidence ? 'Prefers jasmine tea.' : 'Might prefer rain.',
+              'content': highConfidence
+                  ? 'Prefers jasmine tea.'
+                  : 'Might prefer rain.',
               'identityKey': highConfidence ? 'person:drink' : 'person:weather',
               'confidence': highConfidence ? 0.92 : 0.4,
               'sourceMessageIds': sourceMessages
@@ -557,7 +562,11 @@ class _StoryLlmService extends LLMService {
       }
       return const LLMResponse(
         content: '{"title":"The Hidden Garden","summary":'
-            '"They kept returning to the hidden garden and made a quiet plan."}',
+            '"They kept returning to the hidden garden and made a quiet plan.",'
+            '"key_events":["They found the hidden gate."],'
+            '"state_changes":["The garden is now open."],'
+            '"open_threads":["Who left the key?"],'
+            '"next_steps":["Follow the garden path."]}',
       );
     }
     chatRequests++;

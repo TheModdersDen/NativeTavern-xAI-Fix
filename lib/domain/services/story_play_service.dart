@@ -177,8 +177,6 @@ final class StoryPlayService {
               chatId: branch.id,
               startMessageId: startId,
               endMessageId: endId,
-              createdAt: now,
-              updatedAt: now,
             ),
           ),
         );
@@ -245,10 +243,8 @@ final class StoryPlayService {
     if (left.rootChatId != right.rootChatId) {
       throw ArgumentError('Story lines must share the same root.');
     }
-    final forkOrdinals = [left.forkOrdinal, right.forkOrdinal]
-        .whereType<int>()
-        .toList(growable: false);
-    final divergence = forkOrdinals.isEmpty ? -1 : forkOrdinals.reduce(min);
+    final linesById = {for (final line in lines) line.chat.id: line};
+    final divergence = _divergenceOrdinal(left, right, linesById);
     return StoryBranchComparison(
       divergenceOrdinal: divergence,
       left: _outcome(left, divergence),
@@ -282,6 +278,64 @@ final class StoryPlayService {
         chapters.expand((chapter) => chapter.narrative.openThreads),
       ),
     );
+  }
+
+  int _divergenceOrdinal(
+    StoryLine left,
+    StoryLine right,
+    Map<String, StoryLine> linesById,
+  ) {
+    final leftPath = _pathFromRoot(left, linesById);
+    final rightPath = _pathFromRoot(right, linesById);
+    var commonLength = 0;
+    while (commonLength < leftPath.length &&
+        commonLength < rightPath.length &&
+        leftPath[commonLength].chat.id == rightPath[commonLength].chat.id) {
+      commonLength++;
+    }
+    if (commonLength == 0) {
+      throw StateError('The story branch graph is incomplete.');
+    }
+    if (commonLength == leftPath.length) {
+      return _requiredForkOrdinal(rightPath[commonLength]);
+    }
+    if (commonLength == rightPath.length) {
+      return _requiredForkOrdinal(leftPath[commonLength]);
+    }
+    return min(
+      _requiredForkOrdinal(leftPath[commonLength]),
+      _requiredForkOrdinal(rightPath[commonLength]),
+    );
+  }
+
+  List<StoryLine> _pathFromRoot(
+    StoryLine line,
+    Map<String, StoryLine> linesById,
+  ) {
+    final reversed = <StoryLine>[line];
+    final visited = <String>{line.chat.id};
+    var current = line;
+    while (!current.isRoot) {
+      final parentId = current.parentChatId;
+      final parent = parentId == null ? null : linesById[parentId];
+      if (parent == null || parent.rootChatId != line.rootChatId) {
+        throw StateError('The story branch graph is incomplete.');
+      }
+      if (!visited.add(parent.chat.id)) {
+        throw StateError('The story branch graph contains a cycle.');
+      }
+      reversed.add(parent);
+      current = parent;
+    }
+    return reversed.reversed.toList(growable: false);
+  }
+
+  int _requiredForkOrdinal(StoryLine line) {
+    final ordinal = line.forkOrdinal;
+    if (ordinal == null) {
+      throw StateError('The story branch is missing its fork position.');
+    }
+    return ordinal;
   }
 }
 

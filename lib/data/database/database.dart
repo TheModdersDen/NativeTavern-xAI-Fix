@@ -801,7 +801,7 @@ class AppDatabase extends _$AppDatabase {
           if (from < 21) {
             await _ensureOperationLogsTable();
           }
-          if (from < 22) {
+          if (from >= 16 && from < 22) {
             await m.addColumn(storyChapters, storyChapters.narrativeJson);
           }
         });

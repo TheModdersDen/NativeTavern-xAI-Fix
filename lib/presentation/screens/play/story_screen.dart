@@ -20,14 +20,15 @@ class StoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final chapters = ref.watch(storyTimelineProvider);
+    final visibleChapters = _visibleItems(chapters.valueOrNull ?? const []);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.story),
         actions: [
-          if (chapters.valueOrNull?.isNotEmpty == true)
+          if (visibleChapters.isNotEmpty)
             IconButton(
               tooltip: l10n.storySearch,
-              onPressed: () => _search(context, chapters.valueOrNull!),
+              onPressed: () => _search(context, visibleChapters),
               icon: const Icon(Icons.search),
             ),
           IconButton(
@@ -36,7 +37,8 @@ class StoryScreen extends ConsumerWidget {
             onPressed: () => _showJotNoteSheet(
               context,
               ref,
-              chapters.valueOrNull ?? const [],
+              visibleChapters,
+              preferredChatId: initialChatId,
             ),
             icon: const Icon(Icons.edit_note_outlined),
           ),
@@ -52,11 +54,7 @@ class StoryScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (allItems) {
-          final items = initialChatId == null
-              ? allItems
-              : allItems
-                  .where((item) => item.chatId == initialChatId)
-                  .toList(growable: false);
+          final items = _visibleItems(allItems);
           if (items.isEmpty) {
             return _StoryEmptyState(
               onGoToChat: () => context.go(AppRoutes.home),
@@ -66,6 +64,20 @@ class StoryScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  List<StoryChapterTimelineItem> _visibleItems(
+    List<StoryChapterTimelineItem> allItems,
+  ) {
+    final chatId = initialChatId;
+    if (chatId == null) return allItems;
+    final selected =
+        allItems.where((item) => item.chatId == chatId).firstOrNull;
+    if (selected == null) return const [];
+    final rootId = selected.effectiveRootChatId;
+    return allItems
+        .where((item) => item.effectiveRootChatId == rootId)
+        .toList(growable: false);
   }
 
   Future<void> _search(
@@ -152,7 +164,21 @@ class _StoryRoot extends ConsumerWidget {
     for (final branch in branches.values) {
       branch.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     }
-    final title = items.first.chatTitle ?? items.first.title;
+    final branchEntries = branches.entries.toList(growable: false)
+      ..sort((left, right) {
+        final leftItem = left.value.first;
+        final rightItem = right.value.first;
+        final leftRoot = leftItem.chatId == leftItem.effectiveRootChatId;
+        final rightRoot = rightItem.chatId == rightItem.effectiveRootChatId;
+        if (leftRoot != rightRoot) return leftRoot ? -1 : 1;
+        return (leftItem.forkOrdinal ?? -1)
+            .compareTo(rightItem.forkOrdinal ?? -1);
+      });
+    final rootItem = items
+        .where((item) => item.chatId == item.effectiveRootChatId)
+        .firstOrNull;
+    final title =
+        rootItem?.chatTitle ?? items.first.chatTitle ?? items.first.title;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -170,13 +196,13 @@ class _StoryRoot extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 8),
-        for (final entry in branches.entries) ...[
+        for (var index = 0; index < branchEntries.length; index++) ...[
           _StoryBranch(
-            title: entry.value.first.effectiveBranchTitle,
-            isRoot: entry.value.first.parentChatId == null,
-            items: entry.value,
+            title: branchEntries[index].value.first.effectiveBranchTitle,
+            isRoot: branchEntries[index].value.first.parentChatId == null,
+            items: branchEntries[index].value,
           ),
-          if (entry.key != branches.keys.last) const SizedBox(height: 12),
+          if (index < branchEntries.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
@@ -653,8 +679,9 @@ class _OutcomeColumn extends StatelessWidget {
 Future<void> _showJotNoteSheet(
   BuildContext context,
   WidgetRef ref,
-  List<StoryChapterTimelineItem> items,
-) async {
+  List<StoryChapterTimelineItem> items, {
+  String? preferredChatId,
+}) async {
   final l10n = AppLocalizations.of(context);
   var chats = <Chat>[];
   try {
@@ -677,7 +704,10 @@ Future<void> _showJotNoteSheet(
     );
   }
   final controller = TextEditingController();
-  String? selectedChatId = knownChats.keys.firstOrNull;
+  String? selectedChatId =
+      preferredChatId != null && knownChats.containsKey(preferredChatId)
+          ? preferredChatId
+          : knownChats.keys.firstOrNull;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,

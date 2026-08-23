@@ -92,6 +92,10 @@ Future<MemoryScope> resolveStoryMemoryScope(Ref ref, String chatId) {
 Future<MemoryScope> _scopeForChat(Ref ref, String chatId) async {
   final chat = await ref.read(chatRepositoryProvider).getChat(chatId);
   if (chat == null) return MemoryScope.chat(chatId);
+  final storyRootId = chat.settings[storyRootChatIdKey];
+  if (storyRootId is String && storyRootId.trim().isNotEmpty) {
+    return MemoryScope.chat(chatId);
+  }
   if (chat.groupId != null) return MemoryScope.group(chat.groupId!);
 
   final personaRepository = ref.read(personaRepositoryProvider);

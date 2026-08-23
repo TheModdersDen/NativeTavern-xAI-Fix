@@ -9,6 +9,8 @@ import 'package:native_tavern/domain/services/database_backup_service.dart';
 
 import 'support/database_migration_harness.dart';
 
+const _currentSchemaVersion = 22;
+
 void main() {
   late MigrationTestHarness harness;
 
@@ -23,7 +25,7 @@ void main() {
   test('fresh databases create the complete current schema', () async {
     final database = harness.createCurrentDatabase();
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(await runIntegrityCheck(database), 'ok');
     expect(await findForeignKeyViolations(database), isEmpty);
     expect(
@@ -41,7 +43,7 @@ void main() {
     );
     final database = harness.openWithProductionMigrations(file);
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     final after = await captureDatabaseSnapshot(
       database,
       legacyV10PreservedSnapshotTables,
@@ -99,7 +101,7 @@ void main() {
     );
     final database = harness.openWithProductionMigrations(file);
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     final after = await captureDatabaseSnapshot(
       database,
       legacyV13PreservedSnapshotTables,
@@ -118,7 +120,7 @@ void main() {
     );
     var database = harness.openWithProductionMigrations(file);
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(
       (await captureDatabaseSnapshot(
         database,
@@ -136,7 +138,7 @@ void main() {
 
     await harness.close(database);
     database = harness.openWithProductionMigrations(file);
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(await runIntegrityCheck(database), 'ok');
   });
 
@@ -153,7 +155,7 @@ void main() {
     expect(readRawSchemaVersion(file), 13);
 
     database = harness.openWithProductionMigrations(file);
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(
       (await captureDatabaseSnapshot(database, currentSnapshotTables)).tables,
       before.tables,
@@ -169,7 +171,7 @@ void main() {
     await database.customSelect('SELECT 1').get();
     await harness.close(database);
 
-    writeRawSchemaVersion(file, 19);
+    writeRawSchemaVersion(file, _currentSchemaVersion + 1);
     database = harness.openWithProductionMigrations(file);
 
     await expectLater(
@@ -178,13 +180,13 @@ void main() {
         isA<UnsupportedError>().having(
           (error) => error.message,
           'message',
-          contains('schema 19 -> 18'),
+          contains('schema 23 -> 22'),
         ),
       ),
     );
     await harness.close(database);
 
-    expect(readRawSchemaVersion(file), 19);
+    expect(readRawSchemaVersion(file), _currentSchemaVersion + 1);
   });
 
   test('existing v15 data gains a rebuilt derived memory search index',
@@ -205,7 +207,7 @@ void main() {
       ),
     );
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(matches.map((result) => result.memory.id), ['memory-1']);
     expect(matches.single.memory.source.sourceMessageIds, ['message-1']);
   });
@@ -227,7 +229,7 @@ void main() {
       ),
     );
 
-    expect(await readSchemaVersion(database), 18);
+    expect(await readSchemaVersion(database), _currentSchemaVersion);
     expect(matches.map((result) => result.chunk.id), ['chunk-1']);
     expect(matches.single.citation.documentId, 'document-1');
     expect(matches.single.citation.documentVersionId, 'version-1');
@@ -281,7 +283,7 @@ void main() {
     await harness.close(source);
 
     final restored = harness.createCurrentDatabase(name: 'backup_restored');
-    expect(await readSchemaVersion(restored), 18);
+    expect(await readSchemaVersion(restored), _currentSchemaVersion);
     final result = await DatabaseBackupService(restored).importData(
       data: backup,
       mode: ImportMode.addNewOnly,
