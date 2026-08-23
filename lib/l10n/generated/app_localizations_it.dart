@@ -3560,6 +3560,62 @@ class AppLocalizationsIt extends AppLocalizations {
       'Backup to iCloud or Google Drive and restore on any device';
 
   @override
+  String get backupContents => 'Backup contents';
+
+  @override
+  String get allTextData => 'All text data';
+
+  @override
+  String get allTextDataDescription =>
+      'Characters, chats, messages, world books, groups, personas, memories, Data Bank, RPG data, stories, moments, and app state';
+
+  @override
+  String get characterCardImages => 'All character card images';
+
+  @override
+  String get characterCardImagesDescription =>
+      'Character, persona, and group avatars plus character sprites';
+
+  @override
+  String get worldBookImages => 'All world book images';
+
+  @override
+  String get worldBookImagesDescription =>
+      'Local images referenced by world books';
+
+  @override
+  String get conversationImages => 'All chat and moment images';
+
+  @override
+  String get conversationImagesDescription =>
+      'Chat attachments, generated chat images, and moment images';
+
+  @override
+  String get backgroundImages => 'All background images';
+
+  @override
+  String get backgroundImagesDescription =>
+      'Imported global and chat backgrounds';
+
+  @override
+  String get live2DBackup => 'All Live2D models';
+
+  @override
+  String get live2DModelsBackupDescription =>
+      'Optional large files; may significantly increase backup size';
+
+  @override
+  String get independentMediaBackup => 'Independent media backup';
+
+  @override
+  String get independentMediaBackupDescription =>
+      'Images are stored separately. Data backup and restore still work when media fails or is unavailable.';
+
+  @override
+  String get mediaBackupPartialSuccess =>
+      'Database data completed successfully, but some media or settings could not be backed up or restored.';
+
+  @override
   String get enableICloudBackup => 'Enable iCloud Backup';
 
   @override

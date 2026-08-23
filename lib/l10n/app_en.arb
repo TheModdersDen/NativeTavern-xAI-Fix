@@ -4966,6 +4966,22 @@
   "@cloudBackupSubtitle": {
     "description": "Cloud backup subtitle"
   },
+  "backupContents": "Backup contents",
+  "allTextData": "All text data",
+  "allTextDataDescription": "Characters, chats, messages, world books, groups, personas, memories, Data Bank, RPG data, stories, moments, and app state",
+  "characterCardImages": "All character card images",
+  "characterCardImagesDescription": "Character, persona, and group avatars plus character sprites",
+  "worldBookImages": "All world book images",
+  "worldBookImagesDescription": "Local images referenced by world books",
+  "conversationImages": "All chat and moment images",
+  "conversationImagesDescription": "Chat attachments, generated chat images, and moment images",
+  "backgroundImages": "All background images",
+  "backgroundImagesDescription": "Imported global and chat backgrounds",
+  "live2DBackup": "All Live2D models",
+  "live2DModelsBackupDescription": "Optional large files; may significantly increase backup size",
+  "independentMediaBackup": "Independent media backup",
+  "independentMediaBackupDescription": "Images are stored separately. Data backup and restore still work when media fails or is unavailable.",
+  "mediaBackupPartialSuccess": "Database data completed successfully, but some media or settings could not be backed up or restored.",
   "enableICloudBackup": "Enable iCloud Backup",
   "@enableICloudBackup": {
     "description": "Enable iCloud backup toggle"

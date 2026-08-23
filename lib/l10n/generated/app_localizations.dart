@@ -6535,6 +6535,102 @@ abstract class AppLocalizations {
   /// **'Backup to iCloud or Google Drive and restore on any device'**
   String get cloudBackupSubtitle;
 
+  /// No description provided for @backupContents.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup contents'**
+  String get backupContents;
+
+  /// No description provided for @allTextData.
+  ///
+  /// In en, this message translates to:
+  /// **'All text data'**
+  String get allTextData;
+
+  /// No description provided for @allTextDataDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters, chats, messages, world books, groups, personas, memories, Data Bank, RPG data, stories, moments, and app state'**
+  String get allTextDataDescription;
+
+  /// No description provided for @characterCardImages.
+  ///
+  /// In en, this message translates to:
+  /// **'All character card images'**
+  String get characterCardImages;
+
+  /// No description provided for @characterCardImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Character, persona, and group avatars plus character sprites'**
+  String get characterCardImagesDescription;
+
+  /// No description provided for @worldBookImages.
+  ///
+  /// In en, this message translates to:
+  /// **'All world book images'**
+  String get worldBookImages;
+
+  /// No description provided for @worldBookImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Local images referenced by world books'**
+  String get worldBookImagesDescription;
+
+  /// No description provided for @conversationImages.
+  ///
+  /// In en, this message translates to:
+  /// **'All chat and moment images'**
+  String get conversationImages;
+
+  /// No description provided for @conversationImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat attachments, generated chat images, and moment images'**
+  String get conversationImagesDescription;
+
+  /// No description provided for @backgroundImages.
+  ///
+  /// In en, this message translates to:
+  /// **'All background images'**
+  String get backgroundImages;
+
+  /// No description provided for @backgroundImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported global and chat backgrounds'**
+  String get backgroundImagesDescription;
+
+  /// No description provided for @live2DBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'All Live2D models'**
+  String get live2DBackup;
+
+  /// No description provided for @live2DModelsBackupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional large files; may significantly increase backup size'**
+  String get live2DModelsBackupDescription;
+
+  /// No description provided for @independentMediaBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent media backup'**
+  String get independentMediaBackup;
+
+  /// No description provided for @independentMediaBackupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Images are stored separately. Data backup and restore still work when media fails or is unavailable.'**
+  String get independentMediaBackupDescription;
+
+  /// No description provided for @mediaBackupPartialSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Database data completed successfully, but some media or settings could not be backed up or restored.'**
+  String get mediaBackupPartialSuccess;
+
   /// Enable iCloud backup toggle
   ///
   /// In en, this message translates to:

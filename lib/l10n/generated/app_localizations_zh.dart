@@ -3470,6 +3470,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cloudBackupSubtitle => '备份到 iCloud 或 Google Drive，在任何设备上恢复';
 
   @override
+  String get backupContents => '备份内容';
+
+  @override
+  String get allTextData => '全部文本数据';
+
+  @override
+  String get allTextDataDescription =>
+      '角色、聊天、消息、世界书、群组、Persona、记忆、Data Bank、RPG 数据、故事、动态和应用状态';
+
+  @override
+  String get characterCardImages => '全部角色卡图片';
+
+  @override
+  String get characterCardImagesDescription => '角色、Persona 和群组头像，以及角色表情立绘';
+
+  @override
+  String get worldBookImages => '全部世界书图片';
+
+  @override
+  String get worldBookImagesDescription => '世界书引用的本地图片';
+
+  @override
+  String get conversationImages => '全部聊天与动态图片';
+
+  @override
+  String get conversationImagesDescription => '聊天附件、生成的聊天图片和动态图片';
+
+  @override
+  String get backgroundImages => '全部背景图片';
+
+  @override
+  String get backgroundImagesDescription => '导入的全局背景和聊天背景';
+
+  @override
+  String get live2DBackup => '全部 Live2D 模型';
+
+  @override
+  String get live2DModelsBackupDescription => '可选的大体积文件，可能显著增加备份大小';
+
+  @override
+  String get independentMediaBackup => '独立媒体备份';
+
+  @override
+  String get independentMediaBackupDescription =>
+      '图片单独存储；即使媒体失败或缺失，数据备份和恢复仍可正常完成。';
+
+  @override
+  String get mediaBackupPartialSuccess => '数据库数据已成功完成，但部分媒体或设置未能备份或恢复。';
+
+  @override
   String get enableICloudBackup => '启用 iCloud 备份';
 
   @override
@@ -9563,6 +9613,56 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get cloudBackupSubtitle => '備份至 iCloud 或 Google 雲端硬碟，並可在任何裝置上還原';
+
+  @override
+  String get backupContents => '備份內容';
+
+  @override
+  String get allTextData => '全部文字資料';
+
+  @override
+  String get allTextDataDescription =>
+      '角色、聊天、訊息、世界書、群組、Persona、記憶、Data Bank、RPG 資料、故事、動態和應用程式狀態';
+
+  @override
+  String get characterCardImages => '全部角色卡圖片';
+
+  @override
+  String get characterCardImagesDescription => '角色、Persona 和群組頭像，以及角色表情立繪';
+
+  @override
+  String get worldBookImages => '全部世界書圖片';
+
+  @override
+  String get worldBookImagesDescription => '世界書引用的本機圖片';
+
+  @override
+  String get conversationImages => '全部聊天與動態圖片';
+
+  @override
+  String get conversationImagesDescription => '聊天附件、產生的聊天圖片和動態圖片';
+
+  @override
+  String get backgroundImages => '全部背景圖片';
+
+  @override
+  String get backgroundImagesDescription => '匯入的全域背景和聊天背景';
+
+  @override
+  String get live2DBackup => '全部 Live2D 模型';
+
+  @override
+  String get live2DModelsBackupDescription => '可選的大型檔案，可能顯著增加備份大小';
+
+  @override
+  String get independentMediaBackup => '獨立媒體備份';
+
+  @override
+  String get independentMediaBackupDescription =>
+      '圖片會分開儲存；即使媒體失敗或缺失，資料備份與還原仍可正常完成。';
+
+  @override
+  String get mediaBackupPartialSuccess => '資料庫資料已成功完成，但部分媒體或設定未能備份或還原。';
 
   @override
   String get enableICloudBackup => '啟用 iCloud 備份';
