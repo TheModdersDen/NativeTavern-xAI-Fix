@@ -6643,6 +6643,66 @@ abstract class AppLocalizations {
   /// **'This backup does not include a media package; only data was restored.'**
   String get mediaNotIncludedInBackup;
 
+  /// No description provided for @backupStagePreparingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing database and settings...'**
+  String get backupStagePreparingData;
+
+  /// No description provided for @backupStageScanningMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning media files...'**
+  String get backupStageScanningMedia;
+
+  /// No description provided for @backupStageCompressingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Compressing media: {processed}/{total} files'**
+  String backupStageCompressingMedia(int processed, int total);
+
+  /// No description provided for @backupStageUploadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading data backup...'**
+  String get backupStageUploadingData;
+
+  /// No description provided for @backupStageUploadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading media package...'**
+  String get backupStageUploadingMedia;
+
+  /// No description provided for @backupStageDownloadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading data backup...'**
+  String get backupStageDownloadingData;
+
+  /// No description provided for @backupStageDownloadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading media package...'**
+  String get backupStageDownloadingMedia;
+
+  /// No description provided for @backupStageVerifyingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying media package...'**
+  String get backupStageVerifyingMedia;
+
+  /// No description provided for @backupStageRestoringMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring media: {processed}/{total} files'**
+  String backupStageRestoringMedia(int processed, int total);
+
+  /// No description provided for @backupStageRestoringData.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging or replacing database...'**
+  String get backupStageRestoringData;
+
   /// Enable iCloud backup toggle
   ///
   /// In en, this message translates to:

@@ -259,6 +259,21 @@ class CloudBackupSettingsNotifier extends StateNotifier<CloudBackupSettings> {
 }
 
 /// Cloud backup operation state
+enum CloudBackupOperationStage {
+  preparingData,
+  scanningMedia,
+  compressingMedia,
+  uploadingData,
+  uploadingMedia,
+  downloadingData,
+  downloadingMedia,
+  verifyingMedia,
+  restoringMedia,
+  restoringData,
+}
+
+const _notProvided = Object();
+
 class CloudBackupOperationState {
   final bool isLoading;
   final String? currentOperation;
@@ -268,6 +283,9 @@ class CloudBackupOperationState {
   final bool? mediaIncluded;
   final int? mediaRestoredFiles;
   final Set<CloudMediaCategory>? mediaCategories;
+  final CloudBackupOperationStage? stage;
+  final int? processedItems;
+  final int? totalItems;
   final CloudBackupStatus status;
 
   const CloudBackupOperationState({
@@ -279,29 +297,55 @@ class CloudBackupOperationState {
     this.mediaIncluded,
     this.mediaRestoredFiles,
     this.mediaCategories,
+    this.stage,
+    this.processedItems,
+    this.totalItems,
     this.status = CloudBackupStatus.idle,
   });
 
   CloudBackupOperationState copyWith({
     bool? isLoading,
-    String? currentOperation,
-    double? progress,
-    String? error,
-    String? warning,
-    bool? mediaIncluded,
-    int? mediaRestoredFiles,
-    Set<CloudMediaCategory>? mediaCategories,
+    Object? currentOperation = _notProvided,
+    Object? progress = _notProvided,
+    Object? error = _notProvided,
+    Object? warning = _notProvided,
+    Object? mediaIncluded = _notProvided,
+    Object? mediaRestoredFiles = _notProvided,
+    Object? mediaCategories = _notProvided,
+    Object? stage = _notProvided,
+    Object? processedItems = _notProvided,
+    Object? totalItems = _notProvided,
     CloudBackupStatus? status,
   }) {
     return CloudBackupOperationState(
       isLoading: isLoading ?? this.isLoading,
-      currentOperation: currentOperation,
-      progress: progress,
-      error: error,
-      warning: warning,
-      mediaIncluded: mediaIncluded,
-      mediaRestoredFiles: mediaRestoredFiles,
-      mediaCategories: mediaCategories,
+      currentOperation: identical(currentOperation, _notProvided)
+          ? this.currentOperation
+          : currentOperation as String?,
+      progress: identical(progress, _notProvided)
+          ? this.progress
+          : progress as double?,
+      error: identical(error, _notProvided) ? this.error : error as String?,
+      warning:
+          identical(warning, _notProvided) ? this.warning : warning as String?,
+      mediaIncluded: identical(mediaIncluded, _notProvided)
+          ? this.mediaIncluded
+          : mediaIncluded as bool?,
+      mediaRestoredFiles: identical(mediaRestoredFiles, _notProvided)
+          ? this.mediaRestoredFiles
+          : mediaRestoredFiles as int?,
+      mediaCategories: identical(mediaCategories, _notProvided)
+          ? this.mediaCategories
+          : mediaCategories as Set<CloudMediaCategory>?,
+      stage: identical(stage, _notProvided)
+          ? this.stage
+          : stage as CloudBackupOperationStage?,
+      processedItems: identical(processedItems, _notProvided)
+          ? this.processedItems
+          : processedItems as int?,
+      totalItems: identical(totalItems, _notProvided)
+          ? this.totalItems
+          : totalItems as int?,
       status: status ?? this.status,
     );
   }
@@ -324,34 +368,47 @@ class CloudBackupOperationNotifier
   CloudBackupService get _service => _ref.read(cloudBackupServiceProvider);
 
   /// Upload backup to iCloud
-  Future<CloudBackupInfo?> uploadToICloud(Map<String, dynamic> data) async {
-    state = state.copyWith(
+  Future<CloudBackupInfo?> uploadToICloud(
+    Future<Map<String, dynamic>> Function() loadData,
+  ) async {
+    state = const CloudBackupOperationState(
       isLoading: true,
-      currentOperation: 'Creating backup for iCloud...',
+      stage: CloudBackupOperationStage.preparingData,
+      progress: 0,
       status: CloudBackupStatus.uploading,
-      error: null,
     );
 
     try {
+      final data = await loadData();
       // Create backup file
       final settings = _ref.read(cloudBackupSettingsProvider);
       final artifacts = await _service.createCloudBackupArtifacts(
         data: data,
         provider: CloudProvider.iCloud,
         options: settings.backupOptions,
+        onProgress: _handleArtifactProgress,
       );
 
       state = state.copyWith(
-        currentOperation: 'Uploading to iCloud...',
-        progress: 0.5,
+        stage: CloudBackupOperationStage.uploadingData,
+        processedItems: null,
+        totalItems: null,
+        progress: 0.55,
       );
 
       // Upload to iCloud
       final backup = await _service.uploadToICloud(
         backupFile: artifacts.dataFile,
         mediaFile: artifacts.mediaFile,
+        onPartChanged: (part) {
+          state = state.copyWith(
+            stage: part == CloudBackupTransferPart.data
+                ? CloudBackupOperationStage.uploadingData
+                : CloudBackupOperationStage.uploadingMedia,
+          );
+        },
         onProgress: (progress) {
-          state = state.copyWith(progress: 0.5 + progress * 0.5);
+          state = state.copyWith(progress: 0.55 + progress * 0.45);
         },
       );
 
@@ -359,6 +416,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         status: CloudBackupStatus.success,
         warning: _service.lastMediaWarning,
       );
@@ -377,6 +437,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         error: e.toString(),
         status: CloudBackupStatus.error,
       );
@@ -392,25 +455,43 @@ class CloudBackupOperationNotifier
     required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
         restoreCallback,
   }) async {
-    state = state.copyWith(
+    state = const CloudBackupOperationState(
       isLoading: true,
-      currentOperation: 'Downloading from iCloud...',
+      stage: CloudBackupOperationStage.downloadingData,
+      progress: 0,
       status: CloudBackupStatus.downloading,
-      error: null,
     );
 
     try {
       // Download backup
       final backupData = await _service.downloadFromICloud(
         backup: backup,
+        onPartChanged: (part) {
+          state = state.copyWith(
+            stage: part == CloudBackupTransferPart.data
+                ? CloudBackupOperationStage.downloadingData
+                : CloudBackupOperationStage.downloadingMedia,
+          );
+        },
         onProgress: (progress) {
-          state = state.copyWith(progress: progress * 0.5);
+          state = state.copyWith(progress: progress * 0.6);
+        },
+        onMediaProgress: (processed, total) {
+          final fraction = total == 0 ? 1.0 : processed / total;
+          state = state.copyWith(
+            stage: CloudBackupOperationStage.restoringMedia,
+            processedItems: processed,
+            totalItems: total,
+            progress: 0.6 + fraction * 0.2,
+          );
         },
       );
 
       state = state.copyWith(
-        currentOperation: 'Restoring data...',
-        progress: 0.5,
+        stage: CloudBackupOperationStage.restoringData,
+        processedItems: null,
+        totalItems: null,
+        progress: 0.8,
       );
 
       // Merge/restore data
@@ -427,6 +508,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         status: CloudBackupStatus.success,
         warning: (backupData['_mediaRestoreWarning'] ??
             backupData['_textRestoreWarning']) as String?,
@@ -443,6 +527,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         error: e.toString(),
         status: CloudBackupStatus.error,
       );
@@ -701,26 +788,42 @@ class CloudBackupOperationNotifier
 
   /// Upload backup to Google Drive
   Future<GoogleDriveBackupInfo?> uploadToGoogleDrive(
-      Map<String, dynamic> data) async {
-    state = state.copyWith(
+    Future<Map<String, dynamic>> Function() loadData,
+  ) async {
+    state = const CloudBackupOperationState(
       isLoading: true,
-      currentOperation: 'Uploading to Google Drive...',
+      stage: CloudBackupOperationStage.preparingData,
+      progress: 0,
       status: CloudBackupStatus.uploading,
-      error: null,
     );
 
     try {
+      final data = await loadData();
       final settings = _ref.read(cloudBackupSettingsProvider);
       final artifacts = await _service.createCloudBackupArtifacts(
         data: data,
         provider: CloudProvider.googleDrive,
         options: settings.backupOptions,
+        onProgress: _handleArtifactProgress,
+      );
+      state = state.copyWith(
+        stage: CloudBackupOperationStage.uploadingData,
+        processedItems: null,
+        totalItems: null,
+        progress: 0.55,
       );
       final backup = await _googleDriveService.uploadBackupFiles(
         dataFile: artifacts.dataFile,
         mediaFile: artifacts.mediaFile,
+        onPartChanged: (part) {
+          state = state.copyWith(
+            stage: part == GoogleDriveBackupUploadPart.data
+                ? CloudBackupOperationStage.uploadingData
+                : CloudBackupOperationStage.uploadingMedia,
+          );
+        },
         onProgress: (progress) {
-          state = state.copyWith(progress: progress);
+          state = state.copyWith(progress: 0.55 + progress * 0.45);
         },
       );
 
@@ -735,6 +838,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         status: backup != null
             ? CloudBackupStatus.success
             : CloudBackupStatus.error,
@@ -751,10 +857,44 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         error: e.toString(),
         status: CloudBackupStatus.error,
       );
       return null;
+    }
+  }
+
+  void _handleArtifactProgress(CloudBackupArtifactProgress update) {
+    switch (update.stage) {
+      case CloudBackupArtifactStage.scanningMedia:
+        state = state.copyWith(
+          stage: CloudBackupOperationStage.scanningMedia,
+          processedItems: null,
+          totalItems: null,
+          progress: 0.1,
+        );
+        break;
+      case CloudBackupArtifactStage.compressingMedia:
+        final total = update.totalFiles ?? 0;
+        final fraction = total == 0 ? 0.0 : update.processedFiles / total;
+        state = state.copyWith(
+          stage: CloudBackupOperationStage.compressingMedia,
+          processedItems: update.processedFiles,
+          totalItems: update.totalFiles,
+          progress: 0.1 + fraction * 0.4,
+        );
+        break;
+      case CloudBackupArtifactStage.writingData:
+        state = state.copyWith(
+          stage: CloudBackupOperationStage.preparingData,
+          processedItems: null,
+          totalItems: null,
+          progress: 0.5,
+        );
+        break;
     }
   }
 
@@ -766,11 +906,11 @@ class CloudBackupOperationNotifier
     required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
         restoreCallback,
   }) async {
-    state = state.copyWith(
+    state = const CloudBackupOperationState(
       isLoading: true,
-      currentOperation: 'Downloading from Google Drive...',
+      stage: CloudBackupOperationStage.downloadingData,
+      progress: 0,
       status: CloudBackupStatus.downloading,
-      error: null,
     );
 
     try {
@@ -790,7 +930,7 @@ class CloudBackupOperationNotifier
       final media = backupData['media'];
       if (media is Map && media['fileName'] is String) {
         state = state.copyWith(
-          currentOperation: 'Downloading media backup...',
+          stage: CloudBackupOperationStage.downloadingMedia,
           progress: 0.5,
         );
         final mediaBytes = await _googleDriveService.downloadCompanionMedia(
@@ -802,12 +942,23 @@ class CloudBackupOperationNotifier
               'Optional media backup was not found.';
         } else {
           state = state.copyWith(
-            currentOperation: 'Verifying and restoring media...',
-            progress: 0.7,
+            stage: CloudBackupOperationStage.verifyingMedia,
+            processedItems: 0,
+            totalItems: media['fileCount'] as int?,
+            progress: 0.6,
           );
           final outcome = await _service.restoreMediaBytesSafely(
             backupPackage: backupData,
             bytes: mediaBytes,
+            onProgress: (processed, total) {
+              final fraction = total == 0 ? 1.0 : processed / total;
+              state = state.copyWith(
+                stage: CloudBackupOperationStage.restoringMedia,
+                processedItems: processed,
+                totalItems: total,
+                progress: 0.65 + fraction * 0.15,
+              );
+            },
           );
           backupData = outcome.backupPackage;
           backupData['_mediaRestoredFiles'] = outcome.restoredFiles;
@@ -819,7 +970,9 @@ class CloudBackupOperationNotifier
       }
 
       state = state.copyWith(
-        currentOperation: 'Restoring data...',
+        stage: CloudBackupOperationStage.restoringData,
+        processedItems: null,
+        totalItems: null,
         progress: 0.8,
       );
 
@@ -837,6 +990,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         status: CloudBackupStatus.success,
         warning: (backupData['_mediaRestoreWarning'] ??
             backupData['_textRestoreWarning']) as String?,
@@ -853,6 +1009,9 @@ class CloudBackupOperationNotifier
         isLoading: false,
         currentOperation: null,
         progress: null,
+        stage: null,
+        processedItems: null,
+        totalItems: null,
         error: e.toString(),
         status: CloudBackupStatus.error,
       );

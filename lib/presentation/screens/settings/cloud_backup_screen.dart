@@ -44,7 +44,7 @@ class CloudBackupScreen extends ConsumerWidget {
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  Text(operationState.currentOperation ?? l10n.processing),
+                  Text(_operationStageLabel(l10n, operationState)),
                   if (operationState.progress != null) ...[
                     const SizedBox(height: 8),
                     SizedBox(
@@ -542,11 +542,9 @@ class CloudBackupScreen extends ConsumerWidget {
     // Get actual data from database
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
-    final data = await dbBackupService.exportAllData();
-
     final result = await ref
         .read(cloudBackupOperationProvider.notifier)
-        .uploadToICloud(data);
+        .uploadToICloud(dbBackupService.exportAllData);
 
     if (result != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -677,11 +675,9 @@ class CloudBackupScreen extends ConsumerWidget {
     // Get actual data from database
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
-    final data = await dbBackupService.exportAllData();
-
     final result = await ref
         .read(cloudBackupOperationProvider.notifier)
-        .uploadToGoogleDrive(data);
+        .uploadToGoogleDrive(dbBackupService.exportAllData);
 
     if (result != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -787,6 +783,35 @@ String _restoreModeName(RestoreMode mode, AppLocalizations l10n) =>
       RestoreMode.merge => l10n.restoreModeMerge,
       RestoreMode.addNewOnly => l10n.restoreModeAddNewOnly,
     };
+
+String _operationStageLabel(
+  AppLocalizations l10n,
+  CloudBackupOperationState operation,
+) {
+  final stage = operation.stage;
+  if (stage == null) return operation.currentOperation ?? l10n.processing;
+  return switch (stage) {
+    CloudBackupOperationStage.preparingData => l10n.backupStagePreparingData,
+    CloudBackupOperationStage.scanningMedia => l10n.backupStageScanningMedia,
+    CloudBackupOperationStage.compressingMedia =>
+      l10n.backupStageCompressingMedia(
+        operation.processedItems ?? 0,
+        operation.totalItems ?? 0,
+      ),
+    CloudBackupOperationStage.uploadingData => l10n.backupStageUploadingData,
+    CloudBackupOperationStage.uploadingMedia => l10n.backupStageUploadingMedia,
+    CloudBackupOperationStage.downloadingData =>
+      l10n.backupStageDownloadingData,
+    CloudBackupOperationStage.downloadingMedia =>
+      l10n.backupStageDownloadingMedia,
+    CloudBackupOperationStage.verifyingMedia => l10n.backupStageVerifyingMedia,
+    CloudBackupOperationStage.restoringMedia => l10n.backupStageRestoringMedia(
+        operation.processedItems ?? 0,
+        operation.totalItems ?? 0,
+      ),
+    CloudBackupOperationStage.restoringData => l10n.backupStageRestoringData,
+  };
+}
 
 String _restoreModeDescription(RestoreMode mode, AppLocalizations l10n) =>
     switch (mode) {

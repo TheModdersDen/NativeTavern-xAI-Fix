@@ -4993,6 +4993,28 @@
   "@mediaNotIncludedInBackup": {
     "description": "Shown when a restored backup has no media sidecar"
   },
+  "backupStagePreparingData": "Preparing database and settings...",
+  "backupStageScanningMedia": "Scanning media files...",
+  "backupStageCompressingMedia": "Compressing media: {processed}/{total} files",
+  "@backupStageCompressingMedia": {
+    "placeholders": {
+      "processed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "backupStageUploadingData": "Uploading data backup...",
+  "backupStageUploadingMedia": "Uploading media package...",
+  "backupStageDownloadingData": "Downloading data backup...",
+  "backupStageDownloadingMedia": "Downloading media package...",
+  "backupStageVerifyingMedia": "Verifying media package...",
+  "backupStageRestoringMedia": "Restoring media: {processed}/{total} files",
+  "@backupStageRestoringMedia": {
+    "placeholders": {
+      "processed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "backupStageRestoringData": "Merging or replacing database...",
   "enableICloudBackup": "Enable iCloud Backup",
   "@enableICloudBackup": {
     "description": "Enable iCloud backup toggle"

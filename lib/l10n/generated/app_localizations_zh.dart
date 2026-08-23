@@ -3528,6 +3528,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mediaNotIncludedInBackup => '此备份不包含媒体包，本次仅恢复了数据。';
 
   @override
+  String get backupStagePreparingData => '正在整理数据库和设置...';
+
+  @override
+  String get backupStageScanningMedia => '正在扫描媒体文件...';
+
+  @override
+  String backupStageCompressingMedia(int processed, int total) {
+    return '正在压缩媒体：$processed/$total 个文件';
+  }
+
+  @override
+  String get backupStageUploadingData => '正在上传数据备份...';
+
+  @override
+  String get backupStageUploadingMedia => '正在上传媒体包...';
+
+  @override
+  String get backupStageDownloadingData => '正在下载数据备份...';
+
+  @override
+  String get backupStageDownloadingMedia => '正在下载媒体包...';
+
+  @override
+  String get backupStageVerifyingMedia => '正在校验媒体包...';
+
+  @override
+  String backupStageRestoringMedia(int processed, int total) {
+    return '正在恢复媒体：$processed/$total 个文件';
+  }
+
+  @override
+  String get backupStageRestoringData => '正在合并或替换数据库...';
+
+  @override
   String get enableICloudBackup => '启用 iCloud 备份';
 
   @override
@@ -9789,6 +9823,40 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get mediaNotIncludedInBackup => '此備份不包含媒體包，本次僅還原了資料。';
+
+  @override
+  String get backupStagePreparingData => '正在整理資料庫和設定...';
+
+  @override
+  String get backupStageScanningMedia => '正在掃描媒體檔案...';
+
+  @override
+  String backupStageCompressingMedia(int processed, int total) {
+    return '正在壓縮媒體：$processed/$total 個檔案';
+  }
+
+  @override
+  String get backupStageUploadingData => '正在上傳資料備份...';
+
+  @override
+  String get backupStageUploadingMedia => '正在上傳媒體包...';
+
+  @override
+  String get backupStageDownloadingData => '正在下載資料備份...';
+
+  @override
+  String get backupStageDownloadingMedia => '正在下載媒體包...';
+
+  @override
+  String get backupStageVerifyingMedia => '正在校驗媒體包...';
+
+  @override
+  String backupStageRestoringMedia(int processed, int total) {
+    return '正在還原媒體：$processed/$total 個檔案';
+  }
+
+  @override
+  String get backupStageRestoringData => '正在合併或替換資料庫...';
 
   @override
   String get enableICloudBackup => '啟用 iCloud 備份';

@@ -90,6 +90,37 @@ void main() {
     expect(names, isNot(contains('files/nativeData/worlds/map.png')));
   });
 
+  test('backup artifact progress reports scan, compression count, and write',
+      () async {
+    final avatar = File(
+      p.join(documents.path, 'NativeTavern', 'avatars', 'card.png'),
+    );
+    await avatar.parent.create(recursive: true);
+    await avatar.writeAsBytes([1, 2, 3]);
+    final updates = <CloudBackupArtifactProgress>[];
+    final service = CloudBackupService.forTesting(
+      documentsDirectory: documents,
+    );
+
+    await service.createCloudBackupArtifacts(
+      data: const <String, dynamic>{},
+      provider: CloudProvider.googleDrive,
+      options: const CloudBackupOptions(
+        mediaCategories: {CloudMediaCategory.characterImages},
+      ),
+      onProgress: updates.add,
+    );
+
+    expect(updates.first.stage, CloudBackupArtifactStage.scanningMedia);
+    final compression = updates
+        .where((update) =>
+            update.stage == CloudBackupArtifactStage.compressingMedia)
+        .toList();
+    expect(compression.last.processedFiles, 1);
+    expect(compression.last.totalFiles, 1);
+    expect(updates.last.stage, CloudBackupArtifactStage.writingData);
+  });
+
   test('world book switch includes all referenced local world book images',
       () async {
     final image = File(
@@ -154,9 +185,11 @@ void main() {
     final targetService = CloudBackupService.forTesting(
       documentsDirectory: targetDocuments,
     );
+    final progress = <(int, int)>[];
     final outcome = await targetService.restoreMediaFile(
       backupPackage: package,
       mediaFile: artifacts.mediaFile!,
+      onProgress: (processed, total) => progress.add((processed, total)),
     );
 
     final restored = File(
@@ -167,6 +200,7 @@ void main() {
         as Map)['card'] as Map;
     expect(character['avatarPath'], restored.path);
     expect(outcome.skippedFiles, 0);
+    expect(progress, [(0, 1), (1, 1)]);
   });
 
   test('unsafe media paths are skipped without invalidating data', () async {
@@ -329,6 +363,36 @@ void main() {
         CloudMediaCategory.worldInfoImages,
       }),
     );
+  });
+
+  test('operation progress updates preserve stage text and item counts', () {
+    const initial = CloudBackupOperationState(
+      isLoading: true,
+      currentOperation: 'Uploading media',
+      progress: 0.2,
+      stage: CloudBackupOperationStage.compressingMedia,
+      processedItems: 2,
+      totalItems: 5,
+    );
+
+    final updated = initial.copyWith(progress: 0.4);
+
+    expect(updated.currentOperation, 'Uploading media');
+    expect(updated.stage, CloudBackupOperationStage.compressingMedia);
+    expect(updated.processedItems, 2);
+    expect(updated.totalItems, 5);
+    expect(updated.progress, 0.4);
+
+    final cleared = updated.copyWith(
+      currentOperation: null,
+      stage: null,
+      processedItems: null,
+      totalItems: null,
+    );
+    expect(cleared.currentOperation, isNull);
+    expect(cleared.stage, isNull);
+    expect(cleared.processedItems, isNull);
+    expect(cleared.totalItems, isNull);
   });
 }
 

@@ -46,6 +46,22 @@ class CloudBackupArtifacts {
   });
 }
 
+enum CloudBackupArtifactStage { scanningMedia, compressingMedia, writingData }
+
+class CloudBackupArtifactProgress {
+  final CloudBackupArtifactStage stage;
+  final int processedFiles;
+  final int? totalFiles;
+
+  const CloudBackupArtifactProgress({
+    required this.stage,
+    this.processedFiles = 0,
+    this.totalFiles,
+  });
+}
+
+enum CloudBackupTransferPart { data, media }
+
 class CloudMediaRestoreOutcome {
   final Map<String, dynamic> backupPackage;
   final int restoredFiles;
@@ -385,6 +401,7 @@ class CloudBackupService {
     required Map<String, dynamic> data,
     required CloudProvider provider,
     CloudBackupOptions options = const CloudBackupOptions(),
+    void Function(CloudBackupArtifactProgress progress)? onProgress,
   }) async {
     lastMediaWarning = null;
     final cacheDir = await getCloudCacheDirectory();
@@ -401,6 +418,7 @@ class CloudBackupService {
       final media = await _createMediaSidecar(
         data: data,
         options: options,
+        onProgress: onProgress,
         outputFile: File(
           path.join(
             cacheDir.path,
@@ -416,6 +434,12 @@ class CloudBackupService {
       lastMediaWarning =
           'The data backup succeeded, but media preparation failed.';
     }
+
+    onProgress?.call(
+      const CloudBackupArtifactProgress(
+        stage: CloudBackupArtifactStage.writingData,
+      ),
+    );
 
     // Create backup package with metadata
     final backupPackage = {
@@ -453,8 +477,15 @@ class CloudBackupService {
     required Map<String, dynamic> data,
     required CloudBackupOptions options,
     required File outputFile,
+    void Function(CloudBackupArtifactProgress progress)? onProgress,
   }) async {
     if (options.mediaCategories.isEmpty) return (null, 0);
+
+    onProgress?.call(
+      const CloudBackupArtifactProgress(
+        stage: CloudBackupArtifactStage.scanningMedia,
+      ),
+    );
 
     final documents = await _documentsDirectoryProvider();
     final nativeData = Directory(path.join(documents.path, 'NativeTavern'));
@@ -542,6 +573,13 @@ class CloudBackupService {
 
     final archive = Archive();
     final entries = <Map<String, dynamic>>[];
+    var processedFiles = 0;
+    onProgress?.call(
+      CloudBackupArtifactProgress(
+        stage: CloudBackupArtifactStage.compressingMedia,
+        totalFiles: discovered.length,
+      ),
+    );
     for (final source in discovered.values) {
       final bytes = await source.file.readAsBytes();
       archive.addFile(ArchiveFile(source.archivePath, bytes.length, bytes));
@@ -553,6 +591,14 @@ class CloudBackupService {
         'size': bytes.length,
         'sha256': sha256.convert(bytes).toString(),
       });
+      processedFiles++;
+      onProgress?.call(
+        CloudBackupArtifactProgress(
+          stage: CloudBackupArtifactStage.compressingMedia,
+          processedFiles: processedFiles,
+          totalFiles: discovered.length,
+        ),
+      );
     }
     final manifest = utf8.encode(
       jsonEncode({
@@ -841,6 +887,7 @@ class CloudBackupService {
     required File backupFile,
     File? mediaFile,
     void Function(double progress)? onProgress,
+    void Function(CloudBackupTransferPart part)? onPartChanged,
   }) async {
     final iCloudDir = await getICloudDirectory();
     if (iCloudDir == null) {
@@ -853,6 +900,7 @@ class CloudBackupService {
     print('CloudBackupService: Backup path: ${iCloudDir.path}');
 
     try {
+      onPartChanged?.call(CloudBackupTransferPart.data);
       onProgress?.call(0.0);
 
       final fileName = path.basename(backupFile.path);
@@ -863,6 +911,7 @@ class CloudBackupService {
 
       if (mediaFile != null) {
         try {
+          onPartChanged?.call(CloudBackupTransferPart.media);
           await mediaFile.copy(
             path.join(iCloudDir.path, path.basename(mediaFile.path)),
           );
@@ -938,11 +987,14 @@ class CloudBackupService {
   Future<Map<String, dynamic>> downloadFromICloud({
     required CloudBackupInfo backup,
     void Function(double progress)? onProgress,
+    void Function(CloudBackupTransferPart part)? onPartChanged,
+    void Function(int processed, int total)? onMediaProgress,
   }) async {
     if (backup.remotePath == null) {
       throw Exception('Backup remote path is null');
     }
 
+    onPartChanged?.call(CloudBackupTransferPart.data);
     onProgress?.call(0.0);
 
     final file = File(backup.remotePath!);
@@ -953,14 +1005,17 @@ class CloudBackupService {
     final content = await file.readAsString();
     var data = jsonDecode(content) as Map<String, dynamic>;
     data = await restoreTextStateSafely(data);
+    onProgress?.call(0.5);
 
     final mediaName = _mediaFileName(data);
     if (mediaName != null) {
+      onPartChanged?.call(CloudBackupTransferPart.media);
       final mediaFile = File(path.join(file.parent.path, mediaName));
       if (await mediaFile.exists()) {
         final outcome = await restoreMediaFile(
           backupPackage: data,
           mediaFile: mediaFile,
+          onProgress: onMediaProgress,
         );
         data = outcome.backupPackage;
         data['_mediaRestoredFiles'] = outcome.restoredFiles;
@@ -1059,11 +1114,13 @@ class CloudBackupService {
   Future<CloudMediaRestoreOutcome> restoreMediaFile({
     required Map<String, dynamic> backupPackage,
     required File mediaFile,
+    void Function(int processed, int total)? onProgress,
   }) async {
     try {
       return restoreMediaBytes(
         backupPackage: backupPackage,
         bytes: await mediaFile.readAsBytes(),
+        onProgress: onProgress,
       );
     } catch (error) {
       return CloudMediaRestoreOutcome(
@@ -1076,11 +1133,13 @@ class CloudBackupService {
   Future<CloudMediaRestoreOutcome> restoreMediaBytesSafely({
     required Map<String, dynamic> backupPackage,
     required List<int> bytes,
+    void Function(int processed, int total)? onProgress,
   }) async {
     try {
       return await restoreMediaBytes(
         backupPackage: backupPackage,
         bytes: bytes,
+        onProgress: onProgress,
       );
     } catch (error) {
       return CloudMediaRestoreOutcome(
@@ -1093,6 +1152,7 @@ class CloudBackupService {
   Future<CloudMediaRestoreOutcome> restoreMediaBytes({
     required Map<String, dynamic> backupPackage,
     required List<int> bytes,
+    void Function(int processed, int total)? onProgress,
   }) async {
     final documents = await _documentsDirectoryProvider();
     final nativeData = Directory(path.join(documents.path, 'NativeTavern'));
@@ -1130,9 +1190,11 @@ class CloudBackupService {
 
     var restored = 0;
     var skipped = 0;
+    var processed = 0;
     final restoredJsonFiles = <File>[];
     final files = manifest['files'];
     if (files is! List) throw const FormatException('Invalid media file list');
+    onProgress?.call(0, files.length);
     for (final raw in files) {
       try {
         final item = Map<String, dynamic>.from(raw as Map);
@@ -1171,6 +1233,9 @@ class CloudBackupService {
       } catch (error) {
         skipped++;
         print('CloudBackupService: Skipped media entry: $error');
+      } finally {
+        processed++;
+        onProgress?.call(processed, files.length);
       }
     }
 

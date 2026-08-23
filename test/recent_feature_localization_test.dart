@@ -76,6 +76,8 @@ void main() {
     expect(l10n.translatedFromLanguage('日语'), '译自日语');
     expect(l10n.loadingImage, '正在加载图片...');
     expect(l10n.restoreModeMerge, '合并');
+    expect(l10n.backupStageScanningMedia, '正在扫描媒体文件...');
+    expect(l10n.backupStageRestoringMedia(2, 5), '正在恢复媒体：2/5 个文件');
     expect(l10n.sortRecentlyModified, '最近修改优先');
     expect(l10n.pageNotFound, '页面未找到');
     expect(l10n.officialWebsite, '官方网站');
@@ -112,6 +114,8 @@ void main() {
     expect(l10n.translatedFromLanguage('日文'), '譯自日文');
     expect(l10n.loadingImage, '正在載入圖片...');
     expect(l10n.restoreModeMerge, '合併');
+    expect(l10n.backupStageScanningMedia, '正在掃描媒體檔案...');
+    expect(l10n.backupStageRestoringMedia(2, 5), '正在還原媒體：2/5 個檔案');
     expect(l10n.sortRecentlyModified, '最近修改優先');
     expect(l10n.pageNotFound, '找不到頁面');
     expect(l10n.officialWebsite, '官方網站');

@@ -3624,6 +3624,40 @@ class AppLocalizationsTr extends AppLocalizations {
       'This backup does not include a media package; only data was restored.';
 
   @override
+  String get backupStagePreparingData => 'Preparing database and settings...';
+
+  @override
+  String get backupStageScanningMedia => 'Scanning media files...';
+
+  @override
+  String backupStageCompressingMedia(int processed, int total) {
+    return 'Compressing media: $processed/$total files';
+  }
+
+  @override
+  String get backupStageUploadingData => 'Uploading data backup...';
+
+  @override
+  String get backupStageUploadingMedia => 'Uploading media package...';
+
+  @override
+  String get backupStageDownloadingData => 'Downloading data backup...';
+
+  @override
+  String get backupStageDownloadingMedia => 'Downloading media package...';
+
+  @override
+  String get backupStageVerifyingMedia => 'Verifying media package...';
+
+  @override
+  String backupStageRestoringMedia(int processed, int total) {
+    return 'Restoring media: $processed/$total files';
+  }
+
+  @override
+  String get backupStageRestoringData => 'Merging or replacing database...';
+
+  @override
   String get enableICloudBackup => 'Enable iCloud Backup';
 
   @override

@@ -6,6 +6,8 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:intl/intl.dart';
 
+enum GoogleDriveBackupUploadPart { data, media }
+
 /// Google Drive backup info
 class GoogleDriveBackupInfo {
   final String id;
@@ -372,12 +374,14 @@ class GoogleDriveService {
     required File dataFile,
     File? mediaFile,
     void Function(double progress)? onProgress,
+    void Function(GoogleDriveBackupUploadPart part)? onPartChanged,
   }) async {
     lastMediaWarning = null;
     if (_driveApi == null) return null;
     try {
       final folderId = await _getOrCreateBackupFolder();
       if (folderId == null) return null;
+      onPartChanged?.call(GoogleDriveBackupUploadPart.data);
       onProgress?.call(0);
       final dataBytes = await dataFile.readAsBytes();
       final uploaded = await _uploadBytes(
@@ -389,6 +393,7 @@ class GoogleDriveService {
       onProgress?.call(mediaFile == null ? 1 : 0.7);
       if (mediaFile != null) {
         try {
+          onPartChanged?.call(GoogleDriveBackupUploadPart.media);
           await _uploadBytes(
             folderId: folderId,
             fileName: mediaFile.uri.pathSegments.last,
