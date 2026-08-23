@@ -1611,7 +1611,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get aboutBackupsDescription =>
-      'Chat backups save individual conversations. Full backups include all characters, chats, settings, and world info.';
+      'Chat backups save individual conversations. Full backups include all characters, chats, settings, and lorebooks.';
 
   @override
   String get backupLocation => 'Backup Location';
@@ -2086,10 +2086,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get applyDuringCommandProcessing => 'Apply during command processing';
 
   @override
-  String get worldInfoLabel => 'World Info';
+  String get worldInfoLabel => 'Lorebook';
 
   @override
-  String get applyToWorldInfoEntries => 'Apply to world info entries';
+  String get applyToWorldInfoEntries => 'Apply to lorebook entries';
 
   @override
   String scriptsCount(int count) {
@@ -3120,7 +3120,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get pleaseEnterTagName => 'Please enter a tag name';
 
   @override
-  String get worldInfoLorebooks => 'World Info / Lorebooks';
+  String get worldInfoLorebooks => 'Lorebooks';
 
   @override
   String get createLorebook => 'Create Lorebook';
@@ -4448,70 +4448,67 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'metadata': 'Metadata',
-        'compatibility': 'Compatibility',
-        'initialState': 'Initial State',
-        'initialSeed': 'Initial Seed',
-        'schemaVersion': 'Schema Version',
-        'protectedFields': 'Protected Fields',
-        'minimumEngineVersion': 'Minimum Engine Version',
-        'maximumEngineVersion': 'Maximum Engine Version',
-        'requiredCapabilities': 'Required Capabilities',
-        'actors': 'Actors',
-        'attributes': 'Attributes',
-        'author': 'Author',
-        'availability': 'Availability',
-        'branchId': 'Branch ID',
-        'conditions': 'Conditions',
-        'cooldowns': 'Cooldowns',
-        'costs': 'Costs',
-        'createdAt': 'Created At',
-        'data': 'Data',
-        'day': 'Day',
-        'description': 'Description',
-        'difficulty': 'Difficulty',
-        'effects': 'Effects',
-        'elapsedMinutes': 'Elapsed Minutes',
-        'eventHistory': 'Event History',
-        'expression': 'Expression',
-        'failureEffects': 'Failure Effects',
-        'format': 'Format',
-        'id': 'ID',
-        'initialValue': 'Initial Value',
-        'inventory': 'Inventory',
-        'items': 'Items',
-        'label': 'Label',
-        'locations': 'Locations',
-        'maximum': 'Maximum',
-        'minimum': 'Minimum',
-        'minuteOfDay': 'Minute of Day',
-        'name': 'Name',
-        'narrative': 'Narrative',
-        'objectiveIds': 'Objective IDs',
-        'objectiveProgress': 'Objective Progress',
-        'operator': 'Operator',
-        'quantity': 'Quantity',
-        'quests': 'Quests',
-        'relationships': 'Relationships',
-        'source': 'Source',
-        'stages': 'Stages',
-        'status': 'Status',
-        'successEffects': 'Success Effects',
-        'summary': 'Summary',
-        'tags': 'Tags',
-        'target': 'Target',
-        'turn': 'Turn',
-        'type': 'Type',
-        'updatedAt': 'Updated At',
-        'value': 'Value',
-        'variables': 'Variables',
-        'version': 'Version',
-        'other': '$field',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'metadata': 'Metadata',
+      'compatibility': 'Compatibility',
+      'initialState': 'Initial State',
+      'initialSeed': 'Initial Seed',
+      'schemaVersion': 'Schema Version',
+      'protectedFields': 'Protected Fields',
+      'minimumEngineVersion': 'Minimum Engine Version',
+      'maximumEngineVersion': 'Maximum Engine Version',
+      'requiredCapabilities': 'Required Capabilities',
+      'actors': 'Actors',
+      'attributes': 'Attributes',
+      'author': 'Author',
+      'availability': 'Availability',
+      'branchId': 'Branch ID',
+      'conditions': 'Conditions',
+      'cooldowns': 'Cooldowns',
+      'costs': 'Costs',
+      'createdAt': 'Created At',
+      'data': 'Data',
+      'day': 'Day',
+      'description': 'Description',
+      'difficulty': 'Difficulty',
+      'effects': 'Effects',
+      'elapsedMinutes': 'Elapsed Minutes',
+      'eventHistory': 'Event History',
+      'expression': 'Expression',
+      'failureEffects': 'Failure Effects',
+      'format': 'Format',
+      'id': 'ID',
+      'initialValue': 'Initial Value',
+      'inventory': 'Inventory',
+      'items': 'Items',
+      'label': 'Label',
+      'locations': 'Locations',
+      'maximum': 'Maximum',
+      'minimum': 'Minimum',
+      'minuteOfDay': 'Minute of Day',
+      'name': 'Name',
+      'narrative': 'Narrative',
+      'objectiveIds': 'Objective IDs',
+      'objectiveProgress': 'Objective Progress',
+      'operator': 'Operator',
+      'quantity': 'Quantity',
+      'quests': 'Quests',
+      'relationships': 'Relationships',
+      'source': 'Source',
+      'stages': 'Stages',
+      'status': 'Status',
+      'successEffects': 'Success Effects',
+      'summary': 'Summary',
+      'tags': 'Tags',
+      'target': 'Target',
+      'turn': 'Turn',
+      'type': 'Type',
+      'updatedAt': 'Updated At',
+      'value': 'Value',
+      'variables': 'Variables',
+      'version': 'Version',
+      'other': '$field',
+    });
     return '$_temp0';
   }
 
@@ -4546,7 +4543,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files) {
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  ) {
     return '$versions version(s), $chunks chunk(s), $bindings binding(s), and $files managed file(s) will be removed.';
   }
 
@@ -5308,7 +5309,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  ) {
     return 'Supports macros such as $userMacro, $charMacro, $timeMacro, and $dateMacro.';
   }
 
@@ -5365,14 +5370,14 @@ class AppLocalizationsNl extends AppLocalizations {
       'Sample dialogue that demonstrates style';
 
   @override
-  String get promptSectionWorldInfoBefore => 'World info before';
+  String get promptSectionWorldInfoBefore => 'Lorebook before';
 
   @override
   String get promptSectionWorldInfoBeforeDescription =>
       'Lorebook context inserted before character details';
 
   @override
-  String get promptSectionWorldInfoAfter => 'World info after';
+  String get promptSectionWorldInfoAfter => 'Lorebook after';
 
   @override
   String get promptSectionWorldInfoAfterDescription =>
