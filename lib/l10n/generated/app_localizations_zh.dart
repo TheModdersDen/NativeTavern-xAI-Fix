@@ -540,7 +540,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jailbreak => '越狱提示';
 
   @override
-  String get worldInfo => '世界信息';
+  String get worldInfo => '世界书';
 
   @override
   String get createEntry => '创建条目';
@@ -1577,7 +1577,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutBackups => '关于备份';
 
   @override
-  String get aboutBackupsDescription => '聊天备份保存单个对话。完整备份包含所有角色、聊天、设置和世界信息。';
+  String get aboutBackupsDescription => '聊天备份保存单个对话。完整备份包含所有角色、聊天、设置和世界书。';
 
   @override
   String get backupLocation => '备份位置';
@@ -2041,10 +2041,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get applyDuringCommandProcessing => '处理命令时应用';
 
   @override
-  String get worldInfoLabel => '世界信息';
+  String get worldInfoLabel => '世界书';
 
   @override
-  String get applyToWorldInfoEntries => '应用到世界信息条目';
+  String get applyToWorldInfoEntries => '应用到世界书条目';
 
   @override
   String scriptsCount(int count) {
@@ -3046,7 +3046,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pleaseEnterTagName => '请输入标签名称';
 
   @override
-  String get worldInfoLorebooks => '世界信息 / 世界书';
+  String get worldInfoLorebooks => '世界书';
 
   @override
   String get createLorebook => '创建世界书';
@@ -4307,70 +4307,67 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'metadata': '元数据',
-        'compatibility': '兼容性',
-        'initialState': '初始状态',
-        'initialSeed': '初始种子',
-        'schemaVersion': '结构版本',
-        'protectedFields': '受保护字段',
-        'minimumEngineVersion': '最低引擎版本',
-        'maximumEngineVersion': '最高引擎版本',
-        'requiredCapabilities': '所需功能',
-        'actors': '角色',
-        'attributes': '属性',
-        'author': '作者',
-        'availability': '可用性',
-        'branchId': '分支 ID',
-        'conditions': '条件',
-        'cooldowns': '冷却',
-        'costs': '消耗',
-        'createdAt': '创建时间',
-        'data': '数据',
-        'day': '天数',
-        'description': '描述',
-        'difficulty': '难度',
-        'effects': '效果',
-        'elapsedMinutes': '已过分钟',
-        'eventHistory': '事件历史',
-        'expression': '表达式',
-        'failureEffects': '失败效果',
-        'format': '格式',
-        'id': 'ID',
-        'initialValue': '初始值',
-        'inventory': '物品栏',
-        'items': '物品',
-        'label': '标签',
-        'locations': '地点',
-        'maximum': '最大值',
-        'minimum': '最小值',
-        'minuteOfDay': '当日分钟',
-        'name': '名称',
-        'narrative': '叙事',
-        'objectiveIds': '目标 ID',
-        'objectiveProgress': '目标进度',
-        'operator': '运算符',
-        'quantity': '数量',
-        'quests': '任务',
-        'relationships': '关系',
-        'source': '来源',
-        'stages': '阶段',
-        'status': '状态',
-        'successEffects': '成功效果',
-        'summary': '摘要',
-        'tags': '标签',
-        'target': '目标',
-        'turn': '回合',
-        'type': '类型',
-        'updatedAt': '更新时间',
-        'value': '值',
-        'variables': '变量',
-        'version': '版本',
-        'other': '$field',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'metadata': '元数据',
+      'compatibility': '兼容性',
+      'initialState': '初始状态',
+      'initialSeed': '初始种子',
+      'schemaVersion': '结构版本',
+      'protectedFields': '受保护字段',
+      'minimumEngineVersion': '最低引擎版本',
+      'maximumEngineVersion': '最高引擎版本',
+      'requiredCapabilities': '所需功能',
+      'actors': '角色',
+      'attributes': '属性',
+      'author': '作者',
+      'availability': '可用性',
+      'branchId': '分支 ID',
+      'conditions': '条件',
+      'cooldowns': '冷却',
+      'costs': '消耗',
+      'createdAt': '创建时间',
+      'data': '数据',
+      'day': '天数',
+      'description': '描述',
+      'difficulty': '难度',
+      'effects': '效果',
+      'elapsedMinutes': '已过分钟',
+      'eventHistory': '事件历史',
+      'expression': '表达式',
+      'failureEffects': '失败效果',
+      'format': '格式',
+      'id': 'ID',
+      'initialValue': '初始值',
+      'inventory': '物品栏',
+      'items': '物品',
+      'label': '标签',
+      'locations': '地点',
+      'maximum': '最大值',
+      'minimum': '最小值',
+      'minuteOfDay': '当日分钟',
+      'name': '名称',
+      'narrative': '叙事',
+      'objectiveIds': '目标 ID',
+      'objectiveProgress': '目标进度',
+      'operator': '运算符',
+      'quantity': '数量',
+      'quests': '任务',
+      'relationships': '关系',
+      'source': '来源',
+      'stages': '阶段',
+      'status': '状态',
+      'successEffects': '成功效果',
+      'summary': '摘要',
+      'tags': '标签',
+      'target': '目标',
+      'turn': '回合',
+      'type': '类型',
+      'updatedAt': '更新时间',
+      'value': '值',
+      'variables': '变量',
+      'version': '版本',
+      'other': '$field',
+    });
     return '$_temp0';
   }
 
@@ -4405,7 +4402,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files) {
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  ) {
     return '将删除 $versions 个版本、$chunks 个分块、$bindings 个绑定和 $files 个托管文件。';
   }
 
@@ -5134,7 +5135,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  ) {
     return '支持 $userMacro、$charMacro、$timeMacro 和 $dateMacro 等宏。';
   }
 
@@ -5186,13 +5191,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptSectionExampleMessagesDescription => '用于展示对话风格的示例';
 
   @override
-  String get promptSectionWorldInfoBefore => '前置世界信息';
+  String get promptSectionWorldInfoBefore => '前置世界书';
 
   @override
   String get promptSectionWorldInfoBeforeDescription => '插入在角色信息之前的世界书上下文';
 
   @override
-  String get promptSectionWorldInfoAfter => '后置世界信息';
+  String get promptSectionWorldInfoAfter => '后置世界书';
 
   @override
   String get promptSectionWorldInfoAfterDescription => '插入在角色信息之后的世界书上下文';
@@ -6620,7 +6625,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get jailbreak => '越獄提示';
 
   @override
-  String get worldInfo => '世界資訊';
+  String get worldInfo => '世界書';
 
   @override
   String get createEntry => '建立條目';
@@ -7657,7 +7662,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get aboutBackups => '關於備份';
 
   @override
-  String get aboutBackupsDescription => '聊天備份會儲存個別對話。完整備份包含所有角色、聊天、設定與世界資訊。';
+  String get aboutBackupsDescription => '聊天備份會儲存個別對話。完整備份包含所有角色、聊天、設定與世界書。';
 
   @override
   String get backupLocation => '備份位置';
@@ -8121,10 +8126,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get applyDuringCommandProcessing => '處理命令時套用';
 
   @override
-  String get worldInfoLabel => '世界資訊';
+  String get worldInfoLabel => '世界書';
 
   @override
-  String get applyToWorldInfoEntries => '套用至世界資訊項目';
+  String get applyToWorldInfoEntries => '套用至世界書項目';
 
   @override
   String scriptsCount(int count) {
@@ -9126,7 +9131,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get pleaseEnterTagName => '請輸入標籤名稱';
 
   @override
-  String get worldInfoLorebooks => '世界資訊 / 世界書';
+  String get worldInfoLorebooks => '世界書';
 
   @override
   String get createLorebook => '建立世界書';
@@ -10388,70 +10393,67 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'metadata': '中繼資料',
-        'compatibility': '相容性',
-        'initialState': '初始狀態',
-        'initialSeed': '初始種子',
-        'schemaVersion': '結構版本',
-        'protectedFields': '受保護欄位',
-        'minimumEngineVersion': '最低引擎版本',
-        'maximumEngineVersion': '最高引擎版本',
-        'requiredCapabilities': '所需功能',
-        'actors': '角色',
-        'attributes': '屬性',
-        'author': '作者',
-        'availability': '可用性',
-        'branchId': '分支 ID',
-        'conditions': '條件',
-        'cooldowns': '冷卻',
-        'costs': '消耗',
-        'createdAt': '建立時間',
-        'data': '資料',
-        'day': '天數',
-        'description': '描述',
-        'difficulty': '難度',
-        'effects': '效果',
-        'elapsedMinutes': '經過分鐘',
-        'eventHistory': '事件歷程',
-        'expression': '運算式',
-        'failureEffects': '失敗效果',
-        'format': '格式',
-        'id': 'ID',
-        'initialValue': '初始值',
-        'inventory': '物品欄',
-        'items': '物品',
-        'label': '標籤',
-        'locations': '地點',
-        'maximum': '最大值',
-        'minimum': '最小值',
-        'minuteOfDay': '當日分鐘',
-        'name': '名稱',
-        'narrative': '敘事',
-        'objectiveIds': '目標 ID',
-        'objectiveProgress': '目標進度',
-        'operator': '運算子',
-        'quantity': '數量',
-        'quests': '任務',
-        'relationships': '關係',
-        'source': '來源',
-        'stages': '階段',
-        'status': '狀態',
-        'successEffects': '成功效果',
-        'summary': '摘要',
-        'tags': '標籤',
-        'target': '目標',
-        'turn': '回合',
-        'type': '類型',
-        'updatedAt': '更新時間',
-        'value': '值',
-        'variables': '變數',
-        'version': '版本',
-        'other': '$field',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'metadata': '中繼資料',
+      'compatibility': '相容性',
+      'initialState': '初始狀態',
+      'initialSeed': '初始種子',
+      'schemaVersion': '結構版本',
+      'protectedFields': '受保護欄位',
+      'minimumEngineVersion': '最低引擎版本',
+      'maximumEngineVersion': '最高引擎版本',
+      'requiredCapabilities': '所需功能',
+      'actors': '角色',
+      'attributes': '屬性',
+      'author': '作者',
+      'availability': '可用性',
+      'branchId': '分支 ID',
+      'conditions': '條件',
+      'cooldowns': '冷卻',
+      'costs': '消耗',
+      'createdAt': '建立時間',
+      'data': '資料',
+      'day': '天數',
+      'description': '描述',
+      'difficulty': '難度',
+      'effects': '效果',
+      'elapsedMinutes': '經過分鐘',
+      'eventHistory': '事件歷程',
+      'expression': '運算式',
+      'failureEffects': '失敗效果',
+      'format': '格式',
+      'id': 'ID',
+      'initialValue': '初始值',
+      'inventory': '物品欄',
+      'items': '物品',
+      'label': '標籤',
+      'locations': '地點',
+      'maximum': '最大值',
+      'minimum': '最小值',
+      'minuteOfDay': '當日分鐘',
+      'name': '名稱',
+      'narrative': '敘事',
+      'objectiveIds': '目標 ID',
+      'objectiveProgress': '目標進度',
+      'operator': '運算子',
+      'quantity': '數量',
+      'quests': '任務',
+      'relationships': '關係',
+      'source': '來源',
+      'stages': '階段',
+      'status': '狀態',
+      'successEffects': '成功效果',
+      'summary': '摘要',
+      'tags': '標籤',
+      'target': '目標',
+      'turn': '回合',
+      'type': '類型',
+      'updatedAt': '更新時間',
+      'value': '值',
+      'variables': '變數',
+      'version': '版本',
+      'other': '$field',
+    });
     return '$_temp0';
   }
 
@@ -10486,7 +10488,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files) {
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  ) {
     return '將刪除 $versions 個版本、$chunks 個區塊、$bindings 個綁定與 $files 個受管理檔案。';
   }
 
@@ -11215,7 +11221,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  ) {
     return '支援 $userMacro、$charMacro、$timeMacro 與 $dateMacro 等巨集。';
   }
 
@@ -11267,13 +11277,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptSectionExampleMessagesDescription => '用來展示對話風格的範例';
 
   @override
-  String get promptSectionWorldInfoBefore => '前置世界資訊';
+  String get promptSectionWorldInfoBefore => '前置世界書';
 
   @override
   String get promptSectionWorldInfoBeforeDescription => '插入在角色資訊之前的世界書上下文';
 
   @override
-  String get promptSectionWorldInfoAfter => '後置世界資訊';
+  String get promptSectionWorldInfoAfter => '後置世界書';
 
   @override
   String get promptSectionWorldInfoAfterDescription => '插入在角色資訊之後的世界書上下文';

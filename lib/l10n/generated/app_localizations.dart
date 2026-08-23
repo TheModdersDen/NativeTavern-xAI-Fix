@@ -80,7 +80,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -103,11 +103,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -130,7 +130,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('vi'),
     Locale('zh'),
-    Locale('zh', 'TW')
+    Locale('zh', 'TW'),
   ];
 
   /// The application title
@@ -1135,10 +1135,10 @@ abstract class AppLocalizations {
   /// **'Jailbreak'**
   String get jailbreak;
 
-  /// World info screen title
+  /// Lorebook screen title
   ///
   /// In en, this message translates to:
-  /// **'World Info'**
+  /// **'Lorebook'**
   String get worldInfo;
 
   /// Create entry button
@@ -3046,7 +3046,7 @@ abstract class AppLocalizations {
   /// About backups description
   ///
   /// In en, this message translates to:
-  /// **'Chat backups save individual conversations. Full backups include all characters, chats, settings, and world info.'**
+  /// **'Chat backups save individual conversations. Full backups include all characters, chats, settings, and lorebooks.'**
   String get aboutBackupsDescription;
 
   /// Backup location label
@@ -3907,16 +3907,16 @@ abstract class AppLocalizations {
   /// **'Apply during command processing'**
   String get applyDuringCommandProcessing;
 
-  /// World info label
+  /// Lorebook label
   ///
   /// In en, this message translates to:
-  /// **'World Info'**
+  /// **'Lorebook'**
   String get worldInfoLabel;
 
-  /// World info description
+  /// Lorebook description
   ///
   /// In en, this message translates to:
-  /// **'Apply to world info entries'**
+  /// **'Apply to lorebook entries'**
   String get applyToWorldInfoEntries;
 
   /// Scripts count
@@ -5773,10 +5773,10 @@ abstract class AppLocalizations {
   /// **'Please enter a tag name'**
   String get pleaseEnterTagName;
 
-  /// World info screen title
+  /// Lorebook screen title
   ///
   /// In en, this message translates to:
-  /// **'World Info / Lorebooks'**
+  /// **'Lorebooks'**
   String get worldInfoLorebooks;
 
   /// Create lorebook tooltip
@@ -8136,7 +8136,11 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{versions} version(s), {chunks} chunk(s), {bindings} binding(s), and {files} managed file(s) will be removed.'**
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files);
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  );
 
   /// No description provided for @dataBankChatRetrieval.
   ///
@@ -9451,7 +9455,11 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supports macros such as {userMacro}, {charMacro}, {timeMacro}, and {dateMacro}.'**
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro);
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  );
 
   /// No description provided for @enterPromptContent.
   ///
@@ -9546,7 +9554,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptSectionWorldInfoBefore.
   ///
   /// In en, this message translates to:
-  /// **'World info before'**
+  /// **'Lorebook before'**
   String get promptSectionWorldInfoBefore;
 
   /// No description provided for @promptSectionWorldInfoBeforeDescription.
@@ -9558,7 +9566,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptSectionWorldInfoAfter.
   ///
   /// In en, this message translates to:
-  /// **'World info after'**
+  /// **'Lorebook after'**
   String get promptSectionWorldInfoAfter;
 
   /// No description provided for @promptSectionWorldInfoAfterDescription.
@@ -11229,26 +11237,26 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-        'ar',
-        'de',
-        'en',
-        'es',
-        'fr',
-        'hi',
-        'id',
-        'it',
-        'ja',
-        'ko',
-        'ms',
-        'nl',
-        'pl',
-        'pt',
-        'ru',
-        'th',
-        'tr',
-        'vi',
-        'zh'
-      ].contains(locale.languageCode);
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'hi',
+    'id',
+    'it',
+    'ja',
+    'ko',
+    'ms',
+    'nl',
+    'pl',
+    'pt',
+    'ru',
+    'th',
+    'tr',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -11310,8 +11318,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

@@ -758,9 +758,9 @@
   "@jailbreak": {
     "description": "Jailbreak prompt label"
   },
-  "worldInfo": "World Info",
+  "worldInfo": "Lorebook",
   "@worldInfo": {
-    "description": "World info screen title"
+    "description": "Lorebook screen title"
   },
   "createEntry": "Create Entry",
   "@createEntry": {
@@ -2288,7 +2288,7 @@
   "@aboutBackups": {
     "description": "About backups label"
   },
-  "aboutBackupsDescription": "Chat backups save individual conversations. Full backups include all characters, chats, settings, and world info.",
+  "aboutBackupsDescription": "Chat backups save individual conversations. Full backups include all characters, chats, settings, and lorebooks.",
   "@aboutBackupsDescription": {
     "description": "About backups description"
   },
@@ -2936,13 +2936,13 @@
   "@applyDuringCommandProcessing": {
     "description": "Slash commands description"
   },
-  "worldInfoLabel": "World Info",
+  "worldInfoLabel": "Lorebook",
   "@worldInfoLabel": {
-    "description": "World info label"
+    "description": "Lorebook label"
   },
-  "applyToWorldInfoEntries": "Apply to world info entries",
+  "applyToWorldInfoEntries": "Apply to lorebook entries",
   "@applyToWorldInfoEntries": {
-    "description": "World info description"
+    "description": "Lorebook description"
   },
   "scriptsCount": "Scripts ({count})",
   "@scriptsCount": {
@@ -4362,9 +4362,9 @@
   "@pleaseEnterTagName": {
     "description": "Please enter tag name validation"
   },
-  "worldInfoLorebooks": "World Info / Lorebooks",
+  "worldInfoLorebooks": "Lorebooks",
   "@worldInfoLorebooks": {
-    "description": "World info screen title"
+    "description": "Lorebook screen title"
   },
   "createLorebook": "Create Lorebook",
   "@createLorebook": {
@@ -5886,9 +5886,9 @@
   "promptSectionScenarioDescription": "Current situation and setting",
   "promptSectionExampleMessages": "Example messages",
   "promptSectionExampleMessagesDescription": "Sample dialogue that demonstrates style",
-  "promptSectionWorldInfoBefore": "World info before",
+  "promptSectionWorldInfoBefore": "Lorebook before",
   "promptSectionWorldInfoBeforeDescription": "Lorebook context inserted before character details",
-  "promptSectionWorldInfoAfter": "World info after",
+  "promptSectionWorldInfoAfter": "Lorebook after",
   "promptSectionWorldInfoAfterDescription": "Lorebook context inserted after character details",
   "promptSectionAuthorNote": "Author's note",
   "promptSectionAuthorNoteDescription": "Dynamic instructions for the current chat",
