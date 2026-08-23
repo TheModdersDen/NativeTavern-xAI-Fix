@@ -3840,6 +3840,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get story => '故事';
 
   @override
+  String get storyEmptyHint => '聊一段时间才会有故事。';
+
+  @override
+  String get storyGoToChat => '去聊天';
+
+  @override
+  String get storyJotNote => '记一笔';
+
+  @override
+  String get storyJotNoteHint => '写一句短记事。这里不是章节编辑器。';
+
+  @override
   String get moments => '动态';
 
   @override
@@ -9861,6 +9873,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get story => '故事';
+
+  @override
+  String get storyEmptyHint => '聊一段時間才會有故事。';
+
+  @override
+  String get storyGoToChat => '去聊天';
+
+  @override
+  String get storyJotNote => '記一筆';
+
+  @override
+  String get storyJotNoteHint => '寫一句短記事。這裡不是章節編輯器。';
 
   @override
   String get moments => '動態';

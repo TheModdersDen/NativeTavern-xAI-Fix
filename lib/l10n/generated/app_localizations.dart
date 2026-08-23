@@ -7225,6 +7225,30 @@ abstract class AppLocalizations {
   /// **'Story'**
   String get story;
 
+  /// Empty state on the story chapter timeline
+  ///
+  /// In en, this message translates to:
+  /// **'A story appears after you chat for a while.'**
+  String get storyEmptyHint;
+
+  /// Empty-state button that leaves the story page for chat
+  ///
+  /// In en, this message translates to:
+  /// **'Go to chat'**
+  String get storyGoToChat;
+
+  /// Story-page action to write a short note
+  ///
+  /// In en, this message translates to:
+  /// **'Jot a note'**
+  String get storyJotNote;
+
+  /// Hint inside the story jot-a-note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Write a short note. This is not a chapter editor.'**
+  String get storyJotNoteHint;
+
   /// Play hub row for the public moments feed
   ///
   /// In en, this message translates to:

@@ -43,7 +43,7 @@ import 'package:native_tavern/presentation/screens/personas/personas_screen.dart
 import 'package:native_tavern/presentation/screens/world_info/world_info_screen.dart';
 import 'package:native_tavern/presentation/screens/play/moments_placeholder_screen.dart';
 import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
-import 'package:native_tavern/presentation/screens/play/story_placeholder_screen.dart';
+import 'package:native_tavern/presentation/screens/play/story_screen.dart';
 import 'package:native_tavern/presentation/screens/groups/groups_screen.dart';
 import 'package:native_tavern/presentation/screens/groups/group_detail_screen.dart';
 import 'package:native_tavern/presentation/screens/tags/tags_screen.dart';
@@ -425,7 +425,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.playStory,
         name: 'playStory',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const StoryPlaceholderScreen(),
+        builder: (context, state) => const StoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.playMoments,
