@@ -7276,8 +7276,14 @@ abstract class AppLocalizations {
   /// Empty state when moments is on but there are no posts
   ///
   /// In en, this message translates to:
-  /// **'Nobody has posted yet. Write something, or post a photo.'**
+  /// **'Nobody has posted yet.'**
   String get momentsEmpty;
+
+  /// Shown while characters decide whether to post
+  ///
+  /// In en, this message translates to:
+  /// **'People are posting…'**
+  String get momentsRefreshing;
 
   /// No description provided for @momentsCompose.
   ///

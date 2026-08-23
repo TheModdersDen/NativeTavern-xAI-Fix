@@ -212,6 +212,7 @@ void main() {
       dataDirectory.path,
     );
     final chatRepository = ChatRepository(database);
+    final worldInfoRepository = WorldInfoRepository(database);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -220,6 +221,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(preferences),
           characterRepositoryProvider.overrideWithValue(characterRepository),
           chatRepositoryProvider.overrideWithValue(chatRepository),
+          worldInfoRepositoryProvider.overrideWithValue(worldInfoRepository),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,

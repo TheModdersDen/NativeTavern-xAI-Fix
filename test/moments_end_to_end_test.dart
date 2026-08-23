@@ -6,10 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/core/services/initialization_service.dart';
-import 'package:native_tavern/data/database/database.dart';
+import 'package:native_tavern/data/database/database.dart' hide Chat, Message;
 import 'package:native_tavern/data/models/character.dart' as models;
 import 'package:native_tavern/data/models/moment/moment_post.dart';
+import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
+import 'package:native_tavern/data/repositories/chat_repository.dart';
+import 'package:native_tavern/data/repositories/world_info_repository.dart';
+import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/moment_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/moment_providers.dart';
@@ -24,6 +28,8 @@ void main() {
   late AppDatabase database;
   late Directory dataDirectory;
   late CharacterRepository characterRepository;
+  late ChatRepository chatRepository;
+  late WorldInfoRepository worldInfoRepository;
   late ProviderContainer container;
 
   setUp(() async {
@@ -33,11 +39,15 @@ void main() {
     await database.customSelect('SELECT 1').get();
     dataDirectory = Directory.systemTemp.createTempSync('nt_moments');
     characterRepository = CharacterRepository(database, dataDirectory.path);
+    chatRepository = ChatRepository(database);
+    worldInfoRepository = WorldInfoRepository(database);
     container = ProviderContainer(
       overrides: [
         databaseProvider.overrideWithValue(database),
         dataPathProvider.overrideWithValue(dataDirectory.path),
         characterRepositoryProvider.overrideWithValue(characterRepository),
+        chatRepositoryProvider.overrideWithValue(chatRepository),
+        worldInfoRepositoryProvider.overrideWithValue(worldInfoRepository),
         sharedPreferencesProvider.overrideWithValue(preferences),
       ],
     );
@@ -49,6 +59,8 @@ void main() {
       models.Character(
         id: 'character-1',
         name: 'Ava',
+        description: 'Keeps the garden and the spare key.',
+        personality: 'Dry, careful, a little proud.',
         createdAt: now,
         modifiedAt: now,
       ),
@@ -66,36 +78,102 @@ void main() {
     expect(await container.read(momentFeedProvider.future), isEmpty);
   });
 
-  test('player and character can both post text', () async {
-    final service = container.read(momentServiceProvider);
-    final authors = await service.composeAuthors();
-    expect(authors.map((author) => author.id), containsAll(['user', 'character-1']));
+  test('characters post from their card, knowledge, and chats', () async {
+    final now = DateTime.now();
+    final book = await worldInfoRepository.createWorldInfo(
+      name: 'Garden book',
+      characterId: 'character-1',
+    );
+    await worldInfoRepository.addEntry(
+      worldInfoId: book.id,
+      keys: const ['gate'],
+      content: 'The iron gate sticks when it rains.',
+    );
+    await chatRepository.createChat(
+      Chat(
+        id: 'chat-1',
+        characterId: 'character-1',
+        title: 'Evening',
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await chatRepository.addMessage(
+      ChatMessage(
+        id: 'msg-1',
+        chatId: 'chat-1',
+        role: MessageRole.user,
+        content: 'Did you lock the gate?',
+        timestamp: now,
+      ),
+    );
 
-    await service.createPost(
-      authorId: MomentService.userAuthorId,
-      authorName: MomentService.userAuthorName,
-      origin: MomentPostOrigin.user,
-      body: 'Did you lock the gate?',
+    final requests = <List<Map<String, dynamic>>>[];
+    final service = MomentService(
+      momentRepository: container.read(momentRepositoryProvider),
+      characterRepository: characterRepository,
+      chatRepository: chatRepository,
+      worldInfoRepository: worldInfoRepository,
+      dataPath: dataDirectory.path,
+      minInterval: Duration.zero,
+      transport: (messages, config) async {
+        requests.add(messages);
+        return '{"kind":"text","body":"Locked it before the rain."}';
+      },
     );
-    await service.createPost(
-      authorId: 'character-1',
-      authorName: 'Ava',
-      origin: MomentPostOrigin.character,
-      body: 'Of course I did.',
+
+    final published = await service.maybePublishCharacterMoments(
+      config: _configuredLlm,
     );
+    expect(published, hasLength(1));
+    expect(published.single.authorName, 'Ava');
+    expect(published.single.origin, MomentPostOrigin.character);
+    expect(published.single.publicBody, 'Locked it before the rain.');
+
+    final prompt = requests.single.last['content'] as String;
+    expect(prompt, contains('Keeps the garden'));
+    expect(prompt, contains('iron gate'));
+    expect(prompt, contains('Did you lock the gate?'));
+
+    final again = await service.maybePublishCharacterMoments(
+      config: _configuredLlm,
+    );
+    expect(again, isEmpty);
+  });
+
+  test('a character can post a photo when the image generator returns one',
+      () async {
+    final service = MomentService(
+      momentRepository: container.read(momentRepositoryProvider),
+      characterRepository: characterRepository,
+      dataPath: dataDirectory.path,
+      minInterval: Duration.zero,
+      transport: (messages, config) async {
+        return '{"kind":"image","image_prompt":"a locked garden gate"}';
+      },
+      imageGenerator: (prompt) async {
+        expect(prompt, 'a locked garden gate');
+        return const [137, 80, 78, 71];
+      },
+    );
+
+    final published = await service.maybePublishCharacterMoments(
+      config: _configuredLlm,
+    );
+    expect(published.single.hasPhoto, isTrue);
+    expect(published.single.publicBody, isEmpty);
+    expect(File(published.single.imagePath!).existsSync(), isTrue);
+  });
+
+  test('player posts only as themselves', () async {
+    final service = container.read(momentServiceProvider);
+    final created = await service.publishPlayerPost(body: 'Did you lock the gate?');
+    expect(created.origin, MomentPostOrigin.user);
+    expect(created.authorId, MomentService.userAuthorId);
 
     final feed = await container.read(momentFeedProvider.future);
-    expect(
-      feed.map((item) => item.post.publicBody),
-      containsAll(<String>['Of course I did.', 'Did you lock the gate?']),
-    );
-    expect(
-      feed.map((item) => item.post.origin),
-      containsAll(<MomentPostOrigin>[
-        MomentPostOrigin.character,
-        MomentPostOrigin.user,
-      ]),
-    );
+    expect(feed.single.post.publicBody, 'Did you lock the gate?');
+    expect(feed.single.post.origin, MomentPostOrigin.user);
   });
 
   test('a photo-only post is enough and comments stay on the card', () async {
@@ -153,12 +231,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Nobody has posted yet'), findsOneWidget);
+    expect(find.byKey(const Key('moments-compose-author')), findsNothing);
     expect(find.text('Waiting for a reply'), findsNothing);
     expect(find.text('Write this into the world'), findsNothing);
     expect(find.text('Expose'), findsNothing);
   });
 
-  testWidgets('compose dialog asks who is posting, not waiting or world writes',
+  testWidgets('compose dialog is the player posting, not picking a character',
       (tester) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -182,7 +261,8 @@ void main() {
     await tester.tap(find.byKey(const Key('moments-compose')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('moments-compose-author')), findsOneWidget);
+    expect(find.byKey(const Key('moments-compose-author')), findsNothing);
+    expect(find.text('Who is posting'), findsNothing);
     expect(find.byKey(const Key('moments-compose-photo')), findsOneWidget);
     expect(find.text('Waiting for a reply'), findsNothing);
     expect(find.text('Write this into the world'), findsNothing);
@@ -198,3 +278,11 @@ void main() {
     expect(find.text('You'), findsOneWidget);
   });
 }
+
+const _configuredLlm = LLMConfig(
+  provider: LLMProvider.openai,
+  model: 'chat-model',
+  apiKey: 'secret',
+  apiUrl: 'https://example.com/v1',
+  streamEnabled: false,
+);

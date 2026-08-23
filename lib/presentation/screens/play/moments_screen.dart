@@ -17,6 +17,12 @@ class MomentsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(appSettingsProvider);
     final feed = ref.watch(momentFeedProvider);
+    final sweep = ref.watch(momentSweepProvider);
+    ref.listen(momentSweepProvider, (previous, next) {
+      next.whenData((count) {
+        if (count > 0) ref.invalidate(momentFeedProvider);
+      });
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.moments),
@@ -44,42 +50,51 @@ class MomentsScreen extends ConsumerWidget {
               l10n.momentsDisabledEmpty,
               key: const Key('moments-disabled-empty'),
             )
-          : feed.when(
-              data: (items) => items.isEmpty
-                  ? _CenteredMessage(
-                      l10n.momentsEmpty,
-                      key: const Key('moments-empty'),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) => _MomentCard(
-                        item: items[index],
-                      ),
-                    ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => _CenteredMessage(error.toString()),
+          : Column(
+              children: [
+                if (sweep.isLoading)
+                  const LinearProgressIndicator(
+                    key: Key('moments-sweeping'),
+                  ),
+                Expanded(
+                  child: feed.when(
+                    data: (items) => items.isEmpty
+                        ? _CenteredMessage(
+                            sweep.isLoading
+                                ? l10n.momentsRefreshing
+                                : l10n.momentsEmpty,
+                            key: const Key('moments-empty'),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+                            itemCount: items.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) => _MomentCard(
+                              item: items[index],
+                            ),
+                          ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, _) => _CenteredMessage(error.toString()),
+                  ),
+                ),
+              ],
             ),
     );
   }
 
   Future<void> _compose(BuildContext context, WidgetRef ref) async {
-    final authors = await ref.read(momentServiceProvider).composeAuthors();
-    if (!context.mounted || authors.isEmpty) return;
     final draft = await showDialog<_ComposeDraft>(
       context: context,
-      builder: (dialogContext) => _ComposeDialog(authors: authors),
+      builder: (dialogContext) => const _ComposeDialog(),
     );
     if (draft == null || !context.mounted) return;
     final service = ref.read(momentServiceProvider);
     final imagePath = draft.imagePath == null
         ? null
         : await service.importImage(draft.imagePath!);
-    await service.createPost(
-      authorId: draft.author.id,
-      authorName: draft.author.name,
-      origin: draft.author.origin,
+    await service.publishPlayerPost(
       body: draft.body,
       imagePath: imagePath,
     );
@@ -89,27 +104,22 @@ class MomentsScreen extends ConsumerWidget {
 
 class _ComposeDraft {
   const _ComposeDraft({
-    required this.author,
     required this.body,
     this.imagePath,
   });
 
-  final MomentAuthor author;
   final String body;
   final String? imagePath;
 }
 
 class _ComposeDialog extends StatefulWidget {
-  const _ComposeDialog({required this.authors});
-
-  final List<MomentAuthor> authors;
+  const _ComposeDialog();
 
   @override
   State<_ComposeDialog> createState() => _ComposeDialogState();
 }
 
 class _ComposeDialogState extends State<_ComposeDialog> {
-  late MomentAuthor _author = widget.authors.first;
   final _controller = TextEditingController();
   String? _imagePath;
 
@@ -128,28 +138,6 @@ class _ComposeDialogState extends State<_ComposeDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DropdownButtonFormField<String>(
-              key: const Key('moments-compose-author'),
-              initialValue: _author.id,
-              decoration: InputDecoration(labelText: l10n.momentsAuthor),
-              items: [
-                for (final author in widget.authors)
-                  DropdownMenuItem(
-                    value: author.id,
-                    child: Text(author.origin == MomentPostOrigin.user
-                        ? l10n.momentsAuthorMe
-                        : author.name),
-                  ),
-              ],
-              onChanged: (value) {
-                final next = widget.authors.cast<MomentAuthor?>().firstWhere(
-                      (author) => author?.id == value,
-                      orElse: () => null,
-                    );
-                if (next != null) setState(() => _author = next);
-              },
-            ),
-            const SizedBox(height: 12),
             TextField(
               key: const Key('moments-compose-body'),
               controller: _controller,
@@ -201,7 +189,6 @@ class _ComposeDialogState extends State<_ComposeDialog> {
             Navigator.pop(
               context,
               _ComposeDraft(
-                author: _author,
                 body: body,
                 imagePath: _imagePath,
               ),

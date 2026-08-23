@@ -3864,7 +3864,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get momentsDisabledEmpty => '你把动态关掉了。想看大家在说什么，再打开就行。';
 
   @override
-  String get momentsEmpty => '还没人发过。写一句，或者发张图。';
+  String get momentsEmpty => '还没人发过。';
+
+  @override
+  String get momentsRefreshing => '大家正在发动态…';
 
   @override
   String get momentsCompose => '发一条';
@@ -9956,7 +9959,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get momentsDisabledEmpty => '你把動態關掉了。想看大家在說什麼，再開回來就好。';
 
   @override
-  String get momentsEmpty => '還沒人發過。寫一句，或發張圖。';
+  String get momentsEmpty => '還沒人發過。';
+
+  @override
+  String get momentsRefreshing => '大家正在發動態…';
 
   @override
   String get momentsCompose => '發一則';

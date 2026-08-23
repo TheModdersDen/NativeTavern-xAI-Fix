@@ -37,7 +37,8 @@ void main() {
     expect(l10n.imagine, '生图');
     expect(l10n.fillImagePromptWithAi, 'AI 填写提示词');
     expect(l10n.moments, '动态');
-    expect(l10n.momentsEmpty, '还没人发过。写一句，或者发张图。');
+    expect(l10n.momentsEmpty, '还没人发过。');
+    expect(l10n.momentsRefreshing, '大家正在发动态…');
     expect(l10n.momentsComment, '评论');
     expect(l10n.momentsAuthorMe, '我');
     expect(l10n.openDataBank, '打开资料');

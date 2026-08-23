@@ -3977,8 +3977,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'You turned moments off. Turn them back on to see what people are saying.';
 
   @override
-  String get momentsEmpty =>
-      'Nobody has posted yet. Write something, or post a photo.';
+  String get momentsEmpty => 'Nobody has posted yet.';
+
+  @override
+  String get momentsRefreshing => 'People are posting…';
 
   @override
   String get momentsCompose => 'Post';

@@ -5409,9 +5409,13 @@
   "@momentsDisabledEmpty": {
     "description": "Empty state when the user has turned moments off"
   },
-  "momentsEmpty": "Nobody has posted yet. Write something, or post a photo.",
+  "momentsEmpty": "Nobody has posted yet.",
   "@momentsEmpty": {
     "description": "Empty state when moments is on but there are no posts"
+  },
+  "momentsRefreshing": "People are posting…",
+  "@momentsRefreshing": {
+    "description": "Shown while characters decide whether to post"
   },
   "momentsCompose": "Post",
   "momentsComposeHint": "Say something, or add a photo.",

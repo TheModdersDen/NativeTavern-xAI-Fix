@@ -27,6 +27,7 @@ import 'package:native_tavern/presentation/providers/chat_extension_providers.da
 import 'package:native_tavern/presentation/providers/data_bank_providers.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
 import 'package:native_tavern/presentation/providers/memory_providers.dart';
+import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/providers/locale_provider.dart';
 import 'package:native_tavern/presentation/providers/persona_providers.dart';
@@ -909,6 +910,15 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           config: config,
         ),
       );
+      final characterId = state.character?.id;
+      if (characterId != null) {
+        unawaited(
+          _maybePublishMomentsAfterTurn(
+            characterIds: [characterId],
+            config: config,
+          ),
+        );
+      }
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -2904,6 +2914,31 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           config: config,
         ),
       );
+      unawaited(
+        _maybePublishMomentsAfterTurn(
+          characterIds: responders,
+          config: config,
+        ),
+      );
+    }
+  }
+
+  Future<void> _maybePublishMomentsAfterTurn({
+    required List<String> characterIds,
+    required LLMConfig config,
+  }) async {
+    if (!mounted) return;
+    if (!_ref.read(appSettingsProvider).momentsEnabled) return;
+    final service = _ref.read(momentServiceProvider);
+    for (final characterId in characterIds) {
+      try {
+        await service.maybePublishAfterChat(
+          characterId: characterId,
+          config: config,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Moment publish failed: $error\n$stackTrace');
+      }
     }
   }
 
