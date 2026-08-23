@@ -39,7 +39,7 @@ class DriftMomentRepository implements MomentRepository {
 
   @override
   Future<List<MomentPost>> listByChatId(String chatId) async {
-    final rows = await _survivingPostQuery(
+    final rows = await _feedQuery(
       extra: _database.momentPosts.chatId.equals(chatId),
     ).get();
     return rows
@@ -49,7 +49,7 @@ class DriftMomentRepository implements MomentRepository {
 
   @override
   Future<List<MomentPost>> listAll() async {
-    final rows = await _survivingPostQuery().get();
+    final rows = await _feedQuery().get();
     return rows
         .map((row) => _toPost(row.readTable(_database.momentPosts)))
         .toList(growable: false);
@@ -57,7 +57,7 @@ class DriftMomentRepository implements MomentRepository {
 
   @override
   Future<MomentPost?> findByChapterId(String chapterId) async {
-    final query = _survivingPostQuery(
+    final query = _feedQuery(
       extra: _database.momentPosts.chapterId.equals(chapterId),
     )..limit(1);
     final row = await query.getSingleOrNull();
@@ -81,7 +81,7 @@ class DriftMomentRepository implements MomentRepository {
     return rows.map(_toComment).toList(growable: false);
   }
 
-  JoinedSelectStatement<HasResultSet, dynamic> _survivingPostQuery({
+  JoinedSelectStatement<HasResultSet, dynamic> _feedQuery({
     Expression<bool>? extra,
   }) {
     final chapter = _database.alias(_database.storyChapters, 'source_chapter');
@@ -104,7 +104,7 @@ class DriftMomentRepository implements MomentRepository {
       ),
     ])
       ..where(
-        _database.momentPosts.origin.equals(MomentPostOrigin.user.name) |
+        _database.momentPosts.origin.isNotIn([MomentPostOrigin.chapter.name]) |
             (startMessage.id.isNotNull() & endMessage.id.isNotNull()),
       )
       ..orderBy([
@@ -122,6 +122,7 @@ class DriftMomentRepository implements MomentRepository {
       authorId: row.authorId,
       authorName: row.authorName,
       publicBody: row.publicBody,
+      imagePath: row.imagePath,
       factBody: row.factBody,
       chapterId: row.chapterId,
       origin: MomentPostOrigin.values.firstWhere(
@@ -143,6 +144,7 @@ class DriftMomentRepository implements MomentRepository {
       authorId: Value(post.authorId),
       authorName: Value(post.authorName),
       publicBody: Value(post.publicBody),
+      imagePath: Value(post.imagePath),
       factBody: Value(post.factBody),
       chapterId: Value(post.chapterId),
       origin: Value(post.origin.name),

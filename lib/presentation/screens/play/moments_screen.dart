@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:native_tavern/data/models/moment/moment_post.dart';
-import 'package:native_tavern/data/repositories/chat_repository.dart';
 import 'package:native_tavern/domain/services/moment_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/moment_providers.dart';
@@ -64,75 +65,158 @@ class MomentsScreen extends ConsumerWidget {
   }
 
   Future<void> _compose(BuildContext context, WidgetRef ref) async {
-    final chats = await ref.read(chatRepositoryProvider).getRecentChats();
-    if (!context.mounted) return;
-    if (chats.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.momentsNeedChat)),
-      );
-      return;
-    }
-    final controller = TextEditingController();
-    var waiting = false;
-    var writeToWorld = false;
-    final posted = await showDialog<bool>(
+    final authors = await ref.read(momentServiceProvider).composeAuthors();
+    if (!context.mounted || authors.isEmpty) return;
+    final draft = await showDialog<_ComposeDraft>(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final l10n = AppLocalizations.of(context);
-            return AlertDialog(
-              title: Text(l10n.momentsCompose),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    key: const Key('moments-compose-body'),
-                    controller: controller,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: l10n.momentsComposeHint,
-                    ),
+      builder: (dialogContext) => _ComposeDialog(authors: authors),
+    );
+    if (draft == null || !context.mounted) return;
+    final service = ref.read(momentServiceProvider);
+    final imagePath = draft.imagePath == null
+        ? null
+        : await service.importImage(draft.imagePath!);
+    await service.createPost(
+      authorId: draft.author.id,
+      authorName: draft.author.name,
+      origin: draft.author.origin,
+      body: draft.body,
+      imagePath: imagePath,
+    );
+    ref.invalidate(momentFeedProvider);
+  }
+}
+
+class _ComposeDraft {
+  const _ComposeDraft({
+    required this.author,
+    required this.body,
+    this.imagePath,
+  });
+
+  final MomentAuthor author;
+  final String body;
+  final String? imagePath;
+}
+
+class _ComposeDialog extends StatefulWidget {
+  const _ComposeDialog({required this.authors});
+
+  final List<MomentAuthor> authors;
+
+  @override
+  State<_ComposeDialog> createState() => _ComposeDialogState();
+}
+
+class _ComposeDialogState extends State<_ComposeDialog> {
+  late MomentAuthor _author = widget.authors.first;
+  final _controller = TextEditingController();
+  String? _imagePath;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.momentsCompose),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              key: const Key('moments-compose-author'),
+              initialValue: _author.id,
+              decoration: InputDecoration(labelText: l10n.momentsAuthor),
+              items: [
+                for (final author in widget.authors)
+                  DropdownMenuItem(
+                    value: author.id,
+                    child: Text(author.origin == MomentPostOrigin.user
+                        ? l10n.momentsAuthorMe
+                        : author.name),
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.momentsWaiting),
-                    value: waiting,
-                    onChanged: (value) => setState(() => waiting = value),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.momentsWriteToWorld),
-                    value: writeToWorld,
-                    onChanged: (value) => setState(() => writeToWorld = value),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                  child: Text(l10n.cancel),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext, true),
-                  child: Text(l10n.send),
-                ),
               ],
+              onChanged: (value) {
+                final next = widget.authors.cast<MomentAuthor?>().firstWhere(
+                      (author) => author?.id == value,
+                      orElse: () => null,
+                    );
+                if (next != null) setState(() => _author = next);
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('moments-compose-body'),
+              controller: _controller,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: l10n.momentsComposeHint,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_imagePath != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(_imagePath!),
+                    height: 160,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('moments-compose-photo'),
+                onPressed: _pickPhoto,
+                icon: const Icon(Icons.photo_outlined),
+                label: Text(
+                  _imagePath == null
+                      ? l10n.momentsAddPhoto
+                      : l10n.momentsChangePhoto,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          key: const Key('moments-compose-send'),
+          onPressed: () {
+            final body = _controller.text.trim();
+            if (body.isEmpty && _imagePath == null) return;
+            Navigator.pop(
+              context,
+              _ComposeDraft(
+                author: _author,
+                body: body,
+                imagePath: _imagePath,
+              ),
             );
           },
-        );
-      },
+          child: Text(l10n.send),
+        ),
+      ],
     );
-    final body = controller.text.trim();
-    controller.dispose();
-    if (posted != true || body.isEmpty) return;
-    await ref.read(momentServiceProvider).createUserPost(
-          chatId: chats.first.id,
-          body: body,
-          waiting: waiting,
-          writeToWorld: writeToWorld,
-        );
-    ref.invalidate(momentFeedProvider);
+  }
+
+  Future<void> _pickPhoto() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null || !mounted) return;
+    setState(() => _imagePath = image.path);
   }
 }
 
@@ -153,61 +237,34 @@ class _MomentCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(post.authorName, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Text(post.publicBody),
-            if (post.hasHiddenFact) ...[
+            if (post.publicBody.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(
-                l10n.momentsFact(post.factBody!),
-                style: Theme.of(context).textTheme.bodySmall,
+              Text(post.publicBody),
+            ],
+            if (post.hasPhoto) ...[
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  File(post.imagePath!),
+                  key: Key('moment-photo-${post.id}'),
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             ],
-            if (post.status == MomentPostStatus.waiting)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(l10n.momentsWaitingBadge),
-              ),
-            if (post.status == MomentPostStatus.ignored)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(l10n.momentsIgnoredBadge),
-              ),
             for (final comment in item.comments)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text('${comment.authorName}: ${comment.body}'),
               ),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              children: [
-                TextButton(
-                  key: Key('moment-comment-${post.id}'),
-                  onPressed: () => _comment(context, ref, post),
-                  child: Text(l10n.momentsComment),
-                ),
-                TextButton(
-                  key: Key('moment-talk-${post.id}'),
-                  onPressed: () => _talk(context, ref, post),
-                  child: Text(l10n.momentsTalk),
-                ),
-                if (post.hasHiddenFact)
-                  TextButton(
-                    key: Key('moment-expose-${post.id}'),
-                    onPressed: () async {
-                      await ref.read(momentServiceProvider).expose(post.id);
-                      ref.invalidate(momentFeedProvider);
-                    },
-                    child: Text(l10n.momentsExpose),
-                  ),
-                TextButton(
-                  onPressed: () async {
-                    await ref.read(momentServiceProvider).markIgnored(post.id);
-                    ref.invalidate(momentFeedProvider);
-                  },
-                  child: Text(l10n.momentsIgnore),
-                ),
-              ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: Key('moment-comment-${post.id}'),
+                onPressed: () => _comment(context, ref, post),
+                child: Text(l10n.momentsComment),
+              ),
             ),
           ],
         ),
@@ -250,25 +307,6 @@ class _MomentCard extends ConsumerWidget {
     if (submitted != true || body.isEmpty) return;
     await ref.read(momentServiceProvider).comment(postId: post.id, body: body);
     ref.invalidate(momentFeedProvider);
-  }
-
-  Future<void> _talk(
-    BuildContext context,
-    WidgetRef ref,
-    MomentPost post,
-  ) async {
-    final seed = await ref.read(momentServiceProvider).conversationSeed(post.id);
-    final messageId =
-        await ref.read(momentServiceProvider).jumpTargetForPost(post.id);
-    if (!context.mounted) return;
-    final uri = Uri(
-      path: '/chat/${Uri.encodeComponent(post.chatId)}',
-      queryParameters: {
-        'draft': seed,
-        if (messageId != null) 'message': messageId,
-      },
-    );
-    context.push(uri.toString());
   }
 }
 

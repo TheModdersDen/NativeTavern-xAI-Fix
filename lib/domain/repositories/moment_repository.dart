@@ -10,7 +10,7 @@ abstract interface class MomentRepository {
 
   Future<void> delete(String id);
 
-  /// Posts whose source chapter still exists, plus user posts for [chatId].
+  /// Posts for [chatId], including surviving chapter posts.
   Future<List<MomentPost>> listByChatId(String chatId);
 
   Future<List<MomentPost>> listAll();

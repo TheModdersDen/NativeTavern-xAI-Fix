@@ -909,11 +909,11 @@ const _currentOnlySeedStatements = <String>[
   ''',
   '''
     INSERT INTO moment_posts (
-      id, chat_id, author_id, author_name, public_body, fact_body,
+      id, chat_id, author_id, author_name, public_body, image_path, fact_body,
       chapter_id, origin, status, write_to_world, created_at, updated_at
     ) VALUES (
       'moment-1', 'chat-1', 'character-1', 'Fixture',
-      'Nothing worth mentioning.', 'A representative persisted chapter.',
+      'Nothing worth mentioning.', NULL, 'A representative persisted chapter.',
       'chapter-1', 'chapter', 'open', 0, 1704240600, 1704240600
     )
   ''',

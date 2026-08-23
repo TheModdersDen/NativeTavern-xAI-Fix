@@ -12500,9 +12500,9 @@ class $MomentPostsTable extends MomentPosts
   static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
   @override
   late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
-      'chat_id', aliasedName, false,
+      'chat_id', aliasedName, true,
       type: DriftSqlType.string,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES chats (id) ON DELETE CASCADE'));
   static const VerificationMeta _authorIdMeta =
@@ -12523,6 +12523,12 @@ class $MomentPostsTable extends MomentPosts
   late final GeneratedColumn<String> publicBody = GeneratedColumn<String>(
       'public_body', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _factBodyMeta =
       const VerificationMeta('factBody');
   @override
@@ -12577,6 +12583,7 @@ class $MomentPostsTable extends MomentPosts
         authorId,
         authorName,
         publicBody,
+        imagePath,
         factBody,
         chapterId,
         origin,
@@ -12603,8 +12610,6 @@ class $MomentPostsTable extends MomentPosts
     if (data.containsKey('chat_id')) {
       context.handle(_chatIdMeta,
           chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta));
-    } else if (isInserting) {
-      context.missing(_chatIdMeta);
     }
     if (data.containsKey('author_id')) {
       context.handle(_authorIdMeta,
@@ -12627,6 +12632,10 @@ class $MomentPostsTable extends MomentPosts
               data['public_body']!, _publicBodyMeta));
     } else if (isInserting) {
       context.missing(_publicBodyMeta);
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
     }
     if (data.containsKey('fact_body')) {
       context.handle(_factBodyMeta,
@@ -12678,13 +12687,15 @@ class $MomentPostsTable extends MomentPosts
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       chatId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}chat_id']),
       authorId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}author_id'])!,
       authorName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}author_name'])!,
       publicBody: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}public_body'])!,
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
       factBody: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}fact_body']),
       chapterId: attachedDatabase.typeMapping
@@ -12710,10 +12721,11 @@ class $MomentPostsTable extends MomentPosts
 
 class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
   final String id;
-  final String chatId;
+  final String? chatId;
   final String authorId;
   final String authorName;
   final String publicBody;
+  final String? imagePath;
   final String? factBody;
   final String? chapterId;
   final String origin;
@@ -12723,10 +12735,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
   final DateTime updatedAt;
   const MomentPostRow(
       {required this.id,
-      required this.chatId,
+      this.chatId,
       required this.authorId,
       required this.authorName,
       required this.publicBody,
+      this.imagePath,
       this.factBody,
       this.chapterId,
       required this.origin,
@@ -12738,10 +12751,15 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['chat_id'] = Variable<String>(chatId);
+    if (!nullToAbsent || chatId != null) {
+      map['chat_id'] = Variable<String>(chatId);
+    }
     map['author_id'] = Variable<String>(authorId);
     map['author_name'] = Variable<String>(authorName);
     map['public_body'] = Variable<String>(publicBody);
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     if (!nullToAbsent || factBody != null) {
       map['fact_body'] = Variable<String>(factBody);
     }
@@ -12759,10 +12777,14 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
   MomentPostsCompanion toCompanion(bool nullToAbsent) {
     return MomentPostsCompanion(
       id: Value(id),
-      chatId: Value(chatId),
+      chatId:
+          chatId == null && nullToAbsent ? const Value.absent() : Value(chatId),
       authorId: Value(authorId),
       authorName: Value(authorName),
       publicBody: Value(publicBody),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       factBody: factBody == null && nullToAbsent
           ? const Value.absent()
           : Value(factBody),
@@ -12782,10 +12804,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MomentPostRow(
       id: serializer.fromJson<String>(json['id']),
-      chatId: serializer.fromJson<String>(json['chatId']),
+      chatId: serializer.fromJson<String?>(json['chatId']),
       authorId: serializer.fromJson<String>(json['authorId']),
       authorName: serializer.fromJson<String>(json['authorName']),
       publicBody: serializer.fromJson<String>(json['publicBody']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       factBody: serializer.fromJson<String?>(json['factBody']),
       chapterId: serializer.fromJson<String?>(json['chapterId']),
       origin: serializer.fromJson<String>(json['origin']),
@@ -12800,10 +12823,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'chatId': serializer.toJson<String>(chatId),
+      'chatId': serializer.toJson<String?>(chatId),
       'authorId': serializer.toJson<String>(authorId),
       'authorName': serializer.toJson<String>(authorName),
       'publicBody': serializer.toJson<String>(publicBody),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'factBody': serializer.toJson<String?>(factBody),
       'chapterId': serializer.toJson<String?>(chapterId),
       'origin': serializer.toJson<String>(origin),
@@ -12816,10 +12840,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
 
   MomentPostRow copyWith(
           {String? id,
-          String? chatId,
+          Value<String?> chatId = const Value.absent(),
           String? authorId,
           String? authorName,
           String? publicBody,
+          Value<String?> imagePath = const Value.absent(),
           Value<String?> factBody = const Value.absent(),
           Value<String?> chapterId = const Value.absent(),
           String? origin,
@@ -12829,10 +12854,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
           DateTime? updatedAt}) =>
       MomentPostRow(
         id: id ?? this.id,
-        chatId: chatId ?? this.chatId,
+        chatId: chatId.present ? chatId.value : this.chatId,
         authorId: authorId ?? this.authorId,
         authorName: authorName ?? this.authorName,
         publicBody: publicBody ?? this.publicBody,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
         factBody: factBody.present ? factBody.value : this.factBody,
         chapterId: chapterId.present ? chapterId.value : this.chapterId,
         origin: origin ?? this.origin,
@@ -12850,6 +12876,7 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
           data.authorName.present ? data.authorName.value : this.authorName,
       publicBody:
           data.publicBody.present ? data.publicBody.value : this.publicBody,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       factBody: data.factBody.present ? data.factBody.value : this.factBody,
       chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
       origin: data.origin.present ? data.origin.value : this.origin,
@@ -12870,6 +12897,7 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
           ..write('publicBody: $publicBody, ')
+          ..write('imagePath: $imagePath, ')
           ..write('factBody: $factBody, ')
           ..write('chapterId: $chapterId, ')
           ..write('origin: $origin, ')
@@ -12882,8 +12910,20 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
   }
 
   @override
-  int get hashCode => Object.hash(id, chatId, authorId, authorName, publicBody,
-      factBody, chapterId, origin, status, writeToWorld, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id,
+      chatId,
+      authorId,
+      authorName,
+      publicBody,
+      imagePath,
+      factBody,
+      chapterId,
+      origin,
+      status,
+      writeToWorld,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -12893,6 +12933,7 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
           other.authorId == this.authorId &&
           other.authorName == this.authorName &&
           other.publicBody == this.publicBody &&
+          other.imagePath == this.imagePath &&
           other.factBody == this.factBody &&
           other.chapterId == this.chapterId &&
           other.origin == this.origin &&
@@ -12904,10 +12945,11 @@ class MomentPostRow extends DataClass implements Insertable<MomentPostRow> {
 
 class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
   final Value<String> id;
-  final Value<String> chatId;
+  final Value<String?> chatId;
   final Value<String> authorId;
   final Value<String> authorName;
   final Value<String> publicBody;
+  final Value<String?> imagePath;
   final Value<String?> factBody;
   final Value<String?> chapterId;
   final Value<String> origin;
@@ -12922,6 +12964,7 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
     this.authorId = const Value.absent(),
     this.authorName = const Value.absent(),
     this.publicBody = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.factBody = const Value.absent(),
     this.chapterId = const Value.absent(),
     this.origin = const Value.absent(),
@@ -12933,10 +12976,11 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
   });
   MomentPostsCompanion.insert({
     required String id,
-    required String chatId,
+    this.chatId = const Value.absent(),
     required String authorId,
     required String authorName,
     required String publicBody,
+    this.imagePath = const Value.absent(),
     this.factBody = const Value.absent(),
     this.chapterId = const Value.absent(),
     required String origin,
@@ -12946,7 +12990,6 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        chatId = Value(chatId),
         authorId = Value(authorId),
         authorName = Value(authorName),
         publicBody = Value(publicBody),
@@ -12960,6 +13003,7 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
     Expression<String>? authorId,
     Expression<String>? authorName,
     Expression<String>? publicBody,
+    Expression<String>? imagePath,
     Expression<String>? factBody,
     Expression<String>? chapterId,
     Expression<String>? origin,
@@ -12975,6 +13019,7 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
       if (authorId != null) 'author_id': authorId,
       if (authorName != null) 'author_name': authorName,
       if (publicBody != null) 'public_body': publicBody,
+      if (imagePath != null) 'image_path': imagePath,
       if (factBody != null) 'fact_body': factBody,
       if (chapterId != null) 'chapter_id': chapterId,
       if (origin != null) 'origin': origin,
@@ -12988,10 +13033,11 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
 
   MomentPostsCompanion copyWith(
       {Value<String>? id,
-      Value<String>? chatId,
+      Value<String?>? chatId,
       Value<String>? authorId,
       Value<String>? authorName,
       Value<String>? publicBody,
+      Value<String?>? imagePath,
       Value<String?>? factBody,
       Value<String?>? chapterId,
       Value<String>? origin,
@@ -13006,6 +13052,7 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
       authorId: authorId ?? this.authorId,
       authorName: authorName ?? this.authorName,
       publicBody: publicBody ?? this.publicBody,
+      imagePath: imagePath ?? this.imagePath,
       factBody: factBody ?? this.factBody,
       chapterId: chapterId ?? this.chapterId,
       origin: origin ?? this.origin,
@@ -13034,6 +13081,9 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
     }
     if (publicBody.present) {
       map['public_body'] = Variable<String>(publicBody.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
     }
     if (factBody.present) {
       map['fact_body'] = Variable<String>(factBody.value);
@@ -13070,6 +13120,7 @@ class MomentPostsCompanion extends UpdateCompanion<MomentPostRow> {
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
           ..write('publicBody: $publicBody, ')
+          ..write('imagePath: $imagePath, ')
           ..write('factBody: $factBody, ')
           ..write('chapterId: $chapterId, ')
           ..write('origin: $origin, ')
@@ -24896,10 +24947,11 @@ typedef $$StoryChaptersTableProcessedTableManager = ProcessedTableManager<
 typedef $$MomentPostsTableCreateCompanionBuilder = MomentPostsCompanion
     Function({
   required String id,
-  required String chatId,
+  Value<String?> chatId,
   required String authorId,
   required String authorName,
   required String publicBody,
+  Value<String?> imagePath,
   Value<String?> factBody,
   Value<String?> chapterId,
   required String origin,
@@ -24912,10 +24964,11 @@ typedef $$MomentPostsTableCreateCompanionBuilder = MomentPostsCompanion
 typedef $$MomentPostsTableUpdateCompanionBuilder = MomentPostsCompanion
     Function({
   Value<String> id,
-  Value<String> chatId,
+  Value<String?> chatId,
   Value<String> authorId,
   Value<String> authorName,
   Value<String> publicBody,
+  Value<String?> imagePath,
   Value<String?> factBody,
   Value<String?> chapterId,
   Value<String> origin,
@@ -24933,9 +24986,9 @@ final class $$MomentPostsTableReferences
   static $ChatsTable _chatIdTable(_$AppDatabase db) => db.chats
       .createAlias($_aliasNameGenerator(db.momentPosts.chatId, db.chats.id));
 
-  $$ChatsTableProcessedTableManager get chatId {
-    final $_column = $_itemColumn<String>('chat_id')!;
-
+  $$ChatsTableProcessedTableManager? get chatId {
+    final $_column = $_itemColumn<String>('chat_id');
+    if ($_column == null) return null;
     final manager = $$ChatsTableTableManager($_db, $_db.chats)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_chatIdTable($_db));
@@ -24995,6 +25048,9 @@ class $$MomentPostsTableFilterComposer
 
   ColumnFilters<String> get publicBody => $composableBuilder(
       column: $table.publicBody, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get factBody => $composableBuilder(
       column: $table.factBody, builder: (column) => ColumnFilters(column));
@@ -25097,6 +25153,9 @@ class $$MomentPostsTableOrderingComposer
   ColumnOrderings<String> get publicBody => $composableBuilder(
       column: $table.publicBody, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get factBody => $composableBuilder(
       column: $table.factBody, builder: (column) => ColumnOrderings(column));
 
@@ -25177,6 +25236,9 @@ class $$MomentPostsTableAnnotationComposer
 
   GeneratedColumn<String> get publicBody => $composableBuilder(
       column: $table.publicBody, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumn<String> get factBody =>
       $composableBuilder(column: $table.factBody, builder: (column) => column);
@@ -25283,10 +25345,11 @@ class $$MomentPostsTableTableManager extends RootTableManager<
               $$MomentPostsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> chatId = const Value.absent(),
+            Value<String?> chatId = const Value.absent(),
             Value<String> authorId = const Value.absent(),
             Value<String> authorName = const Value.absent(),
             Value<String> publicBody = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
             Value<String?> factBody = const Value.absent(),
             Value<String?> chapterId = const Value.absent(),
             Value<String> origin = const Value.absent(),
@@ -25302,6 +25365,7 @@ class $$MomentPostsTableTableManager extends RootTableManager<
             authorId: authorId,
             authorName: authorName,
             publicBody: publicBody,
+            imagePath: imagePath,
             factBody: factBody,
             chapterId: chapterId,
             origin: origin,
@@ -25313,10 +25377,11 @@ class $$MomentPostsTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String id,
-            required String chatId,
+            Value<String?> chatId = const Value.absent(),
             required String authorId,
             required String authorName,
             required String publicBody,
+            Value<String?> imagePath = const Value.absent(),
             Value<String?> factBody = const Value.absent(),
             Value<String?> chapterId = const Value.absent(),
             required String origin,
@@ -25332,6 +25397,7 @@ class $$MomentPostsTableTableManager extends RootTableManager<
             authorId: authorId,
             authorName: authorName,
             publicBody: publicBody,
+            imagePath: imagePath,
             factBody: factBody,
             chapterId: chapterId,
             origin: origin,

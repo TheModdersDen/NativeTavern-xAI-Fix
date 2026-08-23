@@ -1,19 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-enum MomentPostOrigin { chapter, user }
+enum MomentPostOrigin { chapter, user, character }
 
 enum MomentPostStatus { open, waiting, ignored }
 
 enum MomentCommentKind { comment, expose, character }
 
-/// A public moment. The chapter summary is the private fact; [publicBody]
-/// is what the author chose to show.
+/// A public moment: someone said something, and maybe posted a photo.
 class MomentPost extends Equatable {
   final String id;
-  final String chatId;
+  final String? chatId;
   final String authorId;
   final String authorName;
   final String publicBody;
+  final String? imagePath;
   final String? factBody;
   final String? chapterId;
   final MomentPostOrigin origin;
@@ -28,6 +28,7 @@ class MomentPost extends Equatable {
     required this.authorId,
     required this.authorName,
     required this.publicBody,
+    required this.imagePath,
     required this.factBody,
     required this.chapterId,
     required this.origin,
@@ -39,10 +40,11 @@ class MomentPost extends Equatable {
 
   factory MomentPost({
     required String id,
-    required String chatId,
+    String? chatId,
     required String authorId,
     required String authorName,
-    required String publicBody,
+    String publicBody = '',
+    String? imagePath,
     String? factBody,
     String? chapterId,
     MomentPostOrigin origin = MomentPostOrigin.user,
@@ -52,10 +54,15 @@ class MomentPost extends Equatable {
     DateTime? updatedAt,
   }) {
     _requireNonEmpty(id, 'id');
-    _requireNonEmpty(chatId, 'chatId');
     _requireNonEmpty(authorId, 'authorId');
     _requireNonEmpty(authorName, 'authorName');
-    _requireNonEmpty(publicBody, 'publicBody');
+    final trimmedBody = publicBody.trim();
+    final trimmedImage = imagePath?.trim();
+    final effectiveImage =
+        trimmedImage == null || trimmedImage.isEmpty ? null : trimmedImage;
+    if (trimmedBody.isEmpty && effectiveImage == null) {
+      throw ArgumentError('A moment needs text or a photo.');
+    }
     if (origin == MomentPostOrigin.chapter &&
         (chapterId == null || chapterId.trim().isEmpty)) {
       throw ArgumentError('Chapter posts require a chapterId.');
@@ -64,12 +71,16 @@ class MomentPost extends Equatable {
     if (effectiveUpdatedAt.isBefore(createdAt)) {
       throw ArgumentError('updatedAt cannot be before createdAt.');
     }
+    final trimmedChatId = chatId?.trim();
     return MomentPost._(
       id: id,
-      chatId: chatId,
+      chatId: trimmedChatId == null || trimmedChatId.isEmpty
+          ? null
+          : trimmedChatId,
       authorId: authorId,
       authorName: authorName.trim(),
-      publicBody: publicBody.trim(),
+      publicBody: trimmedBody,
+      imagePath: effectiveImage,
       factBody: factBody?.trim().isEmpty == true ? null : factBody?.trim(),
       chapterId: chapterId,
       origin: origin,
@@ -80,15 +91,20 @@ class MomentPost extends Equatable {
     );
   }
 
+  bool get hasPhoto => imagePath != null && imagePath!.isNotEmpty;
+
   bool get hasHiddenFact =>
       factBody != null && factBody!.isNotEmpty && factBody != publicBody;
 
   MomentPost copyWith({
     String? id,
     String? chatId,
+    bool clearChatId = false,
     String? authorId,
     String? authorName,
     String? publicBody,
+    String? imagePath,
+    bool clearImagePath = false,
     String? factBody,
     bool clearFactBody = false,
     String? chapterId,
@@ -100,10 +116,11 @@ class MomentPost extends Equatable {
   }) {
     return MomentPost(
       id: id ?? this.id,
-      chatId: chatId ?? this.chatId,
+      chatId: clearChatId ? null : (chatId ?? this.chatId),
       authorId: authorId ?? this.authorId,
       authorName: authorName ?? this.authorName,
       publicBody: publicBody ?? this.publicBody,
+      imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
       factBody: clearFactBody ? null : (factBody ?? this.factBody),
       chapterId: chapterId ?? this.chapterId,
       origin: origin ?? this.origin,
@@ -116,10 +133,11 @@ class MomentPost extends Equatable {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'chatId': chatId,
+        if (chatId != null) 'chatId': chatId,
         'authorId': authorId,
         'authorName': authorName,
         'publicBody': publicBody,
+        if (imagePath != null) 'imagePath': imagePath,
         if (factBody != null) 'factBody': factBody,
         if (chapterId != null) 'chapterId': chapterId,
         'origin': origin.name,
@@ -136,6 +154,7 @@ class MomentPost extends Equatable {
         authorId,
         authorName,
         publicBody,
+        imagePath,
         factBody,
         chapterId,
         origin,
