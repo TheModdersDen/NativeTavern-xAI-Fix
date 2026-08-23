@@ -55,6 +55,8 @@ validate_source_project() {
 
   for path in "${CRITICAL_IOS_FILES[@]}"; do
     require_file "$path"
+    git ls-files --error-unmatch "$path" >/dev/null 2>&1 \
+      || fail "Critical iOS release file is not tracked by Git: $path"
   done
 
   grep -Fq 'com.nativetavern/live2d_render_scale' "$APP_DELEGATE" \
@@ -144,7 +146,7 @@ validate_ipa() {
   validate_app_bundle "$app_path"
 }
 
-for command_name in flutter pod xcodebuild plutil unzip strings nm codesign shasum; do
+for command_name in git flutter pod xcodebuild plutil unzip strings nm codesign shasum; do
   require_command "$command_name"
 done
 

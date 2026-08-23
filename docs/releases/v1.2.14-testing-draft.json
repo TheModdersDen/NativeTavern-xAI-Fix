@@ -1,9 +1,9 @@
 {
   "appId": "6757631215",
   "versionString": "0.1.14",
-  "buildId": "155cf337-e3cb-4dd5-a822-2d27b1072803",
-  "buildNumber": "35",
-  "ipaSha256": "dec41250e724433ff47f5087fa7e453cd76820180c0cc7be77fda50b3de55cb6",
+  "buildId": "18d4d7ed-f7fd-4857-bcef-279a94f9e97c",
+  "buildNumber": "36",
+  "ipaSha256": "3a8d9ad3ff875452da04b18061c6b2d92917293ecbb34d1b9871332a5c917897",
   "minimumOsVersion": "15.0",
   "testFlightInternalBuildState": "IN_BETA_TESTING",
   "appStoreReviewSubmitted": false,
