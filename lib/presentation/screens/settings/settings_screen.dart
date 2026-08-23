@@ -65,10 +65,10 @@ class SettingsScreen extends ConsumerWidget {
           _PersonaTile(),
           ListTile(
             leading: const Icon(Icons.backup),
-            title: Text(l10n.backup),
-            subtitle: Text(l10n.backupSubtitle),
+            title: Text(l10n.cloudBackup),
+            subtitle: Text(l10n.cloudBackupSubtitle),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(AppRoutes.backupSettings),
+            onTap: () => context.push(AppRoutes.cloudBackupSettings),
           ),
           const Divider(height: 32),
           _buildSectionHeader(context, l10n.chats),

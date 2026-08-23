@@ -39,20 +39,21 @@ final googleDriveUserProvider = Provider<Map<String, String?>>((ref) {
 });
 
 /// Provider for iCloud backups list
-final iCloudBackupsProvider = FutureProvider<List<CloudBackupInfo>>((ref) async {
+final iCloudBackupsProvider =
+    FutureProvider<List<CloudBackupInfo>>((ref) async {
   final service = ref.watch(cloudBackupServiceProvider);
   return service.listICloudBackups();
 });
 
 /// Provider for Google Drive backups list
-final googleDriveBackupsProvider = FutureProvider<List<GoogleDriveBackupInfo>>((ref) async {
+final googleDriveBackupsProvider =
+    FutureProvider<List<GoogleDriveBackupInfo>>((ref) async {
   final isSignedIn = ref.watch(googleDriveSignedInProvider);
   if (!isSignedIn) return [];
-  
+
   final service = ref.watch(googleDriveServiceProvider);
   return service.listBackups();
 });
-
 
 /// Cloud backup settings
 class CloudBackupSettings {
@@ -62,7 +63,12 @@ class CloudBackupSettings {
   final DateTime? lastICloudSync;
   final DateTime? lastGoogleDriveSync;
   final RestoreMode defaultRestoreMode;
-  
+  final bool includeCharacterImages;
+  final bool includeWorldInfoImages;
+  final bool includeConversationImages;
+  final bool includeBackgrounds;
+  final bool includeLive2D;
+
   const CloudBackupSettings({
     this.iCloudEnabled = false,
     this.googleDriveEnabled = false,
@@ -70,8 +76,23 @@ class CloudBackupSettings {
     this.lastICloudSync,
     this.lastGoogleDriveSync,
     this.defaultRestoreMode = RestoreMode.merge,
+    this.includeCharacterImages = false,
+    this.includeWorldInfoImages = false,
+    this.includeConversationImages = false,
+    this.includeBackgrounds = false,
+    this.includeLive2D = false,
   });
-  
+
+  CloudBackupOptions get backupOptions => CloudBackupOptions(
+        mediaCategories: {
+          if (includeCharacterImages) CloudMediaCategory.characterImages,
+          if (includeWorldInfoImages) CloudMediaCategory.worldInfoImages,
+          if (includeConversationImages) CloudMediaCategory.conversationImages,
+          if (includeBackgrounds) CloudMediaCategory.backgrounds,
+          if (includeLive2D) CloudMediaCategory.live2d,
+        },
+      );
+
   CloudBackupSettings copyWith({
     bool? iCloudEnabled,
     bool? googleDriveEnabled,
@@ -79,6 +100,11 @@ class CloudBackupSettings {
     DateTime? lastICloudSync,
     DateTime? lastGoogleDriveSync,
     RestoreMode? defaultRestoreMode,
+    bool? includeCharacterImages,
+    bool? includeWorldInfoImages,
+    bool? includeConversationImages,
+    bool? includeBackgrounds,
+    bool? includeLive2D,
   }) {
     return CloudBackupSettings(
       iCloudEnabled: iCloudEnabled ?? this.iCloudEnabled,
@@ -87,50 +113,71 @@ class CloudBackupSettings {
       lastICloudSync: lastICloudSync ?? this.lastICloudSync,
       lastGoogleDriveSync: lastGoogleDriveSync ?? this.lastGoogleDriveSync,
       defaultRestoreMode: defaultRestoreMode ?? this.defaultRestoreMode,
+      includeCharacterImages:
+          includeCharacterImages ?? this.includeCharacterImages,
+      includeWorldInfoImages:
+          includeWorldInfoImages ?? this.includeWorldInfoImages,
+      includeConversationImages:
+          includeConversationImages ?? this.includeConversationImages,
+      includeBackgrounds: includeBackgrounds ?? this.includeBackgrounds,
+      includeLive2D: includeLive2D ?? this.includeLive2D,
     );
   }
-  
+
   Map<String, dynamic> toJson() => {
-    'iCloudEnabled': iCloudEnabled,
-    'googleDriveEnabled': googleDriveEnabled,
-    'autoSyncEnabled': autoSyncEnabled,
-    'lastICloudSync': lastICloudSync?.toIso8601String(),
-    'lastGoogleDriveSync': lastGoogleDriveSync?.toIso8601String(),
-    'defaultRestoreMode': defaultRestoreMode.name,
-  };
-  
+        'iCloudEnabled': iCloudEnabled,
+        'googleDriveEnabled': googleDriveEnabled,
+        'autoSyncEnabled': autoSyncEnabled,
+        'lastICloudSync': lastICloudSync?.toIso8601String(),
+        'lastGoogleDriveSync': lastGoogleDriveSync?.toIso8601String(),
+        'defaultRestoreMode': defaultRestoreMode.name,
+        'includeCharacterImages': includeCharacterImages,
+        'includeWorldInfoImages': includeWorldInfoImages,
+        'includeConversationImages': includeConversationImages,
+        'includeBackgrounds': includeBackgrounds,
+        'includeLive2D': includeLive2D,
+      };
+
   factory CloudBackupSettings.fromJson(Map<String, dynamic> json) {
     return CloudBackupSettings(
       iCloudEnabled: json['iCloudEnabled'] as bool? ?? false,
       googleDriveEnabled: json['googleDriveEnabled'] as bool? ?? false,
       autoSyncEnabled: json['autoSyncEnabled'] as bool? ?? false,
-      lastICloudSync: json['lastICloudSync'] != null 
-          ? DateTime.tryParse(json['lastICloudSync'] as String) 
+      lastICloudSync: json['lastICloudSync'] != null
+          ? DateTime.tryParse(json['lastICloudSync'] as String)
           : null,
-      lastGoogleDriveSync: json['lastGoogleDriveSync'] != null 
-          ? DateTime.tryParse(json['lastGoogleDriveSync'] as String) 
+      lastGoogleDriveSync: json['lastGoogleDriveSync'] != null
+          ? DateTime.tryParse(json['lastGoogleDriveSync'] as String)
           : null,
       defaultRestoreMode: RestoreMode.values.firstWhere(
         (m) => m.name == json['defaultRestoreMode'],
         orElse: () => RestoreMode.merge,
       ),
+      includeCharacterImages: json['includeCharacterImages'] as bool? ?? false,
+      includeWorldInfoImages: json['includeWorldInfoImages'] as bool? ?? false,
+      includeConversationImages:
+          json['includeConversationImages'] as bool? ?? false,
+      includeBackgrounds: json['includeBackgrounds'] as bool? ?? false,
+      includeLive2D: json['includeLive2D'] as bool? ?? false,
     );
   }
 }
 
 /// Provider for cloud backup settings
-final cloudBackupSettingsProvider = StateNotifierProvider<CloudBackupSettingsNotifier, CloudBackupSettings>((ref) {
+final cloudBackupSettingsProvider =
+    StateNotifierProvider<CloudBackupSettingsNotifier, CloudBackupSettings>(
+        (ref) {
   return CloudBackupSettingsNotifier();
 });
 
 /// Notifier for cloud backup settings
 class CloudBackupSettingsNotifier extends StateNotifier<CloudBackupSettings> {
   static const _storageKey = 'cloud_backup_settings';
-  
+
   CloudBackupSettingsNotifier() : super(const CloudBackupSettings()) {
     _loadSettings();
   }
-  
+
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -145,7 +192,7 @@ class CloudBackupSettingsNotifier extends StateNotifier<CloudBackupSettings> {
       print('Error loading cloud backup settings: $e');
     }
   }
-  
+
   Future<void> _saveSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -154,32 +201,57 @@ class CloudBackupSettingsNotifier extends StateNotifier<CloudBackupSettings> {
       print('Error saving cloud backup settings: $e');
     }
   }
-  
+
   void setICloudEnabled(bool value) {
     state = state.copyWith(iCloudEnabled: value);
     _saveSettings();
   }
-  
+
   void setGoogleDriveEnabled(bool value) {
     state = state.copyWith(googleDriveEnabled: value);
     _saveSettings();
   }
-  
+
   void setAutoSyncEnabled(bool value) {
     state = state.copyWith(autoSyncEnabled: value);
     _saveSettings();
   }
-  
+
   void setDefaultRestoreMode(RestoreMode mode) {
     state = state.copyWith(defaultRestoreMode: mode);
     _saveSettings();
   }
-  
+
+  void setIncludeCharacterImages(bool value) {
+    state = state.copyWith(includeCharacterImages: value);
+    _saveSettings();
+  }
+
+  void setIncludeWorldInfoImages(bool value) {
+    state = state.copyWith(includeWorldInfoImages: value);
+    _saveSettings();
+  }
+
+  void setIncludeConversationImages(bool value) {
+    state = state.copyWith(includeConversationImages: value);
+    _saveSettings();
+  }
+
+  void setIncludeBackgrounds(bool value) {
+    state = state.copyWith(includeBackgrounds: value);
+    _saveSettings();
+  }
+
+  void setIncludeLive2D(bool value) {
+    state = state.copyWith(includeLive2D: value);
+    _saveSettings();
+  }
+
   void updateLastICloudSync() {
     state = state.copyWith(lastICloudSync: DateTime.now());
     _saveSettings();
   }
-  
+
   void updateLastGoogleDriveSync() {
     state = state.copyWith(lastGoogleDriveSync: DateTime.now());
     _saveSettings();
@@ -192,21 +264,24 @@ class CloudBackupOperationState {
   final String? currentOperation;
   final double? progress;
   final String? error;
+  final String? warning;
   final CloudBackupStatus status;
-  
+
   const CloudBackupOperationState({
     this.isLoading = false,
     this.currentOperation,
     this.progress,
     this.error,
+    this.warning,
     this.status = CloudBackupStatus.idle,
   });
-  
+
   CloudBackupOperationState copyWith({
     bool? isLoading,
     String? currentOperation,
     double? progress,
     String? error,
+    String? warning,
     CloudBackupStatus? status,
   }) {
     return CloudBackupOperationState(
@@ -214,24 +289,28 @@ class CloudBackupOperationState {
       currentOperation: currentOperation,
       progress: progress,
       error: error,
+      warning: warning,
       status: status ?? this.status,
     );
   }
 }
 
 /// Provider for cloud backup operations
-final cloudBackupOperationProvider = StateNotifierProvider<CloudBackupOperationNotifier, CloudBackupOperationState>((ref) {
+final cloudBackupOperationProvider = StateNotifierProvider<
+    CloudBackupOperationNotifier, CloudBackupOperationState>((ref) {
   return CloudBackupOperationNotifier(ref);
 });
 
 /// Notifier for cloud backup operations
-class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationState> {
+class CloudBackupOperationNotifier
+    extends StateNotifier<CloudBackupOperationState> {
   final Ref _ref;
-  
-  CloudBackupOperationNotifier(this._ref) : super(const CloudBackupOperationState());
-  
+
+  CloudBackupOperationNotifier(this._ref)
+      : super(const CloudBackupOperationState());
+
   CloudBackupService get _service => _ref.read(cloudBackupServiceProvider);
-  
+
   /// Upload backup to iCloud
   Future<CloudBackupInfo?> uploadToICloud(Map<String, dynamic> data) async {
     state = state.copyWith(
@@ -240,40 +319,44 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       status: CloudBackupStatus.uploading,
       error: null,
     );
-    
+
     try {
       // Create backup file
-      final file = await _service.createCloudBackupFile(
+      final settings = _ref.read(cloudBackupSettingsProvider);
+      final artifacts = await _service.createCloudBackupArtifacts(
         data: data,
         provider: CloudProvider.iCloud,
+        options: settings.backupOptions,
       );
-      
+
       state = state.copyWith(
         currentOperation: 'Uploading to iCloud...',
         progress: 0.5,
       );
-      
+
       // Upload to iCloud
       final backup = await _service.uploadToICloud(
-        backupFile: file,
+        backupFile: artifacts.dataFile,
+        mediaFile: artifacts.mediaFile,
         onProgress: (progress) {
           state = state.copyWith(progress: 0.5 + progress * 0.5);
         },
       );
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
         status: CloudBackupStatus.success,
+        warning: _service.lastMediaWarning,
       );
-      
+
       // Update settings
       _ref.read(cloudBackupSettingsProvider.notifier).updateLastICloudSync();
-      
+
       // Refresh backups list
       _ref.invalidate(iCloudBackupsProvider);
-      
+
       return backup;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] uploadToICloud error: $e');
@@ -288,13 +371,14 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   /// Download and restore from iCloud
   Future<MergeResult?> downloadFromICloud({
     required CloudBackupInfo backup,
     required RestoreMode mode,
     required Map<String, dynamic> localData,
-    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode) restoreCallback,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -302,7 +386,7 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       status: CloudBackupStatus.downloading,
       error: null,
     );
-    
+
     try {
       // Download backup
       final backupData = await _service.downloadFromICloud(
@@ -311,29 +395,31 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
           state = state.copyWith(progress: progress * 0.5);
         },
       );
-      
+
       state = state.copyWith(
         currentOperation: 'Restoring data...',
         progress: 0.5,
       );
-      
+
       // Merge/restore data
       final mergeResult = await _service.mergeData(
         backupData: backupData,
         localData: localData,
         mode: mode,
       );
-      
+
       // Apply restored data
       await restoreCallback(backupData, mode);
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
         status: CloudBackupStatus.success,
+        warning: (backupData['_mediaRestoreWarning'] ??
+            backupData['_textRestoreWarning']) as String?,
       );
-      
+
       return mergeResult;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] downloadFromICloud error: $e');
@@ -348,7 +434,7 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   /// Delete backup from iCloud
   Future<bool> deleteICloudBackup(CloudBackupInfo backup) async {
     state = state.copyWith(
@@ -356,19 +442,19 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       currentOperation: 'Deleting backup...',
       error: null,
     );
-    
+
     try {
       await _service.deleteICloudBackup(backup);
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         status: CloudBackupStatus.success,
       );
-      
+
       // Refresh backups list
       _ref.invalidate(iCloudBackupsProvider);
-      
+
       return true;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] deleteICloudBackup error: $e');
@@ -382,7 +468,7 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return false;
     }
   }
-  
+
   /// Export backup to file (for Google Drive)
   Future<File?> exportToFile(Map<String, dynamic> data) async {
     state = state.copyWith(
@@ -391,37 +477,39 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       status: CloudBackupStatus.uploading,
       error: null,
     );
-    
+
     try {
       final file = await _service.exportForGoogleDrive(data: data);
-      
+
       // Let user pick destination
       final result = await FilePicker.platform.saveFile(
         dialogTitle: 'Save backup to Google Drive or other location',
         fileName: file.uri.pathSegments.last,
         type: FileType.any,
       );
-      
+
       if (result != null) {
         final destFile = await file.copy(result);
-        
+
         state = state.copyWith(
           isLoading: false,
           currentOperation: null,
           status: CloudBackupStatus.success,
         );
-        
-        _ref.read(cloudBackupSettingsProvider.notifier).updateLastGoogleDriveSync();
-        
+
+        _ref
+            .read(cloudBackupSettingsProvider.notifier)
+            .updateLastGoogleDriveSync();
+
         return destFile;
       }
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         status: CloudBackupStatus.idle,
       );
-      
+
       return null;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] exportToFile error: $e');
@@ -435,12 +523,13 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   /// Import backup from file (for Google Drive)
   Future<MergeResult?> importFromFile({
     required RestoreMode mode,
     required Map<String, dynamic> localData,
-    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode) restoreCallback,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -448,14 +537,14 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       status: CloudBackupStatus.downloading,
       error: null,
     );
-    
+
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowMultiple: false,
         dialogTitle: 'Select backup file from Google Drive or other location',
       );
-      
+
       if (result == null || result.files.isEmpty) {
         state = state.copyWith(
           isLoading: false,
@@ -464,42 +553,42 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
         );
         return null;
       }
-      
+
       final filePath = result.files.first.path;
       if (filePath == null) {
         throw Exception('No file selected');
       }
-      
+
       state = state.copyWith(
         currentOperation: 'Reading backup file...',
         progress: 0.3,
       );
-      
+
       final file = File(filePath);
       final backupData = await _service.importFromFile(file);
-      
+
       state = state.copyWith(
         currentOperation: 'Restoring data...',
         progress: 0.6,
       );
-      
+
       // Merge/restore data
       final mergeResult = await _service.mergeData(
         backupData: backupData,
         localData: localData,
         mode: mode,
       );
-      
+
       // Apply restored data
       await restoreCallback(backupData, mode);
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
         status: CloudBackupStatus.success,
       );
-      
+
       return mergeResult;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] importFromFile error: $e');
@@ -514,15 +603,16 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   void clearError() {
     state = state.copyWith(error: null, status: CloudBackupStatus.idle);
   }
-  
+
   // ============ Google Drive Methods ============
-  
-  GoogleDriveService get _googleDriveService => _ref.read(googleDriveServiceProvider);
-  
+
+  GoogleDriveService get _googleDriveService =>
+      _ref.read(googleDriveServiceProvider);
+
   /// Sign in to Google Drive
   Future<bool> signInToGoogleDrive() async {
     state = state.copyWith(
@@ -530,22 +620,22 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       currentOperation: 'Signing in to Google...',
       error: null,
     );
-    
+
     try {
       final success = await _googleDriveService.signIn();
-      
+
       if (success) {
         _ref.read(googleDriveSignedInProvider.notifier).state = true;
         _ref.invalidate(googleDriveUserProvider);
         _ref.invalidate(googleDriveBackupsProvider);
       }
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         status: success ? CloudBackupStatus.success : CloudBackupStatus.idle,
       );
-      
+
       return success;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] signInToGoogleDrive error: $e');
@@ -559,7 +649,7 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return false;
     }
   }
-  
+
   /// Sign out from Google Drive
   Future<void> signOutFromGoogleDrive() async {
     await _googleDriveService.signOut();
@@ -567,37 +657,51 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
     _ref.invalidate(googleDriveUserProvider);
     _ref.invalidate(googleDriveBackupsProvider);
   }
-  
+
   /// Upload backup to Google Drive
-  Future<GoogleDriveBackupInfo?> uploadToGoogleDrive(Map<String, dynamic> data) async {
+  Future<GoogleDriveBackupInfo?> uploadToGoogleDrive(
+      Map<String, dynamic> data) async {
     state = state.copyWith(
       isLoading: true,
       currentOperation: 'Uploading to Google Drive...',
       status: CloudBackupStatus.uploading,
       error: null,
     );
-    
+
     try {
-      final backup = await _googleDriveService.uploadBackup(
+      final settings = _ref.read(cloudBackupSettingsProvider);
+      final artifacts = await _service.createCloudBackupArtifacts(
         data: data,
+        provider: CloudProvider.googleDrive,
+        options: settings.backupOptions,
+      );
+      final backup = await _googleDriveService.uploadBackupFiles(
+        dataFile: artifacts.dataFile,
+        mediaFile: artifacts.mediaFile,
         onProgress: (progress) {
           state = state.copyWith(progress: progress);
         },
       );
-      
+
       if (backup != null) {
-        _ref.read(cloudBackupSettingsProvider.notifier).updateLastGoogleDriveSync();
+        _ref
+            .read(cloudBackupSettingsProvider.notifier)
+            .updateLastGoogleDriveSync();
         _ref.invalidate(googleDriveBackupsProvider);
       }
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
-        status: backup != null ? CloudBackupStatus.success : CloudBackupStatus.error,
+        status: backup != null
+            ? CloudBackupStatus.success
+            : CloudBackupStatus.error,
         error: backup == null ? 'Failed to upload backup' : null,
+        warning:
+            _service.lastMediaWarning ?? _googleDriveService.lastMediaWarning,
       );
-      
+
       return backup;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] uploadToGoogleDrive error: $e');
@@ -612,13 +716,14 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   /// Download and restore from Google Drive
   Future<MergeResult?> downloadFromGoogleDrive({
     required String fileId,
     required RestoreMode mode,
     required Map<String, dynamic> localData,
-    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode) restoreCallback,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -626,42 +731,66 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       status: CloudBackupStatus.downloading,
       error: null,
     );
-    
+
     try {
       // Download backup
-      final backupData = await _googleDriveService.downloadBackup(
+      var backupData = await _googleDriveService.downloadBackup(
         fileId: fileId,
         onProgress: (progress) {
           state = state.copyWith(progress: progress * 0.5);
         },
       );
-      
+
       if (backupData == null) {
         throw Exception('Failed to download backup');
       }
-      
+      backupData = await _service.restoreTextStateSafely(backupData);
+
+      final media = backupData['media'];
+      if (media is Map && media['fileName'] is String) {
+        final mediaBytes = await _googleDriveService.downloadCompanionMedia(
+          backupFileId: fileId,
+          fileName: media['fileName'] as String,
+        );
+        if (mediaBytes == null) {
+          backupData['_mediaRestoreWarning'] =
+              'Optional media backup was not found.';
+        } else {
+          final outcome = await _service.restoreMediaBytesSafely(
+            backupPackage: backupData,
+            bytes: mediaBytes,
+          );
+          backupData = outcome.backupPackage;
+          if (outcome.warning != null) {
+            backupData['_mediaRestoreWarning'] = outcome.warning;
+          }
+        }
+      }
+
       state = state.copyWith(
         currentOperation: 'Restoring data...',
         progress: 0.5,
       );
-      
+
       // Merge/restore data
       final mergeResult = await _service.mergeData(
         backupData: backupData,
         localData: localData,
         mode: mode,
       );
-      
+
       // Apply restored data
       await restoreCallback(backupData, mode);
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
         status: CloudBackupStatus.success,
+        warning: (backupData['_mediaRestoreWarning'] ??
+            backupData['_textRestoreWarning']) as String?,
       );
-      
+
       return mergeResult;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] downloadFromGoogleDrive error: $e');
@@ -676,7 +805,7 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       return null;
     }
   }
-  
+
   /// Delete backup from Google Drive
   Future<bool> deleteGoogleDriveBackup(String fileId) async {
     state = state.copyWith(
@@ -684,21 +813,21 @@ class CloudBackupOperationNotifier extends StateNotifier<CloudBackupOperationSta
       currentOperation: 'Deleting backup...',
       error: null,
     );
-    
+
     try {
       final success = await _googleDriveService.deleteBackup(fileId);
-      
+
       if (success) {
         _ref.invalidate(googleDriveBackupsProvider);
       }
-      
+
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         status: success ? CloudBackupStatus.success : CloudBackupStatus.error,
         error: success ? null : 'Failed to delete backup',
       );
-      
+
       return success;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] deleteGoogleDriveBackup error: $e');

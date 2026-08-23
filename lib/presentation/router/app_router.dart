@@ -23,7 +23,6 @@ import 'package:native_tavern/presentation/screens/settings/translation_settings
 import 'package:native_tavern/presentation/screens/settings/image_gen_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/regex_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/variables_settings_screen.dart';
-import 'package:native_tavern/presentation/screens/settings/backup_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/cloud_backup_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/logit_bias_settings_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/cfg_scale_settings_screen.dart';
@@ -353,7 +352,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.backupSettings,
         name: 'backupSettings',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const BackupSettingsScreen(),
+        redirect: (context, state) => AppRoutes.cloudBackupSettings,
       ),
       GoRoute(
         path: AppRoutes.cloudBackupSettings,

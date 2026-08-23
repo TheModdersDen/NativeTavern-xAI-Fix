@@ -85,6 +85,72 @@ class CloudBackupScreen extends ConsumerWidget {
 
                 const SizedBox(height: 16),
 
+                _buildSection(
+                  context: context,
+                  title: l10n.backupContents,
+                  children: [
+                    CheckboxListTile(
+                      value: true,
+                      onChanged: null,
+                      secondary: const Icon(Icons.description_outlined),
+                      title: Text(l10n.allTextData),
+                      subtitle: Text(l10n.allTextDataDescription),
+                    ),
+                    SwitchListTile(
+                      value: settings.includeCharacterImages,
+                      onChanged: ref
+                          .read(cloudBackupSettingsProvider.notifier)
+                          .setIncludeCharacterImages,
+                      secondary: const Icon(Icons.account_box_outlined),
+                      title: Text(l10n.characterCardImages),
+                      subtitle: Text(l10n.characterCardImagesDescription),
+                    ),
+                    SwitchListTile(
+                      value: settings.includeWorldInfoImages,
+                      onChanged: ref
+                          .read(cloudBackupSettingsProvider.notifier)
+                          .setIncludeWorldInfoImages,
+                      secondary: const Icon(Icons.public_outlined),
+                      title: Text(l10n.worldBookImages),
+                      subtitle: Text(l10n.worldBookImagesDescription),
+                    ),
+                    SwitchListTile(
+                      value: settings.includeConversationImages,
+                      onChanged: ref
+                          .read(cloudBackupSettingsProvider.notifier)
+                          .setIncludeConversationImages,
+                      secondary: const Icon(Icons.photo_library_outlined),
+                      title: Text(l10n.conversationImages),
+                      subtitle: Text(l10n.conversationImagesDescription),
+                    ),
+                    SwitchListTile(
+                      value: settings.includeBackgrounds,
+                      onChanged: ref
+                          .read(cloudBackupSettingsProvider.notifier)
+                          .setIncludeBackgrounds,
+                      secondary: const Icon(Icons.wallpaper_outlined),
+                      title: Text(l10n.backgroundImages),
+                      subtitle: Text(l10n.backgroundImagesDescription),
+                    ),
+                    SwitchListTile(
+                      value: settings.includeLive2D,
+                      onChanged: ref
+                          .read(cloudBackupSettingsProvider.notifier)
+                          .setIncludeLive2D,
+                      secondary: const Icon(Icons.view_in_ar_outlined),
+                      title: Text(l10n.live2DBackup),
+                      subtitle: Text(l10n.live2DModelsBackupDescription),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.link_outlined),
+                      title: Text(l10n.independentMediaBackup),
+                      subtitle: Text(l10n.independentMediaBackupDescription),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
                 // iCloud section (iOS/macOS only)
                 if (Platform.isIOS || Platform.isMacOS) ...[
                   _buildSection(
@@ -407,6 +473,24 @@ class CloudBackupScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+                if (operationState.warning != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber, color: Colors.amber),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(l10n.mediaBackupPartialSuccess)),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
     );
@@ -471,31 +555,12 @@ class CloudBackupScreen extends ConsumerWidget {
     }
   }
 
-  void _exportToFile(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-
-    // Get actual data from database
-    final db = ref.read(databaseProvider);
-    final dbBackupService = DatabaseBackupService(db);
-    final data = await dbBackupService.exportAllData();
-
-    final result = await ref
-        .read(cloudBackupOperationProvider.notifier)
-        .exportToFile(data);
-
-    if (result != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.backupExported)),
-      );
-    }
-  }
-
   void _showRestoreDialog(
       BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.read(cloudBackupSettingsProvider);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _RestoreDialog(
         backup: backup,
@@ -542,55 +607,6 @@ class CloudBackupScreen extends ConsumerWidget {
     );
   }
 
-  void _showImportDialog(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final settings = ref.read(cloudBackupSettingsProvider);
-
-    showDialog(
-      context: context,
-      builder: (context) => _ImportDialog(
-        defaultMode: settings.defaultRestoreMode,
-        onImport: (mode) async {
-          Navigator.pop(context);
-
-          // Get database service
-          final db = ref.read(databaseProvider);
-          final dbBackupService = DatabaseBackupService(db);
-          final localData = await dbBackupService.exportAllData();
-
-          final result = await ref
-              .read(cloudBackupOperationProvider.notifier)
-              .importFromFile(
-                mode: mode,
-                localData: localData,
-                restoreCallback: (data, restoreMode) async {
-                  // Actually restore data to database
-                  final importMode = _convertToImportMode(restoreMode);
-                  final actualData =
-                      data['data'] as Map<String, dynamic>? ?? data;
-                  await dbBackupService.importData(
-                    data: actualData,
-                    mode: importMode,
-                  );
-                },
-              );
-
-          if (result != null && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.restoreComplete(
-                  result.totalAdded,
-                  result.totalUpdated,
-                  result.totalSkipped,
-                )),
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
   /// Convert cloud RestoreMode to database ImportMode
   ImportMode _convertToImportMode(RestoreMode mode) {
     switch (mode) {
@@ -606,7 +622,7 @@ class CloudBackupScreen extends ConsumerWidget {
   void _confirmDeleteBackup(
       BuildContext context, WidgetRef ref, CloudBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.deleteBackup),
@@ -676,7 +692,7 @@ class CloudBackupScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.read(cloudBackupSettingsProvider);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _RestoreDialog(
         backup: CloudBackupInfo(
@@ -733,7 +749,7 @@ class CloudBackupScreen extends ConsumerWidget {
   void _confirmDeleteGoogleDriveBackup(
       BuildContext context, WidgetRef ref, GoogleDriveBackupInfo backup) {
     final l10n = AppLocalizations.of(context);
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.deleteBackup),
@@ -975,90 +991,6 @@ class _RestoreDialogState extends ConsumerState<_RestoreDialog> {
         ElevatedButton(
           onPressed: () => widget.onRestore(_selectedMode),
           child: Text(l10n.restore),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dialog for importing a backup file
-class _ImportDialog extends ConsumerStatefulWidget {
-  final RestoreMode defaultMode;
-  final void Function(RestoreMode mode) onImport;
-
-  const _ImportDialog({
-    required this.defaultMode,
-    required this.onImport,
-  });
-
-  @override
-  ConsumerState<_ImportDialog> createState() => _ImportDialogState();
-}
-
-class _ImportDialogState extends ConsumerState<_ImportDialog> {
-  late RestoreMode _selectedMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedMode = widget.defaultMode;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return AlertDialog(
-      title: Text(l10n.importBackup),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.selectRestoreMode),
-          const SizedBox(height: 16),
-          ...RestoreMode.values.map((mode) => RadioListTile<RestoreMode>(
-                title: Text(_restoreModeName(mode, l10n)),
-                subtitle: Text(_restoreModeDescription(mode, l10n)),
-                value: mode,
-                groupValue: _selectedMode,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedMode = value);
-                  }
-                },
-              )),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.orange),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.warning, color: Colors.orange, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.restoreWarning,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
-        ),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.folder_open, size: 18),
-          label: Text(l10n.selectFileAndImport),
-          onPressed: () => widget.onImport(_selectedMode),
         ),
       ],
     );
