@@ -35,6 +35,8 @@
 #ifdef __cplusplus
 #if _WIN32
 #define SPINE_FLUTTER_EXPORT extern "C" __declspec(dllexport)
+#elif defined(__APPLE__)
+#define SPINE_FLUTTER_EXPORT extern "C" __attribute__((visibility("default"), used))
 #else
 #ifdef __EMSCRIPTEN__
 #define SPINE_FLUTTER_EXPORT extern "C" __attribute__((used))
@@ -45,6 +47,8 @@
 #else
 #if _WIN32
 #define SPINE_FLUTTER_EXPORT __declspec(dllexport)
+#elif defined(__APPLE__)
+#define SPINE_FLUTTER_EXPORT __attribute__((visibility("default"), used))
 #else
 #ifdef __EMSCRIPTEN__
 #define SPINE_FLUTTER_EXPORT __attribute__((used))

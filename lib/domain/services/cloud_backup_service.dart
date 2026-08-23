@@ -963,6 +963,8 @@ class CloudBackupService {
           mediaFile: mediaFile,
         );
         data = outcome.backupPackage;
+        data['_mediaRestoredFiles'] = outcome.restoredFiles;
+        data['_mediaSkippedFiles'] = outcome.skippedFiles;
         if (outcome.warning != null) {
           data['_mediaRestoreWarning'] = outcome.warning;
         }
@@ -1013,7 +1015,10 @@ class CloudBackupService {
   }
 
   /// Import backup from file (for Google Drive)
-  Future<Map<String, dynamic>> importFromFile(File file) async {
+  Future<Map<String, dynamic>> importFromFile(
+    File file, {
+    File? mediaFile,
+  }) async {
     final content = await file.readAsString();
     var data = jsonDecode(content) as Map<String, dynamic>;
 
@@ -1025,15 +1030,18 @@ class CloudBackupService {
     data = await restoreTextStateSafely(data);
     final mediaName = _mediaFileName(data);
     if (mediaName == null) return data;
-    final mediaFile = File(path.join(file.parent.path, mediaName));
-    if (!await mediaFile.exists()) {
+    final resolvedMediaFile =
+        mediaFile ?? File(path.join(file.parent.path, mediaName));
+    if (!await resolvedMediaFile.exists()) {
       data['_mediaRestoreWarning'] = 'Optional media backup was not found.';
       return data;
     }
     final outcome = await restoreMediaFile(
       backupPackage: data,
-      mediaFile: mediaFile,
+      mediaFile: resolvedMediaFile,
     );
+    outcome.backupPackage['_mediaRestoredFiles'] = outcome.restoredFiles;
+    outcome.backupPackage['_mediaSkippedFiles'] = outcome.skippedFiles;
     if (outcome.warning != null) {
       outcome.backupPackage['_mediaRestoreWarning'] = outcome.warning;
     }

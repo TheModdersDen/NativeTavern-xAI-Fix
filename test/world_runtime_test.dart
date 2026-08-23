@@ -93,11 +93,37 @@ void main() {
     expect(asks, 1);
     expect(published.single.publicBody, 'Rain on the gate.');
     expect(published.single.origin, MomentPostOrigin.character);
-    expect(store.state.nextWakeAt['character-1'], now.add(const Duration(hours: 4)));
+    expect(store.state.nextWakeAt['character-1'],
+        now.add(const Duration(hours: 4)));
 
     asks = 0;
     expect(await runtime.tick(), isEmpty);
     expect(asks, 0);
+  });
+
+  test('a due character does not call AI when moments are off', () async {
+    var asks = 0;
+    final store = MemoryWorldWakeStore();
+    final runtime = WorldRuntime(
+      momentService: service(
+        transport: (messages, config) async {
+          asks++;
+          return '{"kind":"text","body":"should not post"}';
+        },
+      ),
+      characterRepository: characters,
+      store: store,
+      enabled: () => false,
+      storyEnabled: () => false,
+      config: () => _configuredLlm,
+      now: () => now,
+      firstWake: (character, clock) => clock,
+    );
+
+    expect(await runtime.tick(), isEmpty);
+    expect(asks, 0);
+    expect(await moments.listAll(), isEmpty);
+    expect(store.state.nextWakeAt, isEmpty);
   });
 
   test('a character whose wake is still in the future is left alone', () async {
@@ -238,6 +264,7 @@ void main() {
     );
     addTearDown(container.dispose);
     container.read(appSettingsProvider);
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(

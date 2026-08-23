@@ -103,6 +103,7 @@ final momentContextRegistrationProvider =
 final worldMomentRevisionProvider = StateProvider<int>((ref) => 0);
 
 final worldRuntimeProvider = Provider<WorldRuntime>((ref) {
+  final settings = ref.watch(appSettingsProvider);
   final runtime = WorldRuntime(
     momentService: ref.watch(momentServiceProvider),
     characterRepository: ref.watch(characterRepositoryProvider),
@@ -120,7 +121,9 @@ final worldRuntimeProvider = Provider<WorldRuntime>((ref) {
       ref.read(storyRevisionProvider.notifier).state++;
     },
   );
-  runtime.start();
+  if (settings.momentsEnabled || settings.storyEnabled) {
+    runtime.start();
+  }
   ref.onDispose(runtime.dispose);
   return runtime;
 });

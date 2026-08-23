@@ -25,5 +25,8 @@ A new Flutter FFI plugin project.
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  # Dart resolves the statically linked API with DynamicLibrary.process().
+  # Keep the bridge object in Runner even though native code does not call it.
+  s.user_target_xcconfig = { 'OTHER_LDFLAGS' => '$(inherited) -Wl,-u,_spine_major_version' }
   s.swift_version = '5.0'
 end

@@ -4982,6 +4982,17 @@
   "independentMediaBackup": "Independent media backup",
   "independentMediaBackupDescription": "Images are stored separately. Data backup and restore still work when media fails or is unavailable.",
   "mediaBackupPartialSuccess": "Database data completed successfully, but some media or settings could not be backed up or restored.",
+  "mediaRestoreComplete": "Media restored: {count} files",
+  "@mediaRestoreComplete": {
+    "description": "Media file restore count shown after a backup restore",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mediaNotIncludedInBackup": "This backup does not include a media package; only data was restored.",
+  "@mediaNotIncludedInBackup": {
+    "description": "Shown when a restored backup has no media sidecar"
+  },
   "enableICloudBackup": "Enable iCloud Backup",
   "@enableICloudBackup": {
     "description": "Enable iCloud backup toggle"
@@ -5400,6 +5411,28 @@
   "story": "Story",
   "@story": {
     "description": "Play hub row for the story timeline"
+  },
+  "storyEnabledSubtitle": "When this is off, chats are not analyzed and story chapters are not generated.",
+  "@storyEnabledSubtitle": {
+    "description": "Settings switch subtitle for AI-generated story processing"
+  },
+  "playAiFeatureEnableTitle": "Enable {feature}?",
+  "@playAiFeatureEnableTitle": {
+    "description": "Title of the confirmation shown before enabling an AI-powered play feature",
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
+  "playAiFeatureEnableDescription": "{feature} actively sends character information and relevant conversations to your configured AI provider to generate content. It is off by default. Enable it now?",
+  "@playAiFeatureEnableDescription": {
+    "description": "Disclosure shown before enabling an AI-powered play feature",
+    "placeholders": {
+      "feature": {"type": "String"}
+    }
+  },
+  "playAiFeatureEnableAction": "Enable",
+  "@playAiFeatureEnableAction": {
+    "description": "Confirms enabling an AI-powered play feature"
   },
   "storyEmptyHint": "A story appears after you chat for a while.",
   "@storyEmptyHint": {

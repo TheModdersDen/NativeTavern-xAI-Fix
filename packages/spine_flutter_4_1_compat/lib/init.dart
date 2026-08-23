@@ -34,7 +34,12 @@ import 'package:ffi/ffi.dart';
 
 const String _libName = 'spine_flutter';
 final DynamicLibrary _dylib = () {
-  if (Platform.isMacOS || Platform.isIOS) {
+  // CocoaPods links the iOS plugin statically into Runner, so its FFI symbols
+  // must be resolved from the current process instead of a bundled framework.
+  if (Platform.isIOS) {
+    return DynamicLibrary.process();
+  }
+  if (Platform.isMacOS) {
     return DynamicLibrary.open('$_libName.framework/$_libName');
   }
   if (Platform.isAndroid || Platform.isLinux) {

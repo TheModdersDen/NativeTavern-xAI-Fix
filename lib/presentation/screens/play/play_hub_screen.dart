@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
+import 'package:native_tavern/presentation/widgets/play/ai_play_feature_gate.dart';
 
 /// Play tab hub: four names only. No timeline, switches, or status.
-class PlayHubScreen extends StatelessWidget {
+class PlayHubScreen extends ConsumerWidget {
   const PlayHubScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.playHub)),
@@ -19,13 +21,31 @@ class PlayHubScreen extends StatelessWidget {
             key: const Key('play-hub-moments'),
             icon: Icons.dynamic_feed_outlined,
             title: l10n.moments,
-            onTap: () => context.push(AppRoutes.playMoments),
+            onTap: () async {
+              final enabled = await ensureAiPlayFeatureEnabled(
+                context,
+                ref,
+                AiPlayFeature.moments,
+              );
+              if (enabled && context.mounted) {
+                context.push(AppRoutes.playMoments);
+              }
+            },
           ),
           _PlayHubRow(
             key: const Key('play-hub-story'),
             icon: Icons.menu_book_outlined,
             title: l10n.story,
-            onTap: () => context.push(AppRoutes.playStory),
+            onTap: () async {
+              final enabled = await ensureAiPlayFeatureEnabled(
+                context,
+                ref,
+                AiPlayFeature.story,
+              );
+              if (enabled && context.mounted) {
+                context.push(AppRoutes.playStory);
+              }
+            },
           ),
           _PlayHubRow(
             key: const Key('play-hub-world-info'),

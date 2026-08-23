@@ -265,6 +265,9 @@ class CloudBackupOperationState {
   final double? progress;
   final String? error;
   final String? warning;
+  final bool? mediaIncluded;
+  final int? mediaRestoredFiles;
+  final Set<CloudMediaCategory>? mediaCategories;
   final CloudBackupStatus status;
 
   const CloudBackupOperationState({
@@ -273,6 +276,9 @@ class CloudBackupOperationState {
     this.progress,
     this.error,
     this.warning,
+    this.mediaIncluded,
+    this.mediaRestoredFiles,
+    this.mediaCategories,
     this.status = CloudBackupStatus.idle,
   });
 
@@ -282,6 +288,9 @@ class CloudBackupOperationState {
     double? progress,
     String? error,
     String? warning,
+    bool? mediaIncluded,
+    int? mediaRestoredFiles,
+    Set<CloudMediaCategory>? mediaCategories,
     CloudBackupStatus? status,
   }) {
     return CloudBackupOperationState(
@@ -290,6 +299,9 @@ class CloudBackupOperationState {
       progress: progress,
       error: error,
       warning: warning,
+      mediaIncluded: mediaIncluded,
+      mediaRestoredFiles: mediaRestoredFiles,
+      mediaCategories: mediaCategories,
       status: status ?? this.status,
     );
   }
@@ -418,6 +430,9 @@ class CloudBackupOperationNotifier
         status: CloudBackupStatus.success,
         warning: (backupData['_mediaRestoreWarning'] ??
             backupData['_textRestoreWarning']) as String?,
+        mediaIncluded: backupData['media'] is Map,
+        mediaRestoredFiles: backupData['_mediaRestoredFiles'] as int?,
+        mediaCategories: _mediaCategoriesFromBackup(backupData),
       );
 
       return mergeResult;
@@ -540,9 +555,10 @@ class CloudBackupOperationNotifier
 
     try {
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-        dialogTitle: 'Select backup file from Google Drive or other location',
+        type: FileType.custom,
+        allowedExtensions: const ['ntb', 'ntm'],
+        allowMultiple: true,
+        dialogTitle: 'Select the .ntb backup and its matching .ntm media file',
       );
 
       if (result == null || result.files.isEmpty) {
@@ -554,18 +570,38 @@ class CloudBackupOperationNotifier
         return null;
       }
 
-      final filePath = result.files.first.path;
-      if (filePath == null) {
-        throw Exception('No file selected');
+      final dataFiles = result.files
+          .where((selected) => selected.name.toLowerCase().endsWith('.ntb'))
+          .toList();
+      if (dataFiles.length != 1) {
+        throw Exception('Select exactly one NativeTavern .ntb backup file');
       }
+      final dataSelection = dataFiles.single;
+      final filePath = dataSelection.path;
+      if (filePath == null) {
+        throw Exception('The selected backup file is not locally accessible');
+      }
+      final file = File(filePath);
+      final expectedMediaName =
+          '${dataSelection.name.substring(0, dataSelection.name.length - 4)}.ntm';
+      final mediaSelection = result.files.cast<PlatformFile?>().firstWhere(
+            (candidate) => candidate?.name == expectedMediaName,
+            orElse: () => null,
+          );
+      final selectedMediaFile =
+          mediaSelection?.path == null ? null : File(mediaSelection!.path!);
 
       state = state.copyWith(
-        currentOperation: 'Reading backup file...',
+        currentOperation: selectedMediaFile == null
+            ? 'Reading data backup...'
+            : 'Reading data and restoring media...',
         progress: 0.3,
       );
 
-      final file = File(filePath);
-      final backupData = await _service.importFromFile(file);
+      final backupData = await _service.importFromFile(
+        file,
+        mediaFile: selectedMediaFile,
+      );
 
       state = state.copyWith(
         currentOperation: 'Restoring data...',
@@ -587,6 +623,11 @@ class CloudBackupOperationNotifier
         currentOperation: null,
         progress: null,
         status: CloudBackupStatus.success,
+        warning: (backupData['_mediaRestoreWarning'] ??
+            backupData['_textRestoreWarning']) as String?,
+        mediaIncluded: backupData['media'] is Map,
+        mediaRestoredFiles: backupData['_mediaRestoredFiles'] as int?,
+        mediaCategories: _mediaCategoriesFromBackup(backupData),
       );
 
       return mergeResult;
@@ -748,6 +789,10 @@ class CloudBackupOperationNotifier
 
       final media = backupData['media'];
       if (media is Map && media['fileName'] is String) {
+        state = state.copyWith(
+          currentOperation: 'Downloading media backup...',
+          progress: 0.5,
+        );
         final mediaBytes = await _googleDriveService.downloadCompanionMedia(
           backupFileId: fileId,
           fileName: media['fileName'] as String,
@@ -756,11 +801,17 @@ class CloudBackupOperationNotifier
           backupData['_mediaRestoreWarning'] =
               'Optional media backup was not found.';
         } else {
+          state = state.copyWith(
+            currentOperation: 'Verifying and restoring media...',
+            progress: 0.7,
+          );
           final outcome = await _service.restoreMediaBytesSafely(
             backupPackage: backupData,
             bytes: mediaBytes,
           );
           backupData = outcome.backupPackage;
+          backupData['_mediaRestoredFiles'] = outcome.restoredFiles;
+          backupData['_mediaSkippedFiles'] = outcome.skippedFiles;
           if (outcome.warning != null) {
             backupData['_mediaRestoreWarning'] = outcome.warning;
           }
@@ -769,7 +820,7 @@ class CloudBackupOperationNotifier
 
       state = state.copyWith(
         currentOperation: 'Restoring data...',
-        progress: 0.5,
+        progress: 0.8,
       );
 
       // Merge/restore data
@@ -789,6 +840,9 @@ class CloudBackupOperationNotifier
         status: CloudBackupStatus.success,
         warning: (backupData['_mediaRestoreWarning'] ??
             backupData['_textRestoreWarning']) as String?,
+        mediaIncluded: backupData['media'] is Map,
+        mediaRestoredFiles: backupData['_mediaRestoredFiles'] as int?,
+        mediaCategories: _mediaCategoriesFromBackup(backupData),
       );
 
       return mergeResult;
@@ -841,4 +895,15 @@ class CloudBackupOperationNotifier
       return false;
     }
   }
+}
+
+Set<CloudMediaCategory> _mediaCategoriesFromBackup(
+  Map<String, dynamic> backupData,
+) {
+  final media = backupData['media'];
+  if (media is! Map || media['mediaCategories'] is! List) return const {};
+  final names = (media['mediaCategories'] as List).whereType<String>().toSet();
+  return CloudMediaCategory.values
+      .where((category) => names.contains(category.name))
+      .toSet();
 }

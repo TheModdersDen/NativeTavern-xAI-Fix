@@ -55,8 +55,6 @@ void main() {
         l10n.localFeatures,
         l10n.memoryInbox,
         l10n.memoryInboxSubtitle,
-        l10n.openDataBank,
-        l10n.openDataBankSubtitle,
         l10n.dataBank,
         l10n.dataBankSubtitle,
         l10n.rpgScenarioEditor,
@@ -127,7 +125,6 @@ void main() {
         key: Key('memory-inbox-settings-tile'),
         path: AppRoutes.memoryInbox,
       ),
-      (key: Key('data-bank-settings-tile'), path: AppRoutes.dataBank),
       (
         key: Key('capability-diagnostics-settings-tile'),
         path: AppRoutes.capabilityDiagnostics,
@@ -190,7 +187,7 @@ void main() {
 
     for (final destination in destinations) {
       final tile = find.byKey(destination.key);
-      await tester.ensureVisible(tile);
+      await tester.scrollUntilVisible(tile, 240);
       await tester.pumpAndSettle();
       await tester.tap(tile);
       await tester.pumpAndSettle();
@@ -198,6 +195,14 @@ void main() {
       router.go(AppRoutes.settings);
       await tester.pumpAndSettle();
     }
+
+    expect(find.byKey(const Key('data-bank-settings-tile')), findsNothing);
+    final momentsSwitch = find.byKey(const Key('moments-enabled-switch'));
+    await tester.scrollUntilVisible(momentsSwitch, -240);
+    expect(tester.widget<SwitchListTile>(momentsSwitch).value, isFalse);
+    final storySwitch = find.byKey(const Key('story-enabled-switch'));
+    await tester.scrollUntilVisible(storySwitch, 240);
+    expect(tester.widget<SwitchListTile>(storySwitch).value, isFalse);
   });
 }
 

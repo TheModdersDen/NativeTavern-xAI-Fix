@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -36,6 +37,11 @@ void main() {
   late Directory dataDirectory;
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_tts'),
+      (_) async => 1,
+    );
     SharedPreferences.setMockInitialValues({});
     preferences = await SharedPreferences.getInstance();
     database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -98,7 +104,7 @@ void main() {
     }
   });
 
-  testWidgets('play tab shows only four names and opens each destination',
+  testWidgets('AI play destinations require confirmation before opening',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -139,10 +145,16 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      MaterialApp.router(
-        routerConfig: router,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
+      ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -161,12 +173,25 @@ void main() {
 
     await tester.tap(find.byKey(const Key('play-hub-moments')));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('enable-moments-dialog')), findsOneWidget);
+    expect(find.text('moments-page'), findsNothing);
+    await tester.tap(find.byKey(const Key('enable-play-feature-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('moments-page'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('play-hub-moments')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('enable-play-feature-confirm')));
+    await tester.pumpAndSettle();
     expect(find.text('moments-page'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     router.go(AppRoutes.play);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('play-hub-story')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('enable-story-dialog')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('enable-play-feature-confirm')));
     await tester.pumpAndSettle();
     expect(find.text('story-page'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -211,7 +236,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('moments destination stays empty without crashing', (tester) async {
+  testWidgets('moments destination stays empty without crashing',
+      (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -242,7 +268,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text(l10n.momentsEmpty), findsOneWidget);
+    expect(find.text(l10n.momentsDisabledEmpty), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -338,12 +364,12 @@ void main() {
 
     router.go(AppRoutes.playMoments);
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, l10n.moments), findsOneWidget);
-    expect(find.text(l10n.momentsEmpty), findsOneWidget);
+    expect(find.byKey(const Key('moments-disabled-empty')), findsOneWidget);
+    expect(find.text(l10n.momentsDisabledEmpty), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('settings keeps a jump to data bank instead of a homepage tile',
+  testWidgets('settings keeps play switches but no duplicate data bank entry',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -357,11 +383,6 @@ void main() {
         GoRoute(
           path: AppRoutes.settings,
           builder: (_, __) => const SettingsScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.dataBank,
-          builder: (_, __) =>
-              const Scaffold(body: Text('destination:/data-bank')),
         ),
       ],
     );
@@ -391,14 +412,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final tile = find.byKey(const Key('data-bank-settings-tile'));
-    await tester.scrollUntilVisible(tile, 240);
+    final momentsSwitch = find.byKey(const Key('moments-enabled-switch'));
+    await tester.scrollUntilVisible(momentsSwitch, 240);
     await tester.pumpAndSettle();
-    expect(find.text(l10n.openDataBank), findsOneWidget);
-    expect(find.text(l10n.dataBank), findsNothing);
-    await tester.tap(tile);
-    await tester.pumpAndSettle();
-    expect(find.text('destination:/data-bank'), findsOneWidget);
+    expect(find.byKey(const Key('data-bank-settings-tile')), findsNothing);
+    expect(momentsSwitch, findsOneWidget);
+    expect(find.byKey(const Key('story-enabled-switch')), findsOneWidget);
+    expect(find.text(l10n.openDataBank), findsNothing);
   });
 
   testWidgets('new chat app bar does not expose play destinations',

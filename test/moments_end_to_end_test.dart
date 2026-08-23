@@ -75,7 +75,7 @@ void main() {
   });
 
   test('moments stay empty until someone posts', () async {
-    expect(container.read(appSettingsProvider).momentsEnabled, isTrue);
+    expect(container.read(appSettingsProvider).momentsEnabled, isFalse);
     expect(await container.read(momentFeedProvider.future), isEmpty);
   });
 
@@ -163,9 +163,10 @@ void main() {
   });
 
   test('a reply to the player stays a comment, not a new post', () async {
-    final player = await container.read(momentServiceProvider).publishPlayerPost(
-          body: '我的新女友，你们感受一下',
-        );
+    final player =
+        await container.read(momentServiceProvider).publishPlayerPost(
+              body: '我的新女友，你们感受一下',
+            );
     final service = MomentService(
       momentRepository: container.read(momentRepositoryProvider),
       chatRepository: chatRepository,
@@ -227,8 +228,10 @@ void main() {
   });
 
   test('player posts only as themselves', () async {
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     final service = container.read(momentServiceProvider);
-    final created = await service.publishPlayerPost(body: 'Did you lock the gate?');
+    final created =
+        await service.publishPlayerPost(body: 'Did you lock the gate?');
     expect(created.origin, MomentPostOrigin.user);
     expect(created.authorId, MomentService.userAuthorId);
 
@@ -265,6 +268,7 @@ void main() {
   });
 
   test('turning moments off hides the feed without deleting posts', () async {
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     await container.read(momentServiceProvider).createPost(
           authorId: MomentService.userAuthorId,
           authorName: MomentService.userAuthorName,
@@ -273,11 +277,13 @@ void main() {
         );
     container.read(appSettingsProvider.notifier).updateMomentsEnabled(false);
     expect(await container.read(momentFeedProvider.future), isEmpty);
-    expect(await container.read(momentRepositoryProvider).listAll(), hasLength(1));
+    expect(
+        await container.read(momentRepositoryProvider).listAll(), hasLength(1));
   });
 
   testWidgets('tapping a character avatar opens details and chats',
       (tester) async {
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -342,6 +348,7 @@ void main() {
   });
 
   testWidgets('moments page is empty until someone posts', (tester) async {
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -371,6 +378,7 @@ void main() {
 
   testWidgets('compose dialog is the player posting, not picking a character',
       (tester) async {
+    container.read(appSettingsProvider.notifier).updateMomentsEnabled(true);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

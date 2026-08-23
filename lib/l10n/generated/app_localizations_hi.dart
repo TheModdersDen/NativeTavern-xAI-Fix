@@ -3614,6 +3614,15 @@ class AppLocalizationsHi extends AppLocalizations {
       'Database data completed successfully, but some media or settings could not be backed up or restored.';
 
   @override
+  String mediaRestoreComplete(int count) {
+    return 'Media restored: $count files';
+  }
+
+  @override
+  String get mediaNotIncludedInBackup =>
+      'This backup does not include a media package; only data was restored.';
+
+  @override
   String get enableICloudBackup => 'Enable iCloud Backup';
 
   @override
@@ -4008,6 +4017,23 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get story => 'Story';
+
+  @override
+  String get storyEnabledSubtitle =>
+      'When this is off, chats are not analyzed and story chapters are not generated.';
+
+  @override
+  String playAiFeatureEnableTitle(String feature) {
+    return 'Enable $feature?';
+  }
+
+  @override
+  String playAiFeatureEnableDescription(String feature) {
+    return '$feature actively sends character information and relevant conversations to your configured AI provider to generate content. It is off by default. Enable it now?';
+  }
+
+  @override
+  String get playAiFeatureEnableAction => 'Enable';
 
   @override
   String get storyEmptyHint => 'A story appears after you chat for a while.';

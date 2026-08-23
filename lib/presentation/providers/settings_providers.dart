@@ -714,10 +714,10 @@ class AppSettings {
     this.memoryContextEnabled = true,
     this.memorySemanticSearchEnabled = false,
     this.memoryContextTokenBudget = 512,
-    this.storyEnabled = true,
+    this.storyEnabled = false,
     this.storyTurnsPerChapter = 20,
     this.storyHighConfidenceThreshold = 0.8,
-    this.momentsEnabled = true,
+    this.momentsEnabled = false,
   });
 
   AppSettings copyWith({
@@ -819,14 +819,14 @@ class AppSettings {
       memoryContextTokenBudget: normalizeMemoryContextTokenBudget(
         (json['memoryContextTokenBudget'] as num?)?.toInt(),
       ),
-      storyEnabled: json['storyEnabled'] as bool? ?? true,
+      storyEnabled: json['storyEnabled'] as bool? ?? false,
       storyTurnsPerChapter: normalizeStoryTurnsPerChapter(
         (json['storyTurnsPerChapter'] as num?)?.toInt(),
       ),
       storyHighConfidenceThreshold: normalizeStoryHighConfidenceThreshold(
         (json['storyHighConfidenceThreshold'] as num?)?.toDouble(),
       ),
-      momentsEnabled: json['momentsEnabled'] as bool? ?? true,
+      momentsEnabled: json['momentsEnabled'] as bool? ?? false,
     );
   }
 

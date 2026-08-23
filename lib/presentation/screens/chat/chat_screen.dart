@@ -46,6 +46,7 @@ import 'package:native_tavern/presentation/widgets/chat/message_content_widget.d
 import 'package:native_tavern/presentation/widgets/chat/memory_context_usage_sheet.dart';
 import 'package:native_tavern/presentation/widgets/chat/quick_reply_bar.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
+import 'package:native_tavern/presentation/widgets/play/ai_play_feature_gate.dart';
 import 'package:native_tavern/presentation/widgets/chat/markdown_input_field.dart';
 import 'package:native_tavern/presentation/widgets/chat/reasoning_widget.dart';
 import 'package:native_tavern/presentation/widgets/chat/slash_command_suggestions.dart';
@@ -1452,7 +1453,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
           ],
-          onSelected: (value) {
+          onSelected: (value) async {
             switch (value) {
               case 'character':
                 final characterId = chatState.character?.id;
@@ -1495,12 +1496,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 _showBookmarksDialog(context);
                 break;
               case 'story':
-                context.push(
-                  Uri(
-                    path: AppRoutes.playStory,
-                    queryParameters: {'chat': widget.chatId},
-                  ).toString(),
+                final enabled = await ensureAiPlayFeatureEnabled(
+                  context,
+                  ref,
+                  AiPlayFeature.story,
                 );
+                if (enabled && mounted) {
+                  context.push(
+                    Uri(
+                      path: AppRoutes.playStory,
+                      queryParameters: {'chat': widget.chatId},
+                    ).toString(),
+                  );
+                }
                 break;
               case 'memory_usage':
                 _showMemoryUsage();

@@ -592,12 +592,15 @@ class CloudBackupScreen extends ConsumerWidget {
               );
 
           if (result != null && context.mounted) {
+            final operation = ref.read(cloudBackupOperationProvider);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n.restoreComplete(
-                  result.totalAdded,
-                  result.totalUpdated,
-                  result.totalSkipped,
+                content: Text(_restoreResultMessage(
+                  l10n: l10n,
+                  added: result.totalAdded,
+                  updated: result.totalUpdated,
+                  skipped: result.totalSkipped,
+                  operation: operation,
                 )),
               ),
             );
@@ -731,12 +734,15 @@ class CloudBackupScreen extends ConsumerWidget {
               );
 
           if (result != null && context.mounted) {
+            final operation = ref.read(cloudBackupOperationProvider);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n.restoreComplete(
-                  result.totalAdded,
-                  result.totalUpdated,
-                  result.totalSkipped,
+                content: Text(_restoreResultMessage(
+                  l10n: l10n,
+                  added: result.totalAdded,
+                  updated: result.totalUpdated,
+                  skipped: result.totalSkipped,
+                  operation: operation,
                 )),
               ),
             );
@@ -788,6 +794,36 @@ String _restoreModeDescription(RestoreMode mode, AppLocalizations l10n) =>
       RestoreMode.merge => l10n.restoreModeMergeDescription,
       RestoreMode.addNewOnly => l10n.restoreModeAddNewOnlyDescription,
     };
+
+String _restoreResultMessage({
+  required AppLocalizations l10n,
+  required int added,
+  required int updated,
+  required int skipped,
+  required CloudBackupOperationState operation,
+}) {
+  final lines = [l10n.restoreComplete(added, updated, skipped)];
+  if (operation.warning != null) {
+    lines.add(l10n.mediaBackupPartialSuccess);
+  } else if (operation.mediaRestoredFiles != null) {
+    lines.add(l10n.mediaRestoreComplete(operation.mediaRestoredFiles!));
+  } else if (operation.mediaIncluded == false) {
+    lines.add(l10n.mediaNotIncludedInBackup);
+  }
+  final categoryNames = operation.mediaCategories
+      ?.map((category) => switch (category) {
+            CloudMediaCategory.characterImages => l10n.characterCardImages,
+            CloudMediaCategory.worldInfoImages => l10n.worldBookImages,
+            CloudMediaCategory.conversationImages => l10n.conversationImages,
+            CloudMediaCategory.backgrounds => l10n.backgroundImages,
+            CloudMediaCategory.live2d => l10n.live2DBackup,
+          })
+      .toList();
+  if (categoryNames != null && categoryNames.isNotEmpty) {
+    lines.add('${l10n.backupContents}: ${categoryNames.join(', ')}');
+  }
+  return lines.join('\n');
+}
 
 /// Tile for displaying a cloud backup
 class _CloudBackupTile extends StatelessWidget {

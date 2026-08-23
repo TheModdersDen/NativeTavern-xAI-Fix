@@ -3520,6 +3520,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mediaBackupPartialSuccess => '数据库数据已成功完成，但部分媒体或设置未能备份或恢复。';
 
   @override
+  String mediaRestoreComplete(int count) {
+    return '媒体恢复完成：$count 个文件';
+  }
+
+  @override
+  String get mediaNotIncludedInBackup => '此备份不包含媒体包，本次仅恢复了数据。';
+
+  @override
   String get enableICloudBackup => '启用 iCloud 备份';
 
   @override
@@ -3894,6 +3902,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get story => '故事';
+
+  @override
+  String get storyEnabledSubtitle => '关闭后不会分析聊天，也不会生成或更新故事章节。';
+
+  @override
+  String playAiFeatureEnableTitle(String feature) {
+    return '开启“$feature”？';
+  }
+
+  @override
+  String playAiFeatureEnableDescription(String feature) {
+    return '“$feature”会主动将角色信息和相关对话发送给你配置的 AI 提供商来生成内容。此功能默认关闭。是否现在开启？';
+  }
+
+  @override
+  String get playAiFeatureEnableAction => '开启';
 
   @override
   String get storyEmptyHint => '聊一段时间才会有故事。';
@@ -9759,6 +9783,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mediaBackupPartialSuccess => '資料庫資料已成功完成，但部分媒體或設定未能備份或還原。';
 
   @override
+  String mediaRestoreComplete(int count) {
+    return '媒體還原完成：$count 個檔案';
+  }
+
+  @override
+  String get mediaNotIncludedInBackup => '此備份不包含媒體包，本次僅還原了資料。';
+
+  @override
   String get enableICloudBackup => '啟用 iCloud 備份';
 
   @override
@@ -10133,6 +10165,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get story => '故事';
+
+  @override
+  String get storyEnabledSubtitle => '關閉後不會分析聊天，也不會產生或更新故事章節。';
+
+  @override
+  String playAiFeatureEnableTitle(String feature) {
+    return '開啟「$feature」？';
+  }
+
+  @override
+  String playAiFeatureEnableDescription(String feature) {
+    return '「$feature」會主動將角色資訊和相關對話傳送給你設定的 AI 供應商來產生內容。此功能預設關閉。是否現在開啟？';
+  }
+
+  @override
+  String get playAiFeatureEnableAction => '開啟';
 
   @override
   String get storyEmptyHint => '聊一段時間才會有故事。';

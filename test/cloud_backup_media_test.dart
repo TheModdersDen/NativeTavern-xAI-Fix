@@ -256,6 +256,64 @@ void main() {
         ((imported['data'] as Map)['characters'] as Map), contains('legacy'));
   });
 
+  test('file import restores a selected media sidecar from another directory',
+      () async {
+    final avatar = File(
+      p.join(documents.path, 'NativeTavern', 'avatars', 'card.png'),
+    );
+    await avatar.parent.create(recursive: true);
+    await avatar.writeAsBytes([21, 22, 23]);
+    final sourceService = CloudBackupService.forTesting(
+      documentsDirectory: documents,
+    );
+    final artifacts = await sourceService.createCloudBackupArtifacts(
+      data: {
+        'characters': {
+          'card': {'id': 'card', 'avatarPath': avatar.path},
+        },
+      },
+      provider: CloudProvider.googleDrive,
+      options: const CloudBackupOptions(
+        mediaCategories: {CloudMediaCategory.characterImages},
+      ),
+    );
+
+    final pickerCache = await Directory.systemTemp.createTemp(
+      'native_tavern_picker_cache_',
+    );
+    final targetDocuments = await Directory.systemTemp.createTemp(
+      'native_tavern_import_target_',
+    );
+    addTearDown(() async {
+      if (await pickerCache.exists()) await pickerCache.delete(recursive: true);
+      if (await targetDocuments.exists()) {
+        await targetDocuments.delete(recursive: true);
+      }
+    });
+    final selectedData = await artifacts.dataFile.copy(
+      p.join(pickerCache.path, p.basename(artifacts.dataFile.path)),
+    );
+    final selectedMedia = await artifacts.mediaFile!.copy(
+      p.join(documents.path, 'file-picker-cache-entry'),
+    );
+    final targetService = CloudBackupService.forTesting(
+      documentsDirectory: targetDocuments,
+    );
+
+    final imported = await targetService.importFromFile(
+      selectedData,
+      mediaFile: selectedMedia,
+    );
+
+    final restoredAvatar = File(
+      p.join(targetDocuments.path, 'NativeTavern', 'avatars', 'card.png'),
+    );
+    expect(await restoredAvatar.readAsBytes(), [21, 22, 23]);
+    expect(imported['_mediaRestoredFiles'], 1);
+    expect(imported['_mediaSkippedFiles'], 0);
+    expect(imported['_mediaRestoreWarning'], isNull);
+  });
+
   test('media settings are opt-in and persist in JSON', () {
     final defaults = CloudBackupSettings.fromJson(const {});
     expect(defaults.backupOptions.mediaCategories, isEmpty);

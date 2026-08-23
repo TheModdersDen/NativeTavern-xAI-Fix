@@ -118,6 +118,9 @@ validate_app_bundle() {
   strings "$app_path/$executable" \
     | grep -F 'Live2DGLView' >/dev/null \
     || fail "Built native binary is missing the Live2D renderer"
+  nm -gjU "$app_path/$executable" \
+    | grep -Fx '_spine_major_version' >/dev/null \
+    || fail "Built native binary is missing the statically linked Spine FFI symbols"
   require_file "$app_path/Frameworks/App.framework/App"
   strings "$app_path/Frameworks/App.framework/App" \
     | grep -F 'com.nativetavern/live2d_render_scale' >/dev/null \
@@ -141,7 +144,7 @@ validate_ipa() {
   validate_app_bundle "$app_path"
 }
 
-for command_name in flutter pod xcodebuild plutil unzip strings codesign shasum; do
+for command_name in flutter pod xcodebuild plutil unzip strings nm codesign shasum; do
   require_command "$command_name"
 done
 

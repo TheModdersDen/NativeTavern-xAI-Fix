@@ -6631,6 +6631,18 @@ abstract class AppLocalizations {
   /// **'Database data completed successfully, but some media or settings could not be backed up or restored.'**
   String get mediaBackupPartialSuccess;
 
+  /// Media file restore count shown after a backup restore
+  ///
+  /// In en, this message translates to:
+  /// **'Media restored: {count} files'**
+  String mediaRestoreComplete(int count);
+
+  /// Shown when a restored backup has no media sidecar
+  ///
+  /// In en, this message translates to:
+  /// **'This backup does not include a media package; only data was restored.'**
+  String get mediaNotIncludedInBackup;
+
   /// Enable iCloud backup toggle
   ///
   /// In en, this message translates to:
@@ -7332,6 +7344,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Story'**
   String get story;
+
+  /// Settings switch subtitle for AI-generated story processing
+  ///
+  /// In en, this message translates to:
+  /// **'When this is off, chats are not analyzed and story chapters are not generated.'**
+  String get storyEnabledSubtitle;
+
+  /// Title of the confirmation shown before enabling an AI-powered play feature
+  ///
+  /// In en, this message translates to:
+  /// **'Enable {feature}?'**
+  String playAiFeatureEnableTitle(String feature);
+
+  /// Disclosure shown before enabling an AI-powered play feature
+  ///
+  /// In en, this message translates to:
+  /// **'{feature} actively sends character information and relevant conversations to your configured AI provider to generate content. It is off by default. Enable it now?'**
+  String playAiFeatureEnableDescription(String feature);
+
+  /// Confirms enabling an AI-powered play feature
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get playAiFeatureEnableAction;
 
   /// Empty state on the story chapter timeline
   ///

@@ -89,6 +89,7 @@ void main() {
     );
     container.read(appSettingsProvider);
     await Future<void>.delayed(const Duration(milliseconds: 20));
+    container.read(appSettingsProvider.notifier).updateStoryEnabled(true);
   });
 
   tearDown(() async {

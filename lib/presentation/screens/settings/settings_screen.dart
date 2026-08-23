@@ -93,16 +93,9 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.memoryInbox),
           ),
           const Divider(height: 32),
-          _buildSectionHeader(context, l10n.localFeatures),
+          _buildSectionHeader(context, l10n.playHub),
           const _MomentsEnabledTile(),
-          ListTile(
-            key: const Key('data-bank-settings-tile'),
-            leading: const Icon(Icons.library_books_outlined),
-            title: Text(l10n.openDataBank),
-            subtitle: Text(l10n.openDataBankSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(AppRoutes.dataBank),
-          ),
+          const _StoryEnabledTile(),
           if (kRpgProductUiEnabled)
             ListTile(
               key: const Key('rpg-scenario-editor-settings-tile'),
@@ -351,6 +344,26 @@ class _MomentsEnabledTile extends ConsumerWidget {
       value: settings.momentsEnabled,
       onChanged: (value) {
         ref.read(appSettingsProvider.notifier).updateMomentsEnabled(value);
+      },
+    );
+  }
+}
+
+class _StoryEnabledTile extends ConsumerWidget {
+  const _StoryEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.watch(appSettingsProvider);
+    return SwitchListTile(
+      key: const Key('story-enabled-switch'),
+      secondary: const Icon(Icons.menu_book_outlined),
+      title: Text(l10n.story),
+      subtitle: Text(l10n.storyEnabledSubtitle),
+      value: settings.storyEnabled,
+      onChanged: (value) {
+        ref.read(appSettingsProvider.notifier).updateStoryEnabled(value);
       },
     );
   }
