@@ -3864,16 +3864,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get momentsDisabledEmpty => '你把动态关掉了。想看大家在说什么，再打开就行。';
 
   @override
-  String get momentsEmpty => '还没有动态。先去聊一会儿，或者自己写一条。';
+  String get momentsEmpty => '还没人发过。写一句，或者发张图。';
 
   @override
   String get momentsCompose => '发一条';
 
   @override
-  String get momentsComposeHint => '你想让别人看见什么？';
+  String get momentsComposeHint => '说点什么，或者加张图。';
 
   @override
-  String get momentsNeedChat => '先开一场聊天，再回来发帖。';
+  String get momentsAuthor => '谁在发';
+
+  @override
+  String get momentsAuthorMe => '我';
+
+  @override
+  String get momentsAddPhoto => '加张图';
+
+  @override
+  String get momentsChangePhoto => '换一张';
+
+  @override
+  String get momentsNeedSomething => '先写点什么，或者加张图。';
 
   @override
   String get momentsComment => '评论';
@@ -4307,67 +4319,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(field, {
-      'metadata': '元数据',
-      'compatibility': '兼容性',
-      'initialState': '初始状态',
-      'initialSeed': '初始种子',
-      'schemaVersion': '结构版本',
-      'protectedFields': '受保护字段',
-      'minimumEngineVersion': '最低引擎版本',
-      'maximumEngineVersion': '最高引擎版本',
-      'requiredCapabilities': '所需功能',
-      'actors': '角色',
-      'attributes': '属性',
-      'author': '作者',
-      'availability': '可用性',
-      'branchId': '分支 ID',
-      'conditions': '条件',
-      'cooldowns': '冷却',
-      'costs': '消耗',
-      'createdAt': '创建时间',
-      'data': '数据',
-      'day': '天数',
-      'description': '描述',
-      'difficulty': '难度',
-      'effects': '效果',
-      'elapsedMinutes': '已过分钟',
-      'eventHistory': '事件历史',
-      'expression': '表达式',
-      'failureEffects': '失败效果',
-      'format': '格式',
-      'id': 'ID',
-      'initialValue': '初始值',
-      'inventory': '物品栏',
-      'items': '物品',
-      'label': '标签',
-      'locations': '地点',
-      'maximum': '最大值',
-      'minimum': '最小值',
-      'minuteOfDay': '当日分钟',
-      'name': '名称',
-      'narrative': '叙事',
-      'objectiveIds': '目标 ID',
-      'objectiveProgress': '目标进度',
-      'operator': '运算符',
-      'quantity': '数量',
-      'quests': '任务',
-      'relationships': '关系',
-      'source': '来源',
-      'stages': '阶段',
-      'status': '状态',
-      'successEffects': '成功效果',
-      'summary': '摘要',
-      'tags': '标签',
-      'target': '目标',
-      'turn': '回合',
-      'type': '类型',
-      'updatedAt': '更新时间',
-      'value': '值',
-      'variables': '变量',
-      'version': '版本',
-      'other': '$field',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': '元数据',
+        'compatibility': '兼容性',
+        'initialState': '初始状态',
+        'initialSeed': '初始种子',
+        'schemaVersion': '结构版本',
+        'protectedFields': '受保护字段',
+        'minimumEngineVersion': '最低引擎版本',
+        'maximumEngineVersion': '最高引擎版本',
+        'requiredCapabilities': '所需功能',
+        'actors': '角色',
+        'attributes': '属性',
+        'author': '作者',
+        'availability': '可用性',
+        'branchId': '分支 ID',
+        'conditions': '条件',
+        'cooldowns': '冷却',
+        'costs': '消耗',
+        'createdAt': '创建时间',
+        'data': '数据',
+        'day': '天数',
+        'description': '描述',
+        'difficulty': '难度',
+        'effects': '效果',
+        'elapsedMinutes': '已过分钟',
+        'eventHistory': '事件历史',
+        'expression': '表达式',
+        'failureEffects': '失败效果',
+        'format': '格式',
+        'id': 'ID',
+        'initialValue': '初始值',
+        'inventory': '物品栏',
+        'items': '物品',
+        'label': '标签',
+        'locations': '地点',
+        'maximum': '最大值',
+        'minimum': '最小值',
+        'minuteOfDay': '当日分钟',
+        'name': '名称',
+        'narrative': '叙事',
+        'objectiveIds': '目标 ID',
+        'objectiveProgress': '目标进度',
+        'operator': '运算符',
+        'quantity': '数量',
+        'quests': '任务',
+        'relationships': '关系',
+        'source': '来源',
+        'stages': '阶段',
+        'status': '状态',
+        'successEffects': '成功效果',
+        'summary': '摘要',
+        'tags': '标签',
+        'target': '目标',
+        'turn': '回合',
+        'type': '类型',
+        'updatedAt': '更新时间',
+        'value': '值',
+        'variables': '变量',
+        'version': '版本',
+        'other': '$field',
+      },
+    );
     return '$_temp0';
   }
 
@@ -4402,11 +4417,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String dataBankDeleteDocumentBody(
-    int versions,
-    int chunks,
-    int bindings,
-    int files,
-  ) {
+      int versions, int chunks, int bindings, int files) {
     return '将删除 $versions 个版本、$chunks 个分块、$bindings 个绑定和 $files 个托管文件。';
   }
 
@@ -5135,11 +5146,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String supportedPromptMacros(
-    String userMacro,
-    String charMacro,
-    String timeMacro,
-    String dateMacro,
-  ) {
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
     return '支持 $userMacro、$charMacro、$timeMacro 和 $dateMacro 等宏。';
   }
 
@@ -9949,16 +9956,28 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get momentsDisabledEmpty => '你把動態關掉了。想看大家在說什麼，再開回來就好。';
 
   @override
-  String get momentsEmpty => '還沒有動態。先去聊一會兒，或自己寫一則。';
+  String get momentsEmpty => '還沒人發過。寫一句，或發張圖。';
 
   @override
   String get momentsCompose => '發一則';
 
   @override
-  String get momentsComposeHint => '你想讓別人看見什麼？';
+  String get momentsComposeHint => '說點什麼，或加張圖。';
 
   @override
-  String get momentsNeedChat => '先開一場聊天，再回來發文。';
+  String get momentsAuthor => '誰在發';
+
+  @override
+  String get momentsAuthorMe => '我';
+
+  @override
+  String get momentsAddPhoto => '加張圖';
+
+  @override
+  String get momentsChangePhoto => '換一張';
+
+  @override
+  String get momentsNeedSomething => '先寫點什麼，或加張圖。';
 
   @override
   String get momentsComment => '留言';
@@ -10393,67 +10412,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(field, {
-      'metadata': '中繼資料',
-      'compatibility': '相容性',
-      'initialState': '初始狀態',
-      'initialSeed': '初始種子',
-      'schemaVersion': '結構版本',
-      'protectedFields': '受保護欄位',
-      'minimumEngineVersion': '最低引擎版本',
-      'maximumEngineVersion': '最高引擎版本',
-      'requiredCapabilities': '所需功能',
-      'actors': '角色',
-      'attributes': '屬性',
-      'author': '作者',
-      'availability': '可用性',
-      'branchId': '分支 ID',
-      'conditions': '條件',
-      'cooldowns': '冷卻',
-      'costs': '消耗',
-      'createdAt': '建立時間',
-      'data': '資料',
-      'day': '天數',
-      'description': '描述',
-      'difficulty': '難度',
-      'effects': '效果',
-      'elapsedMinutes': '經過分鐘',
-      'eventHistory': '事件歷程',
-      'expression': '運算式',
-      'failureEffects': '失敗效果',
-      'format': '格式',
-      'id': 'ID',
-      'initialValue': '初始值',
-      'inventory': '物品欄',
-      'items': '物品',
-      'label': '標籤',
-      'locations': '地點',
-      'maximum': '最大值',
-      'minimum': '最小值',
-      'minuteOfDay': '當日分鐘',
-      'name': '名稱',
-      'narrative': '敘事',
-      'objectiveIds': '目標 ID',
-      'objectiveProgress': '目標進度',
-      'operator': '運算子',
-      'quantity': '數量',
-      'quests': '任務',
-      'relationships': '關係',
-      'source': '來源',
-      'stages': '階段',
-      'status': '狀態',
-      'successEffects': '成功效果',
-      'summary': '摘要',
-      'tags': '標籤',
-      'target': '目標',
-      'turn': '回合',
-      'type': '類型',
-      'updatedAt': '更新時間',
-      'value': '值',
-      'variables': '變數',
-      'version': '版本',
-      'other': '$field',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      field,
+      {
+        'metadata': '中繼資料',
+        'compatibility': '相容性',
+        'initialState': '初始狀態',
+        'initialSeed': '初始種子',
+        'schemaVersion': '結構版本',
+        'protectedFields': '受保護欄位',
+        'minimumEngineVersion': '最低引擎版本',
+        'maximumEngineVersion': '最高引擎版本',
+        'requiredCapabilities': '所需功能',
+        'actors': '角色',
+        'attributes': '屬性',
+        'author': '作者',
+        'availability': '可用性',
+        'branchId': '分支 ID',
+        'conditions': '條件',
+        'cooldowns': '冷卻',
+        'costs': '消耗',
+        'createdAt': '建立時間',
+        'data': '資料',
+        'day': '天數',
+        'description': '描述',
+        'difficulty': '難度',
+        'effects': '效果',
+        'elapsedMinutes': '經過分鐘',
+        'eventHistory': '事件歷程',
+        'expression': '運算式',
+        'failureEffects': '失敗效果',
+        'format': '格式',
+        'id': 'ID',
+        'initialValue': '初始值',
+        'inventory': '物品欄',
+        'items': '物品',
+        'label': '標籤',
+        'locations': '地點',
+        'maximum': '最大值',
+        'minimum': '最小值',
+        'minuteOfDay': '當日分鐘',
+        'name': '名稱',
+        'narrative': '敘事',
+        'objectiveIds': '目標 ID',
+        'objectiveProgress': '目標進度',
+        'operator': '運算子',
+        'quantity': '數量',
+        'quests': '任務',
+        'relationships': '關係',
+        'source': '來源',
+        'stages': '階段',
+        'status': '狀態',
+        'successEffects': '成功效果',
+        'summary': '摘要',
+        'tags': '標籤',
+        'target': '目標',
+        'turn': '回合',
+        'type': '類型',
+        'updatedAt': '更新時間',
+        'value': '值',
+        'variables': '變數',
+        'version': '版本',
+        'other': '$field',
+      },
+    );
     return '$_temp0';
   }
 
@@ -10488,11 +10510,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String dataBankDeleteDocumentBody(
-    int versions,
-    int chunks,
-    int bindings,
-    int files,
-  ) {
+      int versions, int chunks, int bindings, int files) {
     return '將刪除 $versions 個版本、$chunks 個區塊、$bindings 個綁定與 $files 個受管理檔案。';
   }
 
@@ -11221,11 +11239,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String supportedPromptMacros(
-    String userMacro,
-    String charMacro,
-    String timeMacro,
-    String dateMacro,
-  ) {
+      String userMacro, String charMacro, String timeMacro, String dateMacro) {
     return '支援 $userMacro、$charMacro、$timeMacro 與 $dateMacro 等巨集。';
   }
 

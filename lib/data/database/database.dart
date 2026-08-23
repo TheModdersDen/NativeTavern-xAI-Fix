@@ -530,10 +530,11 @@ class StoryChapters extends Table {
 class MomentPosts extends Table {
   TextColumn get id => text()();
   TextColumn get chatId =>
-      text().references(Chats, #id, onDelete: KeyAction.cascade)();
+      text().nullable().references(Chats, #id, onDelete: KeyAction.cascade)();
   TextColumn get authorId => text()();
   TextColumn get authorName => text()();
   TextColumn get publicBody => text()();
+  TextColumn get imagePath => text().nullable()();
   TextColumn get factBody => text().nullable()();
   TextColumn get chapterId => text().nullable().references(
         StoryChapters,
@@ -552,9 +553,10 @@ class MomentPosts extends Table {
 
   @override
   List<String> get customConstraints => const [
-        "CHECK (origin IN ('chapter', 'user'))",
+        "CHECK (origin IN ('chapter', 'user', 'character'))",
         "CHECK (status IN ('open', 'waiting', 'ignored'))",
         "CHECK (origin != 'chapter' OR chapter_id IS NOT NULL)",
+        "CHECK (length(public_body) > 0 OR image_path IS NOT NULL)",
       ];
 }
 
@@ -644,7 +646,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration {
@@ -655,6 +657,7 @@ class AppDatabase extends _$AppDatabase {
         await _createV15Triggers();
         await _createV16Indexes();
         await _createV17Indexes();
+        await _createV18Indexes();
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from > to) {
@@ -674,6 +677,7 @@ class AppDatabase extends _$AppDatabase {
             await _createV15Triggers();
             await _createV16Indexes();
             await _createV17Indexes();
+            await _createV18Indexes();
             return;
           }
 
@@ -780,6 +784,10 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(momentPosts);
             await m.createTable(momentComments);
             await _createV17Indexes();
+          }
+          if (from < 18) {
+            await _migrateMomentPostsToV18();
+            await _createV18Indexes();
           }
         });
       },
@@ -1083,6 +1091,56 @@ class AppDatabase extends _$AppDatabase {
     for (final statement in statements) {
       await customStatement(statement);
     }
+  }
+
+  Future<void> _createV18Indexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS moment_posts_created_idx '
+          'ON moment_posts (created_at, id)',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
+  Future<void> _migrateMomentPostsToV18() async {
+    await customStatement('ALTER TABLE moment_posts RENAME TO moment_posts_v17');
+    await customStatement('DROP INDEX IF EXISTS moment_posts_chat_idx');
+    await customStatement('DROP INDEX IF EXISTS moment_posts_chapter_unique');
+    await customStatement('''
+      CREATE TABLE moment_posts (
+        id TEXT NOT NULL PRIMARY KEY,
+        chat_id TEXT NULL REFERENCES chats(id) ON DELETE CASCADE,
+        author_id TEXT NOT NULL,
+        author_name TEXT NOT NULL,
+        public_body TEXT NOT NULL,
+        image_path TEXT NULL,
+        fact_body TEXT NULL,
+        chapter_id TEXT NULL REFERENCES story_chapters(id) ON DELETE CASCADE,
+        origin TEXT NOT NULL,
+        status TEXT NOT NULL,
+        write_to_world INTEGER NOT NULL DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        CHECK (origin IN ('chapter', 'user', 'character')),
+        CHECK (status IN ('open', 'waiting', 'ignored')),
+        CHECK (origin != 'chapter' OR chapter_id IS NOT NULL),
+        CHECK (length(public_body) > 0 OR image_path IS NOT NULL)
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO moment_posts (
+        id, chat_id, author_id, author_name, public_body, image_path,
+        fact_body, chapter_id, origin, status, write_to_world,
+        created_at, updated_at
+      )
+      SELECT
+        id, chat_id, author_id, author_name, public_body, NULL,
+        fact_body, chapter_id, origin, status, write_to_world,
+        created_at, updated_at
+      FROM moment_posts_v17
+    ''');
+    await customStatement('DROP TABLE moment_posts_v17');
   }
 
   Future<void> _createV17Indexes() async {

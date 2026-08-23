@@ -5409,13 +5409,17 @@
   "@momentsDisabledEmpty": {
     "description": "Empty state when the user has turned moments off"
   },
-  "momentsEmpty": "Nothing to show yet. Chat for a while, or write something yourself.",
+  "momentsEmpty": "Nobody has posted yet. Write something, or post a photo.",
   "@momentsEmpty": {
     "description": "Empty state when moments is on but there are no posts"
   },
   "momentsCompose": "Post",
-  "momentsComposeHint": "What do you want people to see?",
-  "momentsNeedChat": "Open a chat first, then come back to post.",
+  "momentsComposeHint": "Say something, or add a photo.",
+  "momentsAuthor": "Who is posting",
+  "momentsAuthorMe": "Me",
+  "momentsAddPhoto": "Add a photo",
+  "momentsChangePhoto": "Change photo",
+  "momentsNeedSomething": "Write something or add a photo first.",
   "momentsComment": "Comment",
   "momentsTalk": "Talk",
   "momentsExpose": "Expose",
