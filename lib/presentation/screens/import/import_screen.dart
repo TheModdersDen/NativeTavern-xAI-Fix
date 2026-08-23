@@ -9,9 +9,13 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/world_info.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
+import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/domain/services/import_service.dart';
 import 'package:native_tavern/domain/services/character_regex_import_service.dart';
+import 'package:native_tavern/domain/services/live2d_import_service.dart';
+import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:native_tavern/domain/services/url_import_service.dart';
+import 'package:path/path.dart' as p;
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/regex_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
@@ -108,16 +112,22 @@ class ImportState {
 class ImportNotifier extends StateNotifier<ImportState> {
   final ImportService _importService;
   final UrlImportService _urlImportService;
+  final Live2DImportService _live2dImportService;
+  final Live2DService _live2dService;
   final ImagePicker _imagePicker = ImagePicker();
 
-  ImportNotifier(this._importService, this._urlImportService)
-      : super(const ImportState());
+  ImportNotifier(
+    this._importService,
+    this._urlImportService,
+    this._live2dImportService,
+    this._live2dService,
+  ) : super(const ImportState());
 
   Future<void> pickFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['png', 'charx', 'json'],
+        allowedExtensions: ['png', 'charx', 'json', 'zip', 'skel', 'atlas'],
         allowMultiple: true, // Enable batch import
       );
 
@@ -194,6 +204,15 @@ class ImportNotifier extends StateNotifier<ImportState> {
             final file = File(path);
             final json = await file.readAsString();
             character = await _importService.importFromJson(json);
+            break;
+          case 'zip':
+            character = await _importZip(path);
+            break;
+          case 'skel':
+          case 'atlas':
+            character = await _importLive2DAsCharacter(
+              () => _live2dImportService.importSpineFiles([File(path)]),
+            );
             break;
           default:
             throw Exception('Unsupported file format: $extension');
@@ -283,6 +302,74 @@ class ImportNotifier extends StateNotifier<ImportState> {
   void clear() {
     state = const ImportState();
   }
+
+  Future<Character> _importZip(String path) async {
+    try {
+      return await _importService.importFromCharX(path);
+    } catch (error) {
+      if (!_isMissingCharxPayload(error)) rethrow;
+      return _importLive2DAsCharacter(
+        () => _live2dImportService.importZip(File(path)),
+      );
+    }
+  }
+
+  bool _isMissingCharxPayload(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('card.json') ||
+        message.contains('no character data');
+  }
+
+  Future<Character> _importLive2DAsCharacter(
+    Future<List<Live2DModelDefinition>> Function() importModels,
+  ) async {
+    final models = await importModels();
+    if (models.isEmpty) {
+      throw const Live2DImportException(
+        'No Cubism or Spine model was found in the selected files.',
+      );
+    }
+    final definition = models.first;
+    Live2DModelManifest manifest;
+    try {
+      manifest = await _live2dService.loadManifest(definition);
+    } catch (_) {
+      manifest = Live2DModelManifest(
+        format: definition.format,
+        version: definition.format == Live2DModelFormat.spine ? 4 : 3,
+        mocFile: '',
+        textures: const [],
+        atlasFileName: definition.atlasFileName,
+      );
+    }
+    return _importService.createCharacterFromLive2D(
+      definition: definition,
+      config: Live2DConfig.fromDefinition(definition, manifest),
+      avatarBytes: await _live2dAvatarBytes(definition, manifest),
+    );
+  }
+
+  Future<List<int>?> _live2dAvatarBytes(
+    Live2DModelDefinition definition,
+    Live2DModelManifest manifest,
+  ) async {
+    if (definition.source != Live2DModelSource.appData) return null;
+    final directory = p.join(
+      _importService.dataPath,
+      definition.modelDirectory,
+    );
+    final candidates = [
+      ...manifest.textures,
+      if (definition.atlasFileName != null)
+        p.setExtension(definition.atlasFileName!, '.png'),
+      p.setExtension(definition.modelFileName, '.png'),
+    ];
+    for (final candidate in candidates) {
+      final file = File(p.join(directory, p.basename(candidate)));
+      if (file.existsSync()) return file.readAsBytes();
+    }
+    return null;
+  }
 }
 
 /// Import state provider
@@ -290,7 +377,12 @@ final importStateProvider =
     StateNotifierProvider<ImportNotifier, ImportState>((ref) {
   final importService = ref.watch(importServiceProvider);
   final urlImportService = ref.watch(urlImportServiceProvider);
-  return ImportNotifier(importService, urlImportService);
+  return ImportNotifier(
+    importService,
+    urlImportService,
+    ref.watch(live2DImportServiceProvider),
+    ref.watch(live2DServiceProvider),
+  );
 });
 
 /// Import format enum

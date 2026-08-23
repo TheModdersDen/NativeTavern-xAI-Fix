@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:native_tavern/data/models/character.dart';
+import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/core/utils/path_utils.dart';
 import 'package:native_tavern/core/utils/png_text_chunks.dart';
 import 'package:path/path.dart' as p;
@@ -12,6 +13,8 @@ class ImportService {
   final String _dataPath;
 
   ImportService(this._dataPath);
+
+  String get dataPath => _dataPath;
 
   /// Import character from PNG file (extracts embedded JSON from tEXt chunk)
   Future<Character> importFromPng(String filePath) async {
@@ -90,6 +93,30 @@ class ImportService {
   Future<Character> importFromJson(String json) async {
     final data = jsonDecode(json) as Map<String, dynamic>;
     return _parseCharacterJson(data);
+  }
+
+  /// Creates a playable character bound to an already-imported Live2D model.
+  Future<Character> createCharacterFromLive2D({
+    required Live2DModelDefinition definition,
+    required Live2DConfig config,
+    List<int>? avatarBytes,
+  }) async {
+    final now = DateTime.now();
+    final id = _generateId();
+    String? avatarPath;
+    if (avatarBytes != null && avatarBytes.isNotEmpty) {
+      avatarPath = await _saveAvatar(id, Uint8List.fromList(avatarBytes));
+    }
+    return Character(
+      id: id,
+      name: definition.displayName,
+      assets: CharacterAssets(
+        avatarPath: avatarPath,
+        live2d: config.copyWith(enabled: true),
+      ),
+      createdAt: now,
+      modifiedAt: now,
+    );
   }
 
   /// Export character to PNG with embedded data

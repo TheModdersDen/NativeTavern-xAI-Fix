@@ -201,7 +201,7 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
       _orchestrator,
       _handleTapAt,
     );
-    widget.onReady?.call();
+    _notifyReady();
     final playback = widget.ttsPlayback;
     if (playback?.phase == TTSPlaybackPhase.playing ||
         (playback == null && widget.isSpeaking)) {
@@ -387,6 +387,14 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
     _notifyTransformChanged();
   }
 
+  void _notifyReady() {
+    final callback = widget.onReady;
+    if (callback == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) callback();
+    });
+  }
+
   void _notifyTransformChanged() {
     _transformDirty = false;
     widget.onTransformChanged?.call(
@@ -405,6 +413,10 @@ class _SpineCharacterViewState extends State<_SpineCharacterView>
     WidgetsBinding.instance.removeObserver(this);
     widget.controller?._detachSpine(this);
     _orchestrator.dispose();
+    try {
+      _controller.pause();
+    } catch (_) {}
+    unawaited(_renderingLifecycle.pauseForTeardown());
     _renderingLifecycle.dispose();
     if (!_drawableOwnedByWidget) _drawable?.dispose();
     super.dispose();

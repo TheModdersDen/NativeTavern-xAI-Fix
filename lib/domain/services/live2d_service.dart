@@ -181,27 +181,89 @@ class Live2DService {
       throw const FormatException(
           'The Spine atlas does not reference a texture.');
     }
-    final metadata = await SpineRuntimeService.inspectModel(
-      atlasPath: atlasPath,
-      skeletonPath: skeletonPath,
-    );
-    final version = int.tryParse(metadata.version.split('.').first) ?? 0;
-    return Live2DModelManifest(
-      format: Live2DModelFormat.spine,
-      version: version,
-      mocFile: '',
-      textures: textures,
-      atlasFileName: atlasFileName,
-      motions: [
-        for (var index = 0; index < metadata.animations.length; index++)
-          Live2DMotionRef(
-            group: metadata.animations[index],
-            index: index,
-            file: '',
-            name: metadata.animations[index],
-          ),
-      ],
-    );
+    try {
+      final metadata = await SpineRuntimeService.inspectModel(
+        atlasPath: atlasPath,
+        skeletonPath: skeletonPath,
+      );
+      final version = int.tryParse(metadata.version.split('.').first) ?? 0;
+      return Live2DModelManifest(
+        format: Live2DModelFormat.spine,
+        version: version,
+        mocFile: '',
+        textures: textures,
+        atlasFileName: atlasFileName,
+        motions: [
+          for (var index = 0; index < metadata.animations.length; index++)
+            Live2DMotionRef(
+              group: metadata.animations[index],
+              index: index,
+              file: '',
+              name: metadata.animations[index],
+            ),
+        ],
+      );
+    } catch (error) {
+      final headerVersion = parseSpineBinaryVersion(
+        await File(skeletonPath).readAsBytes(),
+      );
+      if (!isSupportedSpineRuntimeVersion(headerVersion)) {
+        throw FormatException(
+          'The Spine model could not be read by runtime 4.1: $error',
+        );
+      }
+      return Live2DModelManifest(
+        format: Live2DModelFormat.spine,
+        version: spineMajorVersion(headerVersion) ?? 4,
+        mocFile: '',
+        textures: textures,
+        atlasFileName: atlasFileName,
+      );
+    }
+  }
+
+  /// Reads the editor version string from a Spine 4.x `.skel` header.
+  static String? parseSpineBinaryVersion(List<int> bytes) {
+    if (bytes.length < 10) return null;
+    var offset = 8;
+    final length = _readSpineVarint(bytes, offset);
+    if (length == null) return null;
+    offset = length.offset;
+    if (length.value <= 1 || offset + length.value - 1 > bytes.length) {
+      return null;
+    }
+    try {
+      return utf8.decode(bytes.sublist(offset, offset + length.value - 1));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool isSupportedSpineRuntimeVersion(String? version) {
+    return version != null && version.startsWith('4.1');
+  }
+
+  static int? spineMajorVersion(String? version) {
+    if (version == null || version.isEmpty) return null;
+    return int.tryParse(version.split('.').first);
+  }
+
+  static ({int value, int offset})? _readSpineVarint(
+    List<int> bytes,
+    int offset,
+  ) {
+    var result = 0;
+    var shift = 0;
+    var cursor = offset;
+    while (cursor < bytes.length && shift <= 28) {
+      final byte = bytes[cursor++];
+      result |= (byte & 0x7f) << shift;
+      if ((byte & 0x80) == 0) {
+        return (value: result, offset: cursor);
+      }
+      shift += 7;
+    }
+    return null;
   }
 
   /// Extracts page image paths from the standard Spine atlas text format.

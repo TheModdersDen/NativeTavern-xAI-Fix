@@ -189,9 +189,14 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       final zipFiles = files
           .where((file) => file.path.toLowerCase().endsWith('.zip'))
           .toList();
-      final imported = zipFiles.length == 1 && files.length == 1
-          ? await _importService.importZip(zipFiles.single)
-          : await _importService.importSpineFiles(files);
+      final imported = <Live2DModelDefinition>[];
+      if (zipFiles.isNotEmpty) {
+        for (final zipFile in zipFiles) {
+          imported.addAll(await _importService.importZip(zipFile));
+        }
+      } else {
+        imported.addAll(await _importService.importSpineFiles(files));
+      }
       if (!mounted) return;
       final allImported = await _importService.listImportedModels();
       if (!mounted) return;
@@ -460,6 +465,14 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
     }
   }
 
+  void _setStateAfterBuild(VoidCallback fn) {
+    scheduleLive2DEditorSetState(
+      mounted: mounted,
+      setState: setState,
+      fn: fn,
+    );
+  }
+
   Future<void> _showLicenseNotice() async {
     final openTerms = await showDialog<bool>(
       context: context,
@@ -633,9 +646,9 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
                         _previewController.loadedModelId != config.modelId) {
                       return;
                     }
-                    setState(() => _isPreviewReady = true);
+                    _setStateAfterBuild(() => _isPreviewReady = true);
                   },
-                  onTransformChanged: (transform) => setState(
+                  onTransformChanged: (transform) => _setStateAfterBuild(
                     () => _config = config.copyWith(
                       scale: transform.scale,
                       offsetX: transform.offsetX,
@@ -751,6 +764,18 @@ class _Live2DSettingsEditorState extends ConsumerState<_Live2DSettingsEditor> {
       ),
     );
   }
+}
+
+@visibleForTesting
+void scheduleLive2DEditorSetState({
+  required bool mounted,
+  required void Function(VoidCallback fn) setState,
+  required VoidCallback fn,
+}) {
+  if (!mounted) return;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) setState(fn);
+  });
 }
 
 class _SliderTile extends StatelessWidget {

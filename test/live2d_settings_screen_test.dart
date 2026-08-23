@@ -86,6 +86,36 @@ void main() {
     expect(modelService.loadedDefinitions.single.id, 'hiyori_free');
   });
 
+  testWidgets(
+      'preview ready callback does not setState while a child is building',
+      (tester) async {
+    var updates = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            return GestureDetector(
+              onTap: () {},
+              child: Builder(
+                builder: (context) {
+                  scheduleLive2DEditorSetState(
+                    mounted: true,
+                    setState: setState,
+                    fn: () => updates++,
+                  );
+                  return const Text('preview-child');
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(updates, 1);
+  });
+
   testWidgets('imported model management is collapsed by default',
       (tester) async {
     final character = _legacyCharacter();
@@ -175,6 +205,15 @@ class _FakeLive2DService extends Live2DService {
     Live2DModelDefinition definition,
   ) async {
     loadedDefinitions.add(definition);
+    if (definition.format == Live2DModelFormat.spine) {
+      return Live2DModelManifest(
+        format: Live2DModelFormat.spine,
+        version: 4,
+        mocFile: '',
+        textures: const ['preview.png'],
+        atlasFileName: definition.atlasFileName,
+      );
+    }
     return const Live2DModelManifest(
       version: 3,
       mocFile: 'model.moc3',

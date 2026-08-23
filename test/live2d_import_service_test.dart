@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/data/models/live2d.dart';
+import 'package:native_tavern/domain/services/import_service.dart';
 import 'package:native_tavern/domain/services/live2d_import_service.dart';
 import 'package:native_tavern/domain/services/live2d_service.dart';
 import 'package:path/path.dart' as p;
@@ -53,11 +54,99 @@ void main() {
     expect(rediscovered.single.modelFileName, 'test_model.model3.json');
   });
 
+  test('imports a Spine 4.1 ZIP without a native runtime', () async {
+    final zipFile = _writeZip(tempDirectory, 'spine41.zip', {
+      'char067103.skel': _spine41Header(),
+      'char067103.atlas': utf8.encode('''
+char067103.png
+size:64,64
+filter:Linear,Linear
+body
+bounds:0,0,64,64
+'''),
+      'char067103.png': [0x89, 0x50, 0x4e, 0x47],
+    });
+
+    final imported = await Live2DImportService(
+      dataPath: tempDirectory.path,
+      modelService: Live2DService(dataPath: tempDirectory.path),
+    ).importZip(zipFile);
+
+    expect(imported, hasLength(1));
+    expect(imported.single.format, Live2DModelFormat.spine);
+    expect(imported.single.modelFileName, 'char067103.skel');
+    expect(imported.single.atlasFileName, 'char067103.atlas');
+
+    final character =
+        await ImportService(tempDirectory.path).createCharacterFromLive2D(
+      definition: imported.single,
+      config: Live2DConfig.fromDefinition(
+        imported.single,
+        const Live2DModelManifest(
+          format: Live2DModelFormat.spine,
+          version: 4,
+          mocFile: '',
+          textures: ['char067103.png'],
+          atlasFileName: 'char067103.atlas',
+        ),
+      ),
+    );
+    expect(character.name, 'char067103');
+    expect(character.assets?.live2d?.enabled, isTrue);
+    expect(character.assets?.live2d?.format, Live2DModelFormat.spine);
+    expect(character.assets?.live2d?.modelFileName, 'char067103.skel');
+  });
+
+  test('imports the BD2 L2D Viewer Spine ZIP', () async {
+    const zipPath = '/Users/lucy/Downloads/BD2_char067103_BD2-L2D-Viewer.zip';
+    if (!File(zipPath).existsSync()) {
+      return;
+    }
+
+    final imported = await Live2DImportService(
+      dataPath: tempDirectory.path,
+      modelService: Live2DService(dataPath: tempDirectory.path),
+    ).importZip(File(zipPath));
+
+    expect(imported, hasLength(1));
+    expect(imported.single.format, Live2DModelFormat.spine);
+    expect(imported.single.modelFileName, 'char067103.skel');
+    expect(imported.single.atlasFileName, 'char067103.atlas');
+    expect(imported.single.displayName, 'char067103');
+  });
+
+  test('rejects Spine skeletons that are not 4.1', () async {
+    final source = Directory(p.join(tempDirectory.path, 'spine-38'))
+      ..createSync();
+    final skeleton = File(p.join(source.path, 'character.skel'))
+      ..writeAsBytesSync(_spineHeader('3.8.99'));
+    File(p.join(source.path, 'character.atlas')).writeAsStringSync('''
+character.png
+size:64,64
+filter:Linear,Linear
+body
+bounds:0,0,64,64
+''');
+    File(p.join(source.path, 'character.png'))
+        .writeAsBytesSync([0x89, 0x50, 0x4e, 0x47]);
+
+    await expectLater(
+      importService.importSpineFiles([skeleton]),
+      throwsA(
+        isA<Live2DImportException>().having(
+          (error) => error.message,
+          'message',
+          contains('3.8.99'),
+        ),
+      ),
+    );
+  });
+
   test('imports a Spine skeleton with sibling atlas and texture', () async {
     final source = Directory(p.join(tempDirectory.path, 'spine-source'))
       ..createSync();
     final skeleton = File(p.join(source.path, 'character.skel'))
-      ..writeAsBytesSync([0x53, 0x4b, 0x45, 0x4c]);
+      ..writeAsBytesSync(_spine41Header());
     File(p.join(source.path, 'character.atlas')).writeAsStringSync('''
 character.png
 size:64,64
@@ -77,6 +166,28 @@ bounds:0,0,64,64
     final rediscovered = await importService.listImportedModels();
     expect(rediscovered.single.format, Live2DModelFormat.spine);
     expect(rediscovered.single.atlasFileName, 'character.atlas');
+  });
+
+  test('imports a Spine package when only the texture is selected', () async {
+    final source = Directory(p.join(tempDirectory.path, 'spine-texture'))
+      ..createSync();
+    File(p.join(source.path, 'character.skel'))
+        .writeAsBytesSync(_spine41Header());
+    File(p.join(source.path, 'character.atlas')).writeAsStringSync('''
+character.png
+size:64,64
+filter:Linear,Linear
+body
+bounds:0,0,64,64
+''');
+    final texture = File(p.join(source.path, 'character.png'))
+      ..writeAsBytesSync([0x89, 0x50, 0x4e, 0x47]);
+
+    final imported = await importService.importSpineFiles([texture]);
+
+    expect(imported, hasLength(1));
+    expect(imported.single.modelFileName, 'character.skel');
+    expect(imported.single.atlasFileName, 'character.atlas');
   });
 
   test('rejects path traversal without writing outside the model library',
@@ -262,6 +373,16 @@ Map<String, List<int>> _validModelEntries() {
     'package/test_model.physics3.json': utf8.encode('{}'),
     'package/motions/idle.motion3.json': utf8.encode('{}'),
   };
+}
+
+List<int> _spine41Header() => _spineHeader('4.1.11');
+
+List<int> _spineHeader(String version) {
+  return <int>[
+    ...List<int>.filled(8, 0),
+    version.length + 1,
+    ...utf8.encode(version),
+  ];
 }
 
 File _writeZip(

@@ -86,19 +86,34 @@ void main() {
     expect(lifecycle.appliedPaused, isFalse);
   });
 
-  test('detachment invalidates an in-flight native result', () async {
-    final call = Completer<void>();
+  test('detachment pauses the native renderer before Flutter unmounts',
+      () async {
+    final applied = <bool>[];
     final lifecycle = Live2DRenderingLifecycle(
-      applyPaused: (_) => call.future,
+      applyPaused: (paused) async => applied.add(paused),
     );
 
-    final attach = lifecycle.setAttached(true);
+    await lifecycle.setAttached(true);
     await lifecycle.setAttached(false);
-    call.complete();
-    await attach;
 
     expect(lifecycle.isAttached, isFalse);
-    expect(lifecycle.appliedPaused, isNull);
+    expect(applied, [false, true]);
+    expect(lifecycle.appliedPaused, isTrue);
+    expect(lifecycle.desiredPaused, isTrue);
+  });
+
+  test('teardown pause stops the native loop even before dispose', () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    await lifecycle.setAttached(true);
+    await lifecycle.pauseForTeardown();
+
+    expect(applied, [false, true]);
+    expect(lifecycle.desiredPaused, isTrue);
+    expect(lifecycle.appliedPaused, isTrue);
   });
 
   test('a failed native call can be retried', () async {
@@ -117,5 +132,19 @@ void main() {
     expect(attempts, 2);
     expect(lifecycle.appliedPaused, isTrue);
     expect(lifecycle.lastError, isNull);
+  });
+
+  test('dispose requests a final pause of the native renderer', () async {
+    final applied = <bool>[];
+    final lifecycle = Live2DRenderingLifecycle(
+      applyPaused: (paused) async => applied.add(paused),
+    );
+
+    await lifecycle.setAttached(true);
+    lifecycle.dispose();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(applied, [false, true]);
+    expect(lifecycle.isAttached, isFalse);
   });
 }

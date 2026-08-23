@@ -201,6 +201,32 @@ void main() {
     expect(restored.format, Live2DModelFormat.cubism);
   });
 
+  test('reads a Spine 4.1 version string from a .skel header', () {
+    expect(
+      Live2DService.parseSpineBinaryVersion(const [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        7,
+        52,
+        46,
+        49,
+        46,
+        49,
+        49,
+      ]),
+      '4.1.11',
+    );
+    expect(Live2DService.isSupportedSpineRuntimeVersion('4.1.11'), isTrue);
+    expect(Live2DService.isSupportedSpineRuntimeVersion('4.2.0'), isFalse);
+    expect(Live2DService.isSupportedSpineRuntimeVersion('3.8.99'), isFalse);
+  });
+
   test('parses texture page paths from a Spine atlas', () {
     const atlas = '''
 character.png

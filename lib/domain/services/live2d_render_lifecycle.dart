@@ -1,3 +1,5 @@
+import 'dart:async';
+
 typedef Live2DRenderingPauseApplier = Future<void> Function(bool paused);
 
 /// Serializes app lifecycle changes before they reach a native render loop.
@@ -33,10 +35,13 @@ class Live2DRenderingLifecycle {
 
   Future<void> setAttached(bool attached) {
     if (_disposed || _attached == attached) return _tail;
-    _attached = attached;
+    if (!attached) {
+      return _detachAndPause();
+    }
+    _attached = true;
     _appliedPaused = null;
     _attachmentGeneration++;
-    return attached ? _scheduleSynchronization() : Future<void>.value();
+    return _scheduleSynchronization();
   }
 
   Future<void> setAppActive(bool active) {
@@ -88,10 +93,47 @@ class Live2DRenderingLifecycle {
     _lastError = null;
   }
 
+  /// Stops the native display-link / ticker before Flutter unmounts the view.
+  ///
+  /// Leaving the pump running races Impeller text teardown and crashes iOS.
+  Future<void> pauseForTeardown() {
+    if (_disposed) return Future<void>.value();
+    _desiredPaused = true;
+    return _applyPauseNow();
+  }
+
   void dispose() {
+    if (_disposed) return;
     _disposed = true;
     _attached = false;
+    _desiredPaused = true;
     _appliedPaused = null;
     _attachmentGeneration++;
+    unawaited(_applyPaused(true).catchError((_) {}));
+  }
+
+  Future<void> _detachAndPause() {
+    _attached = false;
+    _desiredPaused = true;
+    _appliedPaused = null;
+    _attachmentGeneration++;
+    return _applyPauseNow();
+  }
+
+  Future<void> _applyPauseNow() {
+    final generation = _attachmentGeneration;
+    final operation = _tail.catchError((_) {}).then((_) async {
+      try {
+        await _applyPaused(true);
+        if (!_disposed && generation == _attachmentGeneration) {
+          _appliedPaused = true;
+          _lastError = null;
+        }
+      } catch (error) {
+        _lastError = error;
+      }
+    });
+    _tail = operation;
+    return operation;
   }
 }

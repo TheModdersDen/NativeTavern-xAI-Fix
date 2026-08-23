@@ -486,7 +486,7 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
         await _synchronizeIOSRenderScale(generation);
       }
       if (!mounted || generation != _loadGeneration) return;
-      widget.onReady?.call();
+      _notifyReady();
       final playback = widget.ttsPlayback;
       if (playback?.phase == TTSPlaybackPhase.playing) {
         await _orchestrator.onMessageStarted();
@@ -793,6 +793,14 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     _notifyTransformChanged();
   }
 
+  void _notifyReady() {
+    final callback = widget.onReady;
+    if (callback == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) callback();
+    });
+  }
+
   void _notifyTransformChanged() {
     _transformDirty = false;
     widget.onTransformChanged?.call(
@@ -811,11 +819,22 @@ class _Live2DCharacterViewState extends State<Live2DCharacterView>
     WidgetsBinding.instance.removeObserver(this);
     widget.controller?._detach(_nativeController);
     _orchestrator.dispose();
-    _renderingLifecycle.dispose();
-    unawaited(
-      _setMouthOpen(0).whenComplete(_nativeController.dispose),
-    );
+    unawaited(_stopNativeRenderer());
     super.dispose();
+  }
+
+  Future<void> _stopNativeRenderer() async {
+    try {
+      await _renderingLifecycle.pauseForTeardown();
+    } catch (_) {}
+    try {
+      await _nativeController.setRenderingPaused(true);
+    } catch (_) {}
+    try {
+      await _setMouthOpen(0);
+    } catch (_) {}
+    _renderingLifecycle.dispose();
+    _nativeController.dispose();
   }
 
   @override

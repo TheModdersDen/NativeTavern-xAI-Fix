@@ -245,12 +245,7 @@ class Live2DImportService {
     final skeletons = existingFiles
         .where((file) => p.extension(file.path).toLowerCase() == '.skel')
         .toList();
-    if (skeletons.length != 1) {
-      throw const Live2DImportException(
-        'Select one Spine .skel file with its .atlas and texture files.',
-      );
-    }
-    final skeleton = skeletons.single;
+    final skeleton = _resolveSelectedSkeleton(existingFiles, skeletons);
     final selectedAtlases = existingFiles
         .where((file) => p.extension(file.path).toLowerCase() == '.atlas')
         .toList();
@@ -525,27 +520,13 @@ class Live2DImportService {
           modelFileName: p.basename(modelFile.path),
         );
       }
-      try {
-        final manifest = await modelService.loadManifest(
-          Live2DModelDefinition(
-            id: 'validation',
-            displayName: 'validation',
-            modelDirectory: modelDirectory,
-            modelFileName: p.basename(modelFile.path),
-            source: Live2DModelSource.fileSystem,
-            format: Live2DModelFormat.spine,
-            atlasFileName: atlasFileName,
-          ),
-        );
-        if (manifest.version != 4) {
-          throw Live2DImportException(
-            'Unsupported Spine data version ${manifest.version}.x.',
-          );
-        }
-      } catch (error) {
-        if (error is Live2DImportException) rethrow;
+      final version = Live2DService.parseSpineBinaryVersion(
+        await modelFile.readAsBytes(),
+      );
+      if (!Live2DService.isSupportedSpineRuntimeVersion(version)) {
         throw Live2DImportException(
-          'The Spine model could not be read by runtime 4.1: $error',
+          'Unsupported Spine data version ${version ?? 'unknown'}. '
+          'NativeTavern requires Spine 4.1 .skel files.',
         );
       }
     } else {
@@ -589,6 +570,31 @@ class Live2DImportService {
           : Live2DModelFormat.cubism.name,
       'atlasFileName': atlasFileName,
     };
+  }
+
+  File _resolveSelectedSkeleton(
+    List<File> existingFiles,
+    List<File> selectedSkeletons,
+  ) {
+    if (selectedSkeletons.length == 1) return selectedSkeletons.single;
+    if (selectedSkeletons.length > 1) {
+      throw const Live2DImportException(
+        'Select one Spine .skel file with its .atlas and texture files.',
+      );
+    }
+
+    const companionExtensions = {'.atlas', '.png', '.jpg', '.jpeg', '.webp'};
+    for (final file in existingFiles) {
+      if (!companionExtensions.contains(p.extension(file.path).toLowerCase())) {
+        continue;
+      }
+      final sibling = File(p.setExtension(file.path, '.skel'));
+      if (sibling.existsSync()) return sibling;
+    }
+
+    throw const Live2DImportException(
+      'Select one Spine .skel file with its .atlas and texture files.',
+    );
   }
 
   File _findSpineAtlas(File skeleton) {
