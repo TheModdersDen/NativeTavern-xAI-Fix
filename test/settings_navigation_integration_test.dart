@@ -55,6 +55,8 @@ void main() {
         l10n.localFeatures,
         l10n.memoryInbox,
         l10n.memoryInboxSubtitle,
+        l10n.openDataBank,
+        l10n.openDataBankSubtitle,
         l10n.dataBank,
         l10n.dataBankSubtitle,
         l10n.rpgScenarioEditor,

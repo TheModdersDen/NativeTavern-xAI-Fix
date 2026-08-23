@@ -5369,6 +5369,27 @@
   "useCurrentChatConnection": "Use current chat connection",
   "chatConnectionAppliedToEmbeddings": "Chat endpoint and API key applied to embeddings",
   "localFeatures": "Local features",
+  "playHub": "Play",
+  "@playHub": {
+    "description": "Bottom tab and play hub title"
+  },
+  "story": "Story",
+  "@story": {
+    "description": "Play hub row for the story timeline"
+  },
+  "moments": "Moments",
+  "@moments": {
+    "description": "Play hub row for the public moments feed"
+  },
+  "playFeatureComingSoon": "This play feature is not ready yet.",
+  "@playFeatureComingSoon": {
+    "description": "Placeholder body for unfinished play destinations"
+  },
+  "openDataBank": "Open Data Bank",
+  "@openDataBank": {
+    "description": "Settings jump to the existing data bank, not as a homepage"
+  },
+  "openDataBankSubtitle": "Opens the library from Play",
   "memoryInbox": "Memory inbox",
   "memoryInboxSubtitle": "Review and maintain long-term memories",
   "dataBank": "Data Bank",

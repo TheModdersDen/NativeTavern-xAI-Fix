@@ -26,7 +26,7 @@ class _BottomNavBar extends StatelessWidget {
     if (location.startsWith('/characters')) {
       return 1;
     }
-    if (location.startsWith('/world-info')) {
+    if (location.startsWith('/play') || location.startsWith('/world-info')) {
       return 2;
     }
     if (location.startsWith('/ai-config')) {
@@ -47,7 +47,7 @@ class _BottomNavBar extends StatelessWidget {
         context.go(AppRoutes.characters);
         break;
       case 2:
-        context.go(AppRoutes.worldInfo);
+        context.go(AppRoutes.play);
         break;
       case 3:
         context.go(AppRoutes.aiConfig);
@@ -61,7 +61,7 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = _calculateSelectedIndex(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return NavigationBar(
       selectedIndex: selectedIndex,
@@ -78,9 +78,9 @@ class _BottomNavBar extends StatelessWidget {
           label: l10n.characters,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.auto_stories_outlined),
-          selectedIcon: const Icon(Icons.auto_stories),
-          label: l10n.worldInfo,
+          icon: const Icon(Icons.explore_outlined),
+          selectedIcon: const Icon(Icons.explore),
+          label: l10n.playHub,
         ),
         NavigationDestination(
           icon: const Icon(Icons.auto_awesome_outlined),
