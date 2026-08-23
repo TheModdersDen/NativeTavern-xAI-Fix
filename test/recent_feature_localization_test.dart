@@ -29,6 +29,10 @@ void main() {
     final l10n = AppLocalizationsZh();
 
     expect(l10n.memoryInbox, '记忆收件箱');
+    expect(l10n.playHub, '玩法');
+    expect(l10n.story, '故事');
+    expect(l10n.moments, '动态');
+    expect(l10n.openDataBank, '打开资料');
     expect(l10n.dataBank, '资料库');
     expect(l10n.rpgScenarioEditor, 'RPG 剧本编辑器');
     expect(l10n.capabilityCheck, '功能检查');

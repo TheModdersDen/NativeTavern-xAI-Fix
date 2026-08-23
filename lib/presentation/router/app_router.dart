@@ -41,6 +41,9 @@ import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.da
 import 'package:native_tavern/presentation/screens/import/import_screen.dart';
 import 'package:native_tavern/presentation/screens/personas/personas_screen.dart';
 import 'package:native_tavern/presentation/screens/world_info/world_info_screen.dart';
+import 'package:native_tavern/presentation/screens/play/moments_placeholder_screen.dart';
+import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
+import 'package:native_tavern/presentation/screens/play/story_placeholder_screen.dart';
 import 'package:native_tavern/presentation/screens/groups/groups_screen.dart';
 import 'package:native_tavern/presentation/screens/groups/group_detail_screen.dart';
 import 'package:native_tavern/presentation/screens/tags/tags_screen.dart';
@@ -66,6 +69,9 @@ abstract class AppRoutes {
   static const aiPresets = '/ai-presets';
   static const import_ = '/import';
   static const personas = '/personas';
+  static const play = '/play';
+  static const playStory = '/play/story';
+  static const playMoments = '/play/moments';
   static const worldInfo = '/world-info';
   static const groups = '/groups';
   static const groupDetail = '/groups/:id';
@@ -123,6 +129,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'characters',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: CharacterListScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.play,
+            name: 'play',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: PlayHubScreen(),
             ),
           ),
           GoRoute(
@@ -407,6 +420,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'toolCallingSettings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ToolCallingSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.playStory,
+        name: 'playStory',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const StoryPlaceholderScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.playMoments,
+        name: 'playMoments',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MomentsPlaceholderScreen(),
       ),
       GoRoute(
         path: AppRoutes.dataBank,

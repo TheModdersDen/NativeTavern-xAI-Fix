@@ -80,7 +80,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -103,11 +103,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -130,7 +130,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('vi'),
     Locale('zh'),
-    Locale('zh', 'TW')
+    Locale('zh', 'TW'),
   ];
 
   /// The application title
@@ -7213,6 +7213,42 @@ abstract class AppLocalizations {
   /// **'Local features'**
   String get localFeatures;
 
+  /// Bottom tab and play hub title
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get playHub;
+
+  /// Play hub row for the story timeline
+  ///
+  /// In en, this message translates to:
+  /// **'Story'**
+  String get story;
+
+  /// Play hub row for the public moments feed
+  ///
+  /// In en, this message translates to:
+  /// **'Moments'**
+  String get moments;
+
+  /// Placeholder body for unfinished play destinations
+  ///
+  /// In en, this message translates to:
+  /// **'This play feature is not ready yet.'**
+  String get playFeatureComingSoon;
+
+  /// Settings jump to the existing data bank, not as a homepage
+  ///
+  /// In en, this message translates to:
+  /// **'Open Data Bank'**
+  String get openDataBank;
+
+  /// No description provided for @openDataBankSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the library from Play'**
+  String get openDataBankSubtitle;
+
   /// No description provided for @memoryInbox.
   ///
   /// In en, this message translates to:
@@ -7980,7 +8016,11 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{versions} version(s), {chunks} chunk(s), {bindings} binding(s), and {files} managed file(s) will be removed.'**
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files);
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  );
 
   /// No description provided for @dataBankChatRetrieval.
   ///
@@ -9295,7 +9335,11 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supports macros such as {userMacro}, {charMacro}, {timeMacro}, and {dateMacro}.'**
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro);
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  );
 
   /// No description provided for @enterPromptContent.
   ///
@@ -11073,26 +11117,26 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-        'ar',
-        'de',
-        'en',
-        'es',
-        'fr',
-        'hi',
-        'id',
-        'it',
-        'ja',
-        'ko',
-        'ms',
-        'nl',
-        'pl',
-        'pt',
-        'ru',
-        'th',
-        'tr',
-        'vi',
-        'zh'
-      ].contains(locale.languageCode);
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'hi',
+    'id',
+    'it',
+    'ja',
+    'ko',
+    'ms',
+    'nl',
+    'pl',
+    'pt',
+    'ru',
+    'th',
+    'tr',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -11154,8 +11198,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

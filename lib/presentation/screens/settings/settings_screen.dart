@@ -97,8 +97,8 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             key: const Key('data-bank-settings-tile'),
             leading: const Icon(Icons.library_books_outlined),
-            title: Text(l10n.dataBank),
-            subtitle: Text(l10n.dataBankSubtitle),
+            title: Text(l10n.openDataBank),
+            subtitle: Text(l10n.openDataBankSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.dataBank),
           ),

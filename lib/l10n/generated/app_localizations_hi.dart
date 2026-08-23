@@ -3942,6 +3942,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get localFeatures => 'Local features';
 
   @override
+  String get playHub => 'Play';
+
+  @override
+  String get story => 'Story';
+
+  @override
+  String get moments => 'Moments';
+
+  @override
+  String get playFeatureComingSoon => 'This play feature is not ready yet.';
+
+  @override
+  String get openDataBank => 'Open Data Bank';
+
+  @override
+  String get openDataBankSubtitle => 'Opens the library from Play';
+
+  @override
   String get memoryInbox => 'Memory inbox';
 
   @override
@@ -4363,70 +4381,67 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String rpgFieldLabel(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'metadata': 'Metadata',
-        'compatibility': 'Compatibility',
-        'initialState': 'Initial State',
-        'initialSeed': 'Initial Seed',
-        'schemaVersion': 'Schema Version',
-        'protectedFields': 'Protected Fields',
-        'minimumEngineVersion': 'Minimum Engine Version',
-        'maximumEngineVersion': 'Maximum Engine Version',
-        'requiredCapabilities': 'Required Capabilities',
-        'actors': 'Actors',
-        'attributes': 'Attributes',
-        'author': 'Author',
-        'availability': 'Availability',
-        'branchId': 'Branch ID',
-        'conditions': 'Conditions',
-        'cooldowns': 'Cooldowns',
-        'costs': 'Costs',
-        'createdAt': 'Created At',
-        'data': 'Data',
-        'day': 'Day',
-        'description': 'Description',
-        'difficulty': 'Difficulty',
-        'effects': 'Effects',
-        'elapsedMinutes': 'Elapsed Minutes',
-        'eventHistory': 'Event History',
-        'expression': 'Expression',
-        'failureEffects': 'Failure Effects',
-        'format': 'Format',
-        'id': 'ID',
-        'initialValue': 'Initial Value',
-        'inventory': 'Inventory',
-        'items': 'Items',
-        'label': 'Label',
-        'locations': 'Locations',
-        'maximum': 'Maximum',
-        'minimum': 'Minimum',
-        'minuteOfDay': 'Minute of Day',
-        'name': 'Name',
-        'narrative': 'Narrative',
-        'objectiveIds': 'Objective IDs',
-        'objectiveProgress': 'Objective Progress',
-        'operator': 'Operator',
-        'quantity': 'Quantity',
-        'quests': 'Quests',
-        'relationships': 'Relationships',
-        'source': 'Source',
-        'stages': 'Stages',
-        'status': 'Status',
-        'successEffects': 'Success Effects',
-        'summary': 'Summary',
-        'tags': 'Tags',
-        'target': 'Target',
-        'turn': 'Turn',
-        'type': 'Type',
-        'updatedAt': 'Updated At',
-        'value': 'Value',
-        'variables': 'Variables',
-        'version': 'Version',
-        'other': '$field',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'metadata': 'Metadata',
+      'compatibility': 'Compatibility',
+      'initialState': 'Initial State',
+      'initialSeed': 'Initial Seed',
+      'schemaVersion': 'Schema Version',
+      'protectedFields': 'Protected Fields',
+      'minimumEngineVersion': 'Minimum Engine Version',
+      'maximumEngineVersion': 'Maximum Engine Version',
+      'requiredCapabilities': 'Required Capabilities',
+      'actors': 'Actors',
+      'attributes': 'Attributes',
+      'author': 'Author',
+      'availability': 'Availability',
+      'branchId': 'Branch ID',
+      'conditions': 'Conditions',
+      'cooldowns': 'Cooldowns',
+      'costs': 'Costs',
+      'createdAt': 'Created At',
+      'data': 'Data',
+      'day': 'Day',
+      'description': 'Description',
+      'difficulty': 'Difficulty',
+      'effects': 'Effects',
+      'elapsedMinutes': 'Elapsed Minutes',
+      'eventHistory': 'Event History',
+      'expression': 'Expression',
+      'failureEffects': 'Failure Effects',
+      'format': 'Format',
+      'id': 'ID',
+      'initialValue': 'Initial Value',
+      'inventory': 'Inventory',
+      'items': 'Items',
+      'label': 'Label',
+      'locations': 'Locations',
+      'maximum': 'Maximum',
+      'minimum': 'Minimum',
+      'minuteOfDay': 'Minute of Day',
+      'name': 'Name',
+      'narrative': 'Narrative',
+      'objectiveIds': 'Objective IDs',
+      'objectiveProgress': 'Objective Progress',
+      'operator': 'Operator',
+      'quantity': 'Quantity',
+      'quests': 'Quests',
+      'relationships': 'Relationships',
+      'source': 'Source',
+      'stages': 'Stages',
+      'status': 'Status',
+      'successEffects': 'Success Effects',
+      'summary': 'Summary',
+      'tags': 'Tags',
+      'target': 'Target',
+      'turn': 'Turn',
+      'type': 'Type',
+      'updatedAt': 'Updated At',
+      'value': 'Value',
+      'variables': 'Variables',
+      'version': 'Version',
+      'other': '$field',
+    });
     return '$_temp0';
   }
 
@@ -4461,7 +4476,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String dataBankDeleteDocumentBody(
-      int versions, int chunks, int bindings, int files) {
+    int versions,
+    int chunks,
+    int bindings,
+    int files,
+  ) {
     return '$versions version(s), $chunks chunk(s), $bindings binding(s), and $files managed file(s) will be removed.';
   }
 
@@ -5223,7 +5242,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String supportedPromptMacros(
-      String userMacro, String charMacro, String timeMacro, String dateMacro) {
+    String userMacro,
+    String charMacro,
+    String timeMacro,
+    String dateMacro,
+  ) {
     return 'Supports macros such as $userMacro, $charMacro, $timeMacro, and $dateMacro.';
   }
 
