@@ -3950,6 +3950,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get story => 'Story';
 
   @override
+  String get storyEmptyHint => 'A story appears after you chat for a while.';
+
+  @override
+  String get storyGoToChat => 'Go to chat';
+
+  @override
+  String get storyJotNote => 'Jot a note';
+
+  @override
+  String get storyJotNoteHint =>
+      'Write a short note. This is not a chapter editor.';
+
+  @override
   String get moments => 'Moments';
 
   @override

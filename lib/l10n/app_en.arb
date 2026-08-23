@@ -5377,6 +5377,22 @@
   "@story": {
     "description": "Play hub row for the story timeline"
   },
+  "storyEmptyHint": "A story appears after you chat for a while.",
+  "@storyEmptyHint": {
+    "description": "Empty state on the story chapter timeline"
+  },
+  "storyGoToChat": "Go to chat",
+  "@storyGoToChat": {
+    "description": "Empty-state button that leaves the story page for chat"
+  },
+  "storyJotNote": "Jot a note",
+  "@storyJotNote": {
+    "description": "Story-page action to write a short note"
+  },
+  "storyJotNoteHint": "Write a short note. This is not a chapter editor.",
+  "@storyJotNoteHint": {
+    "description": "Hint inside the story jot-a-note sheet"
+  },
   "moments": "Moments",
   "@moments": {
     "description": "Play hub row for the public moments feed"

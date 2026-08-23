@@ -31,6 +31,9 @@ void main() {
     expect(l10n.memoryInbox, '记忆收件箱');
     expect(l10n.playHub, '玩法');
     expect(l10n.story, '故事');
+    expect(l10n.storyEmptyHint, '聊一段时间才会有故事。');
+    expect(l10n.storyGoToChat, '去聊天');
+    expect(l10n.storyJotNote, '记一笔');
     expect(l10n.moments, '动态');
     expect(l10n.openDataBank, '打开资料');
     expect(l10n.dataBank, '资料库');

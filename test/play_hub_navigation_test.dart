@@ -21,7 +21,7 @@ import 'package:native_tavern/presentation/screens/chat/chat_screen.dart';
 import 'package:native_tavern/presentation/screens/data_bank/data_bank_screen.dart';
 import 'package:native_tavern/presentation/screens/play/moments_placeholder_screen.dart';
 import 'package:native_tavern/presentation/screens/play/play_hub_screen.dart';
-import 'package:native_tavern/presentation/screens/play/story_placeholder_screen.dart';
+import 'package:native_tavern/presentation/screens/play/story_screen.dart';
 import 'package:native_tavern/presentation/screens/settings/settings_screen.dart';
 import 'package:native_tavern/presentation/screens/world_info/world_info_screen.dart';
 import 'package:native_tavern/presentation/widgets/common/app_shell.dart';
@@ -178,22 +178,25 @@ void main() {
     expect(find.text('data-bank-page'), findsOneWidget);
   });
 
-  testWidgets('story and moments placeholders stay empty without crashing',
+  testWidgets('story and moments destinations stay empty without crashing',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     await tester.pumpWidget(
-      const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: StoryPlaceholderScreen(),
+      const ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StoryScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('not ready'), findsOneWidget);
+    expect(find.text(l10n.storyEmptyHint), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(
@@ -240,7 +243,7 @@ void main() {
         ),
         GoRoute(
           path: AppRoutes.playStory,
-          builder: (_, __) => const StoryPlaceholderScreen(),
+          builder: (_, __) => const StoryScreen(),
         ),
         GoRoute(
           path: AppRoutes.playMoments,
@@ -295,7 +298,7 @@ void main() {
     router.go(AppRoutes.playStory);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, l10n.story), findsOneWidget);
-    expect(find.text(l10n.playFeatureComingSoon), findsOneWidget);
+    expect(find.text(l10n.storyEmptyHint), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     router.go(AppRoutes.playMoments);
