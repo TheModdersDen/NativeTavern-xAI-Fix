@@ -2532,6 +2532,14 @@
   "@aboutImageGenerationDescription": {
     "description": "About image generation description"
   },
+  "imagine": "Imagine",
+  "@imagine": {
+    "description": "Chat input action that opens image generation"
+  },
+  "fillImagePromptWithAi": "Fill with AI",
+  "@fillImagePromptWithAi": {
+    "description": "Ask the chat model to write an image prompt"
+  },
   "imagineCommand": "/imagine Command",
   "@imagineCommand": {
     "description": "Imagine command label"

@@ -2,8 +2,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/image_generation_service.dart';
+import 'package:native_tavern/domain/services/image_prompt_composer.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 import 'package:native_tavern/presentation/providers/image_gen_providers.dart';
+import 'package:native_tavern/presentation/providers/settings_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 
 /// Dialog for generating images from message content
@@ -17,11 +19,15 @@ class ImageGenerationDialog extends ConsumerStatefulWidget {
   /// The generation mode
   final ImageGenMode mode;
 
+  /// When true, ask the chat model to fill the prompt after the dialog opens.
+  final bool autoCompose;
+
   const ImageGenerationDialog({
     super.key,
     required this.basePrompt,
     this.characterName,
     this.mode = ImageGenMode.free,
+    this.autoCompose = false,
   });
 
   @override
@@ -33,6 +39,7 @@ class ImageGenerationDialog extends ConsumerStatefulWidget {
     required String basePrompt,
     String? characterName,
     ImageGenMode mode = ImageGenMode.free,
+    bool autoCompose = false,
   }) {
     return showDialog<ImageGenResult>(
       context: context,
@@ -41,6 +48,7 @@ class ImageGenerationDialog extends ConsumerStatefulWidget {
         basePrompt: basePrompt,
         characterName: characterName,
         mode: mode,
+        autoCompose: autoCompose,
       ),
     );
   }
@@ -50,9 +58,11 @@ class _ImageGenerationDialogState extends ConsumerState<ImageGenerationDialog> {
   late TextEditingController _promptController;
   late TextEditingController _negativePromptController;
   bool _isGenerating = false;
+  bool _isComposingPrompt = false;
   double _progress = 0.0;
   String? _error;
   Uint8List? _generatedImage;
+  final _composer = const ImagePromptComposer();
 
   @override
   void initState() {
@@ -61,6 +71,11 @@ class _ImageGenerationDialogState extends ConsumerState<ImageGenerationDialog> {
     _negativePromptController = TextEditingController(
       text: ref.read(imageGenSettingsProvider).defaultNegativePrompt ?? '',
     );
+    if (widget.autoCompose) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _fillPromptWithAi();
+      });
+    }
   }
 
   @override
@@ -155,12 +170,31 @@ class _ImageGenerationDialogState extends ConsumerState<ImageGenerationDialog> {
               const SizedBox(height: 16),
 
               // Prompt
-              Text(
-                l10n.prompt,
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Text(
+                    l10n.prompt,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    key: const Key('image-gen-fill-prompt'),
+                    onPressed: _isGenerating || _isComposingPrompt
+                        ? null
+                        : _fillPromptWithAi,
+                    icon: _isComposingPrompt
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.auto_fix_high, size: 16),
+                    label: Text(l10n.fillImagePromptWithAi),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               TextField(
@@ -177,7 +211,7 @@ class _ImageGenerationDialogState extends ConsumerState<ImageGenerationDialog> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                enabled: !_isGenerating,
+                enabled: !_isGenerating && !_isComposingPrompt,
               ),
               const SizedBox(height: 16),
 
@@ -312,6 +346,52 @@ class _ImageGenerationDialogState extends ConsumerState<ImageGenerationDialog> {
           ),
       ],
     );
+  }
+
+  Future<void> _fillPromptWithAi() async {
+    final l10n = AppLocalizations.of(context);
+    final config = ref.read(llmConfigProvider);
+    if (config.apiKey.isEmpty && config.apiUrl.isEmpty) {
+      setState(() => _error = l10n.configureNow);
+      return;
+    }
+
+    setState(() {
+      _isComposingPrompt = true;
+      _error = null;
+    });
+
+    try {
+      final sceneText = widget.basePrompt.trim().isEmpty
+          ? _promptController.text
+          : widget.basePrompt;
+      final generated = await ref.read(llmServiceProvider).generate(
+            _composer.composeMessages(
+              sceneText: sceneText,
+              characterName: widget.characterName,
+            ),
+            config,
+          );
+      final prompt = _composer.normalizeModelOutput(generated);
+      if (!mounted) return;
+      _promptController.text = prompt.isEmpty
+          ? _composer.fallbackPrompt(
+              sceneText: sceneText,
+              characterName: widget.characterName,
+            )
+          : prompt;
+    } catch (error) {
+      if (!mounted) return;
+      _promptController.text = _composer.fallbackPrompt(
+        sceneText: widget.basePrompt,
+        characterName: widget.characterName,
+      );
+      setState(() => _error = error.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _isComposingPrompt = false);
+      }
+    }
   }
 
   Future<void> _generate() async {

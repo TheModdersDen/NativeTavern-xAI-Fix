@@ -1961,6 +1961,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  Future<void> _openImagineFromInput(ActiveChatState chatState) async {
+    final typed = _messageController.text.trim();
+    final lastAssistant = chatState.messages.reversed
+        .cast<ChatMessage?>()
+        .firstWhere(
+          (message) => message?.role == MessageRole.assistant,
+          orElse: () => null,
+        );
+    final result = await ImageGenerationDialog.show(
+      context,
+      basePrompt: typed.isNotEmpty ? typed : (lastAssistant?.content ?? ''),
+      characterName: chatState.character?.name,
+      mode: ImageGenMode.free,
+      autoCompose: typed.isEmpty,
+    );
+    if (result != null && result.images.isNotEmpty && mounted) {
+      await _attachGeneratedImagesToNewMessage(result);
+    }
+  }
+
+  Future<void> _attachGeneratedImagesToNewMessage(ImageGenResult result) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final attachments = await _saveGeneratedImages(result);
+      await ref.read(activeChatProvider.notifier).addLocalMessage(
+            role: MessageRole.user,
+            content: result.prompt,
+            attachments: attachments,
+          );
+      _showSnackBar('${l10n.generationComplete} (${attachments.length})');
+      _scrollToBottom();
+    } catch (error) {
+      _showCommandError(l10n.failedToSaveImage('$error'));
+    }
+  }
+
   void _showImageGenerationDialog(
     ChatMessage message,
     Character? character,
@@ -1972,6 +2008,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       mode: message.role == MessageRole.assistant
           ? ImageGenMode.lastMessage
           : ImageGenMode.free,
+      autoCompose: message.role == MessageRole.assistant,
     );
 
     if (result != null && result.images.isNotEmpty && mounted) {
@@ -2298,6 +2335,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 onTap: () => _showFormattingMenu(),
               ),
               const SizedBox(width: 8),
+              if (ref.watch(imageGenSettingsProvider).enabled)
+                _InputMenuButton(
+                  key: const Key('chat-input-imagine'),
+                  icon: Icons.auto_awesome,
+                  label: AppLocalizations.of(context).imagine,
+                  onTap: () {
+                    _setInputMenuVisible(false);
+                    _openImagineFromInput(chatState);
+                  },
+                ),
+              if (ref.watch(imageGenSettingsProvider).enabled)
+                const SizedBox(width: 8),
               // Context usage indicator
               Expanded(
                 child: Container(
@@ -3863,6 +3912,7 @@ class _InputMenuButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _InputMenuButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,

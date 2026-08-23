@@ -34,6 +34,8 @@ void main() {
     expect(l10n.storyEmptyHint, '聊一段时间才会有故事。');
     expect(l10n.storyGoToChat, '去聊天');
     expect(l10n.storyJotNote, '记一笔');
+    expect(l10n.imagine, '生图');
+    expect(l10n.fillImagePromptWithAi, 'AI 填写提示词');
     expect(l10n.moments, '动态');
     expect(l10n.momentsComment, '评论');
     expect(l10n.momentsTalk, '开聊');

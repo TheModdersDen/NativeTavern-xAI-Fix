@@ -1753,6 +1753,12 @@ class AppLocalizationsZh extends AppLocalizations {
       '使用 AI 模型生成图片。可在聊天中使用 /imagine 命令，或在角色编辑器中生成角色肖像。';
 
   @override
+  String get imagine => '生图';
+
+  @override
+  String get fillImagePromptWithAi => 'AI 填写提示词';
+
+  @override
   String get imagineCommand => '/imagine 命令';
 
   @override
@@ -7825,6 +7831,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get aboutImageGenerationDescription =>
       '使用 AI 模型產生圖片。可在聊天中使用 /imagine 命令，或在角色編輯器中產生角色肖像。';
+
+  @override
+  String get imagine => '生圖';
+
+  @override
+  String get fillImagePromptWithAi => 'AI 填寫提示詞';
 
   @override
   String get imagineCommand => '/imagine 命令';
