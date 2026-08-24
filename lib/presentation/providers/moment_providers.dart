@@ -46,6 +46,7 @@ final operationLogRepositoryProvider = Provider<OperationLogRepository>((ref) {
 final momentServiceProvider = Provider<MomentService>((ref) {
   return MomentService(
     momentRepository: ref.watch(momentRepositoryProvider),
+    characterRepository: ref.watch(characterRepositoryProvider),
     chatRepository: ref.watch(chatRepositoryProvider),
     worldInfoRepository: ref.watch(worldInfoRepositoryProvider),
     dataBank: ref.watch(dataBankRepositoryProvider),

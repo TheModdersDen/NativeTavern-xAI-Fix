@@ -20,4 +20,12 @@ abstract interface class MomentRepository {
   Future<MomentComment> addComment(MomentComment comment);
 
   Future<List<MomentComment>> listComments(String postId);
+
+  Future<void> deleteComment(String commentId);
+
+  Future<bool> toggleLike(String postId, String authorId, {DateTime? at});
+
+  Future<int> likeCount(String postId);
+
+  Future<bool> hasLiked(String postId, String authorId);
 }

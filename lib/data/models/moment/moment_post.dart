@@ -74,9 +74,8 @@ class MomentPost extends Equatable {
     final trimmedChatId = chatId?.trim();
     return MomentPost._(
       id: id,
-      chatId: trimmedChatId == null || trimmedChatId.isEmpty
-          ? null
-          : trimmedChatId,
+      chatId:
+          trimmedChatId == null || trimmedChatId.isEmpty ? null : trimmedChatId,
       authorId: authorId,
       authorName: authorName.trim(),
       publicBody: trimmedBody,
@@ -172,6 +171,7 @@ class MomentComment extends Equatable {
   final String authorName;
   final String body;
   final MomentCommentKind kind;
+  final String? parentCommentId;
   final DateTime createdAt;
 
   const MomentComment._({
@@ -181,6 +181,7 @@ class MomentComment extends Equatable {
     required this.authorName,
     required this.body,
     required this.kind,
+    required this.parentCommentId,
     required this.createdAt,
   });
 
@@ -191,6 +192,7 @@ class MomentComment extends Equatable {
     required String authorName,
     required String body,
     MomentCommentKind kind = MomentCommentKind.comment,
+    String? parentCommentId,
     required DateTime createdAt,
   }) {
     _requireNonEmpty(id, 'id');
@@ -205,6 +207,9 @@ class MomentComment extends Equatable {
       authorName: authorName.trim(),
       body: body.trim(),
       kind: kind,
+      parentCommentId: parentCommentId?.trim().isEmpty == true
+          ? null
+          : parentCommentId?.trim(),
       createdAt: createdAt,
     );
   }
@@ -217,6 +222,7 @@ class MomentComment extends Equatable {
         authorName,
         body,
         kind,
+        parentCommentId,
         createdAt,
       ];
 }

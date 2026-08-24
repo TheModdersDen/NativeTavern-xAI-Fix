@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:gal/gal.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/data/models/moment/moment_post.dart';
 import 'package:native_tavern/domain/services/moment_service.dart';
@@ -28,8 +29,8 @@ class MomentsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(appSettingsProvider);
     final feed = ref.watch(momentFeedProvider);
-    final characters = ref.watch(characterListProvider).asData?.value ??
-        const <Character>[];
+    final characters =
+        ref.watch(characterListProvider).asData?.value ?? const <Character>[];
     final persona = ref.watch(activePersonaProvider).asData?.value;
     final selfName = _personaName(persona, l10n.momentsAuthorMe);
     final palette = _MomentsPalette.of(context);
@@ -371,13 +372,43 @@ class _MomentRowState extends ConsumerState<_MomentRow> {
                           setState(() => _pendingComments.add(comment));
                         },
                       ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        key: Key('moment-like-${post.id}'),
+                        tooltip: 'Like',
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          widget.item.likedByViewer
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          size: 18,
+                          color: widget.item.likedByViewer
+                              ? Colors.redAccent
+                              : palette.time,
+                        ),
+                        onPressed: () async {
+                          await ref
+                              .read(momentServiceProvider)
+                              .toggleLike(post.id);
+                          ref.invalidate(momentFeedProvider);
+                        },
+                      ),
+                      if (widget.item.likeCount > 0)
+                        Text(
+                          '${widget.item.likeCount}',
+                          style: TextStyle(color: palette.time, fontSize: 13),
+                        ),
                     ],
                   ),
                   if (comments.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _CommentBox(
+                      postId: post.id,
                       comments: comments,
                       palette: palette,
+                      onChanged: () {
+                        ref.invalidate(momentFeedProvider);
+                      },
                     ),
                   ],
                 ],
@@ -510,10 +541,17 @@ class _CommentButton extends ConsumerWidget {
 }
 
 class _CommentBox extends StatelessWidget {
-  const _CommentBox({required this.comments, required this.palette});
+  const _CommentBox({
+    required this.postId,
+    required this.comments,
+    required this.palette,
+    required this.onChanged,
+  });
 
+  final String postId;
   final List<MomentComment> comments;
   final _MomentsPalette palette;
+  final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -528,31 +566,128 @@ class _CommentBox extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final comment in comments)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: comment.authorName,
-                        style: TextStyle(
-                          color: palette.name,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '：${comment.body}',
-                        style: TextStyle(color: palette.text, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
+              _CommentLine(
+                postId: postId,
+                comment: comment,
+                palette: palette,
+                onChanged: onChanged,
               ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _CommentLine extends StatelessWidget {
+  const _CommentLine({
+    required this.postId,
+    required this.comment,
+    required this.palette,
+    required this.onChanged,
+  });
+
+  final String postId;
+  final MomentComment comment;
+  final _MomentsPalette palette;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _reply(context),
+      onLongPress: comment.authorId == MomentService.userAuthorId
+          ? () => _delete(context)
+          : null,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              if (comment.parentCommentId != null) const TextSpan(text: '↳ '),
+              TextSpan(
+                text: comment.authorName,
+                style: TextStyle(
+                  color: palette.name,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: '：${comment.body}',
+                style: TextStyle(color: palette.text, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _reply(BuildContext context) async {
+    final controller = TextEditingController();
+    final submit = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          12,
+          10,
+          12,
+          10 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: 'Reply to ${comment.authorName}',
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(sheetContext, true),
+              child: const Text('Send'),
+            ),
+          ],
+        ),
+      ),
+    );
+    final body = controller.text.trim();
+    controller.dispose();
+    if (submit != true || body.isEmpty || !context.mounted) return;
+    await ProviderScope.containerOf(context, listen: false)
+        .read(momentServiceProvider)
+        .reply(postId: postId, parentCommentId: comment.id, body: body);
+    onChanged();
+  }
+
+  Future<void> _delete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        content: const Text('Delete your comment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ProviderScope.containerOf(context, listen: false)
+        .read(momentServiceProvider)
+        .deleteComment(comment.id, authorId: MomentService.userAuthorId);
+    onChanged();
   }
 }
 
@@ -587,16 +722,45 @@ class _MomentPhoto extends StatelessWidget {
           },
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(2),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 184, maxHeight: 184),
-          child: Image.file(
-            image,
-            key: photoKey,
-            fit: BoxFit.cover,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 184, maxHeight: 184),
+              child: Image.file(image, key: photoKey, fit: BoxFit.cover),
+            ),
           ),
-        ),
+          Positioned(
+            right: 2,
+            bottom: 2,
+            child: IconButton(
+              tooltip: 'Save to Photos',
+              visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black54,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.download_outlined, size: 18),
+              onPressed: () async {
+                try {
+                  await Gal.putImage(image.path, album: 'NativeTavern');
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Saved to Photos')),
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Unable to save photo')),
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -700,8 +864,7 @@ class _MomentsComposePageState extends State<_MomentsComposePage> {
     super.dispose();
   }
 
-  bool get _canSend =>
-      _controller.text.trim().isNotEmpty || _imagePath != null;
+  bool get _canSend => _controller.text.trim().isNotEmpty || _imagePath != null;
 
   @override
   Widget build(BuildContext context) {
@@ -716,35 +879,35 @@ class _MomentsComposePageState extends State<_MomentsComposePage> {
             child: SizedBox(
               width: MediaQuery.sizeOf(context).width,
               child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
-              child: Row(
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      l10n.cancel,
-                      style: TextStyle(color: palette.text),
-                    ),
-                  ),
-                  const Spacer(),
-                  FilledButton(
-                    key: const Key('moments-compose-send'),
-                    onPressed: _canSend ? _submit : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF07C160),
-                      disabledBackgroundColor: const Color(0xFFB5E5C8),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(64, 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+                child: Row(
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        l10n.cancel,
+                        style: TextStyle(color: palette.text),
                       ),
                     ),
-                    child: Text(l10n.momentsCompose),
-                  ),
-                ],
+                    const Spacer(),
+                    FilledButton(
+                      key: const Key('moments-compose-send'),
+                      onPressed: _canSend ? _submit : null,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF07C160),
+                        disabledBackgroundColor: const Color(0xFFB5E5C8),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(64, 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Text(l10n.momentsCompose),
+                    ),
+                  ],
+                ),
               ),
-            ),
             ),
           ),
           Expanded(
@@ -778,7 +941,8 @@ class _MomentsComposePageState extends State<_MomentsComposePage> {
                               border: Border.all(color: palette.divider),
                               borderRadius: BorderRadius.circular(2),
                             ),
-                            child: Icon(Icons.add, size: 36, color: palette.time),
+                            child:
+                                Icon(Icons.add, size: 36, color: palette.time),
                           ),
                         )
                       : GestureDetector(
@@ -867,7 +1031,8 @@ class _CoverGrainPainter extends CustomPainter {
     final paint = Paint()..color = Colors.black.withValues(alpha: 0.08);
     for (var i = 0; i < 80; i++) {
       canvas.drawCircle(
-        Offset(random.nextDouble() * size.width, random.nextDouble() * size.height),
+        Offset(random.nextDouble() * size.width,
+            random.nextDouble() * size.height),
         random.nextDouble() * 18 + 4,
         paint,
       );

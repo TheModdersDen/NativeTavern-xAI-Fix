@@ -34,6 +34,8 @@ class Characters extends Table {
       text().withDefault(const Constant('{}'))(); // JSON
   BoolColumn get isFavorite =>
       boolean().withDefault(const Constant(false))(); // Favorite flag
+  BoolColumn get isDeleted =>
+      boolean().withDefault(const Constant(false))(); // Soft deletion marker
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get modifiedAt => dateTime()();
 
@@ -569,6 +571,7 @@ class MomentComments extends Table {
   TextColumn get authorName => text()();
   TextColumn get body => text()();
   TextColumn get kind => text()();
+  TextColumn get parentCommentId => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -578,6 +581,17 @@ class MomentComments extends Table {
   List<String> get customConstraints => const [
         "CHECK (kind IN ('comment', 'expose', 'character'))",
       ];
+}
+
+@DataClassName('MomentPostLikeRow')
+class MomentPostLikes extends Table {
+  TextColumn get postId =>
+      text().references(MomentPosts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get authorId => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {postId, authorId};
 }
 
 @DataClassName('DataBankBindingRow')
@@ -640,13 +654,14 @@ class DataBankBindings extends Table {
   StoryChapters,
   MomentPosts,
   MomentComments,
+  MomentPostLikes,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration {
@@ -803,6 +818,22 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from >= 16 && from < 22) {
             await m.addColumn(storyChapters, storyChapters.narrativeJson);
+          }
+          if (from < 23) {
+            if (!await _hasColumn('characters', 'is_deleted')) {
+              await m.addColumn(characters, characters.isDeleted);
+            }
+            if (!await _hasColumn('moment_comments', 'parent_comment_id')) {
+              await m.addColumn(momentComments, momentComments.parentCommentId);
+            }
+            final likesExist = await customSelect(
+              "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'moment_post_likes'",
+            ).getSingleOrNull();
+            if (likesExist == null) await m.createTable(momentPostLikes);
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS moment_comments_parent_idx '
+              'ON moment_comments (parent_comment_id)',
+            );
           }
         });
       },
@@ -1193,6 +1224,12 @@ class AppDatabase extends _$AppDatabase {
     }
     if (!needsRepair) return;
 
+    final commentColumns = await customSelect(
+      'PRAGMA table_info(moment_comments)',
+    ).get();
+    final hasParentColumn = commentColumns
+        .map((row) => row.read<String>('name'))
+        .contains('parent_comment_id');
     await customStatement('PRAGMA foreign_keys = OFF');
     await customStatement('''
       CREATE TABLE moment_comments_new (
@@ -1202,15 +1239,28 @@ class AppDatabase extends _$AppDatabase {
         author_name TEXT NOT NULL,
         body TEXT NOT NULL,
         kind TEXT NOT NULL,
+        ${hasParentColumn ? 'parent_comment_id TEXT NULL,' : ''}
         created_at INTEGER NOT NULL,
         CHECK (kind IN ('comment', 'expose', 'character'))
       )
     ''');
-    await customStatement('''
-      INSERT INTO moment_comments_new
-      SELECT id, post_id, author_id, author_name, body, kind, created_at
-      FROM moment_comments
-    ''');
+    if (hasParentColumn) {
+      await customStatement('''
+        INSERT INTO moment_comments_new
+          (id, post_id, author_id, author_name, body, kind,
+           parent_comment_id, created_at)
+        SELECT id, post_id, author_id, author_name, body, kind,
+               parent_comment_id, created_at
+        FROM moment_comments
+      ''');
+    } else {
+      await customStatement('''
+        INSERT INTO moment_comments_new
+          (id, post_id, author_id, author_name, body, kind, created_at)
+        SELECT id, post_id, author_id, author_name, body, kind, created_at
+        FROM moment_comments
+      ''');
+    }
     await customStatement('DROP TABLE moment_comments');
     await customStatement(
       'ALTER TABLE moment_comments_new RENAME TO moment_comments',
@@ -1299,6 +1349,11 @@ class AppDatabase extends _$AppDatabase {
     }
 
     return true;
+  }
+
+  Future<bool> _hasColumn(String table, String column) async {
+    final rows = await customSelect('PRAGMA table_info("$table")').get();
+    return rows.map((row) => row.read<String>('name')).contains(column);
   }
 
   Future<void> _assertNoPartialV15Schema() async {

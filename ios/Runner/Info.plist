@@ -49,6 +49,8 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to import character images, avatars, and chat backgrounds.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app saves moment photos to your photo library when you request it.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to take photos for character avatars and chat images.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -8,6 +8,7 @@ import 'package:native_tavern/data/models/long_term_memory.dart';
 import 'package:native_tavern/data/models/moment/moment_post.dart';
 import 'package:native_tavern/data/models/world_info.dart';
 import 'package:native_tavern/data/repositories/chat_repository.dart';
+import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/data/repositories/world_info_repository.dart';
 import 'package:native_tavern/domain/repositories/data_bank_repository.dart';
 import 'package:native_tavern/domain/repositories/long_term_memory_repository.dart';
@@ -25,10 +26,14 @@ final class MomentFeedItem {
   const MomentFeedItem({
     required this.post,
     this.comments = const [],
+    this.likeCount = 0,
+    this.likedByViewer = false,
   });
 
   final MomentPost post;
   final List<MomentComment> comments;
+  final int likeCount;
+  final bool likedByViewer;
 }
 
 typedef MomentLlmTransport = Future<String> Function(
@@ -66,6 +71,7 @@ final class MomentService {
     required MomentRepository momentRepository,
     required String dataPath,
     ChatRepository? chatRepository,
+    CharacterRepository? characterRepository,
     WorldInfoRepository? worldInfoRepository,
     DataBankRepository? dataBank,
     CharacterSocialService? social,
@@ -78,6 +84,7 @@ final class MomentService {
     this.minInterval = defaultMinInterval,
   })  : _moments = momentRepository,
         _chats = chatRepository,
+        _characters = characterRepository,
         _worldInfo = worldInfoRepository,
         _dataBank = dataBank,
         _social = social,
@@ -95,6 +102,7 @@ final class MomentService {
 
   final MomentRepository _moments;
   final ChatRepository? _chats;
+  final CharacterRepository? _characters;
   final WorldInfoRepository? _worldInfo;
   final DataBankRepository? _dataBank;
   final CharacterSocialService? _social;
@@ -109,13 +117,15 @@ final class MomentService {
 
   Future<List<MomentFeedItem>> loadFeed() async {
     await rehomeMispostedReplies();
-    final posts = await _moments.listAll();
+    final posts = await _visiblePosts(await _moments.listAll());
     final items = <MomentFeedItem>[];
     for (final post in posts) {
       items.add(
         MomentFeedItem(
           post: post,
           comments: await _moments.listComments(post.id),
+          likeCount: await _moments.likeCount(post.id),
+          likedByViewer: await _moments.hasLiked(post.id, userAuthorId),
         ),
       );
     }
@@ -188,6 +198,7 @@ final class MomentService {
     required String body,
     String authorId = userAuthorId,
     String authorName = userAuthorName,
+    String? parentCommentId,
   }) async {
     final comment = await _moments.addComment(
       MomentComment(
@@ -196,6 +207,7 @@ final class MomentService {
         authorId: authorId,
         authorName: authorName,
         body: body,
+        parentCommentId: parentCommentId,
         createdAt: _now(),
       ),
     );
@@ -209,6 +221,79 @@ final class MomentService {
       );
     }
     return comment;
+  }
+
+  Future<MomentComment> reply({
+    required String postId,
+    required String parentCommentId,
+    required String body,
+    String authorId = userAuthorId,
+    String authorName = userAuthorName,
+  }) {
+    return comment(
+      postId: postId,
+      parentCommentId: parentCommentId,
+      body: body,
+      authorId: authorId,
+      authorName: authorName,
+    );
+  }
+
+  Future<void> deleteComment(String commentId,
+      {required String authorId}) async {
+    final posts = await _moments.listAll();
+    for (final post in posts) {
+      final comment = (await _moments.listComments(post.id))
+          .where((item) => item.id == commentId)
+          .firstOrNull;
+      if (comment != null) {
+        if (comment.authorId != authorId) {
+          throw StateError('Only the comment author can delete it.');
+        }
+        await _moments.deleteComment(commentId);
+        return;
+      }
+    }
+    throw StateError('Comment not found.');
+  }
+
+  Future<bool> toggleLike(String postId, {String authorId = userAuthorId}) {
+    return _moments.toggleLike(postId, authorId, at: _now());
+  }
+
+  Future<void> unlike(String postId, {String authorId = userAuthorId}) async {
+    if (await _moments.hasLiked(postId, authorId)) {
+      await _moments.toggleLike(postId, authorId, at: _now());
+    }
+  }
+
+  /// Built-in, constrained tool for an agent's proactive chat message.
+  Future<bool> messagePlayer({
+    required String characterId,
+    required String body,
+    String? chatId,
+  }) async {
+    final chats = _chats;
+    if (chats == null || body.trim().isEmpty) return false;
+    final chat = chatId == null
+        ? (await chats.getChatsForCharacter(characterId)).firstOrNull
+        : await chats.getChat(chatId);
+    if (chat == null || chat.characterId != characterId || chat.isGroupChat) {
+      return false;
+    }
+    await chats.addMessage(
+      ChatMessage(
+        id: _createId(),
+        chatId: chat.id,
+        role: MessageRole.assistant,
+        content: body.trim(),
+        characterId: characterId,
+        characterName: (await _characters?.getCharacter(characterId))?.name,
+        timestamp: _now(),
+        metadata: const {'source': 'moment_agent'},
+      ),
+    );
+    return true;
   }
 
   /// Move standalone character replies onto the player/friend post they
@@ -314,12 +399,26 @@ final class MomentService {
   }
 
   Future<List<MomentFeedItem>> _commentTargets(Character character) async {
-    return [
+    final candidates = [
       for (final item in await visibleFeedFor(character.id, limit: 8))
         if (item.post.authorId != character.id &&
             !item.comments.any((comment) => comment.authorId == character.id))
           item,
     ];
+    if (candidates.isEmpty) return candidates;
+    // Standalone service instances (for imports/tests) do not have the world
+    // roster needed for social throttling.
+    if (_characters == null) return candidates;
+    // A wake is an opportunity, not a broadcast. Use the card's talkativeness
+    // as a soft gate so the same player post does not summon every character.
+    final probability =
+        (0.12 + character.talkativeness.clamp(0, 1) * 0.55).clamp(0.12, 0.67);
+    final seed = '${character.id}:${candidates.first.post.id}'.codeUnits.fold(
+          0,
+          (sum, value) => (sum * 31 + value) & 0x7fffffff,
+        );
+    if ((seed % 1000) / 1000 >= probability) return const [];
+    return candidates;
   }
 
   /// Posts this character can know about: their own, friends', and the player's,
@@ -330,7 +429,7 @@ final class MomentService {
   }) async {
     final friendIds = await _friendIds(characterId);
     final items = <MomentFeedItem>[];
-    for (final post in await _moments.listAll()) {
+    for (final post in await _visiblePosts(await _moments.listAll())) {
       if (!isPostVisibleTo(
         post,
         viewerId: characterId,
@@ -342,11 +441,26 @@ final class MomentService {
         MomentFeedItem(
           post: post,
           comments: await _moments.listComments(post.id),
+          likeCount: await _moments.likeCount(post.id),
+          likedByViewer: await _moments.hasLiked(post.id, userAuthorId),
         ),
       );
       if (items.length >= limit) break;
     }
     return items;
+  }
+
+  Future<List<MomentPost>> _visiblePosts(List<MomentPost> posts) async {
+    final characters = _characters;
+    if (characters == null) return posts;
+    final activeIds = (await characters.getAllCharacters())
+        .map((character) => character.id)
+        .toSet();
+    return posts
+        .where((post) =>
+            post.origin != MomentPostOrigin.character ||
+            activeIds.contains(post.authorId))
+        .toList(growable: false);
   }
 
   static bool isMomentsKnowledgeMemory(LongTermMemory memory) {
@@ -383,7 +497,11 @@ final class MomentService {
           : '${post.authorName}: $body';
       final lines = <String>[headline];
       for (final comment in item.comments) {
-        lines.add('  ${comment.authorName}: ${comment.body}');
+        lines.add(
+          includeIds
+              ? '  ${comment.id} | ${comment.authorName}: ${comment.body}'
+              : '  ${comment.authorName}: ${comment.body}',
+        );
       }
       blocks.add(lines.join('\n'));
     }
@@ -504,6 +622,56 @@ final class MomentService {
               item.post.origin == MomentPostOrigin.user,
         ),
     ];
+    MomentAgentDecision? decision;
+    try {
+      final visibleComments = {
+        for (final item in commentTargets)
+          for (final comment in item.comments) comment.id,
+      };
+      decision = parseMomentAgentDecision(
+        raw,
+        allowedPostIds: {for (final item in commentTargets) item.post.id},
+        allowedCommentIds: {
+          for (final item in commentTargets)
+            for (final comment in item.comments)
+              if (comment.authorId == character.id) comment.id,
+        },
+        allowedParentCommentIds: visibleComments,
+      );
+    } on FormatException {
+      decision = null;
+    }
+    if (decision != null) {
+      switch (decision.action) {
+        case MomentAgentAction.like:
+          await toggleLike(decision.postId!, authorId: character.id);
+          return const MomentWakeResult.skipped();
+        case MomentAgentAction.unlike:
+          await unlike(decision.postId!, authorId: character.id);
+          return const MomentWakeResult.skipped();
+        case MomentAgentAction.reply:
+          return MomentWakeResult.commented(
+            await reply(
+              postId: decision.postId!,
+              parentCommentId: decision.parentCommentId!,
+              body: decision.body!,
+              authorId: character.id,
+              authorName: _displayName(character),
+            ),
+          );
+        case MomentAgentAction.deleteOwnComment:
+          await deleteComment(decision.commentId!, authorId: character.id);
+          return const MomentWakeResult.skipped();
+        case MomentAgentAction.messagePlayer:
+          await messagePlayer(characterId: character.id, body: decision.body!);
+          return const MomentWakeResult.skipped();
+        case MomentAgentAction.skip:
+          return const MomentWakeResult.skipped();
+        case MomentAgentAction.comment:
+        case MomentAgentAction.post:
+          break;
+      }
+    }
     MomentWakePlan? plan;
     try {
       plan = parseMomentWakePlan(

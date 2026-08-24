@@ -154,6 +154,16 @@ class $CharactersTable extends Characters
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _isDeletedMeta =
+      const VerificationMeta('isDeleted');
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+      'is_deleted', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_deleted" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -187,6 +197,7 @@ class $CharactersTable extends Characters
         characterBookJson,
         extensionsJson,
         isFavorite,
+        isDeleted,
         createdAt,
         modifiedAt
       ];
@@ -308,6 +319,10 @@ class $CharactersTable extends Characters
           isFavorite.isAcceptableOrUnknown(
               data['is_favorite']!, _isFavoriteMeta));
     }
+    if (data.containsKey('is_deleted')) {
+      context.handle(_isDeletedMeta,
+          isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -370,6 +385,8 @@ class $CharactersTable extends Characters
           DriftSqlType.string, data['${effectivePrefix}extensions_json'])!,
       isFavorite: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
+      isDeleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       modifiedAt: attachedDatabase.typeMapping
@@ -403,6 +420,7 @@ class Character extends DataClass implements Insertable<Character> {
   final String characterBookJson;
   final String extensionsJson;
   final bool isFavorite;
+  final bool isDeleted;
   final DateTime createdAt;
   final DateTime modifiedAt;
   const Character(
@@ -425,6 +443,7 @@ class Character extends DataClass implements Insertable<Character> {
       required this.characterBookJson,
       required this.extensionsJson,
       required this.isFavorite,
+      required this.isDeleted,
       required this.createdAt,
       required this.modifiedAt});
   @override
@@ -452,6 +471,7 @@ class Character extends DataClass implements Insertable<Character> {
     map['character_book_json'] = Variable<String>(characterBookJson);
     map['extensions_json'] = Variable<String>(extensionsJson);
     map['is_favorite'] = Variable<bool>(isFavorite);
+    map['is_deleted'] = Variable<bool>(isDeleted);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['modified_at'] = Variable<DateTime>(modifiedAt);
     return map;
@@ -480,6 +500,7 @@ class Character extends DataClass implements Insertable<Character> {
       characterBookJson: Value(characterBookJson),
       extensionsJson: Value(extensionsJson),
       isFavorite: Value(isFavorite),
+      isDeleted: Value(isDeleted),
       createdAt: Value(createdAt),
       modifiedAt: Value(modifiedAt),
     );
@@ -510,6 +531,7 @@ class Character extends DataClass implements Insertable<Character> {
       characterBookJson: serializer.fromJson<String>(json['characterBookJson']),
       extensionsJson: serializer.fromJson<String>(json['extensionsJson']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       modifiedAt: serializer.fromJson<DateTime>(json['modifiedAt']),
     );
@@ -538,6 +560,7 @@ class Character extends DataClass implements Insertable<Character> {
       'characterBookJson': serializer.toJson<String>(characterBookJson),
       'extensionsJson': serializer.toJson<String>(extensionsJson),
       'isFavorite': serializer.toJson<bool>(isFavorite),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'modifiedAt': serializer.toJson<DateTime>(modifiedAt),
     };
@@ -563,6 +586,7 @@ class Character extends DataClass implements Insertable<Character> {
           String? characterBookJson,
           String? extensionsJson,
           bool? isFavorite,
+          bool? isDeleted,
           DateTime? createdAt,
           DateTime? modifiedAt}) =>
       Character(
@@ -586,6 +610,7 @@ class Character extends DataClass implements Insertable<Character> {
         characterBookJson: characterBookJson ?? this.characterBookJson,
         extensionsJson: extensionsJson ?? this.extensionsJson,
         isFavorite: isFavorite ?? this.isFavorite,
+        isDeleted: isDeleted ?? this.isDeleted,
         createdAt: createdAt ?? this.createdAt,
         modifiedAt: modifiedAt ?? this.modifiedAt,
       );
@@ -633,6 +658,7 @@ class Character extends DataClass implements Insertable<Character> {
           : this.extensionsJson,
       isFavorite:
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       modifiedAt:
           data.modifiedAt.present ? data.modifiedAt.value : this.modifiedAt,
@@ -661,6 +687,7 @@ class Character extends DataClass implements Insertable<Character> {
           ..write('characterBookJson: $characterBookJson, ')
           ..write('extensionsJson: $extensionsJson, ')
           ..write('isFavorite: $isFavorite, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('modifiedAt: $modifiedAt')
           ..write(')'))
@@ -688,6 +715,7 @@ class Character extends DataClass implements Insertable<Character> {
         characterBookJson,
         extensionsJson,
         isFavorite,
+        isDeleted,
         createdAt,
         modifiedAt
       ]);
@@ -714,6 +742,7 @@ class Character extends DataClass implements Insertable<Character> {
           other.characterBookJson == this.characterBookJson &&
           other.extensionsJson == this.extensionsJson &&
           other.isFavorite == this.isFavorite &&
+          other.isDeleted == this.isDeleted &&
           other.createdAt == this.createdAt &&
           other.modifiedAt == this.modifiedAt);
 }
@@ -738,6 +767,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
   final Value<String> characterBookJson;
   final Value<String> extensionsJson;
   final Value<bool> isFavorite;
+  final Value<bool> isDeleted;
   final Value<DateTime> createdAt;
   final Value<DateTime> modifiedAt;
   final Value<int> rowid;
@@ -761,6 +791,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
     this.characterBookJson = const Value.absent(),
     this.extensionsJson = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.modifiedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -785,6 +816,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
     this.characterBookJson = const Value.absent(),
     this.extensionsJson = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     required DateTime createdAt,
     required DateTime modifiedAt,
     this.rowid = const Value.absent(),
@@ -812,6 +844,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
     Expression<String>? characterBookJson,
     Expression<String>? extensionsJson,
     Expression<bool>? isFavorite,
+    Expression<bool>? isDeleted,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? modifiedAt,
     Expression<int>? rowid,
@@ -837,6 +870,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
       if (characterBookJson != null) 'character_book_json': characterBookJson,
       if (extensionsJson != null) 'extensions_json': extensionsJson,
       if (isFavorite != null) 'is_favorite': isFavorite,
+      if (isDeleted != null) 'is_deleted': isDeleted,
       if (createdAt != null) 'created_at': createdAt,
       if (modifiedAt != null) 'modified_at': modifiedAt,
       if (rowid != null) 'rowid': rowid,
@@ -863,6 +897,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
       Value<String>? characterBookJson,
       Value<String>? extensionsJson,
       Value<bool>? isFavorite,
+      Value<bool>? isDeleted,
       Value<DateTime>? createdAt,
       Value<DateTime>? modifiedAt,
       Value<int>? rowid}) {
@@ -887,6 +922,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
       characterBookJson: characterBookJson ?? this.characterBookJson,
       extensionsJson: extensionsJson ?? this.extensionsJson,
       isFavorite: isFavorite ?? this.isFavorite,
+      isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       modifiedAt: modifiedAt ?? this.modifiedAt,
       rowid: rowid ?? this.rowid,
@@ -954,6 +990,9 @@ class CharactersCompanion extends UpdateCompanion<Character> {
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -988,6 +1027,7 @@ class CharactersCompanion extends UpdateCompanion<Character> {
           ..write('characterBookJson: $characterBookJson, ')
           ..write('extensionsJson: $extensionsJson, ')
           ..write('isFavorite: $isFavorite, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('modifiedAt: $modifiedAt, ')
           ..write('rowid: $rowid')
@@ -13227,6 +13267,12 @@ class $MomentCommentsTable extends MomentComments
   late final GeneratedColumn<String> kind = GeneratedColumn<String>(
       'kind', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _parentCommentIdMeta =
+      const VerificationMeta('parentCommentId');
+  @override
+  late final GeneratedColumn<String> parentCommentId = GeneratedColumn<String>(
+      'parent_comment_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -13234,8 +13280,16 @@ class $MomentCommentsTable extends MomentComments
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, postId, authorId, authorName, body, kind, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        postId,
+        authorId,
+        authorName,
+        body,
+        kind,
+        parentCommentId,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -13283,6 +13337,12 @@ class $MomentCommentsTable extends MomentComments
     } else if (isInserting) {
       context.missing(_kindMeta);
     }
+    if (data.containsKey('parent_comment_id')) {
+      context.handle(
+          _parentCommentIdMeta,
+          parentCommentId.isAcceptableOrUnknown(
+              data['parent_comment_id']!, _parentCommentIdMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -13310,6 +13370,8 @@ class $MomentCommentsTable extends MomentComments
           .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
       kind: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      parentCommentId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}parent_comment_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -13329,6 +13391,7 @@ class MomentCommentRow extends DataClass
   final String authorName;
   final String body;
   final String kind;
+  final String? parentCommentId;
   final DateTime createdAt;
   const MomentCommentRow(
       {required this.id,
@@ -13337,6 +13400,7 @@ class MomentCommentRow extends DataClass
       required this.authorName,
       required this.body,
       required this.kind,
+      this.parentCommentId,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -13347,6 +13411,9 @@ class MomentCommentRow extends DataClass
     map['author_name'] = Variable<String>(authorName);
     map['body'] = Variable<String>(body);
     map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || parentCommentId != null) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -13359,6 +13426,9 @@ class MomentCommentRow extends DataClass
       authorName: Value(authorName),
       body: Value(body),
       kind: Value(kind),
+      parentCommentId: parentCommentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCommentId),
       createdAt: Value(createdAt),
     );
   }
@@ -13373,6 +13443,7 @@ class MomentCommentRow extends DataClass
       authorName: serializer.fromJson<String>(json['authorName']),
       body: serializer.fromJson<String>(json['body']),
       kind: serializer.fromJson<String>(json['kind']),
+      parentCommentId: serializer.fromJson<String?>(json['parentCommentId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -13386,6 +13457,7 @@ class MomentCommentRow extends DataClass
       'authorName': serializer.toJson<String>(authorName),
       'body': serializer.toJson<String>(body),
       'kind': serializer.toJson<String>(kind),
+      'parentCommentId': serializer.toJson<String?>(parentCommentId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -13397,6 +13469,7 @@ class MomentCommentRow extends DataClass
           String? authorName,
           String? body,
           String? kind,
+          Value<String?> parentCommentId = const Value.absent(),
           DateTime? createdAt}) =>
       MomentCommentRow(
         id: id ?? this.id,
@@ -13405,6 +13478,9 @@ class MomentCommentRow extends DataClass
         authorName: authorName ?? this.authorName,
         body: body ?? this.body,
         kind: kind ?? this.kind,
+        parentCommentId: parentCommentId.present
+            ? parentCommentId.value
+            : this.parentCommentId,
         createdAt: createdAt ?? this.createdAt,
       );
   MomentCommentRow copyWithCompanion(MomentCommentsCompanion data) {
@@ -13416,6 +13492,9 @@ class MomentCommentRow extends DataClass
           data.authorName.present ? data.authorName.value : this.authorName,
       body: data.body.present ? data.body.value : this.body,
       kind: data.kind.present ? data.kind.value : this.kind,
+      parentCommentId: data.parentCommentId.present
+          ? data.parentCommentId.value
+          : this.parentCommentId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -13429,14 +13508,15 @@ class MomentCommentRow extends DataClass
           ..write('authorName: $authorName, ')
           ..write('body: $body, ')
           ..write('kind: $kind, ')
+          ..write('parentCommentId: $parentCommentId, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, postId, authorId, authorName, body, kind, createdAt);
+  int get hashCode => Object.hash(
+      id, postId, authorId, authorName, body, kind, parentCommentId, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13447,6 +13527,7 @@ class MomentCommentRow extends DataClass
           other.authorName == this.authorName &&
           other.body == this.body &&
           other.kind == this.kind &&
+          other.parentCommentId == this.parentCommentId &&
           other.createdAt == this.createdAt);
 }
 
@@ -13457,6 +13538,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
   final Value<String> authorName;
   final Value<String> body;
   final Value<String> kind;
+  final Value<String?> parentCommentId;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const MomentCommentsCompanion({
@@ -13466,6 +13548,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
     this.authorName = const Value.absent(),
     this.body = const Value.absent(),
     this.kind = const Value.absent(),
+    this.parentCommentId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -13476,6 +13559,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
     required String authorName,
     required String body,
     required String kind,
+    this.parentCommentId = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -13492,6 +13576,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
     Expression<String>? authorName,
     Expression<String>? body,
     Expression<String>? kind,
+    Expression<String>? parentCommentId,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -13502,6 +13587,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
       if (authorName != null) 'author_name': authorName,
       if (body != null) 'body': body,
       if (kind != null) 'kind': kind,
+      if (parentCommentId != null) 'parent_comment_id': parentCommentId,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -13514,6 +13600,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
       Value<String>? authorName,
       Value<String>? body,
       Value<String>? kind,
+      Value<String?>? parentCommentId,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
     return MomentCommentsCompanion(
@@ -13523,6 +13610,7 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
       authorName: authorName ?? this.authorName,
       body: body ?? this.body,
       kind: kind ?? this.kind,
+      parentCommentId: parentCommentId ?? this.parentCommentId,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -13549,6 +13637,9 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
     if (kind.present) {
       map['kind'] = Variable<String>(kind.value);
     }
+    if (parentCommentId.present) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -13567,6 +13658,242 @@ class MomentCommentsCompanion extends UpdateCompanion<MomentCommentRow> {
           ..write('authorName: $authorName, ')
           ..write('body: $body, ')
           ..write('kind: $kind, ')
+          ..write('parentCommentId: $parentCommentId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MomentPostLikesTable extends MomentPostLikes
+    with TableInfo<$MomentPostLikesTable, MomentPostLikeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MomentPostLikesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _postIdMeta = const VerificationMeta('postId');
+  @override
+  late final GeneratedColumn<String> postId = GeneratedColumn<String>(
+      'post_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES moment_posts (id) ON DELETE CASCADE'));
+  static const VerificationMeta _authorIdMeta =
+      const VerificationMeta('authorId');
+  @override
+  late final GeneratedColumn<String> authorId = GeneratedColumn<String>(
+      'author_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [postId, authorId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'moment_post_likes';
+  @override
+  VerificationContext validateIntegrity(Insertable<MomentPostLikeRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('post_id')) {
+      context.handle(_postIdMeta,
+          postId.isAcceptableOrUnknown(data['post_id']!, _postIdMeta));
+    } else if (isInserting) {
+      context.missing(_postIdMeta);
+    }
+    if (data.containsKey('author_id')) {
+      context.handle(_authorIdMeta,
+          authorId.isAcceptableOrUnknown(data['author_id']!, _authorIdMeta));
+    } else if (isInserting) {
+      context.missing(_authorIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {postId, authorId};
+  @override
+  MomentPostLikeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MomentPostLikeRow(
+      postId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}post_id'])!,
+      authorId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}author_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $MomentPostLikesTable createAlias(String alias) {
+    return $MomentPostLikesTable(attachedDatabase, alias);
+  }
+}
+
+class MomentPostLikeRow extends DataClass
+    implements Insertable<MomentPostLikeRow> {
+  final String postId;
+  final String authorId;
+  final DateTime createdAt;
+  const MomentPostLikeRow(
+      {required this.postId, required this.authorId, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['post_id'] = Variable<String>(postId);
+    map['author_id'] = Variable<String>(authorId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  MomentPostLikesCompanion toCompanion(bool nullToAbsent) {
+    return MomentPostLikesCompanion(
+      postId: Value(postId),
+      authorId: Value(authorId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MomentPostLikeRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MomentPostLikeRow(
+      postId: serializer.fromJson<String>(json['postId']),
+      authorId: serializer.fromJson<String>(json['authorId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'postId': serializer.toJson<String>(postId),
+      'authorId': serializer.toJson<String>(authorId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  MomentPostLikeRow copyWith(
+          {String? postId, String? authorId, DateTime? createdAt}) =>
+      MomentPostLikeRow(
+        postId: postId ?? this.postId,
+        authorId: authorId ?? this.authorId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  MomentPostLikeRow copyWithCompanion(MomentPostLikesCompanion data) {
+    return MomentPostLikeRow(
+      postId: data.postId.present ? data.postId.value : this.postId,
+      authorId: data.authorId.present ? data.authorId.value : this.authorId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPostLikeRow(')
+          ..write('postId: $postId, ')
+          ..write('authorId: $authorId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(postId, authorId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MomentPostLikeRow &&
+          other.postId == this.postId &&
+          other.authorId == this.authorId &&
+          other.createdAt == this.createdAt);
+}
+
+class MomentPostLikesCompanion extends UpdateCompanion<MomentPostLikeRow> {
+  final Value<String> postId;
+  final Value<String> authorId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const MomentPostLikesCompanion({
+    this.postId = const Value.absent(),
+    this.authorId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MomentPostLikesCompanion.insert({
+    required String postId,
+    required String authorId,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : postId = Value(postId),
+        authorId = Value(authorId),
+        createdAt = Value(createdAt);
+  static Insertable<MomentPostLikeRow> custom({
+    Expression<String>? postId,
+    Expression<String>? authorId,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (postId != null) 'post_id': postId,
+      if (authorId != null) 'author_id': authorId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MomentPostLikesCompanion copyWith(
+      {Value<String>? postId,
+      Value<String>? authorId,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return MomentPostLikesCompanion(
+      postId: postId ?? this.postId,
+      authorId: authorId ?? this.authorId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (postId.present) {
+      map['post_id'] = Variable<String>(postId.value);
+    }
+    if (authorId.present) {
+      map['author_id'] = Variable<String>(authorId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MomentPostLikesCompanion(')
+          ..write('postId: $postId, ')
+          ..write('authorId: $authorId, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -13611,6 +13938,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StoryChaptersTable storyChapters = $StoryChaptersTable(this);
   late final $MomentPostsTable momentPosts = $MomentPostsTable(this);
   late final $MomentCommentsTable momentComments = $MomentCommentsTable(this);
+  late final $MomentPostLikesTable momentPostLikes =
+      $MomentPostLikesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13640,7 +13969,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         dataBankBindings,
         storyChapters,
         momentPosts,
-        momentComments
+        momentComments,
+        momentPostLikes
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -13837,6 +14167,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
               TableUpdate('moment_comments', kind: UpdateKind.delete),
             ],
           ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('moment_posts',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('moment_post_likes', kind: UpdateKind.delete),
+            ],
+          ),
         ],
       );
 }
@@ -13861,6 +14198,7 @@ typedef $$CharactersTableCreateCompanionBuilder = CharactersCompanion Function({
   Value<String> characterBookJson,
   Value<String> extensionsJson,
   Value<bool> isFavorite,
+  Value<bool> isDeleted,
   required DateTime createdAt,
   required DateTime modifiedAt,
   Value<int> rowid,
@@ -13885,6 +14223,7 @@ typedef $$CharactersTableUpdateCompanionBuilder = CharactersCompanion Function({
   Value<String> characterBookJson,
   Value<String> extensionsJson,
   Value<bool> isFavorite,
+  Value<bool> isDeleted,
   Value<DateTime> createdAt,
   Value<DateTime> modifiedAt,
   Value<int> rowid,
@@ -14045,6 +14384,9 @@ class $$CharactersTableFilterComposer
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+      column: $table.isDeleted, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -14233,6 +14575,9 @@ class $$CharactersTableOrderingComposer
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+      column: $table.isDeleted, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -14305,6 +14650,9 @@ class $$CharactersTableAnnotationComposer
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -14465,6 +14813,7 @@ class $$CharactersTableTableManager extends RootTableManager<
             Value<String> characterBookJson = const Value.absent(),
             Value<String> extensionsJson = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
+            Value<bool> isDeleted = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> modifiedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -14489,6 +14838,7 @@ class $$CharactersTableTableManager extends RootTableManager<
             characterBookJson: characterBookJson,
             extensionsJson: extensionsJson,
             isFavorite: isFavorite,
+            isDeleted: isDeleted,
             createdAt: createdAt,
             modifiedAt: modifiedAt,
             rowid: rowid,
@@ -14513,6 +14863,7 @@ class $$CharactersTableTableManager extends RootTableManager<
             Value<String> characterBookJson = const Value.absent(),
             Value<String> extensionsJson = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
+            Value<bool> isDeleted = const Value.absent(),
             required DateTime createdAt,
             required DateTime modifiedAt,
             Value<int> rowid = const Value.absent(),
@@ -14537,6 +14888,7 @@ class $$CharactersTableTableManager extends RootTableManager<
             characterBookJson: characterBookJson,
             extensionsJson: extensionsJson,
             isFavorite: isFavorite,
+            isDeleted: isDeleted,
             createdAt: createdAt,
             modifiedAt: modifiedAt,
             rowid: rowid,
@@ -25094,6 +25446,23 @@ final class $$MomentPostsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$MomentPostLikesTable, List<MomentPostLikeRow>>
+      _momentPostLikesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.momentPostLikes,
+              aliasName: $_aliasNameGenerator(
+                  db.momentPosts.id, db.momentPostLikes.postId));
+
+  $$MomentPostLikesTableProcessedTableManager get momentPostLikesRefs {
+    final manager =
+        $$MomentPostLikesTableTableManager($_db, $_db.momentPostLikes)
+            .filter((f) => f.postId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_momentPostLikesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$MomentPostsTableFilterComposer
@@ -25191,6 +25560,27 @@ class $$MomentPostsTableFilterComposer
             $$MomentCommentsTableFilterComposer(
               $db: $db,
               $table: $db.momentComments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> momentPostLikesRefs(
+      Expression<bool> Function($$MomentPostLikesTableFilterComposer f) f) {
+    final $$MomentPostLikesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPostLikes,
+        getReferencedColumn: (t) => t.postId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostLikesTableFilterComposer(
+              $db: $db,
+              $table: $db.momentPostLikes,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -25386,6 +25776,27 @@ class $$MomentPostsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> momentPostLikesRefs<T extends Object>(
+      Expression<T> Function($$MomentPostLikesTableAnnotationComposer a) f) {
+    final $$MomentPostLikesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.momentPostLikes,
+        getReferencedColumn: (t) => t.postId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostLikesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentPostLikes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$MomentPostsTableTableManager extends RootTableManager<
@@ -25400,7 +25811,10 @@ class $$MomentPostsTableTableManager extends RootTableManager<
     (MomentPostRow, $$MomentPostsTableReferences),
     MomentPostRow,
     PrefetchHooks Function(
-        {bool chatId, bool chapterId, bool momentCommentsRefs})> {
+        {bool chatId,
+        bool chapterId,
+        bool momentCommentsRefs,
+        bool momentPostLikesRefs})> {
   $$MomentPostsTableTableManager(_$AppDatabase db, $MomentPostsTable table)
       : super(TableManagerState(
           db: db,
@@ -25482,11 +25896,15 @@ class $$MomentPostsTableTableManager extends RootTableManager<
                   ))
               .toList(),
           prefetchHooksCallback: (
-              {chatId = false, chapterId = false, momentCommentsRefs = false}) {
+              {chatId = false,
+              chapterId = false,
+              momentCommentsRefs = false,
+              momentPostLikesRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
-                if (momentCommentsRefs) db.momentComments
+                if (momentCommentsRefs) db.momentComments,
+                if (momentPostLikesRefs) db.momentPostLikes
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -25538,6 +25956,19 @@ class $$MomentPostsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.postId == item.id),
+                        typedResults: items),
+                  if (momentPostLikesRefs)
+                    await $_getPrefetchedData<MomentPostRow, $MomentPostsTable,
+                            MomentPostLikeRow>(
+                        currentTable: table,
+                        referencedTable: $$MomentPostsTableReferences
+                            ._momentPostLikesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MomentPostsTableReferences(db, table, p0)
+                                .momentPostLikesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.postId == item.id),
                         typedResults: items)
                 ];
               },
@@ -25558,7 +25989,10 @@ typedef $$MomentPostsTableProcessedTableManager = ProcessedTableManager<
     (MomentPostRow, $$MomentPostsTableReferences),
     MomentPostRow,
     PrefetchHooks Function(
-        {bool chatId, bool chapterId, bool momentCommentsRefs})>;
+        {bool chatId,
+        bool chapterId,
+        bool momentCommentsRefs,
+        bool momentPostLikesRefs})>;
 typedef $$MomentCommentsTableCreateCompanionBuilder = MomentCommentsCompanion
     Function({
   required String id,
@@ -25567,6 +26001,7 @@ typedef $$MomentCommentsTableCreateCompanionBuilder = MomentCommentsCompanion
   required String authorName,
   required String body,
   required String kind,
+  Value<String?> parentCommentId,
   required DateTime createdAt,
   Value<int> rowid,
 });
@@ -25578,6 +26013,7 @@ typedef $$MomentCommentsTableUpdateCompanionBuilder = MomentCommentsCompanion
   Value<String> authorName,
   Value<String> body,
   Value<String> kind,
+  Value<String?> parentCommentId,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -25627,6 +26063,10 @@ class $$MomentCommentsTableFilterComposer
   ColumnFilters<String> get kind => $composableBuilder(
       column: $table.kind, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get parentCommentId => $composableBuilder(
+      column: $table.parentCommentId,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
@@ -25675,6 +26115,10 @@ class $$MomentCommentsTableOrderingComposer
   ColumnOrderings<String> get kind => $composableBuilder(
       column: $table.kind, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get parentCommentId => $composableBuilder(
+      column: $table.parentCommentId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -25722,6 +26166,9 @@ class $$MomentCommentsTableAnnotationComposer
 
   GeneratedColumn<String> get kind =>
       $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get parentCommentId => $composableBuilder(
+      column: $table.parentCommentId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -25777,6 +26224,7 @@ class $$MomentCommentsTableTableManager extends RootTableManager<
             Value<String> authorName = const Value.absent(),
             Value<String> body = const Value.absent(),
             Value<String> kind = const Value.absent(),
+            Value<String?> parentCommentId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -25787,6 +26235,7 @@ class $$MomentCommentsTableTableManager extends RootTableManager<
             authorName: authorName,
             body: body,
             kind: kind,
+            parentCommentId: parentCommentId,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -25797,6 +26246,7 @@ class $$MomentCommentsTableTableManager extends RootTableManager<
             required String authorName,
             required String body,
             required String kind,
+            Value<String?> parentCommentId = const Value.absent(),
             required DateTime createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -25807,6 +26257,7 @@ class $$MomentCommentsTableTableManager extends RootTableManager<
             authorName: authorName,
             body: body,
             kind: kind,
+            parentCommentId: parentCommentId,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -25866,6 +26317,253 @@ typedef $$MomentCommentsTableProcessedTableManager = ProcessedTableManager<
     (MomentCommentRow, $$MomentCommentsTableReferences),
     MomentCommentRow,
     PrefetchHooks Function({bool postId})>;
+typedef $$MomentPostLikesTableCreateCompanionBuilder = MomentPostLikesCompanion
+    Function({
+  required String postId,
+  required String authorId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$MomentPostLikesTableUpdateCompanionBuilder = MomentPostLikesCompanion
+    Function({
+  Value<String> postId,
+  Value<String> authorId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$MomentPostLikesTableReferences extends BaseReferences<
+    _$AppDatabase, $MomentPostLikesTable, MomentPostLikeRow> {
+  $$MomentPostLikesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $MomentPostsTable _postIdTable(_$AppDatabase db) =>
+      db.momentPosts.createAlias(
+          $_aliasNameGenerator(db.momentPostLikes.postId, db.momentPosts.id));
+
+  $$MomentPostsTableProcessedTableManager get postId {
+    final $_column = $_itemColumn<String>('post_id')!;
+
+    final manager = $$MomentPostsTableTableManager($_db, $_db.momentPosts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_postIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$MomentPostLikesTableFilterComposer
+    extends Composer<_$AppDatabase, $MomentPostLikesTable> {
+  $$MomentPostLikesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$MomentPostsTableFilterComposer get postId {
+    final $$MomentPostsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableFilterComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentPostLikesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MomentPostLikesTable> {
+  $$MomentPostLikesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get authorId => $composableBuilder(
+      column: $table.authorId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$MomentPostsTableOrderingComposer get postId {
+    final $$MomentPostsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableOrderingComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentPostLikesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MomentPostLikesTable> {
+  $$MomentPostLikesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get authorId =>
+      $composableBuilder(column: $table.authorId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$MomentPostsTableAnnotationComposer get postId {
+    final $$MomentPostsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.postId,
+        referencedTable: $db.momentPosts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MomentPostsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.momentPosts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$MomentPostLikesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MomentPostLikesTable,
+    MomentPostLikeRow,
+    $$MomentPostLikesTableFilterComposer,
+    $$MomentPostLikesTableOrderingComposer,
+    $$MomentPostLikesTableAnnotationComposer,
+    $$MomentPostLikesTableCreateCompanionBuilder,
+    $$MomentPostLikesTableUpdateCompanionBuilder,
+    (MomentPostLikeRow, $$MomentPostLikesTableReferences),
+    MomentPostLikeRow,
+    PrefetchHooks Function({bool postId})> {
+  $$MomentPostLikesTableTableManager(
+      _$AppDatabase db, $MomentPostLikesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MomentPostLikesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MomentPostLikesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MomentPostLikesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> postId = const Value.absent(),
+            Value<String> authorId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentPostLikesCompanion(
+            postId: postId,
+            authorId: authorId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String postId,
+            required String authorId,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MomentPostLikesCompanion.insert(
+            postId: postId,
+            authorId: authorId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$MomentPostLikesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({postId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (postId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.postId,
+                    referencedTable:
+                        $$MomentPostLikesTableReferences._postIdTable(db),
+                    referencedColumn:
+                        $$MomentPostLikesTableReferences._postIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$MomentPostLikesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MomentPostLikesTable,
+    MomentPostLikeRow,
+    $$MomentPostLikesTableFilterComposer,
+    $$MomentPostLikesTableOrderingComposer,
+    $$MomentPostLikesTableAnnotationComposer,
+    $$MomentPostLikesTableCreateCompanionBuilder,
+    $$MomentPostLikesTableUpdateCompanionBuilder,
+    (MomentPostLikeRow, $$MomentPostLikesTableReferences),
+    MomentPostLikeRow,
+    PrefetchHooks Function({bool postId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -25922,4 +26620,6 @@ class $AppDatabaseManager {
       $$MomentPostsTableTableManager(_db, _db.momentPosts);
   $$MomentCommentsTableTableManager get momentComments =>
       $$MomentCommentsTableTableManager(_db, _db.momentComments);
+  $$MomentPostLikesTableTableManager get momentPostLikes =>
+      $$MomentPostLikesTableTableManager(_db, _db.momentPostLikes);
 }

@@ -75,6 +75,10 @@ final class DatabaseBackupV15Adapter {
         (await _database.select(_database.momentComments).get())
             .map((row) => row.toJson()),
       ),
+      'momentPostLikes':
+          (await _database.select(_database.momentPostLikes).get())
+              .map((row) => row.toJson())
+              .toList(),
     };
   }
 
@@ -193,6 +197,13 @@ final class DatabaseBackupV15Adapter {
         await _insert(
           _database.momentComments,
           MomentCommentRow.fromJson(json),
+          overwriteExisting,
+        );
+      }
+      for (final json in _rows(data, 'momentPostLikes')) {
+        await _insert(
+          _database.momentPostLikes,
+          MomentPostLikeRow.fromJson(json),
           overwriteExisting,
         );
       }

@@ -27,7 +27,7 @@ class CharacterRepository {
   /// Get all characters
   Future<List<models.Character>> getAllCharacters() async {
     final rows = await _db.select(_db.characters).get();
-    return rows.map(_characterFromRow).toList();
+    return rows.where((row) => !row.isDeleted).map(_characterFromRow).toList();
   }
 
   /// Get character by ID
@@ -43,13 +43,14 @@ class CharacterRepository {
     final rows = await (_db.select(_db.characters)
           ..where((t) => t.name.like('%$query%')))
         .get();
-    return rows.map(_characterFromRow).toList();
+    return rows.where((row) => !row.isDeleted).map(_characterFromRow).toList();
   }
 
   /// Get characters by tags
   Future<List<models.Character>> getCharactersByTag(String tag) async {
     final rows = await _db.select(_db.characters).get();
     return rows
+        .where((row) => !row.isDeleted)
         .map(_characterFromRow)
         .where((c) => c.tags.contains(tag))
         .toList();
@@ -58,7 +59,7 @@ class CharacterRepository {
   /// Get favorite characters
   Future<List<models.Character>> getFavoriteCharacters() async {
     final rows = await (_db.select(_db.characters)
-          ..where((t) => t.isFavorite.equals(true)))
+          ..where((t) => t.isFavorite.equals(true) & t.isDeleted.equals(false)))
         .get();
     return rows.map(_characterFromRow).toList();
   }
@@ -127,42 +128,14 @@ class CharacterRepository {
 
   /// Delete a character
   Future<void> deleteCharacter(String id) async {
-    // Delete associated messages first (they reference chats)
-    final chats = await (_db.select(_db.chats)
-          ..where((t) => t.characterId.equals(id)))
-        .get();
-    for (final chat in chats) {
-      await (_db.delete(_db.messages)..where((t) => t.chatId.equals(chat.id)))
-          .go();
-      await (_db.delete(_db.bookmarks)..where((t) => t.chatId.equals(chat.id)))
-          .go();
-    }
-
-    // Delete associated chats
-    await (_db.delete(_db.chats)..where((t) => t.characterId.equals(id))).go();
-
-    // Delete associated world infos and their entries (character-specific lorebooks)
-    final worldInfos = await (_db.select(_db.worldInfos)
-          ..where((t) => t.characterId.equals(id)))
-        .get();
-    for (final worldInfo in worldInfos) {
-      await (_db.delete(_db.worldInfoEntries)
-            ..where((t) => t.worldInfoId.equals(worldInfo.id)))
-          .go();
-    }
-    await (_db.delete(_db.worldInfos)..where((t) => t.characterId.equals(id)))
-        .go();
-
-    // Delete associated character tags
-    await (_db.delete(_db.characterTags)
-          ..where((t) => t.characterId.equals(id)))
-        .go();
-
-    // Delete the character
-    await (_db.delete(_db.characters)..where((t) => t.id.equals(id))).go();
-
-    // Delete avatar file if exists
-    await _deleteCharacterAvatar(id);
+    // Keep the row and its history so old moment links and the editor remain
+    // usable. Normal character queries hide this marker.
+    await (_db.update(_db.characters)..where((t) => t.id.equals(id))).write(
+      CharactersCompanion(
+        isDeleted: const Value(true),
+        modifiedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   /// Save character avatar
@@ -184,7 +157,9 @@ class CharacterRepository {
 
   /// Get character count
   Future<int> getCharacterCount() async {
-    final count = await _db.select(_db.characters).get();
+    final count = await (_db.select(_db.characters)
+          ..where((t) => t.isDeleted.equals(false)))
+        .get();
     return count.length;
   }
 
@@ -432,6 +407,7 @@ class CharacterRepository {
       characterBook: _parseCharacterBook(row.characterBookJson),
       extensions: _parseJsonMap(row.extensionsJson),
       isFavorite: row.isFavorite,
+      isDeleted: row.isDeleted,
       depthPrompt: models.Character.depthPromptFromExtensions(
           _parseJsonMap(row.extensionsJson)),
       talkativeness: models.Character.talkativenessFromExtensions(
@@ -463,6 +439,7 @@ class CharacterRepository {
           Value(_serializeCharacterBook(character.characterBook)),
       extensionsJson: Value(jsonEncode(character.extensionsForExport())),
       isFavorite: Value(character.isFavorite),
+      isDeleted: Value(character.isDeleted),
       createdAt: Value(character.createdAt),
       modifiedAt: Value(character.modifiedAt),
     );

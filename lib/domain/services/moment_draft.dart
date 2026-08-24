@@ -2,6 +2,98 @@ import 'dart:convert';
 
 enum MomentDraftKind { text, image, textImage }
 
+enum MomentAgentAction {
+  skip,
+  post,
+  comment,
+  reply,
+  like,
+  unlike,
+  deleteOwnComment,
+  messagePlayer,
+}
+
+final class MomentAgentDecision {
+  const MomentAgentDecision(
+      {required this.action,
+      this.postId,
+      this.commentId,
+      this.parentCommentId,
+      this.body,
+      this.imagePrompt});
+  final MomentAgentAction action;
+  final String? postId;
+  final String? commentId;
+  final String? parentCommentId;
+  final String? body;
+  final String? imagePrompt;
+}
+
+MomentAgentDecision? parseMomentAgentDecision(
+  String response, {
+  required Set<String> allowedPostIds,
+  Set<String> allowedCommentIds = const {},
+  Set<String> allowedParentCommentIds = const {},
+}) {
+  final value = jsonDecode(_jsonObjectFromResponse(response));
+  if (value is! Map<String, dynamic>) return null;
+  if (!value.containsKey('action')) return null;
+  final actionName = '${value['action'] ?? 'skip'}'.trim();
+  final action = switch (actionName) {
+    'post' => MomentAgentAction.post,
+    'comment' => MomentAgentAction.comment,
+    'reply' => MomentAgentAction.reply,
+    'like' => MomentAgentAction.like,
+    'unlike' => MomentAgentAction.unlike,
+    'delete_comment' ||
+    'deleteOwnComment' =>
+      MomentAgentAction.deleteOwnComment,
+    'message_player' || 'messagePlayer' => MomentAgentAction.messagePlayer,
+    _ => MomentAgentAction.skip,
+  };
+  final postId =
+      value['post_id'] is String ? (value['post_id'] as String).trim() : null;
+  final commentId = value['comment_id'] is String
+      ? (value['comment_id'] as String).trim()
+      : null;
+  final parentId = value['parent_comment_id'] is String
+      ? (value['parent_comment_id'] as String).trim()
+      : null;
+  final body = value['body'] is String
+      ? _clip((value['body'] as String).trim(), 500)
+      : null;
+  if (action == MomentAgentAction.comment ||
+      action == MomentAgentAction.like ||
+      action == MomentAgentAction.unlike) {
+    if (postId == null || !allowedPostIds.contains(postId)) return null;
+  }
+  if (action == MomentAgentAction.comment && (body == null || body.isEmpty)) {
+    return null;
+  }
+  if (action == MomentAgentAction.reply &&
+      (postId == null ||
+          !allowedPostIds.contains(postId) ||
+          parentId == null ||
+          !allowedParentCommentIds.contains(parentId) ||
+          body == null ||
+          body.isEmpty)) return null;
+  if (action == MomentAgentAction.deleteOwnComment &&
+      (commentId == null || !allowedCommentIds.contains(commentId)))
+    return null;
+  if (action == MomentAgentAction.messagePlayer &&
+      (body == null || body.isEmpty)) return null;
+  return MomentAgentDecision(
+    action: action,
+    postId: postId,
+    commentId: commentId,
+    parentCommentId: parentId,
+    body: body,
+    imagePrompt: value['image_prompt'] is String
+        ? _clip((value['image_prompt'] as String).trim(), 800)
+        : null,
+  );
+}
+
 /// What a character decided to post on the moments feed.
 final class MomentDraft {
   const MomentDraft({
@@ -50,15 +142,22 @@ Speak as yourself. Do not summarize a chapter. Do not write a recap.
 You only see your own posts, posts by your friends, posts by the player, and comments on those posts.
 You cannot see strangers' moments.
 
-Do exactly one thing:
-- comment: a short reply under one existing post listed in comment_targets.
+Do exactly one thing. You are an autonomous agent, so skip when there is no
+natural reason to act:
+- comment/reply: write under a visible post or comment.
+- like: like a visible post.
 - post: a new moment about your own life.
+- message_player: send a private message in an existing chat when a moment
+  gives you a genuinely urgent reason.
 - skip: do nothing.
 
 If you are reacting to the player or a friend, you MUST comment. Never publish that reply as your own post.
 
 Return JSON only:
 {"action":"comment","post_id":"...","body":"..."}
+{"action":"reply","post_id":"...","parent_comment_id":"...","body":"..."}
+{"action":"like","post_id":"..."}
+{"action":"message_player","body":"..."}
 {"action":"post","kind":"text"|"image"|"text_image","body":"...","image_prompt":"..."}
 {"action":"skip"}
 
@@ -199,9 +298,8 @@ MomentFriendCommentDraft? parseFriendCommentDraft(
       : document['postId'] is String
           ? (document['postId'] as String).trim()
           : '';
-  final body = document['body'] is String
-      ? (document['body'] as String).trim()
-      : '';
+  final body =
+      document['body'] is String ? (document['body'] as String).trim() : '';
   if (postId.isEmpty || body.isEmpty || !allowedPostIds.contains(postId)) {
     return null;
   }
@@ -230,9 +328,8 @@ MomentWakePlan? parseMomentWakePlan(
   if (document['skip'] == true || document['action'] == 'skip') {
     return null;
   }
-  final action = document['action'] is String
-      ? (document['action'] as String).trim()
-      : '';
+  final action =
+      document['action'] is String ? (document['action'] as String).trim() : '';
   final hasPostId = (document['post_id'] is String &&
           (document['post_id'] as String).trim().isNotEmpty) ||
       (document['postId'] is String &&
@@ -264,9 +361,8 @@ MomentDraft? parseMomentDraft(String response) {
 
   final kind = _kind(document['kind']);
   if (kind == null) return null;
-  final body = document['body'] is String
-      ? (document['body'] as String).trim()
-      : '';
+  final body =
+      document['body'] is String ? (document['body'] as String).trim() : '';
   final imagePrompt = document['image_prompt'] is String
       ? (document['image_prompt'] as String).trim()
       : document['imagePrompt'] is String

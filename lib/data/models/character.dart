@@ -47,6 +47,9 @@ class Character {
   final Map<String, dynamic> extensions;
   final bool isFavorite;
 
+  /// Soft-deleted characters stay available to old links and editing.
+  final bool isDeleted;
+
   /// Note injected at a fixed depth (ST extensions.depth_prompt)
   final DepthPrompt? depthPrompt;
 
@@ -75,6 +78,7 @@ class Character {
     this.characterBook,
     this.extensions = const {},
     this.isFavorite = false,
+    this.isDeleted = false,
     this.depthPrompt,
     this.talkativeness = 0.5,
     required this.createdAt,
@@ -101,6 +105,7 @@ class Character {
     CharacterBook? characterBook,
     Map<String, dynamic>? extensions,
     bool? isFavorite,
+    bool? isDeleted,
     DepthPrompt? depthPrompt,
     double? talkativeness,
     DateTime? createdAt,
@@ -126,6 +131,7 @@ class Character {
       characterBook: characterBook ?? this.characterBook,
       extensions: extensions ?? this.extensions,
       isFavorite: isFavorite ?? this.isFavorite,
+      isDeleted: isDeleted ?? this.isDeleted,
       depthPrompt: depthPrompt ?? this.depthPrompt,
       talkativeness: talkativeness ?? this.talkativeness,
       createdAt: createdAt ?? this.createdAt,
@@ -152,6 +158,7 @@ class Character {
         'characterBook': characterBook?.toJson(),
         'extensions': extensions,
         'isFavorite': isFavorite,
+        'isDeleted': isDeleted,
         'depthPrompt': depthPrompt?.toJson(),
         'talkativeness': talkativeness,
         'createdAt': createdAt.toIso8601String(),
@@ -185,6 +192,7 @@ class Character {
             : null,
         extensions: json['extensions'] as Map<String, dynamic>? ?? {},
         isFavorite: json['isFavorite'] as bool? ?? false,
+        isDeleted: json['isDeleted'] as bool? ?? false,
         depthPrompt: json['depthPrompt'] != null
             ? DepthPrompt.fromJson(json['depthPrompt'] as Map<String, dynamic>)
             : (json['extensions'] is Map<String, dynamic> &&

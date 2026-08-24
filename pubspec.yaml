@@ -85,6 +85,7 @@ dependencies:
   
   # Image Picker
   image_picker: ^1.0.7
+  gal: ^2.3.1
   
   # Google Drive Integration
   google_sign_in: ^6.2.1

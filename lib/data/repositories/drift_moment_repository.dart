@@ -81,6 +81,56 @@ class DriftMomentRepository implements MomentRepository {
     return rows.map(_toComment).toList(growable: false);
   }
 
+  @override
+  Future<void> deleteComment(String commentId) async {
+    await (_database.delete(_database.momentComments)
+          ..where((table) => table.id.equals(commentId)))
+        .go();
+  }
+
+  @override
+  Future<bool> toggleLike(String postId, String authorId,
+      {DateTime? at}) async {
+    final existing = await (_database.select(_database.momentPostLikes)
+          ..where((table) =>
+              table.postId.equals(postId) & table.authorId.equals(authorId)))
+        .getSingleOrNull();
+    if (existing != null) {
+      await (_database.delete(_database.momentPostLikes)
+            ..where((table) =>
+                table.postId.equals(postId) & table.authorId.equals(authorId)))
+          .go();
+      return false;
+    }
+    await _database.into(_database.momentPostLikes).insert(
+          MomentPostLikesCompanion(
+            postId: Value(postId),
+            authorId: Value(authorId),
+            createdAt: Value(at ?? DateTime.now().toUtc()),
+          ),
+        );
+    return true;
+  }
+
+  @override
+  Future<int> likeCount(String postId) async {
+    final count = await (_database.selectOnly(_database.momentPostLikes)
+          ..addColumns([_database.momentPostLikes.authorId.count()])
+          ..where(_database.momentPostLikes.postId.equals(postId)))
+        .map((row) => row.read(_database.momentPostLikes.authorId.count()))
+        .getSingle();
+    return count ?? 0;
+  }
+
+  @override
+  Future<bool> hasLiked(String postId, String authorId) async {
+    final row = await (_database.select(_database.momentPostLikes)
+          ..where((table) =>
+              table.postId.equals(postId) & table.authorId.equals(authorId)))
+        .getSingleOrNull();
+    return row != null;
+  }
+
   JoinedSelectStatement<HasResultSet, dynamic> _feedQuery({
     Expression<bool>? extra,
   }) {
@@ -165,6 +215,7 @@ class DriftMomentRepository implements MomentRepository {
       kind: MomentCommentKind.values.firstWhere(
         (value) => value.name == row.kind,
       ),
+      parentCommentId: row.parentCommentId,
       createdAt: row.createdAt.toUtc(),
     );
   }
@@ -177,6 +228,7 @@ class DriftMomentRepository implements MomentRepository {
       authorName: Value(comment.authorName),
       body: Value(comment.body),
       kind: Value(comment.kind.name),
+      parentCommentId: Value(comment.parentCommentId),
       createdAt: Value(comment.createdAt),
     );
   }

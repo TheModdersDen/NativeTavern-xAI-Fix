@@ -343,6 +343,7 @@ final class WorldRuntime {
               );
             }
           case OperationKind.momentImage:
+            woken.add(job.subjectId);
             final posted = await _moments.retryImageJob(job);
             if (posted != null) {
               published.add(posted);
