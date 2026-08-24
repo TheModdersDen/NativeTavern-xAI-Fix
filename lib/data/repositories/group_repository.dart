@@ -23,14 +23,14 @@ class GroupRepository {
   /// Get all groups
   Future<List<Group>> getAllGroups() async {
     final rows = await _db.select(_db.groups).get();
-    return rows.map(_groupFromRow).toList();
+    return Future.wait(rows.map((row) => _visibleGroup(_groupFromRow(row))));
   }
 
   /// Get group by ID
   Future<Group?> getGroup(String id) async {
     final row = await (_db.select(_db.groups)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
-    return row != null ? _groupFromRow(row) : null;
+    return row == null ? null : _visibleGroup(_groupFromRow(row));
   }
 
   /// Create a new group
@@ -64,7 +64,30 @@ class GroupRepository {
 
   /// Update an existing group
   Future<Group> updateGroup(Group group) async {
-    final updatedGroup = group.copyWith(modifiedAt: DateTime.now());
+    // Keep references to deleted members in storage. They are hidden from
+    // callers, but retaining them preserves historical group chats and lets a
+    // later character restore reappear in the group.
+    final raw = await _getRawGroup(group.id);
+    final rawIds =
+        raw?.members.map((member) => member.characterId).toSet() ?? {};
+    final rawCharacters = rawIds.isEmpty
+        ? const <db.Character>[]
+        : await (_db.select(_db.characters)
+              ..where((character) => character.id.isIn(rawIds)))
+            .get();
+    final activeRawIds = rawCharacters
+        .where((character) => !character.isDeleted)
+        .map((character) => character.id)
+        .toSet();
+    final hiddenMembers = raw == null
+        ? const <GroupMember>[]
+        : raw.members
+            .where((member) => !activeRawIds.contains(member.characterId))
+            .toList(growable: false);
+    final updatedGroup = group.copyWith(
+      members: [...group.members, ...hiddenMembers],
+      modifiedAt: DateTime.now(),
+    );
     await (_db.update(_db.groups)..where((t) => t.id.equals(group.id)))
         .write(_groupToCompanion(updatedGroup));
     return updatedGroup;
@@ -210,6 +233,27 @@ class GroupRepository {
       avatarPath: row.avatarPath,
       createdAt: row.createdAt,
       modifiedAt: row.modifiedAt,
+    );
+  }
+
+  Future<Group?> _getRawGroup(String id) async {
+    final row = await (_db.select(_db.groups)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    return row == null ? null : _groupFromRow(row);
+  }
+
+  Future<Group> _visibleGroup(Group group) async {
+    if (group.members.isEmpty) return group;
+    final ids = group.members.map((member) => member.characterId).toSet();
+    final rows = await (_db.select(_db.characters)
+          ..where((character) => character.id.isIn(ids)))
+        .get();
+    final activeIds =
+        rows.where((row) => !row.isDeleted).map((row) => row.id).toSet();
+    return group.copyWith(
+      members: group.members
+          .where((member) => activeIds.contains(member.characterId))
+          .toList(growable: false),
     );
   }
 
