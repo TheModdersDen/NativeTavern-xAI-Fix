@@ -13,7 +13,11 @@ final worldInfoRepositoryProvider = Provider<WorldInfoRepository>((ref) {
 /// All world infos provider
 final allWorldInfosProvider = FutureProvider<List<WorldInfo>>((ref) async {
   final repo = ref.watch(worldInfoRepositoryProvider);
-  return repo.getAllWorldInfos();
+  return repo.getWorldInfoSummaries();
+});
+
+final worldInfoEntryCountsProvider = FutureProvider<Map<String, int>>((ref) {
+  return ref.watch(worldInfoRepositoryProvider).getWorldInfoEntryCounts();
 });
 
 /// Global world infos provider
@@ -43,8 +47,9 @@ class WorldInfoNotifier extends StateNotifier<AsyncValue<List<WorldInfo>>> {
   Future<void> _loadWorldInfos() async {
     state = const AsyncValue.loading();
     try {
-      final worldInfos = await _repository.getAllWorldInfos();
+      final worldInfos = await _repository.getWorldInfoSummaries();
       state = AsyncValue.data(worldInfos);
+      _ref.invalidate(worldInfoEntryCountsProvider);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

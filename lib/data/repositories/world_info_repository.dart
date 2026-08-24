@@ -32,6 +32,28 @@ class WorldInfoRepository {
     return worldInfos;
   }
 
+  /// Loads only lorebook metadata for the management list. Entries are loaded
+  /// when the user opens a specific lorebook.
+  Future<List<models.WorldInfo>> getWorldInfoSummaries() async {
+    final rows = await _db.select(_db.worldInfos).get();
+    return rows
+        .map((row) => _worldInfoFromRow(row, const []))
+        .toList(growable: false);
+  }
+
+  /// Returns entry counts without materializing entry content.
+  Future<Map<String, int>> getWorldInfoEntryCounts() async {
+    final count = _db.worldInfoEntries.id.count();
+    final rows = await (_db.selectOnly(_db.worldInfoEntries)
+          ..addColumns([_db.worldInfoEntries.worldInfoId, count])
+          ..groupBy([_db.worldInfoEntries.worldInfoId]))
+        .get();
+    return {
+      for (final row in rows)
+        row.read(_db.worldInfoEntries.worldInfoId)!: row.read(count) ?? 0,
+    };
+  }
+
   /// Get global world infos (not bound to a character)
   Future<List<models.WorldInfo>> getGlobalWorldInfos() async {
     final rows = await (_db.select(_db.worldInfos)

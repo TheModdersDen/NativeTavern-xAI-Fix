@@ -28,7 +28,7 @@ class MomentsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(appSettingsProvider);
-    final feed = ref.watch(momentFeedProvider);
+    final feed = ref.watch(pagedMomentFeedProvider);
     final characters =
         ref.watch(characterListProvider).asData?.value ?? const <Character>[];
     final persona = ref.watch(activePersonaProvider).asData?.value;
@@ -64,11 +64,20 @@ class MomentsScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => _CenteredMessage(error.toString()),
                 data: (items) {
-                  return CustomScrollView(
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    slivers: [
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification.metrics.extentAfter < 600) {
+                        ref
+                            .read(pagedMomentFeedProvider.notifier)
+                            .loadMore();
+                      }
+                      return false;
+                    },
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
                       SliverAppBar(
                         pinned: true,
                         stretch: true,
@@ -128,7 +137,8 @@ class MomentsScreen extends ConsumerWidget {
                             palette: palette,
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   );
                 },
               ),
@@ -162,7 +172,7 @@ class MomentsScreen extends ConsumerWidget {
       imagePath: imagePath,
       authorName: selfName,
     );
-    ref.invalidate(momentFeedProvider);
+    ref.invalidate(pagedMomentFeedProvider);
   }
 }
 
@@ -390,7 +400,7 @@ class _MomentRowState extends ConsumerState<_MomentRow> {
                           await ref
                               .read(momentServiceProvider)
                               .toggleLike(post.id);
-                          ref.invalidate(momentFeedProvider);
+                          ref.invalidate(pagedMomentFeedProvider);
                         },
                       ),
                       if (widget.item.likeCount > 0)
@@ -407,7 +417,7 @@ class _MomentRowState extends ConsumerState<_MomentRow> {
                       comments: comments,
                       palette: palette,
                       onChanged: () {
-                        ref.invalidate(momentFeedProvider);
+                        ref.invalidate(pagedMomentFeedProvider);
                       },
                     ),
                   ],
@@ -536,7 +546,7 @@ class _CommentButton extends ConsumerWidget {
           authorName: authorName,
         );
     onPosted(comment);
-    ref.invalidate(momentFeedProvider);
+    ref.invalidate(pagedMomentFeedProvider);
   }
 }
 

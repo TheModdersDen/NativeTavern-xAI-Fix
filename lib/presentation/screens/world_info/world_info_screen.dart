@@ -45,6 +45,8 @@ class WorldInfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final worldInfosAsync = ref.watch(worldInfoNotifierProvider);
+    final entryCounts = ref.watch(worldInfoEntryCountsProvider).valueOrNull ??
+        const <String, int>{};
 
     return Scaffold(
       appBar: AppBar(
@@ -92,6 +94,8 @@ class WorldInfoScreen extends ConsumerWidget {
               final worldInfo = worldInfos[index];
               return _WorldInfoCard(
                 worldInfo: worldInfo,
+                entryCount:
+                    entryCounts[worldInfo.id] ?? worldInfo.entries.length,
                 onTap: () => _openWorldInfo(context, worldInfo),
                 onEdit: () => _showEditDialog(context, ref, worldInfo),
                 onDelete: () =>
@@ -337,6 +341,7 @@ class WorldInfoScreen extends ConsumerWidget {
 /// Card widget for displaying a World Info
 class _WorldInfoCard extends StatelessWidget {
   final WorldInfo worldInfo;
+  final int entryCount;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -344,6 +349,7 @@ class _WorldInfoCard extends StatelessWidget {
 
   const _WorldInfoCard({
     required this.worldInfo,
+    required this.entryCount,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
@@ -422,7 +428,7 @@ class _WorldInfoCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       AppLocalizations.of(context)!
-                          .entriesCount(worldInfo.entries.length),
+                          .entriesCount(entryCount),
                       style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 14,
@@ -804,21 +810,27 @@ class WorldInfoEntriesScreen extends ConsumerStatefulWidget {
 class _WorldInfoEntriesScreenState
     extends ConsumerState<WorldInfoEntriesScreen> {
   late WorldInfo _worldInfo;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _worldInfo = widget.worldInfo;
+    _loadWorldInfo();
   }
 
-  void _refreshWorldInfo() async {
-    final worldInfos = ref.read(worldInfoNotifierProvider).valueOrNull ?? [];
-    final updated = worldInfos.firstWhere(
-      (w) => w.id == _worldInfo.id,
-      orElse: () => _worldInfo,
-    );
-    setState(() => _worldInfo = updated);
+  Future<void> _loadWorldInfo() async {
+    final updated = await ref
+        .read(worldInfoRepositoryProvider)
+        .getWorldInfoById(widget.worldInfo.id);
+    if (!mounted || updated == null) return;
+    setState(() {
+      _worldInfo = updated;
+      _isLoading = false;
+    });
   }
+
+  void _refreshWorldInfo() => _loadWorldInfo();
 
   @override
   Widget build(BuildContext context) {
@@ -838,7 +850,9 @@ class _WorldInfoEntriesScreenState
           ),
         ],
       ),
-      body: _worldInfo.entries.isEmpty
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _worldInfo.entries.isEmpty
           ? _buildEmptyState(context)
           : ReorderableListView.builder(
               padding: const EdgeInsets.all(16),

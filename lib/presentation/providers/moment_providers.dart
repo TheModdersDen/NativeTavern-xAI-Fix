@@ -135,3 +135,53 @@ final momentFeedProvider =
   ref.watch(worldMomentRevisionProvider);
   return ref.watch(momentServiceProvider).loadFeed();
 });
+
+/// Paginated feed used by the moments screen.
+final pagedMomentFeedProvider =
+    AsyncNotifierProvider.autoDispose<PagedMomentFeedNotifier,
+        List<MomentFeedItem>>(PagedMomentFeedNotifier.new);
+
+class PagedMomentFeedNotifier
+    extends AutoDisposeAsyncNotifier<List<MomentFeedItem>> {
+  static const _pageSize = 24;
+  int _offset = 0;
+  bool _hasMore = true;
+  bool _loadingMore = false;
+
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _loadingMore;
+
+  @override
+  Future<List<MomentFeedItem>> build() async {
+    if (!ref.watch(appSettingsProvider).momentsEnabled) return const [];
+    ref.watch(worldMomentRevisionProvider);
+    _offset = 0;
+    _hasMore = true;
+    final page = await ref.read(momentServiceProvider).loadFeedPage(
+          limit: _pageSize,
+          offset: 0,
+        );
+    _offset = page.length;
+    _hasMore = page.length == _pageSize;
+    return page;
+  }
+
+  Future<void> loadMore() async {
+    if (_loadingMore || !_hasMore || !state.hasValue) return;
+    _loadingMore = true;
+    try {
+      final page = await ref.read(momentServiceProvider).loadFeedPage(
+            limit: _pageSize,
+            offset: _offset,
+          );
+      final current = state.valueOrNull ?? const <MomentFeedItem>[];
+      state = AsyncData([...current, ...page]);
+      _offset += page.length;
+      _hasMore = page.length == _pageSize;
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+    } finally {
+      _loadingMore = false;
+    }
+  }
+}

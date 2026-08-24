@@ -54,6 +54,8 @@ class ActiveChatState {
       groupCharacters; // Character cache for group chats
   final List<ChatMessage> messages;
   final bool isLoading;
+  final bool hasOlderMessages;
+  final bool isLoadingOlderMessages;
   final bool isGenerating;
   final Set<String> generatingMessageIds;
   final String? error;
@@ -67,6 +69,8 @@ class ActiveChatState {
     this.groupCharacters = const {},
     this.messages = const [],
     this.isLoading = false,
+    this.hasOlderMessages = false,
+    this.isLoadingOlderMessages = false,
     this.isGenerating = false,
     this.generatingMessageIds = const {},
     this.error,
@@ -92,6 +96,8 @@ class ActiveChatState {
     Map<String, Character>? groupCharacters,
     List<ChatMessage>? messages,
     bool? isLoading,
+    bool? hasOlderMessages,
+    bool? isLoadingOlderMessages,
     bool? isGenerating,
     Set<String>? generatingMessageIds,
     String? error,
@@ -105,6 +111,9 @@ class ActiveChatState {
       groupCharacters: groupCharacters ?? this.groupCharacters,
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
+      hasOlderMessages: hasOlderMessages ?? this.hasOlderMessages,
+      isLoadingOlderMessages:
+          isLoadingOlderMessages ?? this.isLoadingOlderMessages,
       isGenerating: isGenerating ?? this.isGenerating,
       generatingMessageIds: generatingMessageIds ?? this.generatingMessageIds,
       error: error,
@@ -129,6 +138,7 @@ class _PreparedGroupResponse {
 
 /// Active chat notifier
 class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
+  static const _messagePageSize = 50;
   final ChatRepository _chatRepository;
   final CharacterRepository _characterRepository;
   final GroupRepository _groupRepository;
@@ -509,10 +519,16 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       final character = await _characterRepository.getCharacter(
         chat.characterId,
       );
-      var messages = await _chatRepository.getMessages(chatId);
+      final messageCount = await _chatRepository.getMessageCount(chatId);
+      var messages = await _chatRepository.getMessagesPage(
+        chatId,
+        limit: _messagePageSize,
+      );
       if (loadGeneration != _chatLoadGeneration) return;
 
-      if (!chat.isGroupChat && character != null) {
+      if (!chat.isGroupChat &&
+          character != null &&
+          messages.length == messageCount) {
         messages = await _syncGreetingSwipes(chat, character, messages);
         if (loadGeneration != _chatLoadGeneration) return;
       }
@@ -541,6 +557,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           group: group,
           groupCharacters: groupChars,
           messages: messages,
+          hasOlderMessages: messages.length < messageCount,
+          isLoadingOlderMessages: false,
           isLoading: false,
         );
       } else {
@@ -551,6 +569,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
           clearGroup: true,
           groupCharacters: const {},
           messages: messages,
+          hasOlderMessages: messages.length < messageCount,
+          isLoadingOlderMessages: false,
           isLoading: false,
         );
       }
@@ -559,6 +579,82 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       debugPrint('❌ ChatProvider error: $e\n$stackTrace');
       state = ActiveChatState(isLoading: false, error: e.toString());
     }
+  }
+
+  /// Load the next page of older messages for the active chat.
+  Future<void> loadOlderMessages() async {
+    final chatId = state.chat?.id;
+    if (chatId == null ||
+        !state.hasOlderMessages ||
+        state.isLoadingOlderMessages) {
+      return;
+    }
+
+    state = state.copyWith(isLoadingOlderMessages: true);
+    try {
+      final older = await _chatRepository.getMessagesPage(
+        chatId,
+        limit: _messagePageSize,
+        offset: state.messages.length,
+      );
+      if (older.isEmpty) {
+        state = state.copyWith(
+          hasOlderMessages: false,
+          isLoadingOlderMessages: false,
+        );
+        return;
+      }
+      final merged = [...older, ...state.messages];
+      state = state.copyWith(
+        messages: merged,
+        hasOlderMessages: older.length == _messagePageSize,
+        isLoadingOlderMessages: false,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('❌ ChatProvider loadOlderMessages error: $e\n$stackTrace');
+      state =
+          state.copyWith(isLoadingOlderMessages: false, error: e.toString());
+    }
+  }
+
+  /// Generation requires the complete history even though the UI is paged.
+  Future<void> _ensureAllMessagesLoaded() async {
+    final chatId = state.chat?.id;
+    if (chatId == null || !state.hasOlderMessages) return;
+    state = state.copyWith(isLoadingOlderMessages: true);
+    try {
+      final messages = await _chatRepository.getMessages(chatId);
+      state = state.copyWith(
+        messages: messages,
+        hasOlderMessages: false,
+        isLoadingOlderMessages: false,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('❌ ChatProvider load context error: $e\n$stackTrace');
+      state =
+          state.copyWith(isLoadingOlderMessages: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  /// Return the UI to a bounded page after a generation used full context.
+  Future<void> _restoreRecentMessagesPage() async {
+    final chatId = state.chat?.id;
+    if (chatId == null) return;
+    final count = await _chatRepository.getMessageCount(chatId);
+    if (count <= _messagePageSize) {
+      state = state.copyWith(hasOlderMessages: false);
+      return;
+    }
+    final messages = await _chatRepository.getMessagesPage(
+      chatId,
+      limit: _messagePageSize,
+    );
+    state = state.copyWith(
+      messages: messages,
+      hasOlderMessages: messages.length < count,
+      isLoadingOlderMessages: false,
+    );
   }
 
   Future<List<ChatMessage>> _syncGreetingSwipes(
@@ -816,6 +912,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   }) async {
     if (state.chat == null) return;
 
+    await _ensureAllMessagesLoaded();
+
     // For group chats, use group message handling
     if (state.isGroupChat) {
       await sendGroupMessage(content, config, attachments: attachments);
@@ -924,6 +1022,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.addMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
+      await _restoreRecentMessagesPage();
       unawaited(
         _writeStoryAfterTurn(
           chatId: state.chat!.id,
@@ -945,6 +1044,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   /// Regenerate the last assistant message
   Future<void> regenerateLastMessage(LLMConfig config) async {
+    await _ensureAllMessagesLoaded();
     if (state.messages.isEmpty) return;
 
     final lastMessage = state.messages.last;
@@ -1048,6 +1148,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.updateMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
+      await _restoreRecentMessagesPage();
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -1204,6 +1305,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   /// Regenerate a specific assistant message (adds new swipe)
   Future<void> regenerateMessage(String messageId, LLMConfig config) async {
+    await _ensureAllMessagesLoaded();
     final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
     if (messageIndex < 0) return;
 
@@ -1314,6 +1416,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.updateMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
+      await _restoreRecentMessagesPage();
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -1327,6 +1430,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
   /// Continue from a specific message (delete all after and regenerate)
   Future<void> continueFromMessage(String messageId, LLMConfig config) async {
+    await _ensureAllMessagesLoaded();
     final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
     if (messageIndex < 0) return;
 
@@ -1351,6 +1455,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// Continue generation without user message (for "Continue" quick reply)
   Future<void> continueGeneration(LLMConfig config) async {
     if (state.chat == null) return;
+    await _ensureAllMessagesLoaded();
 
     // For group chats, pick a character to respond
     if (state.isGroupChat) {
@@ -1393,6 +1498,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
   /// Returns the text for the input field; nothing is added to the chat.
   Future<String?> impersonate(LLMConfig config) async {
     if (state.chat == null) return null;
+    await _ensureAllMessagesLoaded();
 
     state = state.copyWith(isGenerating: true, error: null);
     _startGenerationSession(config, ChatGenerationMode.impersonate);
@@ -1410,6 +1516,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       // voice, not the user's
       final response = await _generateWithoutPrefill(context, config);
       state = state.copyWith(isGenerating: false);
+      await _restoreRecentMessagesPage();
       final text = response.content.trim();
       return text.isEmpty ? null : text;
     } catch (e) {
@@ -1510,6 +1617,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       await _chatRepository.addMessage(finalMessage);
 
       state = state.copyWith(isGenerating: false);
+      await _restoreRecentMessagesPage();
     } catch (e, stackTrace) {
       _closeGenerationSession();
       if (e is ChatGenerationCancelledException) {
@@ -2902,6 +3010,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
     List<ChatAttachment> attachments = const [],
   }) async {
     if (state.chat == null || state.group == null) return;
+    await _ensureAllMessagesLoaded();
     final turnStart = state.messages.length;
 
     // Add user message
@@ -2943,6 +3052,7 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         ),
       );
     }
+    await _restoreRecentMessagesPage();
   }
 
   Future<void> _writeStoryAfterTurn({
@@ -3564,6 +3674,50 @@ final allChatsProvider = FutureProvider<List<Chat>>((ref) async {
   final repo = ref.watch(chatRepositoryProvider);
   return repo.getAllChats();
 });
+
+final pagedChatsProvider =
+    AsyncNotifierProvider.autoDispose<PagedChatsNotifier, List<Chat>>(
+  PagedChatsNotifier.new,
+);
+
+class PagedChatsNotifier extends AutoDisposeAsyncNotifier<List<Chat>> {
+  static const _pageSize = 40;
+  int _offset = 0;
+  bool _hasMore = true;
+  bool _loadingMore = false;
+
+  @override
+  Future<List<Chat>> build() async {
+    _offset = 0;
+    _hasMore = true;
+    final page = await ref.read(chatRepositoryProvider).getChatsPage(
+          limit: _pageSize,
+          offset: 0,
+        );
+    _offset = page.length;
+    _hasMore = page.length == _pageSize;
+    return page;
+  }
+
+  Future<void> loadMore() async {
+    if (_loadingMore || !_hasMore || !state.hasValue) return;
+    _loadingMore = true;
+    try {
+      final page = await ref.read(chatRepositoryProvider).getChatsPage(
+            limit: _pageSize,
+            offset: _offset,
+          );
+      final current = state.valueOrNull ?? const <Chat>[];
+      state = AsyncData([...current, ...page]);
+      _offset += page.length;
+      _hasMore = page.length == _pageSize;
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+    } finally {
+      _loadingMore = false;
+    }
+  }
+}
 
 /// Recent chats
 final recentChatsProvider = FutureProvider<List<Chat>>((ref) async {

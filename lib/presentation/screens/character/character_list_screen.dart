@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +25,13 @@ class CharacterListScreen extends ConsumerStatefulWidget {
 class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
   String _searchQuery = '';
   CharacterViewMode _viewMode = CharacterViewMode.compactGrid;
+  Timer? _searchDebounce;
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +67,25 @@ class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
       body: Column(
         children: [
           _SearchBar(
-            onChanged: (value) => setState(() => _searchQuery = value),
+            onChanged: (value) {
+              setState(() => _searchQuery = value);
+              _searchDebounce?.cancel();
+              _searchDebounce = Timer(const Duration(milliseconds: 250), () {
+                if (mounted) {
+                  ref.read(characterListProvider.notifier).setQuery(value);
+                }
+              });
+            },
           ),
           Expanded(
-            child: charactersAsync.when(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.extentAfter < 600) {
+                  ref.read(characterListProvider.notifier).loadMore();
+                }
+                return false;
+              },
+              child: charactersAsync.when(
               data: (characters) {
                 final filtered = _searchQuery.isEmpty
                     ? characters
@@ -107,6 +130,7 @@ class _CharacterListScreenState extends ConsumerState<CharacterListScreen> {
                   ],
                 ),
               ),
+            ),
             ),
           ),
         ],

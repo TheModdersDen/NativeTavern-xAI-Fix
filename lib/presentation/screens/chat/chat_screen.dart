@@ -159,10 +159,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final actualIndex = messages.indexWhere(
       (message) => message.id == targetId,
     );
-    if (actualIndex < 0) {
-      _initialMessageJumpScheduled = true;
-      return;
-    }
+    if (actualIndex < 0) return;
     _initialMessageJumpScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !_scrollController.hasClients) return;
@@ -1042,11 +1039,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       // 2. Chat finishes loading (transitions from loading to loaded with messages)
       final messageCountChanged =
           previous?.messages.length != next.messages.length;
+      final olderMessagesLoaded = previous != null &&
+          next.messages.length > previous.messages.length &&
+          previous.messages.isNotEmpty &&
+          next.messages.last.id == previous.messages.last.id &&
+          next.messages.first.id != previous.messages.first.id;
       final loadingFinished = previous?.isLoading == true &&
           next.isLoading == false &&
           next.messages.isNotEmpty;
 
-      if (messageCountChanged || loadingFinished) {
+      if ((messageCountChanged && !olderMessagesLoaded) || loadingFinished) {
         _scrollToBottomImmediate();
       }
       _handleChatTTSChange(previous, next);
@@ -1898,6 +1900,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageList(ActiveChatState chatState) {
+    if (widget.initialMessageId != null &&
+        !chatState.messages
+            .any((message) => message.id == widget.initialMessageId) &&
+        chatState.hasOlderMessages &&
+        !chatState.isLoadingOlderMessages) {
+      unawaited(ref.read(activeChatProvider.notifier).loadOlderMessages());
+    }
     _scheduleInitialMessageJump(chatState.messages);
     final config = ref.read(llmConfigProvider);
     final backgroundAsync = ref.watch(
@@ -1907,86 +1916,121 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasBackground = background.type != BackgroundType.none ||
         chatState.character?.assets?.live2d?.enabled == true;
 
-    return ListView.builder(
-      controller: _scrollController,
-      reverse:
-          true, // Build from bottom up - newest messages at bottom, always visible
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: chatState.messages.length,
-      itemBuilder: (context, index) {
-        // With reverse: true, we need to reverse the index to maintain correct message order
-        // index 0 in reversed list = last message (newest) = should be at bottom
-        final actualIndex = chatState.messages.length - 1 - index;
-        final message = chatState.messages[actualIndex];
-        final isLast = actualIndex == chatState.messages.length - 1;
-
-        final layoutMode = ref.watch(
-          appSettingsProvider.select((s) => s.chatLayoutMode),
-        );
-
-        return _MessageBubble(
-          key: _messageKeys.putIfAbsent(
-            message.id,
-            () => GlobalKey<_MessageBubbleState>(),
-          ),
-          message: message,
-          messageIndex:
-              actualIndex, // Use actual index for bookmarks and other features
-          chatId: widget.chatId,
-          character: chatState.characterForMessage(message),
-          isGenerating: chatState.generatingMessageIds.contains(message.id) ||
-              (isLast &&
-                  message.role == MessageRole.assistant &&
-                  chatState.isGenerating &&
-                  chatState.generatingMessageIds.isEmpty),
-          isLast: isLast,
-          hasBackground: hasBackground,
-          bubbleOpacity: background.bubbleOpacity,
-          layoutMode: layoutMode,
-          highlighted: _highlightedMessageId == message.id,
-          onSwipe: (swipeIndex) {
-            ref
-                .read(activeChatProvider.notifier)
-                .swipeMessage(message.id, swipeIndex);
-          },
-          onDeleteSwipe: (swipeIndex) {
-            return ref
-                .read(activeChatProvider.notifier)
-                .deleteSwipe(message.id, swipeIndex);
-          },
-          onEdit: (newContent) {
-            ref
-                .read(activeChatProvider.notifier)
-                .editMessage(message.id, newContent);
-          },
-          onDelete: () {
-            _showDeleteConfirmation(message.id);
-          },
-          onRegenerate: message.role == MessageRole.assistant
-              ? () {
-                  ref
-                      .read(activeChatProvider.notifier)
-                      .regenerateMessage(message.id, config);
-                }
-              : null,
-          onContinueFromHere: () {
-            ref
-                .read(activeChatProvider.notifier)
-                .continueFromMessage(message.id, config);
-          },
-          onDeleteAndAfter: () {
-            _showDeleteAndAfterConfirmation(message.id);
-          },
-          onCreateBookmark: () {
-            _showCreateBookmarkDialog(message.id, actualIndex);
-          },
-          onGenerateImage: ref.read(imageGenSettingsProvider).enabled
-              ? () {
-                  _showImageGenerationDialog(message, chatState.character);
-                }
-              : null,
-        );
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.depth != 0 ||
+            notification.metrics.axis != Axis.vertical ||
+            !chatState.hasOlderMessages ||
+            chatState.isLoadingOlderMessages) {
+          return false;
+        }
+        // With reverse=true, maxScrollExtent is the oldest-message end.
+        if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 160) {
+          unawaited(
+            ref.read(activeChatProvider.notifier).loadOlderMessages(),
+          );
+        }
+        return false;
       },
+      child: ListView.builder(
+        controller: _scrollController,
+        reverse:
+            true, // Build from bottom up - newest messages at bottom, always visible
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: chatState.messages.length +
+            (chatState.hasOlderMessages || chatState.isLoadingOlderMessages
+                ? 1
+                : 0),
+        itemBuilder: (context, index) {
+          if (index == chatState.messages.length) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: chatState.isLoadingOlderMessages
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            );
+          }
+          // With reverse: true, we need to reverse the index to maintain correct message order
+          // index 0 in reversed list = last message (newest) = should be at bottom
+          final actualIndex = chatState.messages.length - 1 - index;
+          final message = chatState.messages[actualIndex];
+          final isLast = actualIndex == chatState.messages.length - 1;
+
+          final layoutMode = ref.watch(
+            appSettingsProvider.select((s) => s.chatLayoutMode),
+          );
+
+          return _MessageBubble(
+            key: _messageKeys.putIfAbsent(
+              message.id,
+              () => GlobalKey<_MessageBubbleState>(),
+            ),
+            message: message,
+            messageIndex:
+                actualIndex, // Use actual index for bookmarks and other features
+            chatId: widget.chatId,
+            character: chatState.characterForMessage(message),
+            isGenerating: chatState.generatingMessageIds.contains(message.id) ||
+                (isLast &&
+                    message.role == MessageRole.assistant &&
+                    chatState.isGenerating &&
+                    chatState.generatingMessageIds.isEmpty),
+            isLast: isLast,
+            hasBackground: hasBackground,
+            bubbleOpacity: background.bubbleOpacity,
+            layoutMode: layoutMode,
+            highlighted: _highlightedMessageId == message.id,
+            onSwipe: (swipeIndex) {
+              ref
+                  .read(activeChatProvider.notifier)
+                  .swipeMessage(message.id, swipeIndex);
+            },
+            onDeleteSwipe: (swipeIndex) {
+              return ref
+                  .read(activeChatProvider.notifier)
+                  .deleteSwipe(message.id, swipeIndex);
+            },
+            onEdit: (newContent) {
+              ref
+                  .read(activeChatProvider.notifier)
+                  .editMessage(message.id, newContent);
+            },
+            onDelete: () {
+              _showDeleteConfirmation(message.id);
+            },
+            onRegenerate: message.role == MessageRole.assistant
+                ? () {
+                    ref
+                        .read(activeChatProvider.notifier)
+                        .regenerateMessage(message.id, config);
+                  }
+                : null,
+            onContinueFromHere: () {
+              ref
+                  .read(activeChatProvider.notifier)
+                  .continueFromMessage(message.id, config);
+            },
+            onDeleteAndAfter: () {
+              _showDeleteAndAfterConfirmation(message.id);
+            },
+            onCreateBookmark: () {
+              _showCreateBookmarkDialog(message.id, actualIndex);
+            },
+            onGenerateImage: ref.read(imageGenSettingsProvider).enabled
+                ? () {
+                    _showImageGenerationDialog(message, chatState.character);
+                  }
+                : null,
+          );
+        },
+      ),
     );
   }
 

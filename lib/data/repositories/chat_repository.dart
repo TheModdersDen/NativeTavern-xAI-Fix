@@ -22,28 +22,38 @@ class ChatRepository {
   Future<List<models.Chat>> getAllChats() async {
     final rows = await (_db.select(
       _db.chats,
-    )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).get();
+    )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .get();
     return rows.map(_chatFromRow).toList();
+  }
+
+  /// Loads a bounded page for the home chat list.
+  Future<List<models.Chat>> getChatsPage({
+    int limit = 40,
+    int offset = 0,
+  }) async {
+    final rows = await (_db.select(_db.chats)
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(limit, offset: offset < 0 ? 0 : offset))
+        .get();
+    return rows.map(_chatFromRow).toList(growable: false);
   }
 
   /// Get chats for a specific character
   Future<List<models.Chat>> getChatsForCharacter(String characterId) async {
-    final rows =
-        await (_db.select(_db.chats)
-              ..where((t) =>
-                  t.characterId.equals(characterId) & t.groupId.isNull())
-              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
-            .get();
+    final rows = await (_db.select(_db.chats)
+          ..where((t) => t.characterId.equals(characterId) & t.groupId.isNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .get();
     return rows.map(_chatFromRow).toList();
   }
 
   /// Get recent chats
   Future<List<models.Chat>> getRecentChats({int limit = 10}) async {
-    final rows =
-        await (_db.select(_db.chats)
-              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
-              ..limit(limit))
-            .get();
+    final rows = await (_db.select(_db.chats)
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(limit))
+        .get();
     return rows.map(_chatFromRow).toList();
   }
 
@@ -51,7 +61,8 @@ class ChatRepository {
   Future<models.Chat?> getChat(String id) async {
     final row = await (_db.select(
       _db.chats,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    )..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
     return row != null ? _chatFromRow(row) : null;
   }
 
@@ -74,9 +85,7 @@ class ChatRepository {
       updatedAt: now,
     );
 
-    await _db
-        .into(_db.chats)
-        .insert(
+    await _db.into(_db.chats).insert(
           ChatsCompanion(
             id: Value(newChat.id),
             characterId: Value(newChat.characterId),
@@ -123,12 +132,35 @@ class ChatRepository {
 
   /// Get messages for a chat
   Future<List<models.ChatMessage>> getMessages(String chatId) async {
-    final rows =
-        await (_db.select(_db.messages)
-              ..where((t) => t.chatId.equals(chatId))
-              ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
-            .get();
+    final rows = await (_db.select(_db.messages)
+          ..where((t) => t.chatId.equals(chatId))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.timestamp),
+            (t) => OrderingTerm.asc(t.id),
+          ]))
+        .get();
     return rows.map(_messageFromRow).toList();
+  }
+
+  /// Load a bounded page of messages, keeping chronological order.
+  ///
+  /// Pages are addressed from the newest message: offset 0 returns the most
+  /// recent page, while larger offsets load progressively older messages.
+  Future<List<models.ChatMessage>> getMessagesPage(
+    String chatId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    if (limit <= 0) return const [];
+    final rows = await (_db.select(_db.messages)
+          ..where((t) => t.chatId.equals(chatId))
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.timestamp),
+            (t) => OrderingTerm.desc(t.id),
+          ])
+          ..limit(limit, offset: offset < 0 ? 0 : offset))
+        .get();
+    return rows.reversed.map(_messageFromRow).toList(growable: false);
   }
 
   /// Add a message to a chat
@@ -137,9 +169,7 @@ class ChatRepository {
 
     final newMessage = message.copyWith(id: id);
 
-    await _db
-        .into(_db.messages)
-        .insert(
+    await _db.into(_db.messages).insert(
           MessagesCompanion(
             id: Value(newMessage.id),
             chatId: Value(newMessage.chatId),
@@ -170,7 +200,8 @@ class ChatRepository {
   Future<models.ChatMessage> updateMessage(models.ChatMessage message) async {
     await (_db.update(
       _db.messages,
-    )..where((t) => t.id.equals(message.id))).write(
+    )..where((t) => t.id.equals(message.id)))
+        .write(
       MessagesCompanion(
         content: Value(message.content),
         swipes: Value(jsonEncode(message.swipes)),
@@ -201,10 +232,12 @@ class ChatRepository {
     await _db.transaction(() async {
       await (_db.delete(
         _db.bookmarks,
-      )..where((t) => t.chatId.equals(chatId))).go();
+      )..where((t) => t.chatId.equals(chatId)))
+          .go();
       await (_db.delete(
         _db.messages,
-      )..where((t) => t.chatId.equals(chatId))).go();
+      )..where((t) => t.chatId.equals(chatId)))
+          .go();
       await (_db.update(_db.chats)..where((t) => t.id.equals(chatId))).write(
         ChatsCompanion(updatedAt: Value(DateTime.now())),
       );
@@ -213,30 +246,30 @@ class ChatRepository {
 
   /// Get message count for a chat
   Future<int> getMessageCount(String chatId) async {
-    final messages = await (_db.select(
-      _db.messages,
-    )..where((t) => t.chatId.equals(chatId))).get();
-    return messages.length;
+    final countExpression = _db.messages.id.count();
+    final row = await (_db.selectOnly(_db.messages)
+          ..addColumns([countExpression])
+          ..where(_db.messages.chatId.equals(chatId)))
+        .getSingle();
+    return row.read(countExpression) ?? 0;
   }
 
   /// Get last message of a chat
   Future<models.ChatMessage?> getLastMessage(String chatId) async {
-    final row =
-        await (_db.select(_db.messages)
-              ..where((t) => t.chatId.equals(chatId))
-              ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
-              ..limit(1))
-            .getSingleOrNull();
+    final row = await (_db.select(_db.messages)
+          ..where((t) => t.chatId.equals(chatId))
+          ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
+          ..limit(1))
+        .getSingleOrNull();
     return row != null ? _messageFromRow(row) : null;
   }
 
   /// Get chats for a group
   Future<List<models.Chat>> getChatsForGroup(String groupId) async {
-    final rows =
-        await (_db.select(_db.chats)
-              ..where((t) => t.groupId.equals(groupId))
-              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
-            .get();
+    final rows = await (_db.select(_db.chats)
+          ..where((t) => t.groupId.equals(groupId))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .get();
     return rows.map(_chatFromRow).toList();
   }
 
@@ -258,8 +291,7 @@ class ChatRepository {
       authorNoteDepth: row.authorNoteDepth,
       authorNoteEnabled: row.authorNoteEnabled,
       settings: settings,
-      summaries:
-          (settings['summaries'] as List<dynamic>?)
+      summaries: (settings['summaries'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
               .map(models.ChatSummary.fromJson)
               .toList() ??

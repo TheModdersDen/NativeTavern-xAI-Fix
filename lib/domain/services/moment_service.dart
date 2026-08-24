@@ -117,7 +117,23 @@ final class MomentService {
 
   Future<List<MomentFeedItem>> loadFeed() async {
     await rehomeMispostedReplies();
-    final posts = await _visiblePosts(await _moments.listAll());
+    return _loadFeedItems(await _visiblePosts(await _moments.listAll()));
+  }
+
+  /// Load only one page for the moments UI. Full-feed callers keep using
+  /// [loadFeed] when they need every post.
+  Future<List<MomentFeedItem>> loadFeedPage({
+    int limit = 24,
+    int offset = 0,
+  }) async {
+    if (offset == 0) await rehomeMispostedReplies();
+    final posts = await _visiblePosts(
+      await _moments.listPage(limit: limit, offset: offset),
+    );
+    return _loadFeedItems(posts);
+  }
+
+  Future<List<MomentFeedItem>> _loadFeedItems(List<MomentPost> posts) async {
     final items = <MomentFeedItem>[];
     for (final post in posts) {
       items.add(

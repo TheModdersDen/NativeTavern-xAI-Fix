@@ -30,6 +30,28 @@ class CharacterRepository {
     return rows.where((row) => !row.isDeleted).map(_characterFromRow).toList();
   }
 
+  /// Loads a bounded page for the character browser. Full character reads are
+  /// still available for chat/runtime callers that need complete data.
+  Future<List<models.Character>> getCharactersPage({
+    int limit = 40,
+    int offset = 0,
+    String query = '',
+  }) async {
+    final normalized = query.trim();
+    final statement = _db.select(_db.characters)
+      ..where((row) {
+        final active = row.isDeleted.equals(false);
+        if (normalized.isEmpty) return active;
+        final pattern = '%$normalized%';
+        return active &
+            (row.name.like(pattern) | row.description.like(pattern));
+      })
+      ..orderBy([(row) => OrderingTerm.desc(row.modifiedAt)])
+      ..limit(limit, offset: offset < 0 ? 0 : offset);
+    final rows = await statement.get();
+    return rows.map(_characterFromRow).toList(growable: false);
+  }
+
   /// Get character by ID
   Future<models.Character?> getCharacter(String id) async {
     final row = await (_db.select(_db.characters)

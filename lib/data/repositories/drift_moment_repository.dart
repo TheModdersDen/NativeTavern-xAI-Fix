@@ -56,6 +56,16 @@ class DriftMomentRepository implements MomentRepository {
   }
 
   @override
+  Future<List<MomentPost>> listPage({int limit = 24, int offset = 0}) async {
+    final rows = await (_feedQuery()
+          ..limit(limit, offset: offset < 0 ? 0 : offset))
+        .get();
+    return rows
+        .map((row) => _toPost(row.readTable(_database.momentPosts)))
+        .toList(growable: false);
+  }
+
+  @override
   Future<MomentPost?> findByChapterId(String chapterId) async {
     final query = _feedQuery(
       extra: _database.momentPosts.chapterId.equals(chapterId),

@@ -31,7 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     WidgetsBinding.instance.addObserver(this);
     // Refresh chat list when screen is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(allChatsProvider);
+      ref.invalidate(pagedChatsProvider);
       ref.invalidate(_groupPresentationProvider);
     });
   }
@@ -46,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // Refresh chat list when returning to the app
-      ref.invalidate(allChatsProvider);
+      ref.invalidate(pagedChatsProvider);
       ref.invalidate(_groupPresentationProvider);
     }
   }
@@ -55,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Refresh chat list whenever dependencies change (e.g., when navigating back)
-    ref.invalidate(allChatsProvider);
+    ref.invalidate(pagedChatsProvider);
     ref.invalidate(_groupPresentationProvider);
   }
 
@@ -95,7 +95,7 @@ class _ChatListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final chatsAsync = ref.watch(allChatsProvider);
+    final chatsAsync = ref.watch(pagedChatsProvider);
 
     return chatsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -150,17 +150,25 @@ class _ChatListView extends ConsumerWidget {
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(allChatsProvider);
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.extentAfter < 600) {
+              ref.read(pagedChatsProvider.notifier).loadMore();
+            }
+            return false;
           },
-          child: ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: chats.length,
-            itemBuilder: (context, index) {
-              final chat = chats[index];
-              return _ChatListTile(chat: chat);
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(pagedChatsProvider);
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: chats.length,
+              itemBuilder: (context, index) {
+                final chat = chats[index];
+                return _ChatListTile(chat: chat);
+              },
+            ),
           ),
         );
       },

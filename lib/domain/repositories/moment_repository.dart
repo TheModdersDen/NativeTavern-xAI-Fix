@@ -15,6 +15,9 @@ abstract interface class MomentRepository {
 
   Future<List<MomentPost>> listAll();
 
+  /// A page of posts in timeline order.
+  Future<List<MomentPost>> listPage({int limit = 24, int offset = 0});
+
   Future<MomentPost?> findByChapterId(String chapterId);
 
   Future<MomentComment> addComment(MomentComment comment);
