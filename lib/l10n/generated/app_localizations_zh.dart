@@ -4090,6 +4090,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get momentsComment => '评论';
 
   @override
+  String get momentsSavePhoto => '保存图片';
+
+  @override
+  String get momentsPhotoSaved => '图片保存成功';
+
+  @override
+  String get momentsPhotoSaveFailed => '图片保存失败';
+
+  @override
   String get momentsFriends => '好友';
 
   @override
@@ -10385,6 +10394,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get momentsComment => '留言';
+
+  @override
+  String get momentsSavePhoto => '儲存圖片';
+
+  @override
+  String get momentsPhotoSaved => '圖片儲存成功';
+
+  @override
+  String get momentsPhotoSaveFailed => '圖片儲存失敗';
 
   @override
   String get momentsFriends => '好友';

@@ -116,39 +116,37 @@ class _DebugLogOverlayWrapperState
 
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Overlay(
-        initialEntries: [
-          OverlayEntry(
-            builder: (context) => Stack(
-              children: [
-                widget.child,
-                if (_showLogViewer)
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: _toggleLogViewer,
-                      child: Container(
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ),
-                if (_showLogViewer)
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    top: MediaQuery.of(context).padding.top + 50,
-                    bottom: MediaQuery.of(context).padding.bottom + 100,
-                    child: Material(
-                      borderRadius: BorderRadius.circular(16),
-                      clipBehavior: Clip.antiAlias,
-                      child: DebugLogViewerInline(onClose: _toggleLogViewer),
-                    ),
-                  ),
-                DebugFloatingBall(
-                  logCount: logs.length,
-                  onTap: _toggleLogViewer,
+      // Keep the routed child in one stable element tree. Recreating an
+      // Overlay with the same child on every log update reparented the
+      // navigation subtree and triggered duplicate GlobalKey assertions.
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.child,
+          if (_showLogViewer)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _toggleLogViewer,
+                child: Container(
+                  color: Colors.black54,
                 ),
-              ],
+              ),
             ),
+          if (_showLogViewer)
+            Positioned(
+              left: 16,
+              right: 16,
+              top: MediaQuery.of(context).padding.top + 50,
+              bottom: MediaQuery.of(context).padding.bottom + 100,
+              child: Material(
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: DebugLogViewerInline(onClose: _toggleLogViewer),
+              ),
+            ),
+          DebugFloatingBall(
+            logCount: logs.length,
+            onTap: _toggleLogViewer,
           ),
         ],
       ),

@@ -704,65 +704,115 @@ class _MomentPhoto extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return GestureDetector(
-      onTap: () {
-        showDialog<void>(
-          context: context,
-          builder: (dialogContext) {
-            return GestureDetector(
-              onTap: () => Navigator.pop(dialogContext),
-              child: ColoredBox(
-                color: Colors.black,
-                child: InteractiveViewer(
-                  child: Center(
-                    child: Image.file(image, fit: BoxFit.contain),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 184, maxHeight: 184),
-              child: Image.file(image, key: photoKey, fit: BoxFit.cover),
-            ),
-          ),
-          Positioned(
-            right: 2,
-            bottom: 2,
-            child: IconButton(
-              tooltip: 'Save to Photos',
-              visualDensity: VisualDensity.compact,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black54,
-                foregroundColor: Colors.white,
-              ),
-              icon: const Icon(Icons.download_outlined, size: 18),
-              onPressed: () async {
-                try {
-                  await Gal.putImage(image.path, album: 'NativeTavern');
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved to Photos')),
-                    );
-                  }
-                } catch (_) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Unable to save photo')),
-                    );
-                  }
-                }
-              },
-            ),
-          ),
-        ],
+      onTap: () => _openPreview(context, image),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(2),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 184, maxHeight: 184),
+          child: Image.file(image, key: photoKey, fit: BoxFit.cover),
+        ),
       ),
     );
+  }
+
+  Future<void> _openPreview(BuildContext context, File image) {
+    return showDialog<void>(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (_) => _MomentPhotoPreview(image: image),
+    );
+  }
+}
+
+class _MomentPhotoPreview extends StatefulWidget {
+  const _MomentPhotoPreview({required this.image});
+
+  final File image;
+
+  @override
+  State<_MomentPhotoPreview> createState() => _MomentPhotoPreviewState();
+}
+
+class _MomentPhotoPreviewState extends State<_MomentPhotoPreview> {
+  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ScaffoldMessenger(
+      key: _messengerKey,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(context),
+          onLongPress: () => _showActions(context, l10n),
+          child: Center(
+            child: InteractiveViewer(
+              child: Image.file(widget.image, fit: BoxFit.contain),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showActions(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    final save = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: ListTile(
+          key: const Key('moment-photo-save'),
+          leading: const Icon(Icons.download_outlined),
+          title: Text(l10n.momentsSavePhoto),
+          onTap: () => Navigator.pop(sheetContext, true),
+        ),
+      ),
+    );
+    if (save != true || !context.mounted) return;
+    try {
+      final hasAccess = await Gal.hasAccess(toAlbum: true).timeout(
+        const Duration(seconds: 8),
+      );
+      if (!hasAccess) {
+        final granted = await Gal.requestAccess(toAlbum: true).timeout(
+          const Duration(seconds: 8),
+        );
+        if (!granted) {
+          if (context.mounted) {
+            _showFeedback(l10n.momentsPhotoSaveFailed);
+          }
+          return;
+        }
+      }
+      await Gal.putImage(widget.image.path, album: 'NativeTavern').timeout(
+        const Duration(seconds: 15),
+      );
+      if (context.mounted) {
+        _showFeedback(l10n.momentsPhotoSaved);
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showFeedback(l10n.momentsPhotoSaveFailed);
+      }
+    }
+  }
+
+  void _showFeedback(String message) {
+    final messenger = _messengerKey.currentState;
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+          content: Text(message),
+        ),
+      );
   }
 }
 

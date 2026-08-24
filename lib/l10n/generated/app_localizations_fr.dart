@@ -4216,6 +4216,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get momentsComment => 'Comment';
 
   @override
+  String get momentsSavePhoto => 'Save photo';
+
+  @override
+  String get momentsPhotoSaved => 'Photo saved';
+
+  @override
+  String get momentsPhotoSaveFailed => 'Unable to save photo';
+
+  @override
   String get momentsFriends => 'Friends';
 
   @override

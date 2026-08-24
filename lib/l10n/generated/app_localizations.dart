@@ -7693,6 +7693,24 @@ abstract class AppLocalizations {
   /// **'Comment'**
   String get momentsComment;
 
+  /// No description provided for @momentsSavePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Save photo'**
+  String get momentsSavePhoto;
+
+  /// No description provided for @momentsPhotoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo saved'**
+  String get momentsPhotoSaved;
+
+  /// No description provided for @momentsPhotoSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save photo'**
+  String get momentsPhotoSaveFailed;
+
   /// No description provided for @momentsFriends.
   ///
   /// In en, this message translates to:
