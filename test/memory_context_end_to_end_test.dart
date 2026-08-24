@@ -307,7 +307,8 @@ void main() {
 
     await notifier.sendGroupMessage('orchid', _config);
 
-    final request = llmService.requests.single;
+    // Story extraction runs asynchronously after the foreground group reply.
+    final request = llmService.requests.first;
     expect(_requestContains(request, 'Group orchid memory.'), isTrue);
     expect(_requestContains(request, 'Responder orchid memory.'), isTrue);
     expect(_requestContains(request, 'Other orchid memory.'), isFalse);

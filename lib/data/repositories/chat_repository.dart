@@ -136,7 +136,7 @@ class ChatRepository {
           ..where((t) => t.chatId.equals(chatId))
           ..orderBy([
             (t) => OrderingTerm.asc(t.timestamp),
-            (t) => OrderingTerm.asc(t.id),
+            (t) => OrderingTerm.asc(t.rowId),
           ]))
         .get();
     return rows.map(_messageFromRow).toList();
@@ -156,7 +156,7 @@ class ChatRepository {
           ..where((t) => t.chatId.equals(chatId))
           ..orderBy([
             (t) => OrderingTerm.desc(t.timestamp),
-            (t) => OrderingTerm.desc(t.id),
+            (t) => OrderingTerm.desc(t.rowId),
           ])
           ..limit(limit, offset: offset < 0 ? 0 : offset))
         .get();
