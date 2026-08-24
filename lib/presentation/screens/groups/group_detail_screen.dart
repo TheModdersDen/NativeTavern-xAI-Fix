@@ -41,13 +41,12 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
   }
 
   Future<void> _loadGroup() async {
-    final groupsAsync = ref.read(groupListProvider);
-    final groups = groupsAsync.valueOrNull ?? [];
-
     try {
-      final group = groups.firstWhere(
-        (g) => g.id == widget.groupId,
-      );
+      // The group list now loads asynchronously while hiding deleted members.
+      // Do not treat a still-loading list as a missing group.
+      final group = await ref.read(groupProvider(widget.groupId).future);
+      if (!mounted) return;
+      if (group == null) throw StateError('Group not found');
 
       setState(() {
         _group = group;
