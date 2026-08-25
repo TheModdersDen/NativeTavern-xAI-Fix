@@ -123,6 +123,11 @@ Do not submit App Store review without an explicit instruction. Expire or
 remove old test builds only when requested or when they make the current
 internal invitation non-installable.
 
+App Store Review contact fields are optional for this project. Do not add,
+invent, or treat missing contact name, email, or phone fields as a release
+requirement. If an API submission flow reports a contact-field validation
+error, report the platform response without writing placeholder contact data.
+
 ### Google Play
 
 Upload the `.aab`, not the APK. Use the configured track and follow the user's

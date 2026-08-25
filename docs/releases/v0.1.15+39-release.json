@@ -31,7 +31,7 @@
     "buildAssociated": true,
     "whatIsNewLocalizationCount": 17,
     "androidMentionsInWhatsNew": false,
-    "reviewSubmission": "blocked: App Store Review Detail requires a real contact name, email, and E.164 phone number"
+    "reviewSubmission": "not submitted; optional contact fields were intentionally left unchanged"
   },
   "discord": {
     "announcementPublished": false
