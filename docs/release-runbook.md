@@ -128,6 +128,12 @@ invent, or treat missing contact name, email, or phone fields as a release
 requirement. If an API submission flow reports a contact-field validation
 error, report the platform response without writing placeholder contact data.
 
+For a resubmission, inspect the existing `reviewSubmissions` collection and
+its `reviewSubmissionItems` first. Reuse the prepared submission item and
+submit it with `PATCH /v1/reviewSubmissions/{id}` using
+`{"data":{"type":"reviewSubmissions","id":"{id}","attributes":{"submitted":true}}}`.
+Do not create a second draft submission or add contact fields as a workaround.
+
 ### Google Play
 
 Upload the `.aab`, not the APK. Use the configured track and follow the user's
