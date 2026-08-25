@@ -139,6 +139,7 @@ final class WorldRuntime {
   static const chattyInterval = Duration(minutes: 90);
   static const firstWakeWindow = Duration(minutes: 45);
   static const maxWakeAttempts = 8;
+  static const maxRetryAge = Duration(hours: 24);
 
   final MomentService _moments;
   final CharacterRepository _characters;
@@ -215,6 +216,7 @@ final class WorldRuntime {
     final recovered = await _retryOpenOperations(
       config: config,
       now: now,
+      state: state,
       published: published,
       momentsOn: momentsOn,
       storyOn: storyOn,
@@ -250,7 +252,12 @@ final class WorldRuntime {
     for (final (character, _) in due.take(maxPostsPerTick)) {
       debugPrint('WorldRuntime wake: ${character.name} (${character.id})');
       await _befriendGroupMates(character, now);
-      final result = await _runLoggedWake(character, config, now);
+      final result = await _runLoggedWake(
+        character,
+        config,
+        now,
+        allowNewPost: await _moments.canPublishCharacterPost(now: now),
+      );
       if (result.failed) continue;
       state.nextWakeAt[character.id] = now.add(
         _intervalFor(character, posted: result.post != null),
@@ -269,6 +276,7 @@ final class WorldRuntime {
           'WorldRuntime commented: ${character.name} — ${result.comment!.body}',
         );
       } else {
+        if (result.feedChanged) feedChanged++;
         debugPrint('WorldRuntime skipped: ${character.name}');
       }
     }
@@ -286,6 +294,7 @@ final class WorldRuntime {
   Future<({int feedChanged, Set<String> woken})> _retryOpenOperations({
     required LLMConfig config,
     required DateTime now,
+    required WorldWakeState state,
     required List<MomentPost> published,
     required bool momentsOn,
     required bool storyOn,
@@ -307,14 +316,33 @@ final class WorldRuntime {
         kinds: const {OperationKind.momentWake, OperationKind.momentImage},
       );
       for (final job in due) {
+        if (job.attempts >= maxWakeAttempts ||
+            now.difference(job.createdAt) >= maxRetryAge) {
+          await operations.stopRetrying(
+            job,
+            reason: job.attempts >= maxWakeAttempts
+                ? 'Retry limit reached.'
+                : 'Retry expired after 24 hours.',
+            now: now,
+          );
+          debugPrint(
+            'WorldRuntime abandoned ${job.kind.wireName} for '
+            '${job.subjectId}: ${job.attempts} attempts',
+          );
+          continue;
+        }
         switch (job.kind) {
           case OperationKind.storyChapter:
             continue;
           case OperationKind.momentWake:
             woken.add(job.subjectId);
             final character = await _characters.getCharacter(job.subjectId);
-            if (character == null) {
-              await operations.markCompleted(job, now: now);
+            if (character == null || character.isDeleted) {
+              await operations.stopRetrying(
+                job,
+                reason: 'Character no longer exists.',
+                now: now,
+              );
               continue;
             }
             final claimed = await operations.begin(
@@ -327,7 +355,13 @@ final class WorldRuntime {
               config,
               now,
               existing: claimed,
+              allowNewPost: await _moments.canPublishCharacterPost(now: now),
             );
+            if (!result.failed) {
+              state.nextWakeAt[character.id] = now.add(
+                _intervalFor(character, posted: result.post != null),
+              );
+            }
             if (result.post != null) {
               published.add(result.post!);
               feedChanged++;
@@ -341,13 +375,39 @@ final class WorldRuntime {
                 'WorldRuntime commented: ${character.name} — '
                 '${result.comment!.body}',
               );
+            } else if (result.feedChanged) {
+              feedChanged++;
             }
           case OperationKind.momentImage:
             woken.add(job.subjectId);
-            final posted = await _moments.retryImageJob(job);
+            final character = await _characters.getCharacter(job.subjectId);
+            if (character == null || character.isDeleted) {
+              await operations.stopRetrying(
+                job,
+                reason: 'Character no longer exists.',
+                now: now,
+              );
+              continue;
+            }
+            if (!await _moments.canPublishCharacterPost(now: now)) {
+              await operations.markIncomplete(
+                job,
+                error: 'Waiting for the global character-post budget.',
+                dueAt: now.add(MomentService.defaultGlobalPostInterval),
+                now: now,
+              );
+              continue;
+            }
+            final posted = await _moments.retryImageJob(
+              job,
+              maxAttempts: maxWakeAttempts,
+            );
             if (posted != null) {
               published.add(posted);
               feedChanged++;
+              state.nextWakeAt[character.id] = now.add(
+                _intervalFor(character, posted: true),
+              );
             }
         }
       }
@@ -489,6 +549,7 @@ final class WorldRuntime {
     LLMConfig config,
     DateTime now, {
     OperationLog? existing,
+    bool allowNewPost = true,
   }) async {
     final operations = _operations;
     final job = operations == null
@@ -499,9 +560,21 @@ final class WorldRuntime {
               subjectId: character.id,
               now: now,
             );
-    final result = await _wakeCharacter(character, config);
+    final result = await _wakeCharacter(
+      character,
+      config,
+      allowNewPost: allowNewPost,
+    );
     if (operations == null || job == null) return result;
     if (result.failed) {
+      if (job.attempts >= maxWakeAttempts) {
+        await operations.stopRetrying(
+          job,
+          reason: 'Retry limit reached.',
+          now: now,
+        );
+        return result;
+      }
       await operations.markIncomplete(
         job,
         error: 'Moment wake failed.',
@@ -519,11 +592,13 @@ final class WorldRuntime {
 
   Future<MomentWakeResult> _wakeCharacter(
     Character character,
-    LLMConfig config,
-  ) async {
+    LLMConfig config, {
+    required bool allowNewPost,
+  }) async {
     return _moments.attemptCharacter(
       character: character,
       config: config,
+      allowNewPost: allowNewPost,
     );
   }
 
@@ -559,8 +634,8 @@ final class WorldRuntime {
   }) {
     final talk = character.talkativeness.clamp(0.0, 1.0);
     final span = quietInterval.inMilliseconds - chattyInterval.inMilliseconds;
-    final base = chattyInterval +
-        Duration(milliseconds: (span * (1 - talk)).round());
+    final base =
+        chattyInterval + Duration(milliseconds: (span * (1 - talk)).round());
     return posted ? base + const Duration(minutes: 30) : base;
   }
 

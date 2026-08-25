@@ -147,6 +147,8 @@ class DriftMomentRepository implements MomentRepository {
     final chapter = _database.alias(_database.storyChapters, 'source_chapter');
     final startMessage = _database.alias(_database.messages, 'start_message');
     final endMessage = _database.alias(_database.messages, 'end_message');
+    final authorCharacter =
+        _database.alias(_database.characters, 'moment_author_character');
     final query = _database.select(_database.momentPosts).join([
       leftOuterJoin(
         chapter,
@@ -162,10 +164,18 @@ class DriftMomentRepository implements MomentRepository {
         endMessage.id.equalsExp(chapter.endMessageId) &
             endMessage.chatId.equalsExp(chapter.chatId),
       ),
+      leftOuterJoin(
+        authorCharacter,
+        authorCharacter.id.equalsExp(_database.momentPosts.authorId),
+      ),
     ])
       ..where(
-        _database.momentPosts.origin.isNotIn([MomentPostOrigin.chapter.name]) |
-            (startMessage.id.isNotNull() & endMessage.id.isNotNull()),
+        (_database.momentPosts.origin.isNotIn([MomentPostOrigin.chapter.name]) |
+                (startMessage.id.isNotNull() & endMessage.id.isNotNull())) &
+            (_database.momentPosts.origin
+                    .isNotIn([MomentPostOrigin.character.name]) |
+                (authorCharacter.id.isNotNull() &
+                    authorCharacter.isDeleted.equals(false))),
       )
       ..orderBy([
         OrderingTerm.desc(_database.momentPosts.createdAt),

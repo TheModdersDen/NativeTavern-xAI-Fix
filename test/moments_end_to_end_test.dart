@@ -79,6 +79,55 @@ void main() {
     expect(await container.read(momentFeedProvider.future), isEmpty);
   });
 
+  test('moment pages skip deleted authors without ending pagination', () async {
+    final now = DateTime.now().toUtc();
+    await characterRepository.createCharacter(
+      models.Character(
+        id: 'deleted-character',
+        name: 'Deleted',
+        createdAt: now,
+        modifiedAt: now,
+      ),
+    );
+    await characterRepository.deleteCharacter('deleted-character');
+    final repository = container.read(momentRepositoryProvider);
+
+    for (var index = 0; index < 30; index++) {
+      await repository.create(
+        MomentPost(
+          id: 'hidden-$index',
+          authorId: 'deleted-character',
+          authorName: 'Deleted',
+          publicBody: 'hidden $index',
+          imagePath: 'hidden-$index.png',
+          origin: MomentPostOrigin.character,
+          createdAt: now.add(Duration(minutes: index + 10)),
+        ),
+      );
+    }
+    for (var index = 0; index < 5; index++) {
+      await repository.create(
+        MomentPost(
+          id: 'visible-$index',
+          authorId: MomentService.userAuthorId,
+          authorName: MomentService.userAuthorName,
+          publicBody: 'visible $index',
+          origin: MomentPostOrigin.user,
+          createdAt: now.add(Duration(minutes: index)),
+        ),
+      );
+    }
+
+    final service = container.read(momentServiceProvider);
+    final first = await service.loadFeedPage(limit: 3);
+    final second = await service.loadFeedPage(limit: 3, offset: first.length);
+
+    expect(first.map((item) => item.post.id),
+        const ['visible-4', 'visible-3', 'visible-2']);
+    expect(
+        second.map((item) => item.post.id), const ['visible-1', 'visible-0']);
+  });
+
   test('characters post from their card, knowledge, and chats', () async {
     final now = DateTime.now();
     final book = await worldInfoRepository.createWorldInfo(

@@ -132,7 +132,7 @@ List<Map<String, dynamic>> composeMomentMessages({
 - image_prompt describes the photo you would post. It is not shown to others.'''
       : '''
 - You already posted recently. Do not create another post.
-- If you want to react, use action=comment.''';
+- If you want to react, choose like, comment/reply, or skip based on what feels natural.''';
   return [
     {
       'role': 'system',
@@ -151,7 +151,9 @@ natural reason to act:
   gives you a genuinely urgent reason.
 - skip: do nothing.
 
-If you are reacting to the player or a friend, you MUST comment. Never publish that reply as your own post.
+When reacting to the player or a friend, choose naturally between like,
+comment/reply, and skip. Comment only when you have something specific to say.
+Never publish a reaction as your own post.
 
 Return JSON only:
 {"action":"comment","post_id":"...","body":"..."}

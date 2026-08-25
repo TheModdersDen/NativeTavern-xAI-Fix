@@ -15,8 +15,10 @@ void main() {
     expect(messages.first['role'], 'system');
     expect(messages.first['content'], contains('Ava'));
     expect(messages.first['content'], contains('friends-circle'));
-    expect(messages.first['content'], contains('MUST comment'));
-    expect(messages.first['content'], contains('Never publish that reply'));
+    expect(
+        messages.first['content'], contains('choose naturally between like'));
+    expect(messages.first['content'], contains('Comment only when'));
+    expect(messages.first['content'], contains('Never publish a reaction'));
     expect(messages.last['content'], contains('spare key'));
     expect(messages.last['content'], contains('lock the gate'));
   });
@@ -91,7 +93,8 @@ void main() {
     expect(
       parseMomentDraft(
         '{"kind":"text_image","body":"Look.","image_prompt":"a rusted gate"}',
-      )!.wantsPhoto,
+      )!
+          .wantsPhoto,
       isTrue,
     );
     expect(parseMomentDraft('{"skip":true}'), isNull);

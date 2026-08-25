@@ -66,6 +66,7 @@ void main() {
       momentRepository: moments,
       dataPath: dataDirectory.path,
       minInterval: Duration.zero,
+      now: () => now,
       transport: transport,
     );
   }
@@ -99,6 +100,94 @@ void main() {
     asks = 0;
     expect(await runtime.tick(), isEmpty);
     expect(asks, 0);
+  });
+
+  test('one global budget prevents due characters from posting in a burst',
+      () async {
+    await characters.createCharacter(
+      models.Character(
+        id: 'character-2',
+        name: 'Bea',
+        description: 'Keeps the orchard.',
+        createdAt: now,
+        modifiedAt: now,
+      ),
+    );
+    var asks = 0;
+    final runtime = WorldRuntime(
+      momentService: service(
+        transport: (messages, config) async {
+          asks++;
+          return '{"action":"post","kind":"text",'
+              '"body":"Post number $asks."}';
+        },
+      ),
+      characterRepository: characters,
+      store: MemoryWorldWakeStore(),
+      enabled: () => true,
+      config: () => _configuredLlm,
+      now: () => now,
+      firstWake: (character, clock) => clock,
+      maxPostsPerTick: 2,
+    );
+
+    final published = await runtime.tick();
+    expect(asks, 2);
+    expect(published, hasLength(1));
+    expect(await moments.listAll(), hasLength(1));
+  });
+
+  test('global budget enforces hourly and daily character post limits',
+      () async {
+    final momentService = service(
+      transport: (messages, config) async => '{"action":"skip"}',
+    );
+    for (var index = 0; index < 2; index++) {
+      await momentService.createPost(
+        authorId: 'character-1',
+        authorName: 'Ava',
+        origin: MomentPostOrigin.character,
+        body: 'Hourly $index',
+      );
+      now = now.add(const Duration(minutes: 21));
+    }
+    expect(await momentService.canPublishCharacterPost(now: now), isFalse);
+
+    now = DateTime.utc(2026, 8, 24, 12);
+    for (var index = 0; index < 16; index++) {
+      await momentService.createPost(
+        authorId: 'character-1',
+        authorName: 'Ava',
+        origin: MomentPostOrigin.character,
+        body: 'Daily $index',
+      );
+      now = now.add(const Duration(minutes: 61));
+    }
+    expect(await momentService.canPublishCharacterPost(now: now), isFalse);
+  });
+
+  test('a character like refreshes the feed without creating a post', () async {
+    final playerPost = await service(
+      transport: (messages, config) async => '{"action":"skip"}',
+    ).publishPlayerPost(body: 'The garden is open.');
+    var revisions = 0;
+    final runtime = WorldRuntime(
+      momentService: service(
+        transport: (messages, config) async =>
+            '{"action":"like","post_id":"${playerPost.id}"}',
+      ),
+      characterRepository: characters,
+      store: MemoryWorldWakeStore(),
+      enabled: () => true,
+      config: () => _configuredLlm,
+      now: () => now,
+      firstWake: (character, clock) => clock,
+      onPublished: (count) => revisions += count,
+    );
+
+    expect(await runtime.tick(), isEmpty);
+    expect(await moments.likeCount(playerPost.id), 1);
+    expect(revisions, 1);
   });
 
   test('a due character does not call AI when moments are off', () async {
@@ -182,6 +271,10 @@ void main() {
     expect(asks, 2);
     expect(published.single.publicBody, 'Back online.');
     expect(
+      store.state.nextWakeAt['character-1'],
+      now.add(const Duration(hours: 4)),
+    );
+    expect(
       await operations.findOpen(
         kind: OperationKind.momentWake,
         subjectId: 'character-1',
@@ -228,6 +321,56 @@ void main() {
 
     final published = await runtime.tick();
     expect(published.single.hasPhoto, isTrue);
+    expect(
+      await operations.findOpen(
+        kind: OperationKind.momentImage,
+        subjectId: 'character-1',
+      ),
+      isNull,
+    );
+  });
+
+  test('an exhausted image job is closed without another generation', () async {
+    var images = 0;
+    final operations = OperationLogRepository(database);
+    OperationLog? job;
+    for (var attempt = 0; attempt < WorldRuntime.maxWakeAttempts; attempt++) {
+      job = await operations.begin(
+        kind: OperationKind.momentImage,
+        subjectId: 'character-1',
+        payload: const {
+          'characterId': 'character-1',
+          'authorName': 'Ava',
+          'prompt': 'a rusted gate',
+          'body': 'Look.',
+        },
+        now: now,
+      );
+      await operations.markIncomplete(job, dueAt: now, now: now);
+    }
+    expect(job?.attempts, WorldRuntime.maxWakeAttempts);
+    final runtime = WorldRuntime(
+      momentService: MomentService(
+        momentRepository: moments,
+        dataPath: dataDirectory.path,
+        operations: operations,
+        transport: (messages, config) async => '{"action":"skip"}',
+        imageGenerator: (prompt) async {
+          images++;
+          return const [1, 2, 3, 4];
+        },
+      ),
+      characterRepository: characters,
+      operations: operations,
+      store: MemoryWorldWakeStore(),
+      enabled: () => true,
+      config: () => _configuredLlm,
+      now: () => now,
+      firstWake: (character, clock) => clock.add(const Duration(hours: 1)),
+    );
+
+    expect(await runtime.tick(), isEmpty);
+    expect(images, 0);
     expect(
       await operations.findOpen(
         kind: OperationKind.momentImage,

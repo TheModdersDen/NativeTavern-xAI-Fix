@@ -82,6 +82,27 @@ final class OperationLogRepository {
     );
   }
 
+  /// Closes a retryable operation without pretending that it succeeded.
+  ///
+  /// The current schema uses `completed` as the terminal state. Keeping the
+  /// reason in [lastError] makes expired and exhausted background work
+  /// auditable while ensuring it is never selected for another retry.
+  Future<void> stopRetrying(
+    OperationLog log, {
+    required String reason,
+    DateTime? now,
+  }) {
+    final clock = (now ?? DateTime.now()).toUtc();
+    return _update(
+      log.copyWith(
+        status: OperationStatus.completed,
+        lastError: reason,
+        completedAt: clock,
+        updatedAt: clock,
+      ),
+    );
+  }
+
   Future<void> markIncomplete(
     OperationLog log, {
     String? error,
@@ -136,13 +157,15 @@ final class OperationLogRepository {
       }
     }
     variables.add(Variable<int>(limit));
-    final rows = await _db.customSelect(
-      'SELECT * FROM operation_logs '
-      'WHERE ${filters.join(' AND ')} '
-      'ORDER BY due_at ASC, created_at ASC '
-      'LIMIT ?',
-      variables: variables,
-    ).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM operation_logs '
+          'WHERE ${filters.join(' AND ')} '
+          'ORDER BY due_at ASC, created_at ASC '
+          'LIMIT ?',
+          variables: variables,
+        )
+        .get();
     return rows.map(_fromRow).toList(growable: false);
   }
 

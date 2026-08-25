@@ -45,23 +45,27 @@ typedef MomentImageGenerator = Future<List<int>?> Function(String prompt);
 
 /// One world-clock attempt: posted, commented, skipped, or failed.
 final class MomentWakeResult {
-  const MomentWakeResult.skipped()
+  const MomentWakeResult.skipped({this.feedChanged = false})
       : post = null,
         comment = null,
         failed = false;
   const MomentWakeResult.posted(this.post)
       : comment = null,
+        feedChanged = true,
         failed = false;
   const MomentWakeResult.commented(this.comment)
       : post = null,
+        feedChanged = true,
         failed = false;
   const MomentWakeResult.failed()
       : post = null,
         comment = null,
+        feedChanged = false,
         failed = true;
 
   final MomentPost? post;
   final MomentComment? comment;
+  final bool feedChanged;
   final bool failed;
 }
 
@@ -99,6 +103,9 @@ final class MomentService {
   static const userAuthorId = 'user';
   static const userAuthorName = 'You';
   static const defaultMinInterval = Duration(minutes: 20);
+  static const defaultGlobalPostInterval = Duration(minutes: 20);
+  static const defaultHourlyPostLimit = 2;
+  static const defaultDailyPostLimit = 16;
 
   final MomentRepository _moments;
   final ChatRepository? _chats;
@@ -114,6 +121,31 @@ final class MomentService {
   final DateTime Function() _now;
   final String Function() _createId;
   final Duration minInterval;
+
+  /// Applies one shared publishing budget across every autonomous character.
+  /// Comments, likes, and private messages do not consume this budget.
+  Future<bool> canPublishCharacterPost({
+    DateTime? now,
+    Duration minimumInterval = defaultGlobalPostInterval,
+    int hourlyLimit = defaultHourlyPostLimit,
+    int dailyLimit = defaultDailyPostLimit,
+  }) async {
+    final clock = (now ?? _now()).toUtc();
+    final posts = (await _moments.listAll())
+        .where((post) => post.origin == MomentPostOrigin.character)
+        .toList();
+    if (posts.isEmpty) return true;
+    posts.sort((left, right) => right.createdAt.compareTo(left.createdAt));
+    if (clock.difference(posts.first.createdAt) < minimumInterval) return false;
+    final hourAgo = clock.subtract(const Duration(hours: 1));
+    if (posts.where((post) => !post.createdAt.isBefore(hourAgo)).length >=
+        hourlyLimit) {
+      return false;
+    }
+    final dayAgo = clock.subtract(const Duration(hours: 24));
+    return posts.where((post) => !post.createdAt.isBefore(dayAgo)).length <
+        dailyLimit;
+  }
 
   Future<List<MomentFeedItem>> loadFeed() async {
     await rehomeMispostedReplies();
@@ -277,6 +309,12 @@ final class MomentService {
     return _moments.toggleLike(postId, authorId, at: _now());
   }
 
+  Future<bool> like(String postId, {String authorId = userAuthorId}) async {
+    if (await _moments.hasLiked(postId, authorId)) return false;
+    await _moments.toggleLike(postId, authorId, at: _now());
+    return true;
+  }
+
   Future<void> unlike(String postId, {String authorId = userAuthorId}) async {
     if (await _moments.hasLiked(postId, authorId)) {
       await _moments.toggleLike(postId, authorId, at: _now());
@@ -387,6 +425,7 @@ final class MomentService {
   Future<MomentWakeResult> attemptCharacter({
     required Character character,
     required LLMConfig config,
+    bool allowNewPost = true,
   }) async {
     if (_transport == null || !isMemoryLlmConfigured(config)) {
       return const MomentWakeResult.failed();
@@ -409,7 +448,7 @@ final class MomentService {
       context: context,
       ownPosts: ownPosts,
       commentTargets: commentTargets,
-      mayPost: !recentlyPosted,
+      mayPost: allowNewPost && !recentlyPosted,
       config: config,
     );
   }
@@ -428,7 +467,7 @@ final class MomentService {
     // A wake is an opportunity, not a broadcast. Use the card's talkativeness
     // as a soft gate so the same player post does not summon every character.
     final probability =
-        (0.12 + character.talkativeness.clamp(0, 1) * 0.55).clamp(0.12, 0.67);
+        (0.04 + character.talkativeness.clamp(0, 1) * 0.20).clamp(0.04, 0.24);
     final seed = '${character.id}:${candidates.first.post.id}'.codeUnits.fold(
           0,
           (sum, value) => (sum * 31 + value) & 0x7fffffff,
@@ -660,11 +699,15 @@ final class MomentService {
     if (decision != null) {
       switch (decision.action) {
         case MomentAgentAction.like:
-          await toggleLike(decision.postId!, authorId: character.id);
-          return const MomentWakeResult.skipped();
+          final changed = await like(decision.postId!, authorId: character.id);
+          return MomentWakeResult.skipped(feedChanged: changed);
         case MomentAgentAction.unlike:
+          final changed = await _moments.hasLiked(
+            decision.postId!,
+            character.id,
+          );
           await unlike(decision.postId!, authorId: character.id);
-          return const MomentWakeResult.skipped();
+          return MomentWakeResult.skipped(feedChanged: changed);
         case MomentAgentAction.reply:
           return MomentWakeResult.commented(
             await reply(
@@ -677,7 +720,7 @@ final class MomentService {
           );
         case MomentAgentAction.deleteOwnComment:
           await deleteComment(decision.commentId!, authorId: character.id);
-          return const MomentWakeResult.skipped();
+          return const MomentWakeResult.skipped(feedChanged: true);
         case MomentAgentAction.messagePlayer:
           await messagePlayer(characterId: character.id, body: decision.body!);
           return const MomentWakeResult.skipped();
@@ -741,7 +784,10 @@ final class MomentService {
     );
   }
 
-  Future<MomentPost?> retryImageJob(OperationLog job) async {
+  Future<MomentPost?> retryImageJob(
+    OperationLog job, {
+    int maxAttempts = 8,
+  }) async {
     final operations = _operations;
     if (job.kind != OperationKind.momentImage) return null;
     final prompt = '${job.payload['prompt'] ?? ''}'.trim();
@@ -761,6 +807,14 @@ final class MomentService {
           );
     final imagePath = await _generatePhoto(prompt);
     if (imagePath == null) {
+      if (claimed.attempts >= maxAttempts) {
+        await operations?.stopRetrying(
+          claimed,
+          reason: 'Retry limit reached.',
+          now: _now(),
+        );
+        return null;
+      }
       await operations?.markIncomplete(
         claimed,
         error: 'Image generation failed.',

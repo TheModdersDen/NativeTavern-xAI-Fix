@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:native_tavern/data/models/group.dart';
 import 'package:native_tavern/data/models/character.dart';
 import 'package:native_tavern/presentation/providers/group_providers.dart';
-import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/chat_providers.dart';
 import 'package:native_tavern/data/repositories/character_repository.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 
 class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -112,8 +112,11 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
   }
 
   Future<void> _addMember() async {
-    final charactersAsync = ref.read(characterListProvider);
-    final characters = charactersAsync.valueOrNull ?? [];
+    // Read fresh data rather than the character browser's currently loaded
+    // page, so newly created and not-yet-paged characters are available.
+    final characters =
+        await ref.read(characterRepositoryProvider).getAllCharacters();
+    if (!mounted) return;
     final currentMemberIds =
         _group?.members.map((m) => m.characterId).toSet() ?? {};
     final availableCharacters =
@@ -447,10 +450,7 @@ class _MemberTile extends StatelessWidget {
                 child: const Icon(Icons.drag_handle),
               ),
               const SizedBox(width: 8),
-              CircleAvatar(
-                backgroundImage: avatar != null ? AssetImage(avatar) : null,
-                child: avatar == null ? Text(name[0].toUpperCase()) : null,
-              ),
+              _CharacterAvatar(avatarPath: avatar, name: name),
             ],
           ),
           title: Text(
@@ -535,14 +535,30 @@ class _AddMemberDialog extends StatelessWidget {
   }
 
   Widget _buildAvatar(Character character) {
-    final avatarPath = character.assets?.avatarPath;
-    if (avatarPath != null) {
-      return CircleAvatar(
-        backgroundImage: AssetImage(avatarPath),
-      );
+    return _CharacterAvatar(
+      avatarPath: character.assets?.avatarPath,
+      name: character.name,
+    );
+  }
+}
+
+class _CharacterAvatar extends StatelessWidget {
+  const _CharacterAvatar({required this.avatarPath, required this.name});
+
+  final String? avatarPath;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedPath = avatarPath?.trim();
+    final initial = name.trim().characters.firstOrNull?.toUpperCase() ?? '?';
+    if (normalizedPath == null || normalizedPath.isEmpty) {
+      return CircleAvatar(child: Text(initial));
     }
-    return CircleAvatar(
-      child: Text(character.name[0].toUpperCase()),
+    return CharacterAvatarCircle(
+      imagePath: normalizedPath,
+      radius: 20,
+      errorBuilder: (_, __, ___) => CircleAvatar(child: Text(initial)),
     );
   }
 }

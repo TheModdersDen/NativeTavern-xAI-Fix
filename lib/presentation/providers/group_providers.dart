@@ -9,7 +9,8 @@ final allGroupsProvider = FutureProvider<List<Group>>((ref) async {
 });
 
 /// Single group provider
-final groupProvider = FutureProvider.family<Group?, String>((ref, groupId) async {
+final groupProvider =
+    FutureProvider.family<Group?, String>((ref, groupId) async {
   final repo = ref.watch(groupRepositoryProvider);
   return repo.getGroup(groupId);
 });
@@ -19,7 +20,8 @@ class GroupListNotifier extends StateNotifier<AsyncValue<List<Group>>> {
   final GroupRepository _repository;
   final Ref _ref;
 
-  GroupListNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  GroupListNotifier(this._repository, this._ref)
+      : super(const AsyncValue.loading()) {
     _loadGroups();
   }
 
@@ -45,22 +47,29 @@ class GroupListNotifier extends StateNotifier<AsyncValue<List<Group>>> {
       description: description,
       characterIds: characterIds,
     );
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
     return group;
   }
 
   Future<void> updateGroup(Group group) async {
     await _repository.updateGroup(group);
+    _ref.invalidate(groupProvider(group.id));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
   Future<void> deleteGroup(String id) async {
     await _repository.deleteGroup(id);
+    _ref.invalidate(groupProvider(id));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
   Future<void> addMember(String groupId, String characterId) async {
     await _repository.addMember(groupId, characterId);
+    _ref.invalidate(groupProvider(groupId));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
@@ -71,6 +80,8 @@ class GroupListNotifier extends StateNotifier<AsyncValue<List<Group>>> {
 
   Future<void> removeMember(String groupId, String characterId) async {
     await _repository.removeMember(groupId, characterId);
+    _ref.invalidate(groupProvider(groupId));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
@@ -81,23 +92,30 @@ class GroupListNotifier extends StateNotifier<AsyncValue<List<Group>>> {
 
   Future<void> toggleMemberMute(String groupId, String characterId) async {
     await _repository.toggleMemberMute(groupId, characterId);
+    _ref.invalidate(groupProvider(groupId));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
   Future<void> updateSettings(String groupId, GroupSettings settings) async {
     await _repository.updateSettings(groupId, settings);
+    _ref.invalidate(groupProvider(groupId));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 
   /// Update a specific member's settings
   Future<void> updateMember(String groupId, GroupMember member) async {
     await _repository.updateMember(groupId, member);
+    _ref.invalidate(groupProvider(groupId));
+    _ref.invalidate(allGroupsProvider);
     await _loadGroups();
   }
 }
 
 /// Provider for group list notifier
-final groupListProvider = StateNotifierProvider<GroupListNotifier, AsyncValue<List<Group>>>((ref) {
+final groupListProvider =
+    StateNotifierProvider<GroupListNotifier, AsyncValue<List<Group>>>((ref) {
   final repo = ref.watch(groupRepositoryProvider);
   return GroupListNotifier(repo, ref);
 });
