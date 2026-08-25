@@ -1,6 +1,6 @@
 {
   "versionString": "1.2.14",
-  "buildNumber": "35",
+  "buildNumber": "39",
   "localizations": {
     "ar-SA": "NativeTavern 1.2.14\n\n• أضفنا مركز Play مع القصص وMoments ومنشورات الشخصيات وتعليقات الأصدقاء.\n• يمكن الآن تشغيل فصول القصة كمسارات مستقلة وإنشاء تفرعات ومقارنتها مع عزل ذاكرة كل فرع.\n• حسّنا استيراد Live2D وSpine والنسخ الاحتياطي للوسائط وإنشاء الصور وعرض بطاقات HTML والاستقرار.",
     "de-DE": "NativeTavern 1.2.14\n\n• Der Play-Bereich bietet jetzt Storys, Moments sowie Beiträge und Kommentare von Charakteren.\n• Story-Kapitel lassen sich als eigene Handlungsstränge spielen, verzweigen und vergleichen; Erinnerungen bleiben je Zweig getrennt.\n• Live2D-/Spine-Import, Medien-Backups, Bilderstellung, HTML-Karten und Stabilität wurden verbessert.",
