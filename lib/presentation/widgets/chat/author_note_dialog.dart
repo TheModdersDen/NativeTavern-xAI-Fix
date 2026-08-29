@@ -27,7 +27,7 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
     _contentController = TextEditingController(text: chat?.authorNote ?? '');
     _depth = chat?.authorNoteDepth ?? 4;
     _enabled = chat?.authorNoteEnabled ?? false;
-    
+
     _contentController.addListener(_onChanged);
   }
 
@@ -47,11 +47,11 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
   Future<void> _save() async {
     final saved =
         await ref.read(activeChatProvider.notifier).updateAuthorNoteSettings(
-      chatId: widget.chatId,
-      content: _contentController.text,
-      depth: _depth,
-      enabled: _enabled,
-    );
+              chatId: widget.chatId,
+              content: _contentController.text,
+              depth: _depth,
+              enabled: _enabled,
+            );
     if (mounted && saved) {
       Navigator.of(context).pop(true);
     }
@@ -67,153 +67,161 @@ class _AuthorNoteDialogState extends ConsumerState<AuthorNoteDialog> {
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Icon(
-                    Icons.note_alt_outlined,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    AppLocalizations.of(context)!.authorsNote,
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context)!.authorsNoteDescription,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Icon(
+                      Icons.note_alt_outlined,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      AppLocalizations.of(context)!.authorsNote,
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.authorsNoteDescription,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-              // Enable toggle
-              SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableAuthorsNote),
-                subtitle: Text(AppLocalizations.of(context)!.injectNoteIntoContext),
-                value: _enabled,
-                onChanged: (value) {
-                  setState(() {
-                    _enabled = value;
-                    _hasChanges = true;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 16),
+                // Enable toggle
+                SwitchListTile(
+                  title: Text(AppLocalizations.of(context)!.enableAuthorsNote),
+                  subtitle:
+                      Text(AppLocalizations.of(context)!.injectNoteIntoContext),
+                  value: _enabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _enabled = value;
+                      _hasChanges = true;
+                    });
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
 
-              // Depth selector
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.injectionDepth,
-                          style: theme.textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          AppLocalizations.of(context)!.messagesFromEndWhereInserted,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                // Depth selector
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.injectionDepth,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            AppLocalizations.of(context)!
+                                .messagesFromEndWhereInserted,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 100,
+                      child: DropdownButtonFormField<int>(
+                        value: _depth,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  SizedBox(
-                    width: 100,
-                    child: DropdownButtonFormField<int>(
-                      value: _depth,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+                        items: List.generate(21, (i) => i).map((depth) {
+                          return DropdownMenuItem(
+                            value: depth,
+                            child: Text('$depth'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _depth = value;
+                              _hasChanges = true;
+                            });
+                          }
+                        },
                       ),
-                      items: List.generate(21, (i) => i).map((depth) {
-                        return DropdownMenuItem(
-                          value: depth,
-                          child: Text('$depth'),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _depth = value;
-                            _hasChanges = true;
-                          });
-                        }
-                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Keep the editor in a bounded, independently scrollable area.
+                // An expanding TextField inside a shrink-wrapped dialog can paint
+                // its first lines above the input border on iOS.
+                Text(
+                  AppLocalizations.of(context)!.noteContent,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 220,
+                  child: TextField(
+                    controller: _contentController,
+                    minLines: 6,
+                    maxLines: null,
+                    textAlignVertical: TextAlignVertical.top,
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.authorsNoteHint,
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor:
+                          colorScheme.surfaceContainerHighest.withOpacity(0.3),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Content field
-              Text(
-                AppLocalizations.of(context)!.noteContent,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.authorsNoteHint,
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Supports macros like {{char}}, {{user}}, etc.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Supports macros like {{char}}, {{user}}, etc.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Actions
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(AppLocalizations.of(context)!.cancel),
-                  ),
-                  const SizedBox(width: 12),
-                  FilledButton.icon(
-                    onPressed: _save,
-                    icon: const Icon(Icons.save),
-                    label: Text(AppLocalizations.of(context)!.save),
-                  ),
-                ],
-              ),
-            ],
+                // Actions
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(AppLocalizations.of(context)!.cancel),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      onPressed: _save,
+                      icon: const Icon(Icons.save),
+                      label: Text(AppLocalizations.of(context)!.save),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
