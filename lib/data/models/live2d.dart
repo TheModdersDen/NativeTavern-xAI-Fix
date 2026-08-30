@@ -119,11 +119,11 @@ class Live2DMotionRef {
   factory Live2DMotionRef.fromJson(Map<String, dynamic> json) {
     return Live2DMotionRef(
       group: json['group'] as String? ?? '',
-      index: (json['index'] as num?)?.toInt() ?? 0,
+      index: _intValue(json['index']) ?? 0,
       file: json['file'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      durationSeconds: (json['durationSeconds'] as num?)?.toDouble(),
-      loop: json['loop'] as bool? ?? false,
+      durationSeconds: _doubleValue(json['durationSeconds']),
+      loop: _boolValue(json['loop']) ?? false,
     );
   }
 }
@@ -486,7 +486,7 @@ class Live2DConfig {
     }
 
     return Live2DConfig(
-      enabled: json['enabled'] as bool? ?? true,
+      enabled: _boolValue(json['enabled']) ?? true,
       modelId: json['modelId'] as String? ?? '',
       displayName: json['displayName'] as String? ?? '',
       modelDirectory: json['modelDirectory'] as String? ?? '',
@@ -494,11 +494,11 @@ class Live2DConfig {
       source: Live2DModelSource.fromJson(json['source'] as String?),
       format: Live2DModelFormat.fromJson(json['format'] as String?),
       atlasFileName: json['atlasFileName'] as String?,
-      scale: (json['scale'] as num?)?.toDouble() ?? 1,
-      offsetX: (json['offsetX'] as num?)?.toDouble() ?? 0,
-      offsetY: (json['offsetY'] as num?)?.toDouble() ?? 0,
-      opacity: (json['opacity'] as num?)?.toDouble() ?? 1,
-      motionSpeed: (json['motionSpeed'] as num?)?.toDouble() ?? 1,
+      scale: _doubleValue(json['scale']) ?? 1,
+      offsetX: _doubleValue(json['offsetX']) ?? 0,
+      offsetY: _doubleValue(json['offsetY']) ?? 0,
+      opacity: _doubleValue(json['opacity']) ?? 1,
+      motionSpeed: _doubleValue(json['motionSpeed']) ?? 1,
       idleMotion: parseMotion('idleMotion'),
       tapMotion: parseMotion('tapMotion'),
       headTapMotion: parseMotion('headTapMotion'),
@@ -514,6 +514,35 @@ class Live2DConfig {
           json['lipSyncParameter'] as String? ?? 'ParamMouthOpenY',
     );
   }
+}
+
+int? _intValue(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim());
+  return null;
+}
+
+double? _doubleValue(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
+}
+
+bool? _boolValue(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    switch (value.trim().toLowerCase()) {
+      case 'true':
+      case '1':
+        return true;
+      case 'false':
+      case '0':
+        return false;
+    }
+  }
+  return null;
 }
 
 const _emotionMotionAliases = <String, List<String>>{

@@ -20,7 +20,7 @@ class DepthPrompt {
       };
 
   factory DepthPrompt.fromJson(Map<String, dynamic> json) => DepthPrompt(
-        depth: (json['depth'] as num?)?.toInt() ?? 4,
+        depth: _intValue(json['depth']) ?? 4,
         prompt: json['prompt'] as String? ?? '',
         role: json['role'] as String? ?? 'system',
       );
@@ -202,7 +202,7 @@ class Character {
                     (json['extensions'] as Map<String, dynamic>)['depth_prompt']
                         as Map<String, dynamic>)
                 : null,
-        talkativeness: (json['talkativeness'] as num?)?.toDouble() ??
+        talkativeness: _doubleValue(json['talkativeness']) ??
             (json['extensions'] is Map<String, dynamic>
                 ? _parseTalkativeness((json['extensions']
                     as Map<String, dynamic>)['talkativeness'])
@@ -349,9 +349,9 @@ class CharacterBook {
   factory CharacterBook.fromJson(Map<String, dynamic> json) => CharacterBook(
         name: json['name'] as String?,
         description: json['description'] as String?,
-        scanDepth: json['scan_depth'] as bool? ?? true,
-        tokenBudget: json['token_budget'] as int? ?? 2048,
-        recursiveScanning: json['recursive_scanning'] as bool? ?? false,
+        scanDepth: _boolValue(json['scan_depth']) ?? true,
+        tokenBudget: _intValue(json['token_budget']) ?? 2048,
+        recursiveScanning: _boolValue(json['recursive_scanning']) ?? false,
         entries: (json['entries'] as List<dynamic>?)
                 ?.map((e) =>
                     CharacterBookEntry.fromJson(e as Map<String, dynamic>))
@@ -414,20 +414,49 @@ class CharacterBookEntry {
 
   factory CharacterBookEntry.fromJson(Map<String, dynamic> json) =>
       CharacterBookEntry(
-        id: json['id'] as int? ?? 0,
+        id: _intValue(json['id']) ?? 0,
         keys: (json['keys'] as List<dynamic>?)?.cast<String>() ?? [],
         secondaryKeys:
             (json['secondary_keys'] as List<dynamic>?)?.cast<String>() ?? [],
         content: json['content'] as String? ?? '',
         comment: json['comment'] as String? ?? '',
-        enabled: json['enabled'] as bool? ?? true,
-        insertionOrder: json['insertion_order'] as int? ?? 0,
-        caseSensitive: json['case_sensitive'] as bool? ?? false,
+        enabled: _boolValue(json['enabled']) ?? true,
+        insertionOrder: _intValue(json['insertion_order']) ?? 0,
+        caseSensitive: _boolValue(json['case_sensitive']) ?? false,
         name: json['name'] as String? ?? '',
-        priority: json['priority'] as int? ?? 10,
-        constant: json['constant'] as bool? ?? false,
-        selective: json['selective'] as bool? ?? false,
-        position: json['position'] as int? ?? 0,
+        priority: _intValue(json['priority']) ?? 10,
+        constant: _boolValue(json['constant']) ?? false,
+        selective: _boolValue(json['selective']) ?? false,
+        position: _intValue(json['position']) ?? 0,
         extensions: json['extensions'] as Map<String, dynamic>? ?? {},
       );
+}
+
+int? _intValue(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim());
+  return null;
+}
+
+double? _doubleValue(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
+}
+
+bool? _boolValue(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    switch (value.trim().toLowerCase()) {
+      case 'true':
+      case '1':
+        return true;
+      case 'false':
+      case '0':
+        return false;
+    }
+  }
+  return null;
 }
