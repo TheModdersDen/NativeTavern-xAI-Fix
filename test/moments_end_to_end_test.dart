@@ -79,6 +79,29 @@ void main() {
     expect(await container.read(momentFeedProvider.future), isEmpty);
   });
 
+  test('character retries and repeated text do not create duplicate moments',
+      () async {
+    final service = container.read(momentServiceProvider);
+    final first = await service.createPost(
+      authorId: 'character-1',
+      authorName: 'Ava',
+      origin: MomentPostOrigin.character,
+      body: 'The gate is locked.',
+    );
+    final duplicate = await service.createPost(
+      authorId: 'character-1',
+      authorName: 'Ava',
+      origin: MomentPostOrigin.character,
+      body: '  The   gate is locked.  ',
+    );
+
+    expect(duplicate.id, first.id);
+    expect(
+      (await service.loadFeed()).where((item) => item.post.id == first.id),
+      hasLength(1),
+    );
+  });
+
   test('moment pages skip deleted authors without ending pagination', () async {
     final now = DateTime.now().toUtc();
     await characterRepository.createCharacter(

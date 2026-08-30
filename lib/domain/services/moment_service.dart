@@ -202,19 +202,41 @@ final class MomentService {
     required MomentPostOrigin origin,
     String body = '',
     String? imagePath,
+    String? id,
   }) async {
     if (origin == MomentPostOrigin.chapter) {
       throw ArgumentError('New posts are written by people, not chapters.');
     }
+    final now = _now();
+    // Stable IDs (used by image operations) must always address that exact
+    // operation; only ordinary generated posts participate in text dedupe.
+    if (id == null &&
+        origin == MomentPostOrigin.character &&
+        body.trim().isNotEmpty) {
+      final normalizedBody = body.trim().replaceAll(RegExp(r'\s+'), ' ');
+      final duplicate = (await _moments.listAll()).where((candidate) {
+        if (candidate.origin != MomentPostOrigin.character ||
+            candidate.authorId != authorId) {
+          return false;
+        }
+        if (candidate.publicBody.trim().replaceAll(RegExp(r'\s+'), ' ') !=
+            normalizedBody) {
+          return false;
+        }
+        return now.difference(candidate.createdAt).abs() <=
+            const Duration(minutes: 15);
+      }).firstOrNull;
+      if (duplicate != null) return duplicate;
+    }
     final post = await _moments.create(
       MomentPost(
-        id: _createId(),
+        id: id ?? _createId(),
         authorId: authorId,
         authorName: authorName,
         publicBody: body,
         imagePath: imagePath,
         origin: origin,
-        createdAt: _now(),
+        createdAt: now,
       ),
     );
     await _rememberMoment(
@@ -794,17 +816,35 @@ final class MomentService {
     final body = '${job.payload['body'] ?? ''}';
     final authorId = '${job.payload['characterId'] ?? job.subjectId}';
     final authorName = '${job.payload['authorName'] ?? 'Someone'}';
+    final existingPostId = job.payload['postId'];
+    if (existingPostId is String && existingPostId.trim().isNotEmpty) {
+      final existing = await _moments.getById(existingPostId.trim());
+      if (existing != null) {
+        await operations?.markCompleted(job, now: _now());
+        return existing;
+      }
+    }
     if (prompt.isEmpty) {
       await operations?.markIncomplete(job, error: 'Image prompt is missing.');
       return null;
     }
-    final claimed = operations == null
+    var claimed = operations == null
         ? job
         : await operations.begin(
             kind: OperationKind.momentImage,
             subjectId: job.subjectId,
             payload: job.payload,
           );
+    final postId = existingPostId is String && existingPostId.trim().isNotEmpty
+        ? existingPostId.trim()
+        : 'moment-operation-${claimed.id}';
+    if (operations != null && claimed.payload['postId'] != postId) {
+      claimed = await operations.updatePayload(
+        claimed,
+        {...claimed.payload, 'postId': postId},
+        now: _now(),
+      );
+    }
     final imagePath = await _generatePhoto(prompt);
     if (imagePath == null) {
       if (claimed.attempts >= maxAttempts) {
@@ -829,6 +869,7 @@ final class MomentService {
       origin: MomentPostOrigin.character,
       body: body,
       imagePath: imagePath,
+      id: postId,
     );
     await operations?.markCompleted(claimed);
     return post;
@@ -840,7 +881,7 @@ final class MomentService {
     required String body,
   }) async {
     final operations = _operations;
-    final job = await operations?.begin(
+    var job = await operations?.begin(
       kind: OperationKind.momentImage,
       subjectId: character.id,
       payload: {
@@ -850,6 +891,14 @@ final class MomentService {
         'body': body,
       },
     );
+    final postId = job == null ? null : 'moment-operation-${job.id}';
+    if (job != null) {
+      job = await operations?.updatePayload(
+        job,
+        {...job.payload, 'postId': postId},
+        now: _now(),
+      );
+    }
     final imagePath = await _generatePhoto(prompt);
     if (imagePath == null) {
       if (job != null) {
@@ -867,6 +916,7 @@ final class MomentService {
       origin: MomentPostOrigin.character,
       body: body,
       imagePath: imagePath,
+      id: postId,
     );
     if (job != null) await operations?.markCompleted(job);
     return post;

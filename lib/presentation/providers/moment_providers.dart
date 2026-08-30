@@ -137,9 +137,8 @@ final momentFeedProvider =
 });
 
 /// Paginated feed used by the moments screen.
-final pagedMomentFeedProvider =
-    AsyncNotifierProvider.autoDispose<PagedMomentFeedNotifier,
-        List<MomentFeedItem>>(PagedMomentFeedNotifier.new);
+final pagedMomentFeedProvider = AsyncNotifierProvider.autoDispose<
+    PagedMomentFeedNotifier, List<MomentFeedItem>>(PagedMomentFeedNotifier.new);
 
 class PagedMomentFeedNotifier
     extends AutoDisposeAsyncNotifier<List<MomentFeedItem>> {
@@ -161,9 +160,10 @@ class PagedMomentFeedNotifier
           limit: _pageSize,
           offset: 0,
         );
+    final unique = _uniqueById(page);
     _offset = page.length;
     _hasMore = page.length == _pageSize;
-    return page;
+    return unique;
   }
 
   Future<void> loadMore() async {
@@ -175,7 +175,7 @@ class PagedMomentFeedNotifier
             offset: _offset,
           );
       final current = state.valueOrNull ?? const <MomentFeedItem>[];
-      state = AsyncData([...current, ...page]);
+      state = AsyncData(_uniqueById([...current, ...page]));
       _offset += page.length;
       _hasMore = page.length == _pageSize;
     } catch (error, stack) {
@@ -183,5 +183,13 @@ class PagedMomentFeedNotifier
     } finally {
       _loadingMore = false;
     }
+  }
+
+  List<MomentFeedItem> _uniqueById(List<MomentFeedItem> items) {
+    final seen = <String>{};
+    return [
+      for (final item in items)
+        if (seen.add(item.post.id)) item,
+    ];
   }
 }

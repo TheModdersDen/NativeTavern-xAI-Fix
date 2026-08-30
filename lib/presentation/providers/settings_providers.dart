@@ -50,6 +50,11 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     _loadConfig();
   }
 
+  // All settings writes share one queue. Provider switches and preset applies
+  // otherwise race and an older snapshot can overwrite a newer API key.
+  Future<void> _writeQueue = Future<void>.value();
+  bool _stateChangedBeforeLoad = false;
+
   static LLMConfig _defaultConfig() {
     return const LLMConfig(
       provider: LLMProvider.claude,
@@ -158,12 +163,13 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   }
 
   /// Save the current provider's connection settings (apiKey, apiUrl, model)
-  Future<void> _saveCurrentProviderConfig() async {
-    final key = _getProviderConfigKey(state.provider);
+  Future<void> _saveCurrentProviderConfig([LLMConfig? snapshot]) async {
+    final config = snapshot ?? state;
+    final key = _getProviderConfigKey(config.provider);
     final providerConfig = {
-      'apiKey': state.apiKey,
-      'apiUrl': state.apiUrl,
-      'model': state.model,
+      'apiKey': config.apiKey,
+      'apiUrl': config.apiUrl,
+      'model': config.model,
     };
     final jsonStr = jsonEncode(providerConfig);
 
@@ -180,7 +186,7 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     // Keep syncing to prefs for backup safety until fully migrated (optional but good for now)
     await _prefs.setString(key, jsonStr);
     _log(
-        'Saved config for provider ${state.provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
+        'Saved config for provider ${config.provider.name}: apiUrl=${config.apiUrl}, model=${config.model}');
   }
 
   /// Load a provider's connection settings, or return defaults if none exist
@@ -250,13 +256,15 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
       try {
         final map = jsonDecode(jsonStr) as Map<String, dynamic>;
         final loaded = LLMConfig.fromJson(map);
-        state = loaded.copyWith(
-          apiUrl: _normalizeApiUrl(loaded.provider, loaded.apiUrl),
-        );
+        if (!_stateChangedBeforeLoad) {
+          state = loaded.copyWith(
+            apiUrl: _normalizeApiUrl(loaded.provider, loaded.apiUrl),
+          );
+        }
 
         if (needsMigration) {
           _log('Migrating LLM config from SharedPreferences to Database');
-          _saveConfig(); // Save to DB
+          _enqueuePersistence(); // Save to DB
         }
       } catch (e) {
         // Use default config on error
@@ -264,13 +272,13 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     }
   }
 
-  Future<void> _saveConfig() async {
-    final jsonStr = jsonEncode(state.toJson());
+  Future<void> _saveConfig([LLMConfig? snapshot]) async {
+    final jsonStr = jsonEncode((snapshot ?? state).toJson());
 
     // Save to DB
     await _db.into(_db.globalStates).insert(
           GlobalStatesCompanion(
-            key: drift.Value(_configKey),
+            key: const drift.Value(_configKey),
             value: drift.Value(jsonStr),
             updatedAt: drift.Value(DateTime.now()),
           ),
@@ -281,65 +289,98 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
     await _prefs.setString(_configKey, jsonStr);
   }
 
-  Future<void> updateProvider(LLMProvider provider) async {
+  Future<void> _enqueuePersistence({bool providerConfig = false}) {
+    _stateChangedBeforeLoad = true;
+    final snapshot = state;
+    return _enqueueWrite(() async {
+      await _saveConfig(snapshot);
+      if (providerConfig) await _saveCurrentProviderConfig(snapshot);
+    });
+  }
+
+  Future<void> _enqueueWrite(Future<void> Function() operation) {
+    final result = _writeQueue.then((_) => operation());
+    // Keep later writes usable even if one persistence operation fails. The
+    // returned future still reports the error to callers that await it.
+    _writeQueue = result.catchError((Object error, StackTrace stackTrace) {
+      _log(
+        'LLM config persistence failed',
+        error: '$error',
+        stackTrace: stackTrace,
+      );
+    });
+    return result;
+  }
+
+  Future<void> flushPersistence() => _writeQueue;
+
+  Future<void> updateProvider(LLMProvider provider) {
     // Don't do anything if switching to the same provider
     if (provider == state.provider) {
-      return;
+      return Future<void>.value();
     }
+    _stateChangedBeforeLoad = true;
 
-    // Save current provider's connection settings first
-    await _saveCurrentProviderConfig();
+    return _enqueueWrite(() async {
+      // Save current provider's connection settings before switching.
+      await _saveCurrentProviderConfig(state);
 
-    // Load the new provider's saved settings (or defaults)
-    final newProviderConfig = await _loadProviderConfig(provider);
+      // Load the new provider's saved settings (or defaults)
+      final newProviderConfig = await _loadProviderConfig(provider);
 
-    state = state.copyWith(
-      provider: provider,
-      apiKey: newProviderConfig['apiKey'],
-      apiUrl: newProviderConfig['apiUrl'],
-      model: newProviderConfig['model'],
-    );
-    await _saveConfig();
+      state = state.copyWith(
+        provider: provider,
+        apiKey: newProviderConfig['apiKey'],
+        apiUrl: newProviderConfig['apiUrl'],
+        model: newProviderConfig['model'],
+      );
+      await _saveConfig(state);
+      await _saveCurrentProviderConfig(state);
 
-    _log(
-        'Switched to provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
+      _log(
+          'Switched to provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}');
+    });
   }
 
   /// Force set provider and reload its config from DB.
   /// Unlike updateProvider, this does NOT skip if the provider is the same.
   /// Used when applying presets to ensure connection settings are refreshed.
   ///
-  /// IMPORTANT: Do NOT call _saveCurrentProviderConfig() here!
-  /// This method is called after restoreProviderConfigs has already written
-  /// the correct configs to DB. Saving current state would overwrite
-  /// the just-restored preset configs with old values.
-  Future<void> forceSetProvider(LLMProvider provider) async {
-    // Load the target provider's saved settings (freshly restored from preset)
-    final newProviderConfig = await _loadProviderConfig(provider);
+  /// This is commonly called after restoreProviderConfigs has written the
+  /// target provider snapshot; the active state is refreshed before both
+  /// mirrors are persisted below.
+  Future<void> forceSetProvider(LLMProvider provider) {
+    _stateChangedBeforeLoad = true;
+    return _enqueueWrite(() async {
+      // Load the target provider's saved settings (freshly restored from preset)
+      final newProviderConfig = await _loadProviderConfig(provider);
 
-    state = state.copyWith(
-      provider: provider,
-      apiKey: newProviderConfig['apiKey'],
-      apiUrl: newProviderConfig['apiUrl'],
-      model: newProviderConfig['model'],
-    );
-    await _saveConfig();
+      final keepCurrentKey = provider == state.provider &&
+          (newProviderConfig['apiKey']?.isEmpty ?? true) &&
+          state.apiKey.trim().isNotEmpty;
+      state = state.copyWith(
+        provider: provider,
+        apiKey: keepCurrentKey ? state.apiKey : newProviderConfig['apiKey'],
+        apiUrl: newProviderConfig['apiUrl'],
+        model: newProviderConfig['model'],
+      );
+      await _saveConfig(state);
+      await _saveCurrentProviderConfig(state);
 
-    _log(
-        'Force set provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}, apiKey=${state.apiKey.isNotEmpty ? "***" : "(empty)"}');
+      _log(
+          'Force set provider ${provider.name}: apiUrl=${state.apiUrl}, model=${state.model}, apiKey=${state.apiKey.isNotEmpty ? "***" : "(empty)"}');
+    });
   }
 
   void updateApiKey(String apiKey) {
     state = state.copyWith(apiKey: apiKey);
-    _saveConfig();
-    _saveCurrentProviderConfig(); // Also save to per-provider config for persistence
+    _enqueuePersistence(providerConfig: true);
   }
 
   void updateApiUrl(String apiUrl) {
     final normalized = _normalizeApiUrl(state.provider, apiUrl);
     state = state.copyWith(apiUrl: normalized);
-    _saveConfig();
-    _saveCurrentProviderConfig(); // Also save to per-provider config for persistence
+    _enqueuePersistence(providerConfig: true);
   }
 
   void updateModel(String model) {
@@ -349,164 +390,169 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
           ? ''
           : state.openRouterProvider,
     );
-    _saveConfig();
-    _saveCurrentProviderConfig(); // Also save to per-provider config for persistence
+    _enqueuePersistence(providerConfig: true);
   }
 
   void updateOpenRouterProvider(String provider) {
     state = state.copyWith(openRouterProvider: provider);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMaxTokens(int maxTokens) {
     state = state.copyWith(maxTokens: maxTokens);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateContextLength(int contextLength) {
     state = state.copyWith(contextLength: contextLength);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateTemperature(double temperature) {
     state = state.copyWith(temperature: temperature);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateTopP(double topP) {
     state = state.copyWith(topP: topP);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateTopK(int topK) {
     state = state.copyWith(topK: topK);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateFrequencyPenalty(double penalty) {
     state = state.copyWith(frequencyPenalty: penalty);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updatePresencePenalty(double penalty) {
     state = state.copyWith(presencePenalty: penalty);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateStreamEnabled(bool enabled) {
     state = state.copyWith(streamEnabled: enabled);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateReasoningEffort(String effort) {
     state = state.copyWith(reasoningEffort: effort);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updatePromptCacheEnabled(bool enabled) {
     state = state.copyWith(promptCacheEnabled: enabled);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMergeConsecutiveRoles(bool enabled) {
     state = state.copyWith(mergeConsecutiveRoles: enabled);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   /// Apply a full connection configuration (used by connection profiles)
   Future<void> applyConfig(LLMConfig config) async {
-    state = config;
-    await _saveConfig();
-    await _saveCurrentProviderConfig();
+    _stateChangedBeforeLoad = true;
+    await _enqueueWrite(() async {
+      state = config;
+      await _saveConfig(state);
+      await _saveCurrentProviderConfig(state);
+    });
   }
 
   // Advanced sampler methods
   void updateTypicalP(double value) {
     state = state.copyWith(typicalP: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMinP(double value) {
     state = state.copyWith(minP: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateRepetitionPenalty(double value) {
     state = state.copyWith(repetitionPenalty: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateRepetitionPenaltyRange(int value) {
     state = state.copyWith(repetitionPenaltyRange: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateTailFreeSampling(double value) {
     state = state.copyWith(tailFreeSampling: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateTopA(double value) {
     state = state.copyWith(topA: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMirostatMode(int mode) {
     state = state.copyWith(mirostatMode: mode);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMirostatTau(double value) {
     state = state.copyWith(mirostatTau: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateMirostatEta(double value) {
     state = state.copyWith(mirostatEta: value);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateStopSequences(List<String> sequences) {
     state = state.copyWith(stopSequences: sequences);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateSeed(int seed) {
     state = state.copyWith(seed: seed);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateAutoSummarizeEnabled(bool enabled) {
     state = state.copyWith(autoSummarizeEnabled: enabled);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void updateAutoSummarizeThreshold(double threshold) {
     state = state.copyWith(autoSummarizeThreshold: threshold);
-    _saveConfig();
+    _enqueuePersistence();
   }
 
   void resetToDefaults() {
     state = _defaultConfig();
-    _saveConfig();
+    _enqueuePersistence(providerConfig: true);
   }
 
   /// Get configuration for all providers
   Future<Map<String, Map<String, dynamic>>> getAllProviderConfigs() async {
-    // Ensure current config is saved first
-    await _saveCurrentProviderConfig();
+    late final Map<String, Map<String, dynamic>> result;
+    await _enqueueWrite(() async {
+      // Ensure current config is saved first
+      await _saveCurrentProviderConfig();
 
-    final result = <String, Map<String, dynamic>>{};
-    for (final provider in LLMProvider.values) {
-      // _loadProviderConfig returns {apiKey, apiUrl, model}
-      final config = await _loadProviderConfig(provider);
-      // Ensure we store concrete values, not nulls
-      result[provider.name] = {
-        'apiKey': config['apiKey'],
-        'apiUrl': config['apiUrl'],
-        'model': config['model'],
-      };
-    }
+      result = <String, Map<String, dynamic>>{};
+      for (final provider in LLMProvider.values) {
+        // _loadProviderConfig returns {apiKey, apiUrl, model}
+        final config = await _loadProviderConfig(provider);
+        // Ensure we store concrete values, not nulls
+        result[provider.name] = {
+          'apiKey': config['apiKey'],
+          'apiUrl': config['apiUrl'],
+          'model': config['model'],
+        };
+      }
+    });
     return result;
   }
 
@@ -514,41 +560,51 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
   /// The caller is responsible for refreshing the active provider state
   /// (e.g., via forceSetProvider).
   Future<void> restoreProviderConfigs(
-      Map<String, Map<String, dynamic>> configs) async {
-    for (final entry in configs.entries) {
-      try {
-        final providerName = entry.key;
-        final config = entry.value;
+      Map<String, Map<String, dynamic>> configs) {
+    return _enqueueWrite(() async {
+      for (final entry in configs.entries) {
+        try {
+          final providerName = entry.key;
+          final config = entry.value;
 
-        // Find the provider enum
-        final provider = LLMProvider.values.firstWhere(
-            (p) => p.name == providerName,
-            orElse: () => LLMProvider.openai // Fallback
-            );
+          // Find the provider enum
+          final provider = LLMProvider.values.firstWhere(
+              (p) => p.name == providerName,
+              orElse: () => LLMProvider.openai // Fallback
+              );
 
-        if (provider.name != providerName)
-          continue; // Skip if name didn't match exactly
+          if (provider.name != providerName) {
+            continue; // Skip if name didn't match exactly
+          }
 
-        final key = _getProviderConfigKey(provider);
-        final jsonStr = jsonEncode(config);
+          final key = _getProviderConfigKey(provider);
+          final current = await _loadProviderConfig(provider);
+          final restored = <String, dynamic>{...config};
+          // Presets/backups intentionally omit secrets. Never turn an omitted
+          // key into an empty key when applying one of those snapshots.
+          if (!restored.containsKey('apiKey') || restored['apiKey'] == null) {
+            restored['apiKey'] = current['apiKey'] ?? '';
+          }
+          final jsonStr = jsonEncode(restored);
 
-        // Save to DB
-        await _db.into(_db.globalStates).insert(
-              GlobalStatesCompanion(
-                key: drift.Value(key),
-                value: drift.Value(jsonStr),
-                updatedAt: drift.Value(DateTime.now()),
-              ),
-              mode: drift.InsertMode.insertOrReplace,
-            );
+          // Save to DB
+          await _db.into(_db.globalStates).insert(
+                GlobalStatesCompanion(
+                  key: drift.Value(key),
+                  value: drift.Value(jsonStr),
+                  updatedAt: drift.Value(DateTime.now()),
+                ),
+                mode: drift.InsertMode.insertOrReplace,
+              );
 
-        // Sync to Prefs
-        await _prefs.setString(key, jsonStr);
-        _log('Restored config for provider ${provider.name}');
-      } catch (e) {
-        _log('Failed to restore config for ${entry.key}: $e');
+          // Sync to Prefs
+          await _prefs.setString(key, jsonStr);
+          _log('Restored config for provider ${provider.name}');
+        } catch (e) {
+          _log('Failed to restore config for ${entry.key}: $e');
+        }
       }
-    }
+    });
   }
 }
 
@@ -895,7 +951,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
     // Save to DB
     await _db.into(_db.globalStates).insert(
           GlobalStatesCompanion(
-            key: drift.Value(_settingsKey),
+            key: const drift.Value(_settingsKey),
             value: drift.Value(jsonStr),
             updatedAt: drift.Value(DateTime.now()),
           ),

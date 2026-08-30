@@ -80,7 +80,8 @@ final allAIPresetsProvider = Provider<List<AIPreset>>((ref) {
   final customPresets = ref.watch(aiCustomPresetsProvider);
   final customIds = customPresets.map((p) => p.id).toSet();
   // Built-in presets that haven't been overridden by custom versions
-  final nonOverriddenBuiltIn = BuiltInAIPresets.all.where((p) => !customIds.contains(p.id));
+  final nonOverriddenBuiltIn =
+      BuiltInAIPresets.all.where((p) => !customIds.contains(p.id));
   return [...nonOverriddenBuiltIn, ...customPresets];
 });
 
@@ -182,12 +183,16 @@ class AIPresetManager {
     // Check if already exists in custom presets
     final customPresets = _ref.read(aiCustomPresetsProvider);
     final existsInCustom = customPresets.any((p) => p.id == activeId);
-    
+
     if (existsInCustom) {
-      await _ref.read(aiCustomPresetsProvider.notifier).updatePreset(updatedPreset);
+      await _ref
+          .read(aiCustomPresetsProvider.notifier)
+          .updatePreset(updatedPreset);
     } else {
       // First time saving a built-in preset — add to custom presets
-      await _ref.read(aiCustomPresetsProvider.notifier).addPreset(updatedPreset);
+      await _ref
+          .read(aiCustomPresetsProvider.notifier)
+          .addPreset(updatedPreset);
     }
   }
 
@@ -220,8 +225,14 @@ class AIPresetManager {
     llmNotifier.updateSeed(gen.seed);
     llmNotifier.updateStreamEnabled(gen.streamEnabled);
 
+    // The setters persist asynchronously. Wait until their snapshots are
+    // durable before restoring provider connection data, otherwise an older
+    // generation-settings write can overwrite the preset's API key.
+    await llmNotifier.flushPersistence();
+
     // Restore ALL provider configurations
-    if (preset.providerSettings != null && preset.providerSettings!.isNotEmpty) {
+    if (preset.providerSettings != null &&
+        preset.providerSettings!.isNotEmpty) {
       await llmNotifier.restoreProviderConfigs(preset.providerSettings!);
     }
 
@@ -262,7 +273,9 @@ class AIPresetManager {
     }
 
     // Set as active preset
-    await _ref.read(activeAIPresetIdProvider.notifier).setActivePreset(preset.id);
+    await _ref
+        .read(activeAIPresetIdProvider.notifier)
+        .setActivePreset(preset.id);
   }
 
   /// Create a preset from current settings

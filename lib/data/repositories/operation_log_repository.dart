@@ -103,6 +103,17 @@ final class OperationLogRepository {
     );
   }
 
+  Future<OperationLog> updatePayload(
+    OperationLog log,
+    Map<String, dynamic> payload, {
+    DateTime? now,
+  }) async {
+    final clock = (now ?? DateTime.now()).toUtc();
+    final updated = log.copyWith(payload: payload, updatedAt: clock);
+    await _update(updated);
+    return updated;
+  }
+
   Future<void> markIncomplete(
     OperationLog log, {
     String? error,
