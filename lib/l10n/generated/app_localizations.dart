@@ -1081,6 +1081,12 @@ abstract class AppLocalizations {
   /// **'KoboldCpp'**
   String get koboldCpp;
 
+  /// xAI (Grok) provider name
+  ///
+  /// In en, this message translates to:
+  /// **'xAI (Grok)'**
+  String get xai;
+
   /// Local provider indicator
   ///
   /// In en, this message translates to:
@@ -11592,7 +11598,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiDataSharingRecipients.
   ///
   /// In en, this message translates to:
-  /// **'Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.'**
+  /// **'Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, xAI (Grok), DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.'**
   String get aiDataSharingRecipients;
 
   /// No description provided for @aiDataSharingControlTitle.

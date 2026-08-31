@@ -153,6 +153,7 @@
   "gemini": "Gemini",
   "ollama": "Ollama",
   "koboldCpp": "KoboldCpp",
+  "xai": "xAI (Grok)",
   "local": "本機",
   "aiPresets": "AI預設",
   "createPreset": "建立預設",
