@@ -933,7 +933,7 @@ class _WorldInfoEntriesScreenState
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteEntry),
         content: Text(AppLocalizations.of(context)!
-            .deleteEntryConfirmation(entry.keys.join(", "))),
+            .deleteEntryConfirmation(entry.keys.join(', '))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1103,9 +1103,8 @@ class _WorldInfoEntryDialog extends StatefulWidget {
 
   const _WorldInfoEntryDialog({
     required this.title,
-    this.entry,
     required this.onSave,
-  });
+  }) : entry = null;
 
   @override
   State<_WorldInfoEntryDialog> createState() => _WorldInfoEntryDialogState();

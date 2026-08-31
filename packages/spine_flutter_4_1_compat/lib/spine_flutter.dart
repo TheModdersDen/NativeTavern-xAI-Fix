@@ -123,18 +123,18 @@ class Atlas {
     }
 
     final atlasDir = path.dirname(atlasFileName);
-    List<Image> atlasPages = [];
-    List<Map<BlendMode, Paint>> atlasPagePaints = [];
+    final List<Image> atlasPages = [];
+    final List<Map<BlendMode, Paint>> atlasPagePaints = [];
     final numImagePaths = _bindings.spine_atlas_get_num_image_paths(atlas);
     for (int i = 0; i < numImagePaths; i++) {
       final Pointer<Utf8> atlasPageFile = _bindings.spine_atlas_get_image_path(atlas, i).cast();
-      final imagePath = atlasDir + "/" + atlasPageFile.toDartString();
-      var imageData = await loadFile(imagePath);
+      final imagePath = atlasDir + '/' + atlasPageFile.toDartString();
+      final imageData = await loadFile(imagePath);
       final Codec codec = await instantiateImageCodec(imageData);
       final FrameInfo frameInfo = await codec.getNextFrame();
       final Image image = frameInfo.image;
       atlasPages.add(image);
-      Map<BlendMode, Paint> paints = {};
+      final Map<BlendMode, Paint> paints = {};
       for (final blendMode in BlendMode.values) {
         paints[blendMode] = Paint()
           ..shader = ImageShader(image, TileMode.clamp, TileMode.clamp, Matrix4
@@ -219,7 +219,7 @@ class SkeletonData {
       _bindings.spine_skeleton_data_result_dispose(result);
       throw Exception("Couldn't load skeleton data: $message");
     }
-    var data = SkeletonData._(_bindings.spine_skeleton_data_result_get_data(result));
+    final data = SkeletonData._(_bindings.spine_skeleton_data_result_get_data(result));
     _bindings.spine_skeleton_data_result_dispose(result);
     return data;
   }
@@ -239,7 +239,7 @@ class SkeletonData {
       _bindings.spine_skeleton_data_result_dispose(result);
       throw Exception("Couldn't load skeleton data: $message");
     }
-    var data = SkeletonData._(_bindings.spine_skeleton_data_result_get_data(result));
+    final data = SkeletonData._(_bindings.spine_skeleton_data_result_get_data(result));
     _bindings.spine_skeleton_data_result_dispose(result);
     return data;
   }
@@ -250,7 +250,7 @@ class SkeletonData {
   /// Throws an [Exception] in case the skeleton data could not be loaded.
   static Future<SkeletonData> fromAsset(Atlas atlas, String skeletonFile, {AssetBundle? bundle}) async {
     bundle ??= rootBundle;
-    if (skeletonFile.endsWith(".json")) {
+    if (skeletonFile.endsWith('.json')) {
       return fromJson(atlas, await bundle.loadString(skeletonFile));
     } else {
       return fromBinary(atlas, (await bundle.load(skeletonFile)).buffer.asUint8List());
@@ -261,7 +261,7 @@ class SkeletonData {
   ///
   /// Throws an [Exception] in case the skeleton data could not be loaded.
   static Future<SkeletonData> fromFile(Atlas atlas, String skeletonFile) async {
-    if (skeletonFile.endsWith(".json")) {
+    if (skeletonFile.endsWith('.json')) {
       return fromJson(atlas, convert.utf8.decode(await File(skeletonFile).readAsBytes()));
     } else {
       return fromBinary(atlas, await File(skeletonFile).readAsBytes());
@@ -272,7 +272,7 @@ class SkeletonData {
   ///
   /// Throws an [Exception] in case the skeleton data could not be loaded.
   static Future<SkeletonData> fromHttp(Atlas atlas, String skeletonURL) async {
-    if (skeletonURL.endsWith(".json")) {
+    if (skeletonURL.endsWith('.json')) {
       return fromJson(atlas, convert.utf8.decode((await http.get(Uri.parse(skeletonURL))).bodyBytes));
     } else {
       return fromBinary(atlas, (await http.get(Uri.parse(skeletonURL))).bodyBytes);
@@ -463,7 +463,7 @@ class SkeletonData {
   /// The skeleton's name, which by default is the name of the skeleton data file when possible, or null when a name hasn't been
   /// set.
   String? getName() {
-    Pointer<Utf8> name = _bindings.spine_skeleton_data_get_name(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_skeleton_data_get_name(_data).cast();
     if (name.address == nullptr.address) return null;
     return name.toDartString();
   }
@@ -506,28 +506,28 @@ class SkeletonData {
 
   /// The Spine version used to export the skeleton data.
   String? getVersion() {
-    Pointer<Utf8> name = _bindings.spine_skeleton_data_get_version(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_skeleton_data_get_version(_data).cast();
     if (name.address == nullptr.address) return null;
     return name.toDartString();
   }
 
   /// The skeleton data hash. This value will change if any of the skeleton data has changed.
   String? getHash() {
-    Pointer<Utf8> name = _bindings.spine_skeleton_data_get_hash(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_skeleton_data_get_hash(_data).cast();
     if (name.address == nullptr.address) return null;
     return name.toDartString();
   }
 
   /// The path to the images directory as defined in Spine, or null if nonessential data was not exported.
   String? getImagesPath() {
-    Pointer<Utf8> name = _bindings.spine_skeleton_data_get_images_path(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_skeleton_data_get_images_path(_data).cast();
     if (name.address == nullptr.address) return null;
     return name.toDartString();
   }
 
   /// The path to the audio directory as defined in Spine, or null if nonessential data was not exported.
   String? getAudioPath() {
-    Pointer<Utf8> name = _bindings.spine_skeleton_data_get_audio_path(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_skeleton_data_get_audio_path(_data).cast();
     if (name.address == nullptr.address) return null;
     return name.toDartString();
   }
@@ -627,7 +627,7 @@ class BoneData {
 
   /// The name of the bone, which is unique across all bones in the skeleton.
   String getName() {
-    Pointer<Utf8> name = _bindings.spine_bone_data_get_name(_data).cast();
+    final Pointer<Utf8> name = _bindings.spine_bone_data_get_name(_data).cast();
     return name.toDartString();
   }
 
@@ -865,7 +865,7 @@ class Bone {
 
   /// The immediate children of this bone.
   List<Bone> getChildren() {
-    List<Bone> children = [];
+    final List<Bone> children = [];
     final numChildren = _bindings.spine_bone_get_num_children(_bone);
     final nativeChildren = _bindings.spine_bone_get_children(_bone);
     for (int i = 0; i < numChildren; i++) {
@@ -1407,7 +1407,7 @@ class Sequence {
   }
 
   List<TextureRegion> getRegions() {
-    List<TextureRegion> result = [];
+    final List<TextureRegion> result = [];
     final num = _bindings.spine_sequence_get_num_regions(_sequence);
     final nativeRegions = _bindings.spine_sequence_get_regions(_sequence);
     for (int i = 0; i < num; i++) {
@@ -1439,7 +1439,7 @@ abstract class Attachment<T extends Pointer> {
 
   /// The attachment's name.
   String getName() {
-    Pointer<Utf8> name = _bindings.spine_attachment_get_name(_attachment.cast()).cast();
+    final Pointer<Utf8> name = _bindings.spine_attachment_get_name(_attachment.cast()).cast();
     return name.toString();
   }
 
@@ -1490,7 +1490,7 @@ class RegionAttachment extends Attachment<spine_region_attachment> {
   /// See [World transforms](http://esotericsoftware.com/spine-runtime-skeletons#World-transforms) in the Spine
   /// Runtimes Guide.
   List<double> computeWorldVertices(Slot slot) {
-    Pointer<Float> vertices = _allocator.allocate(4 * 8).cast();
+    final Pointer<Float> vertices = _allocator.allocate(4 * 8).cast();
     _bindings.spine_region_attachment_compute_world_vertices(_attachment, slot._slot, vertices);
     final result = vertices.asTypedList(8).toList();
     _allocator.free(vertices);
@@ -1571,7 +1571,7 @@ class RegionAttachment extends Attachment<spine_region_attachment> {
   }
 
   String getPath() {
-    Pointer<Utf8> path = _bindings.spine_region_attachment_get_path(_attachment).cast();
+    final Pointer<Utf8> path = _bindings.spine_region_attachment_get_path(_attachment).cast();
     return path.toDartString();
   }
 
@@ -1615,7 +1615,7 @@ class VertexAttachment<T extends Pointer> extends Attachment<T> {
   /// Runtimes Guide.
   List<double> computeWorldVertices(Slot slot) {
     final worldVerticesLength = _bindings.spine_vertex_attachment_get_world_vertices_length(_attachment.cast());
-    Pointer<Float> vertices = _allocator.allocate(4 * worldVerticesLength).cast();
+    final Pointer<Float> vertices = _allocator.allocate(4 * worldVerticesLength).cast();
     _bindings.spine_vertex_attachment_compute_world_vertices(_attachment.cast(), slot._slot, vertices);
     final result = vertices.asTypedList(worldVerticesLength).toList();
     _allocator.free(vertices);
@@ -1710,7 +1710,7 @@ class MeshAttachment extends VertexAttachment<spine_mesh_attachment> {
   }
 
   String getPath() {
-    Pointer<Utf8> path = _bindings.spine_mesh_attachment_get_path(_attachment).cast();
+    final Pointer<Utf8> path = _bindings.spine_mesh_attachment_get_path(_attachment).cast();
     return path.toDartString();
   }
 
@@ -1978,7 +1978,7 @@ class Skin {
 
   /// The skin's name, which is unique across all skins in the skeleton.
   String getName() {
-    Pointer<Utf8> name = _bindings.spine_skin_get_name(_skin).cast();
+    final Pointer<Utf8> name = _bindings.spine_skin_get_name(_skin).cast();
     return name.toDartString();
   }
 
@@ -1989,12 +1989,12 @@ class Skin {
 
   /// Returns all entries in this skin.
   List<SkinEntry> getEntries() {
-    List<SkinEntry> result = [];
+    final List<SkinEntry> result = [];
     final entries = _bindings.spine_skin_get_entries(_skin);
-    int numEntries = _bindings.spine_skin_entries_get_num_entries(entries);
+    final int numEntries = _bindings.spine_skin_entries_get_num_entries(entries);
     for (int i = 0; i < numEntries; i++) {
       final entry = _bindings.spine_skin_entries_get_entry(entries, i);
-      Pointer<Utf8> name = _bindings.spine_skin_entry_get_name(entry).cast();
+      final Pointer<Utf8> name = _bindings.spine_skin_entry_get_name(entry).cast();
       result.add(SkinEntry(
           _bindings.spine_skin_entry_get_slot_index(entry),
           name.toDartString(),
@@ -2006,7 +2006,7 @@ class Skin {
   }
 
   List<BoneData> getBones() {
-    List<BoneData> bones = [];
+    final List<BoneData> bones = [];
     final numBones = _bindings.spine_skin_get_num_bones(_skin);
     final nativeBones = _bindings.spine_skin_get_bones(_skin);
     for (int i = 0; i < numBones; i++) {
@@ -2016,7 +2016,7 @@ class Skin {
   }
 
   List<ConstraintData> getConstraints() {
-    List<ConstraintData> constraints = [];
+    final List<ConstraintData> constraints = [];
     final numConstraints = _bindings.spine_skin_get_num_constraints(_skin);
     final nativeConstraints = _bindings.spine_skin_get_constraints(_skin);
     for (int i = 0; i < numConstraints; i++) {
@@ -2191,7 +2191,7 @@ class IkConstraint {
 
   /// The bones that will be modified by this IK constraint.
   List<Bone> getBones() {
-    List<Bone> result = [];
+    final List<Bone> result = [];
     final num = _bindings.spine_ik_constraint_get_num_bones(_constraint);
     final nativeBones = _bindings.spine_ik_constraint_get_bones(_constraint);
     for (int i = 0; i < num; i++) {
@@ -2446,7 +2446,7 @@ class TransformConstraint {
 
   /// The bones that will be modified by this transform constraint.
   List<Bone> getBones() {
-    List<Bone> result = [];
+    final List<Bone> result = [];
     final num = _bindings.spine_transform_constraint_get_num_bones(_constraint);
     final nativeBones = _bindings.spine_transform_constraint_get_bones(_constraint);
     for (int i = 0; i < num; i++) {
@@ -2655,7 +2655,7 @@ class PathConstraint {
 
   /// The bones that will be modified by this path constraint.
   List<Bone> getBones() {
-    List<Bone> result = [];
+    final List<Bone> result = [];
     final num = _bindings.spine_path_constraint_get_num_bones(_constraint);
     final nativeBones = _bindings.spine_path_constraint_get_bones(_constraint);
     for (int i = 0; i < num; i++) {
@@ -3926,8 +3926,8 @@ class SkeletonDrawable {
   /// Throws an exception in case the data could not be loaded.
   static Future<SkeletonDrawable> fromAsset(String atlasFile, String skeletonFile, {AssetBundle? bundle}) async {
     bundle ??= rootBundle;
-    var atlas = await Atlas.fromAsset(atlasFile, bundle: bundle);
-    var skeletonData = await SkeletonData.fromAsset(atlas, skeletonFile, bundle: bundle);
+    final atlas = await Atlas.fromAsset(atlasFile, bundle: bundle);
+    final skeletonData = await SkeletonData.fromAsset(atlas, skeletonFile, bundle: bundle);
     return SkeletonDrawable(atlas, skeletonData, true);
   }
 
@@ -3935,8 +3935,8 @@ class SkeletonDrawable {
   ///
   /// Throws an exception in case the data could not be loaded.
   static Future<SkeletonDrawable> fromFile(String atlasFile, String skeletonFile) async {
-    var atlas = await Atlas.fromFile(atlasFile);
-    var skeletonData = await SkeletonData.fromFile(atlas, skeletonFile);
+    final atlas = await Atlas.fromFile(atlasFile);
+    final skeletonData = await SkeletonData.fromFile(atlas, skeletonFile);
     return SkeletonDrawable(atlas, skeletonData, true);
   }
 
@@ -3944,8 +3944,8 @@ class SkeletonDrawable {
   ///
   /// Throws an exception in case the data could not be loaded.
   static Future<SkeletonDrawable> fromHttp(String atlasUrl, String skeletonUrl) async {
-    var atlas = await Atlas.fromHttp(atlasUrl);
-    var skeletonData = await SkeletonData.fromHttp(atlas, skeletonUrl);
+    final atlas = await Atlas.fromHttp(atlasUrl);
+    final skeletonData = await SkeletonData.fromHttp(atlas, skeletonUrl);
     return SkeletonDrawable(atlas, skeletonData, true);
   }
 
@@ -3964,7 +3964,7 @@ class SkeletonDrawable {
   List<RenderCommand> render() {
     if (_disposed) return [];
     spine_render_command nativeCmd = _bindings.spine_skeleton_drawable_render(_drawable);
-    List<RenderCommand> commands = [];
+    final List<RenderCommand> commands = [];
     while (nativeCmd.address != nullptr.address) {
       final atlasPage = atlas.atlasPages[_bindings.spine_render_command_get_atlas_page(nativeCmd)];
       commands.add(RenderCommand._(nativeCmd, atlasPage.width.toDouble(), atlasPage.height.toDouble()));
@@ -3976,7 +3976,7 @@ class SkeletonDrawable {
   /// Renders the skeleton drawable's current pose to the given [canvas]. Does not perform any
   /// scaling or fitting.
   List<RenderCommand> renderToCanvas(Canvas canvas) {
-    var commands = render();
+    final commands = render();
     for (final cmd in commands) {
       canvas.drawVertices(cmd.vertices, rendering.BlendMode.modulate, atlas.atlasPagePaints[cmd.atlasPageIndex][cmd.blendMode]!);
     }
@@ -3987,12 +3987,12 @@ class SkeletonDrawable {
   /// Uses [bgColor], a 32-bit ARGB color value, to paint the background.
   /// Scales and centers the skeleton to fit the within the bounds of [width] and [height].
   PictureRecorder renderToPictureRecorder(double width, double height, int bgColor) {
-    var bounds = skeleton.getBounds();
-    var scale = 1 / (bounds.width > bounds.height ? bounds.width / width : bounds.height / height);
+    final bounds = skeleton.getBounds();
+    final scale = 1 / (bounds.width > bounds.height ? bounds.width / width : bounds.height / height);
 
-    var recorder = PictureRecorder();
-    var canvas = Canvas(recorder);
-    var paint = Paint()
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()
       ..color = material.Color(bgColor)
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, width, height), paint);
@@ -4018,7 +4018,7 @@ class SkeletonDrawable {
   /// Scales and centers the skeleton to fit the within the bounds of [width] and [height].
   Future<RawImageData> renderToRawImageData(double width, double height, int bgColor) async {
     final recorder = renderToPictureRecorder(width, height, bgColor);
-    var rawImageData =
+    final rawImageData =
         (await (await recorder.endRecording().toImage(width.toInt(), height.toInt())).toByteData(format: ImageByteFormat.rawRgba))!
             .buffer
             .asUint8List();
@@ -4053,8 +4053,8 @@ class RenderCommand {
 
   RenderCommand._(spine_render_command nativeCmd, double pageWidth, double pageHeight) {
     atlasPageIndex = _bindings.spine_render_command_get_atlas_page(nativeCmd);
-    int numVertices = _bindings.spine_render_command_get_num_vertices(nativeCmd);
-    int numIndices = _bindings.spine_render_command_get_num_indices(nativeCmd);
+    final int numVertices = _bindings.spine_render_command_get_num_vertices(nativeCmd);
+    final int numIndices = _bindings.spine_render_command_get_num_indices(nativeCmd);
     positions = _bindings.spine_render_command_get_positions(nativeCmd).asTypedList(numVertices * 2);
     uvs = _bindings.spine_render_command_get_uvs(nativeCmd).asTypedList(numVertices * 2);
     for (int i = 0; i < numVertices * 2; i += 2) {

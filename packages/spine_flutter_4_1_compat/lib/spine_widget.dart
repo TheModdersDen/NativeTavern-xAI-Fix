@@ -78,45 +78,45 @@ class SpineWidgetController {
       {this.onInitialized, this.onBeforeUpdateWorldTransforms, this.onAfterUpdateWorldTransforms, this.onBeforePaint, this.onAfterPaint});
 
   void _initialize(SkeletonDrawable drawable) {
-    var wasInitialized = _drawable != null;
+    final wasInitialized = _drawable != null;
     _drawable = drawable;
     if (!wasInitialized) onInitialized?.call(this);
   }
 
   /// The [Atlas] from which images to render the skeleton are sourced.
   Atlas get atlas {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!.atlas;
   }
 
   /// The setup-pose data used by the skeleton.
   SkeletonData get skeletonData {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!.skeletonData;
   }
 
   /// The mixing information used by the [AnimationState]
   AnimationStateData get animationStateData {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!.animationStateData;
   }
 
   /// The [AnimationState] used to manage animations that are being applied to the
   /// skeleton.
   AnimationState get animationState {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!.animationState;
   }
 
   /// The [Skeleton]
   Skeleton get skeleton {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!.skeleton;
   }
 
   /// The [SkeletonDrawable]
   SkeletonDrawable get drawable {
-    if (_drawable == null) throw Exception("Controller is not initialized yet.");
+    if (_drawable == null) throw Exception('Controller is not initialized yet.');
     return _drawable!;
   }
 
@@ -135,8 +135,8 @@ class SpineWidgetController {
   /// the skeleton coordinate system. See the `ik_following.dart` example how to use this
   /// to move a bone based on user touch input.
   Offset toSkeletonCoordinates(Offset position) {
-    var x = position.dx;
-    var y = position.dy;
+    final x = position.dx;
+    final y = position.dy;
     return Offset(x / _scaleX - _offsetX, y / _scaleY - _offsetY);
   }
 
@@ -203,13 +203,13 @@ class SkinAndAnimationBounds extends BoundsProvider {
   /// The [stepTime], given in seconds, defines at what interval the bounds should be sampled
   /// across the entire animation.
   SkinAndAnimationBounds({List<String>? skins, this.animation, this.stepTime = 0.1})
-      : skins = skins == null || skins.isEmpty ? ["default"] : skins;
+      : skins = skins == null || skins.isEmpty ? ['default'] : skins;
 
   @override
   Bounds computeBounds(SkeletonDrawable drawable) {
     final data = drawable.skeletonData;
     final oldSkin = drawable.skeleton.getSkin();
-    final customSkin = Skin("custom-skin");
+    final customSkin = Skin('custom-skin');
     for (final skinName in skins) {
       final skin = data.findSkin(skinName);
       if (skin == null) continue;
@@ -241,7 +241,7 @@ class SkinAndAnimationBounds extends BoundsProvider {
         maxY = max(maxY, minY + bounds.height);
       }
     }
-    drawable.skeleton.setSkinByName("default");
+    drawable.skeleton.setSkinByName('default');
     drawable.animationState.clearTracks();
     if (oldSkin != null) drawable.skeleton.setSkin(oldSkin);
     drawable.skeleton.setToSetupPose();
@@ -427,7 +427,7 @@ class _SpineWidgetState extends State<SpineWidget> {
         loadDrawable(await SkeletonDrawable.fromHttp(atlasFile, skeletonFile));
         break;
       case _AssetType.drawable:
-        throw Exception("Drawable can not be loaded via loadFromAsset().");
+        throw Exception('Drawable can not be loaded via loadFromAsset().');
     }
   }
 
@@ -651,8 +651,8 @@ class _SpineRenderObject extends RenderBox {
         break;
     }
 
-    var offsetX = offset.dx + size.width / 2.0 + (_alignment.x * size.width / 2.0);
-    var offsetY = offset.dy + size.height / 2.0 + (_alignment.y * size.height / 2.0);
+    final offsetX = offset.dx + size.width / 2.0 + (_alignment.x * size.width / 2.0);
+    final offsetY = offset.dy + size.height / 2.0 + (_alignment.y * size.height / 2.0);
     canvas
       ..translate(offsetX, offsetY)
       ..scale(scaleX, scaleY)

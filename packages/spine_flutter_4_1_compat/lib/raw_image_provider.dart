@@ -57,7 +57,7 @@ class RawImageProvider extends ImageProvider<_RawImageKey> {
   Future<ui.Codec> _loadAsync(_RawImageKey key) async {
     assert(key == image._obtainKey());
     // rgba8888 pixels
-    var buffer = await ui.ImmutableBuffer.fromUint8List(image.pixels);
+    final buffer = await ui.ImmutableBuffer.fromUint8List(image.pixels);
 
     final descriptor = ui.ImageDescriptor.raw(
       buffer,

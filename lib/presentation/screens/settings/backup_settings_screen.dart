@@ -837,7 +837,7 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
 
   void _showBackupContent(
       BuildContext context, BackupInfo backup, List<dynamic> content) {
-    final encoder = JsonEncoder.withIndent('  ');
+    const encoder = JsonEncoder.withIndent('  ');
     final jsonContent = encoder.convert(content);
 
     showDialog(

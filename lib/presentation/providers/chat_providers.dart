@@ -2677,8 +2677,8 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
         final name = entry.comment.isNotEmpty
             ? entry.comment
             : (entry.keys.isEmpty
-                ? "(constant, no keys)"
-                : entry.keys.join(", "));
+                ? '(constant, no keys)'
+                : entry.keys.join(', '));
         final isConstant = entry.constant || entry.keys.isEmpty;
         debugPrint('║   • [${entry.position.name}] $name');
         debugPrint(

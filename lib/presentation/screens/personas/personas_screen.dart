@@ -376,11 +376,8 @@ class _PersonaDialog extends StatefulWidget {
 
   const _PersonaDialog({
     required this.title,
-    this.initialName,
-    this.initialDescription,
-    this.initialAvatarPath,
     required this.onSave,
-  });
+  }) : initialName = null : initialDescription = null : initialAvatarPath = null;
 
   @override
   State<_PersonaDialog> createState() => _PersonaDialogState();

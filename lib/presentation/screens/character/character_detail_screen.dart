@@ -487,8 +487,7 @@ class _SectionCard extends StatefulWidget {
     required this.title,
     required this.content,
     required this.icon,
-    this.maxLines = 10,
-  });
+  }) : maxLines = 10;
 
   @override
   State<_SectionCard> createState() => _SectionCardState();
