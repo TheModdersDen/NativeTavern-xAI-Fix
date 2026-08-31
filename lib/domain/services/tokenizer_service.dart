@@ -102,7 +102,7 @@ class TokenizerService {
     int offset = 0;
 
     // Split into words and punctuation
-    final pattern = RegExp(r"(\s+|[^\s\w]|\w+)");
+    final pattern = RegExp(r'(\s+|[^\s\w]|\w+)');
     final matches = pattern.allMatches(text);
 
     for (final match in matches) {

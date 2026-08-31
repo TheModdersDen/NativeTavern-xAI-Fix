@@ -1246,7 +1246,7 @@ class LLMService {
     _log('Full Response:');
     try {
       if (responseData is Map || responseData is List) {
-        final encoder = const JsonEncoder.withIndent('  ');
+        const encoder = JsonEncoder.withIndent('  ');
         final jsonStr = encoder.convert(responseData);
         for (final line in jsonStr.split('\n')) {
           _log(line);

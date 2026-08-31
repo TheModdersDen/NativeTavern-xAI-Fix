@@ -242,7 +242,7 @@ class GoogleDriveService {
 
     try {
       // Search for existing folder
-      final query =
+      const query =
           "name='$_backupFolderName' and mimeType='application/vnd.google-apps.folder' and trashed=false";
       final response = await _driveApi!.files.list(
         q: query,

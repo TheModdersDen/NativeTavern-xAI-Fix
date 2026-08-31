@@ -199,7 +199,7 @@ class WorldInfoMatcher {
       
       for (final entry in entries) {
         final isConstant = entry.constant || entry.keys.isEmpty;
-        final entryName = entry.comment.isNotEmpty ? entry.comment : (entry.keys.isEmpty ? "(no keys)" : entry.keys.join(", "));
+        final entryName = entry.comment.isNotEmpty ? entry.comment : (entry.keys.isEmpty ? '(no keys)' : entry.keys.join(', '));
         
         debugPrint('║   Entry: $entryName');
         debugPrint('║     • enabled: ${entry.enabled}');

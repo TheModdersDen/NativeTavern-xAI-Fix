@@ -114,7 +114,7 @@ class VariablesService {
             current = [];
           }
           // Extend list if needed
-          while ((current as List).length <= numIndex) {
+          while ((current).length <= numIndex) {
             current.add(null);
           }
           current[numIndex] = convertedValue;
@@ -122,7 +122,7 @@ class VariablesService {
           if (current is! Map) {
             current = {};
           }
-          (current as Map)[index] = convertedValue;
+          (current)[index] = convertedValue;
         }
         
         _globalVariables[name] = jsonEncode(current);
@@ -267,7 +267,7 @@ class VariablesService {
           if (current is! List) {
             current = [];
           }
-          while ((current as List).length <= numIndex) {
+          while ((current).length <= numIndex) {
             current.add(null);
           }
           current[numIndex] = convertedValue;
@@ -275,7 +275,7 @@ class VariablesService {
           if (current is! Map) {
             current = {};
           }
-          (current as Map)[index] = convertedValue;
+          (current)[index] = convertedValue;
         }
         
         _localVariables[chatId]![name] = jsonEncode(current);

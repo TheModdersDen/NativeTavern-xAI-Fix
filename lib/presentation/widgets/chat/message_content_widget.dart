@@ -128,7 +128,7 @@ class _MessageContentWidgetState extends State<MessageContentWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.copiedToClipboard),
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
       ),
     );
   }

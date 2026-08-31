@@ -545,7 +545,7 @@ class WorldInfoRepository {
                   extensionsJson: Value(entry['extensions'] != null ? jsonEncode(entry['extensions']) : '{}'),
                 ),
               );
-            } catch (entryError, entryStack) {
+            } catch (entryError) {
               debugPrint('  ❌ Failed to insert entry ${entry['id']}: $entryError');
               debugPrint('  Entry data: ${jsonEncode(entry)}');
             }
