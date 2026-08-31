@@ -11,6 +11,8 @@ import 'package:native_tavern/presentation/providers/moment_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
+import 'package:native_tavern/domain/services/chat_export_service.dart';
+import 'package:native_tavern/presentation/widgets/chat/chat_import_dialog.dart';
 
 /// Character detail screen
 class CharacterDetailScreen extends ConsumerWidget {
@@ -903,9 +905,10 @@ class _CharacterFriendsList extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         l10n.momentsFriends,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppTheme.primaryColor,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
                       ),
                     ],
                   ),
@@ -975,6 +978,28 @@ class _CharacterChatList extends ConsumerWidget {
                             color: AppTheme.primaryColor,
                           ),
                     ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final exportService = ChatExportService();
+                      final result = await exportService.importFromFile();
+                      if (result == null || !context.mounted) return;
+
+                      final createdChat = await ChatImportResolutionDialog.show(
+                        context,
+                        importResult: result,
+                        initialCharacterId: characterId,
+                      );
+
+                      if (createdChat != null && context.mounted) {
+                        ref.invalidate(characterChatsProvider(characterId));
+                        ref.invalidate(pagedChatsProvider);
+                        ref.invalidate(allChatsProvider);
+                        context.push('/chat/${createdChat.id}');
+                      }
+                    },
+                    icon: const Icon(Icons.file_upload_outlined, size: 18),
+                    label: Text(l10n.importChat),
                   ),
                   TextButton.icon(
                     onPressed: onStartChat,

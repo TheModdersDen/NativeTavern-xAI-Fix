@@ -3077,61 +3077,84 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return;
       }
 
-      // Show confirmation dialog with import details
       if (!mounted) return;
 
+      bool replaceExisting = false;
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.importConfirmation),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${l10n.character}: ${result.characterName}'),
-              Text('${l10n.user}: ${result.userName}'),
-              Text('${l10n.messages}: ${result.messages.length}'),
-              Text(
-                '${l10n.date}: ${result.createDate.toString().split('.')[0]}',
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(l10n.importConfirmation),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${l10n.character}: ${result.characterName}'),
+                Text('${l10n.user}: ${result.userName}'),
+                if (result.model != null && result.model!.isNotEmpty)
+                  Text('Model: ${result.model}'),
+                Text('${l10n.messages}: ${result.messages.length}'),
+                Text(
+                  '${l10n.date}: ${result.createDate.toString().split('.')[0]}',
+                ),
+                if (result.authorNote != null && result.authorNote!.isNotEmpty)
+                  Text('${l10n.hasAuthorsNote}: ${l10n.yes}'),
+                const Divider(height: 24),
+                RadioListTile<bool>(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Append to conversation'),
+                  subtitle: const Text('Add messages after existing ones'),
+                  value: false,
+                  groupValue: replaceExisting,
+                  onChanged: (val) =>
+                      setDialogState(() => replaceExisting = val ?? false),
+                ),
+                RadioListTile<bool>(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(
+                    'Replace all existing messages',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  subtitle: const Text(
+                      'Clears current chat and loads imported session'),
+                  value: true,
+                  groupValue: replaceExisting,
+                  onChanged: (val) =>
+                      setDialogState(() => replaceExisting = val ?? true),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(l10n.cancel),
               ),
-              if (result.authorNote != null && result.authorNote!.isNotEmpty)
-                Text('${l10n.hasAuthorsNote}: ${l10n.yes}'),
-              const SizedBox(height: 16),
-              Text(
-                l10n.importMessagesToCurrentChat,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(l10n.import),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(l10n.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(l10n.import),
-            ),
-          ],
         ),
       );
 
-      if (confirmed != true) return;
+      if (confirmed != true || !mounted) return;
 
-      // Import messages to current chat
       final chatState = ref.read(activeChatProvider);
       if (chatState.chat == null) {
         _showSnackBar(l10n.noActiveChat);
         return;
       }
 
-      // Add imported messages
       final chatNotifier = ref.read(activeChatProvider.notifier);
       final uuid = const Uuid();
       final importedCount = await chatNotifier.importMessages(
         result.messages.map((importedMsg) {
           return importedMsg.toChatMessage(chatState.chat!.id, uuid.v4());
         }).toList(),
+        replaceExisting: replaceExisting,
       );
 
       // Update author's note if present
