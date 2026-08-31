@@ -1,0 +1,36 @@
+name: Validate PR Template
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  validate-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Description
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const minLength = 50;
+
+            const requiredSections = [
+              '## Summary',
+              '## Changes Made',
+              '## User-Facing UI & Localization Checklist'
+            ];
+
+            const missingSections = requiredSections.filter(section => !body.includes(section));
+
+            if (body.trim().length < minLength || missingSections.length > 0) {
+              core.setFailed(
+                `PR description is incomplete. Please follow the PR template.\n` +
+                (missingSections.length > 0 ? `Missing required sections: ${missingSections.join(', ')}` : '')
+              );
+            }
