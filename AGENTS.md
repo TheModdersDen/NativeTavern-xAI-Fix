@@ -37,3 +37,13 @@ Unless the user explicitly overrides these defaults:
 
 Do not report a release complete until the external platform states, artifact
 checksums, Git commit, remote branch, and release tag have all been verified.
+
+## User-Facing UI & Localization
+
+When creating or modifying any user-facing UI:
+
+1. Never hardcode user-visible strings in widgets or screens; always access localized strings through `AppLocalizations.of(context)!` (or `l10n`).
+2. Add new translation keys and descriptions to `lib/l10n/app_en.arb` (including proper metadata `@key` blocks with descriptions and placeholder definitions).
+3. Propagate corresponding translation entries across all target language `.arb` files in `lib/l10n/` (e.g., `app_zh.arb`, `app_zh_TW.arb`, `app_ja.arb`, `app_de.arb`, `app_fr.arb`, `app_es.arb`, etc.).
+4. Run `flutter gen-l10n` to regenerate the localization classes in `lib/l10n/generated/`.
+5. Keep related provider sources, consent lists (such as `aiDataSharingRecipients`), and UI settings tiles properly synchronized with any added/changed features.
