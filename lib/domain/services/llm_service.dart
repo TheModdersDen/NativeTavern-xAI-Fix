@@ -643,36 +643,10 @@ class LLMService {
     ToolCancellationToken cancellationToken,
   ) async {
     final endpoint = '${config.apiUrl}/chat/completions';
-    final baseRequest = <String, dynamic>{
-      'model': config.model,
-      'messages': _prepareOpenAIMessages(
-        [...baseMessages, ...continuationMessages],
-        config,
-      ),
-      'max_tokens': config.maxTokens,
-      'temperature': config.temperature,
-      'top_p': config.topP,
-      'frequency_penalty': config.frequencyPenalty,
-      'presence_penalty': config.presencePenalty,
-      if (config.stopSequences.isNotEmpty) 'stop': config.stopSequences,
-      if (config.seed != -1) 'seed': config.seed,
-    };
-    _applyOpenRouterRouting(baseRequest, config);
-    if (config.provider != LLMProvider.openai) {
-      if (config.topK > 0) baseRequest['top_k'] = config.topK;
-      if (config.repetitionPenalty != 1.0) {
-        baseRequest['repetition_penalty'] = config.repetitionPenalty;
-      }
-      if (config.minP > 0.0) baseRequest['min_p'] = config.minP;
-      if (config.topA > 0.0) baseRequest['top_a'] = config.topA;
-      if (config.typicalP != 1.0) {
-        baseRequest['typical_p'] = config.typicalP;
-      }
-      if (config.tailFreeSampling != 1.0) {
-        baseRequest['tfs_z'] = config.tailFreeSampling;
-      }
-    }
-    _applyOpenAIReasoning(baseRequest, config);
+    final baseRequest = _buildOpenAIRequestBody(
+      messages: [...baseMessages, ...continuationMessages],
+      config: config,
+    );
     final data = await _postToolJson(
       endpoint: endpoint,
       data: adapter.decorateRequest(baseRequest, toolConfiguration),
@@ -1962,45 +1936,108 @@ class LLMService {
     }
   }
 
+  static void _applyExtendedSamplerParameters(
+    Map<String, dynamic> requestData,
+    LLMConfig config,
+  ) {
+    if (config.topK > 0) requestData['top_k'] = config.topK;
+    if (config.repetitionPenalty != 1.0) {
+      requestData['repetition_penalty'] = config.repetitionPenalty;
+    }
+    if (config.minP > 0.0) requestData['min_p'] = config.minP;
+    if (config.topA > 0.0) requestData['top_a'] = config.topA;
+    if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
+    if (config.tailFreeSampling != 1.0) {
+      requestData['tfs_z'] = config.tailFreeSampling;
+    }
+  }
+
+  Map<String, dynamic> _buildOpenAIRequestBody({
+    required List<Map<String, dynamic>> messages,
+    required LLMConfig config,
+    bool stream = false,
+  }) {
+    final preset = OpenAIProviderPreset.resolve(config);
+
+    final requestData = <String, dynamic>{
+      'model': config.model,
+      'messages': _prepareOpenAIMessages(messages, config),
+      'max_tokens': config.maxTokens,
+      'temperature': config.temperature,
+      'top_p': config.topP,
+    };
+
+    if (stream) {
+      requestData['stream'] = true;
+    }
+
+    switch (preset) {
+      case OpenAIProviderPreset.xai:
+        // xAI / Grok rejects presence_penalty and extended samplers with HTTP 400
+        if (config.frequencyPenalty != 0.0) {
+          requestData['frequency_penalty'] = config.frequencyPenalty;
+        }
+        if (config.stopSequences.isNotEmpty) {
+          requestData['stop'] = config.stopSequences;
+        }
+        if (config.seed != -1) {
+          requestData['seed'] = config.seed;
+        }
+        break;
+
+      case OpenAIProviderPreset.standard:
+        requestData['frequency_penalty'] = config.frequencyPenalty;
+        requestData['presence_penalty'] = config.presencePenalty;
+        if (config.stopSequences.isNotEmpty) {
+          requestData['stop'] = config.stopSequences;
+        }
+        if (config.seed != -1) {
+          requestData['seed'] = config.seed;
+        }
+        _applyOpenAIReasoning(requestData, config);
+        break;
+
+      case OpenAIProviderPreset.openRouter:
+        requestData['frequency_penalty'] = config.frequencyPenalty;
+        requestData['presence_penalty'] = config.presencePenalty;
+        if (config.stopSequences.isNotEmpty) {
+          requestData['stop'] = config.stopSequences;
+        }
+        if (config.seed != -1) {
+          requestData['seed'] = config.seed;
+        }
+        _applyOpenRouterRouting(requestData, config);
+        _applyExtendedSamplerParameters(requestData, config);
+        _applyOpenAIReasoning(requestData, config);
+        break;
+
+      case OpenAIProviderPreset.compatible:
+        requestData['frequency_penalty'] = config.frequencyPenalty;
+        requestData['presence_penalty'] = config.presencePenalty;
+        if (config.stopSequences.isNotEmpty) {
+          requestData['stop'] = config.stopSequences;
+        }
+        if (config.seed != -1) {
+          requestData['seed'] = config.seed;
+        }
+        _applyExtendedSamplerParameters(requestData, config);
+        _applyOpenAIReasoning(requestData, config);
+        break;
+    }
+
+    return requestData;
+  }
+
   // OpenAI / OpenAI-compatible with reasoning support
   Future<LLMResponse> _generateOpenAIWithReasoning(
     List<Map<String, dynamic>> messages,
     LLMConfig config,
   ) async {
     final endpoint = '${config.apiUrl}/chat/completions';
-    final requestData = {
-      'model': config.model,
-      'messages': _prepareOpenAIMessages(messages, config),
-      'max_tokens': config.maxTokens,
-      'temperature': config.temperature,
-      'top_p': config.topP,
-      'frequency_penalty': config.frequencyPenalty,
-      'presence_penalty': config.presencePenalty,
-    };
-
-    // Add standard OpenAI params
-    if (config.stopSequences.isNotEmpty) {
-      requestData['stop'] = config.stopSequences;
-    }
-    if (config.seed != -1) {
-      requestData['seed'] = config.seed;
-    }
-    _applyOpenRouterRouting(requestData, config);
-
-    // Add extended parameters for compatible providers (OpenRouter, local, etc)
-    // Official OpenAI API might reject these, so we exclude them for LLMProvider.openai
-    if (config.provider != LLMProvider.openai) {
-      if (config.topK > 0) requestData['top_k'] = config.topK;
-      if (config.repetitionPenalty != 1.0)
-        requestData['repetition_penalty'] = config.repetitionPenalty;
-      if (config.minP > 0.0) requestData['min_p'] = config.minP;
-      if (config.topA > 0.0) requestData['top_a'] = config.topA;
-      if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
-      if (config.tailFreeSampling != 1.0)
-        requestData['tfs_z'] = config.tailFreeSampling;
-    }
-
-    _applyOpenAIReasoning(requestData, config);
+    final requestData = _buildOpenAIRequestBody(
+      messages: messages,
+      config: config,
+    );
 
     _logRequest(endpoint, requestData, config);
 
@@ -2066,18 +2103,11 @@ class LLMService {
     LLMConfig config,
   ) async* {
     final endpoint = '${config.apiUrl}/chat/completions';
-    final requestData = {
-      'model': config.model,
-      'messages': messages,
-      'max_tokens': config.maxTokens,
-      'temperature': config.temperature,
-      'top_p': config.topP,
-      'frequency_penalty': config.frequencyPenalty,
-      'presence_penalty': config.presencePenalty,
-      'stream': true,
-    };
-
-    _applyOpenAIReasoning(requestData, config);
+    final requestData = _buildOpenAIRequestBody(
+      messages: messages,
+      config: config,
+      stream: true,
+    );
 
     _logRequest(endpoint, requestData, config);
 
@@ -2646,39 +2676,11 @@ class LLMService {
   ) async* {
     try {
       final endpoint = '${config.apiUrl}/chat/completions';
-      final requestData = {
-        'model': config.model,
-        'messages': _prepareOpenAIMessages(messages, config),
-        'max_tokens': config.maxTokens,
-        'temperature': config.temperature,
-        'top_p': config.topP,
-        'frequency_penalty': config.frequencyPenalty,
-        'presence_penalty': config.presencePenalty,
-        'stream': true,
-      };
-
-      // Add standard OpenAI params
-      if (config.stopSequences.isNotEmpty) {
-        requestData['stop'] = config.stopSequences;
-      }
-      if (config.seed != -1) {
-        requestData['seed'] = config.seed;
-      }
-      _applyOpenRouterRouting(requestData, config);
-
-      // Add extended parameters for compatible providers (OpenRouter, local, etc)
-      if (config.provider != LLMProvider.openai) {
-        if (config.topK > 0) requestData['top_k'] = config.topK;
-        if (config.repetitionPenalty != 1.0)
-          requestData['repetition_penalty'] = config.repetitionPenalty;
-        if (config.minP > 0.0) requestData['min_p'] = config.minP;
-        if (config.topA > 0.0) requestData['top_a'] = config.topA;
-        if (config.typicalP != 1.0) requestData['typical_p'] = config.typicalP;
-        if (config.tailFreeSampling != 1.0)
-          requestData['tfs_z'] = config.tailFreeSampling;
-      }
-
-      _applyOpenAIReasoning(requestData, config);
+      final requestData = _buildOpenAIRequestBody(
+        messages: messages,
+        config: config,
+        stream: true,
+      );
 
       _logRequest(endpoint, requestData, config);
 
