@@ -68,7 +68,9 @@ release
 build_*
 !build_ios.sh
 !build_android.sh
+!build_macos.sh
 !tool/build_android_release.dart
+!tool/build_ios_adhoc.sh
 resize_app_store_images.py
 config
 !config/

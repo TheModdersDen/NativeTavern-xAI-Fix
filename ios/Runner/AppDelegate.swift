@@ -36,11 +36,41 @@ import StoreKit
       }
       let arguments = call.arguments as? [String: Any]
       let requestedScale = (arguments?["devicePixelRatio"] as? NSNumber)
-        .map { CGFloat($0.doubleValue) }
       result(self?.synchronizeLive2DContentScale(requestedScale: requestedScale) ?? 0)
     }
 
+    let fileOpenChannel = FlutterMethodChannel(
+      name: "com.nativetavern/file_open",
+      binaryMessenger: controller.binaryMessenger
+    )
+    self.fileOpenChannel = fileOpenChannel
+    fileOpenChannel.setMethodCallHandler { [weak self] call, result in
+      if call.method == "getInitialFile" {
+        result(self?.initialFilePath)
+        self?.initialFilePath = nil
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  private var fileOpenChannel: FlutterMethodChannel?
+  private var initialFilePath: String?
+
+  override func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    let filePath = url.path
+    if let channel = fileOpenChannel {
+      channel.invokeMethod("onFileOpened", arguments: filePath)
+    } else {
+      initialFilePath = filePath
+    }
+    return super.application(app, open: url, options: options)
   }
 
   private func synchronizeLive2DContentScale(requestedScale: CGFloat?) -> Int {

@@ -254,6 +254,12 @@ if [ -f "$ANDROID_MANIFEST" ]; then
         perl -i -pe 's|(android:name="\.MainActivity")|$1\n            android:screenOrientation="portrait"|' "$ANDROID_MANIFEST"
         echo "Added portrait orientation restriction"
     fi
+
+    # Add intent-filter for .jsonl and chat files if not present
+    if ! grep -q "android:pathPattern=\".*\\.jsonl\"" "$ANDROID_MANIFEST"; then
+        perl -i -pe 's|(</activity>)|            <intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="file" />\n                <data android:scheme="content" />\n                <data android:mimeType="*/*" />\n                <data android:pathPattern=".*\\\\.jsonl" />\n                <data android:host="*" />\n            </intent-filter>\n            <intent-filter>\n                <action android:name="android.intent.action.SEND" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <data android:mimeType="*/*" />\n            </intent-filter>\n$1|' "$ANDROID_MANIFEST"
+        echo "Added JSONL intent filters to AndroidManifest.xml"
+    fi
 else
     echo "Warning: AndroidManifest.xml not found at $ANDROID_MANIFEST"
 fi
@@ -283,8 +289,8 @@ else
     echo "Warning: $BACKCLOUD_CONFIG not found, skipping Google Sign-In configuration"
 fi
 
-echo "=== Adding Region Detection Code to MainActivity ==="
-# Create the correct package directory and MainActivity.kt with region detection code
+echo "=== Adding Region Detection and File Open Code to MainActivity ==="
+# Create the correct package directory and MainActivity.kt with region and file open code
 MAIN_ACTIVITY_DIR="android/app/src/main/kotlin/com/miaomiaoxworld/nativetavern"
 MAIN_ACTIVITY_PATH="$MAIN_ACTIVITY_DIR/MainActivity.kt"
 mkdir -p "$MAIN_ACTIVITY_DIR"
@@ -293,19 +299,26 @@ if true; then
 package com.miaomiaoxworld.nativetavern
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.telephony.TelephonyManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.nativetavern/region"
+    private val REGION_CHANNEL = "com.nativetavern/region"
+    private val FILE_OPEN_CHANNEL = "com.nativetavern/file_open"
+    private var fileChannel: MethodChannel? = null
+    private var initialFilePath: String? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, REGION_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "isChinaRegion" -> {
                     result.success(isChinaRegion())
@@ -314,6 +327,66 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+        }
+
+        fileChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, FILE_OPEN_CHANNEL).apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInitialFile" -> {
+                        result.success(initialFilePath)
+                        initialFilePath = null
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+        val action = intent.action
+        val uri: Uri? = if (Intent.ACTION_VIEW == action) {
+            intent.data
+        } else if (Intent.ACTION_SEND == action) {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(Intent.EXTRA_STREAM)
+        } else {
+            null
+        }
+
+        if (uri != null) {
+            val path = copyUriToCache(uri)
+            if (path != null) {
+                if (fileChannel != null) {
+                    fileChannel?.invokeMethod("onFileOpened", path)
+                } else {
+                    initialFilePath = path
+                }
+            }
+        }
+    }
+
+    private fun copyUriToCache(uri: Uri): String? {
+        return try {
+            val contentResolver = applicationContext.contentResolver
+            val fileName = "imported_${System.currentTimeMillis()}.jsonl"
+            val tempFile = File(cacheDir, fileName)
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(tempFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            tempFile.absolutePath
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -345,7 +418,7 @@ class MainActivity : FlutterActivity() {
     }
 }
 MAIN_ACTIVITY_CONTENT
-    echo "Created MainActivity.kt with region detection code"
+    echo "Created MainActivity.kt with region detection and file open code"
 fi
 
 echo "Android configuration complete!"

@@ -13,7 +13,8 @@ void main() {
   ];
 
   group('xAI Grok Dynamic Models & Parameter Filtering', () {
-    test('fetches available models dynamically from xAI server /models endpoint',
+    test(
+        'fetches available models dynamically from xAI server /models endpoint',
         () async {
       final adapter = _RecordingLlmAdapter(
         jsonResponse: {
@@ -42,7 +43,8 @@ void main() {
       );
     });
 
-    test('LLMProvider.xai excludes presence_penalty and extended samplers in non-streaming requests',
+    test(
+        'LLMProvider.xai excludes presence_penalty and extended samplers in non-streaming requests',
         () async {
       final adapter = _RecordingLlmAdapter();
       final service = LLMService(dio: Dio()..httpClientAdapter = adapter);
@@ -87,7 +89,9 @@ void main() {
         topK: 60,
       );
 
-      await service.generateStreamWithReasoning(sampleMessages, config).toList();
+      await service
+          .generateStreamWithReasoning(sampleMessages, config)
+          .toList();
 
       final requestData = _data(adapter.lastOptions);
       expect(requestData['stream'], isTrue);
@@ -95,7 +99,8 @@ void main() {
       expect(requestData.containsKey('top_k'), isFalse);
     });
 
-    test('Dual detection: LLMProvider.openAICompatible auto-detects xAI when URL contains api.x.ai and model starts with grok-',
+    test(
+        'Dual detection: LLMProvider.openAICompatible auto-detects xAI when URL contains api.x.ai and model starts with grok-',
         () async {
       final adapter = _RecordingLlmAdapter();
       final service = LLMService(dio: Dio()..httpClientAdapter = adapter);
@@ -119,7 +124,8 @@ void main() {
       expect(requestData.containsKey('top_k'), isFalse);
     });
 
-    test('Generic OpenAI-compatible endpoint preserves presence_penalty and extended samplers',
+    test(
+        'Generic OpenAI-compatible endpoint preserves presence_penalty and extended samplers',
         () async {
       final adapter = _RecordingLlmAdapter();
       final service = LLMService(dio: Dio()..httpClientAdapter = adapter);
@@ -144,7 +150,8 @@ void main() {
       expect(requestData['min_p'], 0.05);
     });
 
-    test('generateToolTurn with LLMProvider.xai excludes presence_penalty from request',
+    test(
+        'generateToolTurn with LLMProvider.xai excludes presence_penalty from request',
         () async {
       final adapter = _RecordingLlmAdapter(
         jsonResponse: {

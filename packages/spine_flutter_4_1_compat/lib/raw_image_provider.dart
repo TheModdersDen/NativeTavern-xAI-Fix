@@ -40,7 +40,8 @@ class RawImageProvider extends ImageProvider<_RawImageKey> {
   });
 
   @override
-  ImageStreamCompleter loadImage(_RawImageKey key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      _RawImageKey key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: scale ?? 1.0,

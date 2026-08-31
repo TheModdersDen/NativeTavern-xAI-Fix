@@ -20,6 +20,8 @@ import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/regex_providers.dart';
 import 'package:native_tavern/presentation/providers/external_call_audit_providers.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
+import 'package:uuid/uuid.dart';
+import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
 
 /// Import service provider
@@ -204,6 +206,36 @@ class ImportNotifier extends StateNotifier<ImportState> {
             final file = File(path);
             final json = await file.readAsString();
             character = await _importService.importFromJson(json);
+            break;
+          case 'jsonl':
+            final chatImport = await ChatExportService().importFromPath(path);
+            if (chatImport != null) {
+              character = Character(
+                id: const Uuid().v4(),
+                name: chatImport.characterName,
+                description:
+                    'Imported Chat History (${chatImport.messages.length} messages)',
+                personality: '',
+                firstMessage: chatImport.messages.isNotEmpty
+                    ? chatImport.messages.first.content
+                    : '',
+                scenario: '',
+                mesExamples: '',
+                creatorNotes: 'Imported from ${path.split('/').last}',
+                systemPrompt: '',
+                postHistoryInstructions: '',
+                tags: const ['chat-history'],
+                creator: chatImport.userName,
+                characterVersion: '1.0',
+                alternateGreetings: const [],
+                extensions: {
+                  'chatImport': true,
+                  'chatImportPath': path,
+                },
+                createdAt: chatImport.createDate,
+                updatedAt: DateTime.now(),
+              );
+            }
             break;
           case 'zip':
             character = await _importZip(path);
