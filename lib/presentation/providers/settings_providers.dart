@@ -100,6 +100,8 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
         return 'https://api.minimaxi.com/v1';
       case LLMProvider.openAICompatible:
         return 'http://localhost:8080/v1';
+      case LLMProvider.xai:
+        return 'https://api.x.ai/v1';
     }
   }
 
@@ -131,6 +133,8 @@ class LLMConfigNotifier extends StateNotifier<LLMConfig> {
       case LLMProvider.miniMax:
         return 'MiniMax-M2';
       case LLMProvider.openAICompatible:
+        return '';
+      case LLMProvider.xai:
         return '';
     }
   }
@@ -1246,6 +1250,7 @@ class ModelFetchNotifier extends StateNotifier<ModelFetchState> {
           case LLMProvider.miniMax:
           case LLMProvider.openAICompatible:
           case LLMProvider.openai:
+          case LLMProvider.xai:
             message = 'No models found. Check your API key.';
             break;
           case LLMProvider.ollama:

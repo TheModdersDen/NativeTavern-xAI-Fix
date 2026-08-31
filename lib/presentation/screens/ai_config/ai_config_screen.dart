@@ -325,6 +325,8 @@ class _LLMProviderTile extends ConsumerWidget {
         return 'MiniMax';
       case LLMProvider.openAICompatible:
         return 'OAI Compatible';
+      case LLMProvider.xai:
+        return 'xAI (Grok)';
     }
   }
 
@@ -443,6 +445,8 @@ class _LLMProviderTile extends ConsumerWidget {
         return 'MiniMax M2 series';
       case LLMProvider.openAICompatible:
         return 'Custom OAI-compatible API';
+      case LLMProvider.xai:
+        return 'Grok models';
     }
   }
 }
@@ -612,9 +616,13 @@ class _ModelTileState extends ConsumerState<_ModelTile> {
 
     ref.listen<ModelFetchState>(modelFetchProvider, (previous, next) {
       if (next.status == ModelFetchStatus.success && next.models.isNotEmpty) {
+        if (config.model.trim().isEmpty) {
+          ref.read(llmConfigProvider.notifier).updateModel(next.models.first);
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            _showModelListSheet(context, ref, config, next.models);
+            final latestConfig = ref.read(llmConfigProvider);
+            _showModelListSheet(context, ref, latestConfig, next.models);
           }
         });
       } else if (next.status == ModelFetchStatus.error) {

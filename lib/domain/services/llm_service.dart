@@ -24,6 +24,40 @@ enum LLMProvider {
   moonshot,
   zai,
   miniMax,
+  xai,
+}
+
+/// Provider preset for OpenAI and OpenAI-compatible endpoints.
+/// Controls parameter inclusion/exclusion across different providers.
+enum OpenAIProviderPreset {
+  standard,
+  compatible,
+  openRouter,
+  xai;
+
+  /// Resolves the provider preset from the current configuration.
+  /// Dual-detects xAI/Grok when provider is xai, OR when apiUrl contains
+  /// 'api.x.ai' and model starts with 'grok-'.
+  static OpenAIProviderPreset resolve(LLMConfig config) {
+    if (config.provider == LLMProvider.xai || _isXaiGrok(config)) {
+      return OpenAIProviderPreset.xai;
+    }
+    if (config.provider == LLMProvider.openRouter) {
+      return OpenAIProviderPreset.openRouter;
+    }
+    if (config.provider == LLMProvider.openai) {
+      return OpenAIProviderPreset.standard;
+    }
+    return OpenAIProviderPreset.compatible;
+  }
+
+  static bool _isXaiGrok(LLMConfig config) {
+    final host = Uri.tryParse(config.apiUrl)?.host.toLowerCase() ?? '';
+    final urlContainsXai = host.contains('api.x.ai') ||
+        config.apiUrl.toLowerCase().contains('api.x.ai');
+    final modelStartsGrok = config.model.toLowerCase().startsWith('grok-');
+    return urlContainsXai && modelStartsGrok;
+  }
 }
 
 /// LLM Response with content and optional reasoning/thinking
@@ -581,7 +615,8 @@ class LLMService {
       LLMProvider.siliconFlow ||
       LLMProvider.moonshot ||
       LLMProvider.zai ||
-      LLMProvider.miniMax =>
+      LLMProvider.miniMax ||
+      LLMProvider.xai =>
         _generateOpenAiToolTurn(
           fittedBase,
           continuationMessages,
@@ -1358,6 +1393,7 @@ class LLMService {
       case LLMProvider.miniMax:
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
+      case LLMProvider.xai:
         return _generateOpenAIWithReasoning(messages, config);
       case LLMProvider.claude:
         return _generateClaudeWithReasoning(messages, config);
@@ -1451,6 +1487,7 @@ class LLMService {
       case LLMProvider.miniMax:
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
+      case LLMProvider.xai:
         return _streamOpenAIWithReasoning(messages, config);
       case LLMProvider.claude:
         return _streamClaudeWithReasoning(messages, config);
@@ -1483,6 +1520,7 @@ class LLMService {
         case LLMProvider.miniMax:
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
+        case LLMProvider.xai:
           if (config.apiKey.isEmpty) {
             _log('Error: API key is empty');
             throw Exception('API key is required');
@@ -1766,6 +1804,7 @@ class LLMService {
         case LLMProvider.miniMax:
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
+        case LLMProvider.xai:
           _log('Fetching models from ${config.apiUrl}/models');
           final response = await _dio.get(
             '${config.apiUrl}/models',
