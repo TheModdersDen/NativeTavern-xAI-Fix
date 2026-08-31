@@ -154,6 +154,7 @@
   "gemini": "Gemini",
   "ollama": "Ollama",
   "koboldCpp": "KoboldCpp",
+  "xai": "xAI (Grok)",
   "local": "स्थानीय",
   "aiPresets": "AI प्रीसेट",
   "createPreset": "प्रीसेट बनाएं",

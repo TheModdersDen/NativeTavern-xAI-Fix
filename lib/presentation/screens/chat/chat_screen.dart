@@ -293,6 +293,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Text('• ${l10n.claude} (Anthropic)'),
             Text('• ${l10n.openRouter}'),
             Text('• ${l10n.gemini} (Google)'),
+            Text('• ${l10n.xai}'),
             Text('• ${l10n.ollama} (${l10n.local})'),
             Text('• ${l10n.koboldCpp} (${l10n.local})'),
           ],

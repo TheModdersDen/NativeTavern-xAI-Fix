@@ -526,6 +526,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get koboldCpp => 'KoboldCpp';
 
   @override
+  String get xai => 'xAI (Grok)';
+
+  @override
   String get local => 'Yerel';
 
   @override

@@ -153,6 +153,7 @@
   "gemini": "Gemini",
   "ollama": "Ollama",
   "koboldCpp": "KoboldCpp",
+  "xai": "xAI (Grok)",
   "local": "로컬",
   "aiPresets": "AI 프리셋",
   "createPreset": "프리셋 만들기",

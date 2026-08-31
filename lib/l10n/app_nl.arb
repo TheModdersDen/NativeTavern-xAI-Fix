@@ -154,6 +154,7 @@
   "gemini": "Gemini",
   "ollama": "Ollama",
   "koboldCpp": "KoboldCpp",
+  "xai": "xAI (Grok)",
   "local": "Lokaal",
   "aiPresets": "AI-presets",
   "createPreset": "Preset Maken",

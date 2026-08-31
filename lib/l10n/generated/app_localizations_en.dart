@@ -527,6 +527,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get koboldCpp => 'KoboldCpp';
 
   @override
+  String get xai => 'xAI (Grok)';
+
+  @override
   String get local => 'Local';
 
   @override
@@ -6527,7 +6530,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiDataSharingRecipients =>
-      'Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.';
+      'Depending on your configuration: Anthropic, an OAI Compatible endpoint you configure, OpenRouter, Google Gemini, xAI (Grok), DeepSeek, Alibaba Qwen, SiliconFlow, Moonshot/Kimi, Z.AI, MiniMax, Cohere, ElevenLabs, Azure Speech, Volcengine, NovelAI, Pollinations, or another custom endpoint you enter.';
 
   @override
   String get aiDataSharingControlTitle => 'Your choice';
