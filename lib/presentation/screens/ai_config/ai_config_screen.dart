@@ -330,8 +330,8 @@ class _LLMProviderTile extends ConsumerWidget {
     }
   }
 
-  /// Check if OpenAI should be hidden based on region or language setting
-  bool _shouldHideOpenAI(BuildContext context, bool isChinaRegion) {
+  /// Check if restricted providers should be hidden based on region or language setting
+  bool _shouldHideRestrictedProviders(BuildContext context, bool isChinaRegion) {
     // Hide if in China region (detected via App Store/SIM)
     if (isChinaRegion) {
       return true;
@@ -349,10 +349,11 @@ class _LLMProviderTile extends ConsumerWidget {
   /// Get filtered list of providers based on region and language
   List<LLMProvider> _getAvailableProviders(
       BuildContext context, bool isChinaRegion) {
-    final hideOpenAI = _shouldHideOpenAI(context, isChinaRegion);
+    final hideRestricted = _shouldHideRestrictedProviders(context, isChinaRegion);
     return LLMProvider.values.where((provider) {
-      // Hide OpenAI in China region or when language is Chinese
-      if (hideOpenAI && provider == LLMProvider.openai) {
+      // Hide OpenAI and xAI in China region or when language is Chinese
+      if (hideRestricted &&
+          (provider == LLMProvider.openai || provider == LLMProvider.xai)) {
         return false;
       }
       return true;

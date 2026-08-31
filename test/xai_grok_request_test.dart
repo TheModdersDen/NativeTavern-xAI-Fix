@@ -190,6 +190,28 @@ void main() {
       expect(requestData.containsKey('presence_penalty'), isFalse);
       expect(requestData.containsKey('top_k'), isFalse);
     });
+
+    test('OpenAI and xAI are both filtered out when China restriction is active', () {
+      List<LLMProvider> filterProviders({required bool hideRestricted}) {
+        return LLMProvider.values.where((provider) {
+          if (hideRestricted &&
+              (provider == LLMProvider.openai || provider == LLMProvider.xai)) {
+            return false;
+          }
+          return true;
+        }).toList();
+      }
+
+      final restrictedProviders = filterProviders(hideRestricted: true);
+      expect(restrictedProviders.contains(LLMProvider.openai), isFalse);
+      expect(restrictedProviders.contains(LLMProvider.xai), isFalse);
+      expect(restrictedProviders.contains(LLMProvider.claude), isTrue);
+      expect(restrictedProviders.contains(LLMProvider.deepSeek), isTrue);
+
+      final unrestrictedProviders = filterProviders(hideRestricted: false);
+      expect(unrestrictedProviders.contains(LLMProvider.openai), isTrue);
+      expect(unrestrictedProviders.contains(LLMProvider.xai), isTrue);
+    });
   });
 }
 
