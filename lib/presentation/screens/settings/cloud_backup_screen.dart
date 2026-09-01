@@ -24,6 +24,17 @@ class CloudBackupScreen extends ConsumerWidget {
     final isGoogleDriveSignedIn = ref.watch(googleDriveSignedInProvider);
     final googleDriveBackupsAsync = ref.watch(googleDriveBackupsProvider);
 
+    final pendingOpenedPath = ref.watch(pendingBackupImportPathProvider);
+    if (pendingOpenedPath != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        if (ref.read(pendingBackupImportPathProvider) != pendingOpenedPath) {
+          return;
+        }
+        _importFromOpenedPath(context, ref, pendingOpenedPath);
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cloudBackup),
@@ -152,13 +163,42 @@ class CloudBackupScreen extends ConsumerWidget {
 
                 const SizedBox(height: 16),
 
-                // Local & File Backup section (.ntb)
+                // Local & File Backup section (.ntx / .ntb)
                 _buildSection(
                   context: context,
                   title: l10n.localBackup,
                   children: [
                     ListTile(
                       leading: const Icon(Icons.folder_zip_outlined,
+                          color: AppTheme.accentColor),
+                      title: Text(l10n.exportNtxBackup),
+                      subtitle: Text(l10n.exportNtxBackupSubtitle),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.save_alt),
+                            tooltip: l10n.exportToFiles,
+                            onPressed: () => _exportBackupToFile(
+                              context,
+                              ref,
+                              combined: true,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.share),
+                            tooltip: l10n.shareBackup,
+                            onPressed: () => _shareBackup(
+                              context,
+                              ref,
+                              combined: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.description_outlined,
                           color: AppTheme.accentColor),
                       title: Text(l10n.exportNtbBackup),
                       subtitle: Text(l10n.exportNtbBackupSubtitle),
@@ -168,12 +208,20 @@ class CloudBackupScreen extends ConsumerWidget {
                           IconButton(
                             icon: const Icon(Icons.save_alt),
                             tooltip: l10n.exportToFiles,
-                            onPressed: () => _exportBackupToFile(context, ref),
+                            onPressed: () => _exportBackupToFile(
+                              context,
+                              ref,
+                              combined: false,
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.share),
                             tooltip: l10n.shareBackup,
-                            onPressed: () => _shareBackup(context, ref),
+                            onPressed: () => _shareBackup(
+                              context,
+                              ref,
+                              combined: false,
+                            ),
                           ),
                         ],
                       ),
@@ -181,8 +229,8 @@ class CloudBackupScreen extends ConsumerWidget {
                     ListTile(
                       leading: const Icon(Icons.file_open_outlined,
                           color: Colors.teal),
-                      title: Text(l10n.importNtbBackup),
-                      subtitle: Text(l10n.importNtbBackupSubtitle),
+                      title: Text(l10n.importNtxBackup),
+                      subtitle: Text(l10n.importNtxBackupSubtitle),
                       trailing: ElevatedButton.icon(
                         icon: const Icon(Icons.file_open, size: 18),
                         label: Text(l10n.import_action),
@@ -819,7 +867,11 @@ class CloudBackupScreen extends ConsumerWidget {
     );
   }
 
-  void _exportBackupToFile(BuildContext context, WidgetRef ref) async {
+  void _exportBackupToFile(
+    BuildContext context,
+    WidgetRef ref, {
+    bool combined = true,
+  }) async {
     final l10n = AppLocalizations.of(context);
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
@@ -827,31 +879,104 @@ class CloudBackupScreen extends ConsumerWidget {
 
     final result = await ref
         .read(cloudBackupOperationProvider.notifier)
-        .exportBackupToFile(data: localData);
+        .exportBackupToFile(data: localData, combined: combined);
 
-    if (result != null && context.mounted) {
+    if (result != null && result.succeeded && context.mounted) {
+      final message = result.savedToFilesApp
+          ? l10n.backupSavedToFilesApp
+          : l10n.backupSavedToAppFolder;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.backupExported)),
+        SnackBar(content: Text(message)),
       );
     }
   }
 
-  void _shareBackup(BuildContext context, WidgetRef ref) async {
+  void _shareBackup(
+    BuildContext context,
+    WidgetRef ref, {
+    bool combined = true,
+  }) async {
     final l10n = AppLocalizations.of(context);
     final origin = sharePositionOrigin(context);
     final db = ref.read(databaseProvider);
     final dbBackupService = DatabaseBackupService(db);
     final localData = await dbBackupService.exportAllData();
 
-    final success = await ref
-        .read(cloudBackupOperationProvider.notifier)
-        .shareBackup(data: localData, sharePositionOrigin: origin);
+    final success =
+        await ref.read(cloudBackupOperationProvider.notifier).shareBackup(
+              data: localData,
+              sharePositionOrigin: origin,
+              combined: combined,
+            );
 
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.backupExported)),
       );
     }
+  }
+
+  void _importFromOpenedPath(
+    BuildContext context,
+    WidgetRef ref,
+    String filePath,
+  ) {
+    ref.read(pendingBackupImportPathProvider.notifier).state = null;
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.read(cloudBackupSettingsProvider);
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => _RestoreDialog(
+        backup: CloudBackupInfo(
+          id: 'opened_file',
+          name: filePath.split('/').last,
+          size: 0,
+          createdAt: DateTime.now(),
+          provider: CloudProvider.googleDrive,
+        ),
+        defaultMode: settings.defaultRestoreMode,
+        onRestore: (mode) async {
+          Navigator.pop(context);
+
+          final db = ref.read(databaseProvider);
+          final dbBackupService = DatabaseBackupService(db);
+          final localData = await dbBackupService.exportAllData();
+
+          final result = await ref
+              .read(cloudBackupOperationProvider.notifier)
+              .importFromPath(
+                filePath: filePath,
+                mode: mode,
+                localData: localData,
+                restoreCallback: (data, restoreMode) async {
+                  final importMode = _convertToImportMode(restoreMode);
+                  final actualData =
+                      data['data'] as Map<String, dynamic>? ?? data;
+                  await dbBackupService.importData(
+                    data: actualData,
+                    mode: importMode,
+                  );
+                },
+              );
+
+          if (result != null && context.mounted) {
+            final operation = ref.read(cloudBackupOperationProvider);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(_restoreResultMessage(
+                  l10n: l10n,
+                  added: result.totalAdded,
+                  updated: result.totalUpdated,
+                  skipped: result.totalSkipped,
+                  operation: operation,
+                )),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
   void _importFromFile(BuildContext context, WidgetRef ref) async {

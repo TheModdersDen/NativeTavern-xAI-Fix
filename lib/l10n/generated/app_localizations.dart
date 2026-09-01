@@ -11646,26 +11646,38 @@ abstract class AppLocalizations {
   /// Local and file backup section header
   ///
   /// In en, this message translates to:
-  /// **'Local & File Backup (.ntb)'**
+  /// **'Local & File Backup'**
   String get localBackup;
 
   /// Local backup description
   ///
   /// In en, this message translates to:
-  /// **'Export and import NativeTavern .ntb backup files to your device storage or files app'**
+  /// **'Export and import NativeTavern .ntx combined backups or .ntb data backups to your device storage or files app'**
   String get localBackupDescription;
 
   /// Export NTB backup button
   ///
   /// In en, this message translates to:
-  /// **'Export Backup File (.ntb)'**
+  /// **'Export Data Backup (.ntb)'**
   String get exportNtbBackup;
 
   /// Export NTB backup subtitle
   ///
   /// In en, this message translates to:
-  /// **'Save or share full backup to device filesystem'**
+  /// **'Save JSON data only; media is stored separately as .ntm'**
   String get exportNtbBackupSubtitle;
+
+  /// Export NTX combined backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Export Combined Backup (.ntx)'**
+  String get exportNtxBackup;
+
+  /// Export NTX backup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Save app data and media together in one .ntx file'**
+  String get exportNtxBackupSubtitle;
 
   /// Import NTB backup button
   ///
@@ -11678,6 +11690,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore or merge data from a local .ntb file'**
   String get importNtbBackupSubtitle;
+
+  /// Import NTX or NTB backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Import Backup (.ntx / .ntb)'**
+  String get importNtxBackup;
+
+  /// Import NTX backup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Restore or merge data from a combined .ntx file or a .ntb data backup'**
+  String get importNtxBackupSubtitle;
 
   /// Save to files action button
   ///
@@ -11708,6 +11732,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick the .ntb backup file and optional .ntm media file'**
   String get selectNtbFileDescription;
+
+  /// Select NTX or NTB backup file title
+  ///
+  /// In en, this message translates to:
+  /// **'Select NativeTavern Backup'**
+  String get selectNtxFile;
+
+  /// Select NTX file description
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a .ntx combined backup, or a .ntb file with optional .ntm media'**
+  String get selectNtxFileDescription;
+
+  /// Snackbar after saving a backup through the system Files app
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved to Files'**
+  String get backupSavedToFilesApp;
+
+  /// Snackbar when a backup is stored in the app Backups folder
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save to Files. Backup saved to NativeTavern/Backups.'**
+  String get backupSavedToAppFolder;
+
+  /// Snackbar after saving an export through the system Files app
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Files'**
+  String get savedToFilesApp;
 
   /// Explanation shown before importing a backup
   ///

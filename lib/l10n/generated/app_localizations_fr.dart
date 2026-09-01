@@ -6561,18 +6561,25 @@ class AppLocalizationsFr extends AppLocalizations {
       'Bloqué ; l’IA locale reste disponible';
 
   @override
-  String get localBackup => 'Sauvegarde locale & fichier (.ntb)';
+  String get localBackup => 'Sauvegarde locale & fichier';
 
   @override
   String get localBackupDescription =>
-      'Exporter et importer les fichiers de sauvegarde .ntb NativeTavern';
+      'Exporter et importer les sauvegardes combinées .ntx ou les sauvegardes de données .ntb NativeTavern';
 
   @override
-  String get exportNtbBackup => 'Exporter le fichier de sauvegarde (.ntb)';
+  String get exportNtbBackup => 'Exporter la sauvegarde de données (.ntb)';
 
   @override
   String get exportNtbBackupSubtitle =>
-      'Enregistrer ou partager la sauvegarde complète';
+      'Enregistrer uniquement les données JSON ; les médias sont stockés séparément en .ntm';
+
+  @override
+  String get exportNtxBackup => 'Exporter la sauvegarde combinée (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle =>
+      'Enregistrer les données de l\'app et les médias dans un seul fichier .ntx';
 
   @override
   String get importNtbBackup => 'Importer un fichier de sauvegarde (.ntb)';
@@ -6580,6 +6587,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get importNtbBackupSubtitle =>
       'Restaurer ou fusionner les données depuis un fichier .ntb';
+
+  @override
+  String get importNtxBackup => 'Importer une sauvegarde (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle =>
+      'Restaurer ou fusionner depuis un fichier .ntx combiné ou une sauvegarde .ntb';
 
   @override
   String get exportToFiles => 'Enregistrer dans Fichiers';
@@ -6596,6 +6610,23 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get selectNtbFileDescription =>
       'Sélectionnez le fichier .ntb et le fichier média .ntm facultatif';
+
+  @override
+  String get selectNtxFile => 'Sélectionner la sauvegarde NativeTavern';
+
+  @override
+  String get selectNtxFileDescription =>
+      'Choisissez une sauvegarde combinée .ntx, ou un fichier .ntb avec un média .ntm facultatif';
+
+  @override
+  String get backupSavedToFilesApp => 'Sauvegarde enregistrée dans Fichiers';
+
+  @override
+  String get backupSavedToAppFolder =>
+      'Impossible d\'enregistrer dans Fichiers. Sauvegarde enregistrée dans NativeTavern/Backups.';
+
+  @override
+  String get savedToFilesApp => 'Enregistré dans Fichiers';
 
   @override
   String get importBackupExplanation =>

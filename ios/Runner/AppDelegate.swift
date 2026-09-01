@@ -48,10 +48,18 @@ import StoreKit
       if call.method == "getInitialFile" {
         result(self?.initialFilePath)
         self?.initialFilePath = nil
+      } else if call.method == "prepareBackupVisibility" {
+        result(self?.prepareBackupVisibility())
       } else {
         result(FlutterMethodNotImplemented)
       }
     }
+
+    if let url = launchOptions?[.url] as? URL {
+      initialFilePath = copyIncomingFile(url)
+    }
+
+    _ = prepareBackupVisibility()
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -64,13 +72,75 @@ import StoreKit
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-    let filePath = url.path
+    let filePath = copyIncomingFile(url) ?? url.path
     if let channel = fileOpenChannel {
       channel.invokeMethod("onFileOpened", arguments: filePath)
     } else {
       initialFilePath = filePath
     }
     return super.application(app, open: url, options: options)
+  }
+
+  /// Copies a security-scoped Files URL into a readable temp path.
+  private func copyIncomingFile(_ url: URL) -> String? {
+    let accessing = url.startAccessingSecurityScopedResource()
+    defer {
+      if accessing {
+        url.stopAccessingSecurityScopedResource()
+      }
+    }
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let destination = tempDir.appendingPathComponent(url.lastPathComponent)
+    do {
+      if FileManager.default.fileExists(atPath: destination.path) {
+        try FileManager.default.removeItem(at: destination)
+      }
+      try FileManager.default.copyItem(at: url, to: destination)
+      return destination.path
+    } catch {
+      return url.path
+    }
+  }
+
+  /// Exposes only `NativeTavern/Backups` in the Files app by hiding sibling data.
+  private func prepareBackupVisibility() -> String {
+    let fileManager = FileManager.default
+    guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+      return ""
+    }
+    let nativeTavern = documents.appendingPathComponent("NativeTavern", isDirectory: true)
+    let backups = nativeTavern.appendingPathComponent("Backups", isDirectory: true)
+    try? fileManager.createDirectory(at: backups, withIntermediateDirectories: true)
+
+    hideItem(at: nativeTavern, hidden: false)
+    if let children = try? fileManager.contentsOfDirectory(
+      at: nativeTavern,
+      includingPropertiesForKeys: [.isHiddenKey],
+      options: []
+    ) {
+      for child in children {
+        hideItem(at: child, hidden: child.lastPathComponent != "Backups")
+      }
+    }
+
+    if let rootItems = try? fileManager.contentsOfDirectory(
+      at: documents,
+      includingPropertiesForKeys: [.isHiddenKey],
+      options: []
+    ) {
+      for item in rootItems where item.lastPathComponent != "NativeTavern" {
+        hideItem(at: item, hidden: true)
+      }
+    }
+
+    return backups.path
+  }
+
+  private func hideItem(at url: URL, hidden: Bool) {
+    var values = URLResourceValues()
+    values.isHidden = hidden
+    try? url.setResourceValues(values)
   }
 
   private func synchronizeLive2DContentScale(requestedScale: CGFloat?) -> Int {

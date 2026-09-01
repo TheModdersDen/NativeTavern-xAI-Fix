@@ -23,6 +23,7 @@ import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/providers/cloud_backup_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
 
 /// Import service provider
@@ -140,6 +141,7 @@ class ImportNotifier extends StateNotifier<ImportState> {
           'atlas',
           'ntb',
           'ntm',
+          'ntx',
         ],
         allowMultiple: true, // Enable batch import
       );
@@ -258,10 +260,13 @@ class ImportNotifier extends StateNotifier<ImportState> {
             );
             break;
           case 'ntb':
+          case 'ntx':
             final file = File(path);
-            final json = await file.readAsString();
-            final ntbChars =
-                await _importService.importCharactersFromNtb(json);
+            final ntbChars = extension == 'ntx'
+                ? await _importService
+                    .importCharactersFromNtx(await file.readAsBytes())
+                : await _importService
+                    .importCharactersFromNtb(await file.readAsString());
             if (ntbChars.isNotEmpty) {
               character = ntbChars.first;
               final baseName = p.basename(path);
@@ -464,6 +469,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     // Clear previous import state when screen is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(importStateProvider.notifier).clear();
+      final pending = ref.read(pendingImportFilePathProvider);
+      if (pending != null) {
+        ref.read(pendingImportFilePathProvider.notifier).state = null;
+        ref.read(importStateProvider.notifier).loadFiles([pending]);
+      }
     });
   }
 
@@ -471,6 +481,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   Widget build(BuildContext context) {
     final importState = ref.watch(importStateProvider);
     final l10n = AppLocalizations.of(context)!;
+    ref.listen<String?>(pendingImportFilePathProvider, (previous, next) {
+      if (next == null || next == previous) return;
+      ref.read(pendingImportFilePathProvider.notifier).state = null;
+      ref.read(importStateProvider.notifier).loadFiles([next]);
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -742,8 +757,8 @@ class _FilePickerViewState extends State<_FilePickerView> {
                         onPressed: () =>
                             context.push(AppRoutes.cloudBackupSettings),
                         icon: const Icon(Icons.backup_outlined, size: 18),
-                        label: Text(
-                            AppLocalizations.of(context)!.importNtbBackup),
+                        label:
+                            Text(AppLocalizations.of(context)!.importNtbBackup),
                       ),
                     ],
                   ],

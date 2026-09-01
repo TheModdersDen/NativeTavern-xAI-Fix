@@ -2,11 +2,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:native_tavern/domain/services/cloud_backup_service.dart';
+import 'package:native_tavern/domain/services/file_export_service.dart';
 import 'package:native_tavern/domain/services/google_drive_service.dart';
+
+/// Path of a backup file opened from the system Files app / share sheet.
+final pendingBackupImportPathProvider = StateProvider<String?>((ref) => null);
+
+/// Path of a non-backup file opened from the system for character/chat import.
+final pendingImportFilePathProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for cloud backup service
 final cloudBackupServiceProvider = Provider<CloudBackupService>((ref) {
@@ -572,10 +580,57 @@ class CloudBackupOperationNotifier
     }
   }
 
-  /// Export backup to local file (.ntb and optional .ntm)
-  Future<File?> exportBackupToFile({
+  FileExportService get _fileExport => fileExportService;
+
+  Future<CloudBackupArtifacts> _createLocalArtifacts({
     required Map<String, dynamic> data,
     CloudBackupOptions? options,
+  }) async {
+    final opts =
+        options ?? _ref.read(cloudBackupSettingsProvider).backupOptions;
+    return _service.exportLocalBackupArtifacts(
+      data: data,
+      options: opts,
+      onProgress: (progress) {
+        final progressValue = switch (progress.stage) {
+          CloudBackupArtifactStage.scanningMedia => 0.15,
+          CloudBackupArtifactStage.compressingMedia =>
+            progress.totalFiles != null && progress.totalFiles! > 0
+                ? 0.2 + (0.5 * (progress.processedFiles / progress.totalFiles!))
+                : 0.45,
+          CloudBackupArtifactStage.writingData => 0.85,
+        };
+        state = state.copyWith(
+          currentOperation: switch (progress.stage) {
+            CloudBackupArtifactStage.scanningMedia => 'Scanning media files...',
+            CloudBackupArtifactStage.compressingMedia =>
+              'Compressing media (${progress.processedFiles}/${progress.totalFiles ?? '?'})...',
+            CloudBackupArtifactStage.writingData => 'Writing backup file...',
+          },
+          progress: progressValue,
+        );
+      },
+    );
+  }
+
+  Future<File> _combinedBackupFile(CloudBackupArtifacts artifacts) async {
+    if (artifacts.combinedFile != null &&
+        await artifacts.combinedFile!.exists()) {
+      return artifacts.combinedFile!;
+    }
+    return _service.packageCombinedBackup(
+      dataFile: artifacts.dataFile,
+      mediaFile: artifacts.mediaFile,
+      mediaFileCount: artifacts.mediaFileCount,
+    );
+  }
+
+  /// Export a combined `.ntx` backup to a user-chosen folder. Falls back to
+  /// `NativeTavern/Backups` only when that chosen-folder save cannot complete.
+  Future<FileExportOutcome?> exportBackupToFile({
+    required Map<String, dynamic> data,
+    CloudBackupOptions? options,
+    bool combined = true,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -585,80 +640,54 @@ class CloudBackupOperationNotifier
     );
 
     try {
-      final opts =
-          options ?? _ref.read(cloudBackupSettingsProvider).backupOptions;
-      final artifacts = await _service.exportLocalBackupArtifacts(
+      final artifacts = await _createLocalArtifacts(
         data: data,
-        options: opts,
-        onProgress: (progress) {
-          final progressValue = switch (progress.stage) {
-            CloudBackupArtifactStage.scanningMedia => 0.15,
-            CloudBackupArtifactStage.compressingMedia =>
-              progress.totalFiles != null && progress.totalFiles! > 0
-                  ? 0.2 +
-                      (0.5 *
-                          (progress.processedFiles / progress.totalFiles!))
-                  : 0.45,
-            CloudBackupArtifactStage.writingData => 0.85,
-          };
-          state = state.copyWith(
-            currentOperation: switch (progress.stage) {
-              CloudBackupArtifactStage.scanningMedia =>
-                'Scanning media files...',
-              CloudBackupArtifactStage.compressingMedia =>
-                'Compressing media (${progress.processedFiles}/${progress.totalFiles ?? '?'})...',
-              CloudBackupArtifactStage.writingData => 'Writing backup file...',
-            },
-            progress: progressValue,
-          );
-        },
+        options: options,
+      );
+      final source =
+          combined ? await _combinedBackupFile(artifacts) : artifacts.dataFile;
+      final extension = path.extension(source.path).replaceFirst('.', '');
+      final outcome = await _fileExport.exportBackup(
+        source: source,
+        fileName: path.basename(source.path),
+        allowedExtensions: [extension],
+        dialogTitle: combined
+            ? 'Save NativeTavern Backup (.ntx)'
+            : 'Save NativeTavern Backup (.ntb)',
       );
 
-      // Save data file (.ntb)
-      final ntbName = artifacts.dataFile.uri.pathSegments.last;
-      final result = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save NativeTavern Backup (.ntb)',
-        fileName: ntbName,
-        type: FileType.custom,
-        allowedExtensions: const ['ntb'],
-      );
-
-      if (result != null) {
-        final destFile = await artifacts.dataFile.copy(result);
-
-        // If media sidecar was also generated, save it next to the .ntb if possible
-        if (artifacts.mediaFile != null &&
-            await artifacts.mediaFile!.exists()) {
-          final destDir = destFile.parent;
-          final ntmName = artifacts.mediaFile!.uri.pathSegments.last;
-          try {
-            final destMedia = File('${destDir.path}/$ntmName');
+      if (!combined &&
+          artifacts.mediaFile != null &&
+          await artifacts.mediaFile!.exists()) {
+        try {
+          if (outcome.filesAppFile != null) {
+            final destMedia = File(
+              path.join(
+                outcome.filesAppFile!.parent.path,
+                path.basename(artifacts.mediaFile!.path),
+              ),
+            );
             await artifacts.mediaFile!.copy(destMedia.path);
-          } catch (mediaCopyErr) {
-            debugPrint(
-                '[CloudBackup] Could not auto-save .ntm sidecar: $mediaCopyErr');
+          } else if (outcome.savedToAppBackups) {
+            await _fileExport.copyToAppBackups(artifacts.mediaFile!);
           }
+        } catch (mediaCopyErr) {
+          debugPrint(
+              '[CloudBackup] Could not auto-save .ntm sidecar: $mediaCopyErr');
         }
-
-        state = state.copyWith(
-          isLoading: false,
-          currentOperation: null,
-          progress: null,
-          status: CloudBackupStatus.success,
-          warning: _service.lastMediaWarning,
-        );
-
-        return destFile;
       }
 
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
         progress: null,
-        status: CloudBackupStatus.idle,
+        status: outcome.succeeded
+            ? CloudBackupStatus.success
+            : CloudBackupStatus.idle,
+        warning: _service.lastMediaWarning ?? outcome.error,
       );
 
-      return null;
+      return outcome;
     } catch (e, stackTrace) {
       debugPrint('[CloudBackup] exportBackupToFile error: $e');
       debugPrint('[CloudBackup] Stack trace: $stackTrace');
@@ -673,11 +702,12 @@ class CloudBackupOperationNotifier
     }
   }
 
-  /// Share backup (.ntb and optional .ntm) via native share sheet
+  /// Share a combined `.ntx` backup via the native share sheet.
   Future<bool> shareBackup({
     required Map<String, dynamic> data,
     CloudBackupOptions? options,
     Rect? sharePositionOrigin,
+    bool combined = true,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -687,39 +717,31 @@ class CloudBackupOperationNotifier
     );
 
     try {
-      final opts =
-          options ?? _ref.read(cloudBackupSettingsProvider).backupOptions;
-      final artifacts = await _service.exportLocalBackupArtifacts(
+      final artifacts = await _createLocalArtifacts(
         data: data,
-        options: opts,
-        onProgress: (progress) {
-          state = state.copyWith(
-            currentOperation: switch (progress.stage) {
-              CloudBackupArtifactStage.scanningMedia =>
-                'Scanning media files...',
-              CloudBackupArtifactStage.compressingMedia =>
-                'Compressing media (${progress.processedFiles}/${progress.totalFiles ?? '?'})...',
-              CloudBackupArtifactStage.writingData => 'Writing backup file...',
-            },
-          );
-        },
+        options: options,
       );
+      final combinedFile =
+          combined ? await _combinedBackupFile(artifacts) : artifacts.dataFile;
 
       final filesToShare = <XFile>[
         XFile(
-          artifacts.dataFile.path,
-          mimeType: 'application/octet-stream',
-          name: artifacts.dataFile.uri.pathSegments.last,
+          combinedFile.path,
+          mimeType: combined
+              ? 'application/x-nativetavern-package'
+              : 'application/x-nativetavern-backup',
+          name: path.basename(combinedFile.path),
         ),
       ];
 
-      if (artifacts.mediaFile != null &&
+      if (!combined &&
+          artifacts.mediaFile != null &&
           await artifacts.mediaFile!.exists()) {
         filesToShare.add(
           XFile(
             artifacts.mediaFile!.path,
-            mimeType: 'application/zip',
-            name: artifacts.mediaFile!.uri.pathSegments.last,
+            mimeType: 'application/x-nativetavern-media',
+            name: path.basename(artifacts.mediaFile!.path),
           ),
         );
       }
@@ -778,10 +800,9 @@ class CloudBackupOperationNotifier
       }
 
       File? mediaFile = mediaPath != null ? File(mediaPath) : null;
-      if (mediaFile == null || !await mediaFile.exists()) {
-        // Look for matching .ntm in the same directory
-        final ntmCandidate =
-            '${filePath.substring(0, filePath.length - 4)}.ntm';
+      if (!_service.isCombinedBackupPath(filePath) &&
+          (mediaFile == null || !await mediaFile.exists())) {
+        final ntmCandidate = '${path.withoutExtension(filePath)}.ntm';
         final candidateFile = File(ntmCandidate);
         if (await candidateFile.exists()) {
           mediaFile = candidateFile;
@@ -789,9 +810,10 @@ class CloudBackupOperationNotifier
       }
 
       state = state.copyWith(
-        currentOperation: mediaFile != null
-            ? 'Reading data and restoring media...'
-            : 'Reading data backup...',
+        currentOperation:
+            mediaFile != null || _service.isCombinedBackupPath(filePath)
+                ? 'Reading data and restoring media...'
+                : 'Reading data backup...',
         progress: 0.3,
       );
 
@@ -840,8 +862,8 @@ class CloudBackupOperationNotifier
     }
   }
 
-  /// Export backup to file (for Google Drive)
-  Future<File?> exportToFile(Map<String, dynamic> data) async {
+  /// Export backup to file (for Google Drive / local Files)
+  Future<FileExportOutcome?> exportToFile(Map<String, dynamic> data) async {
     return exportBackupToFile(data: data);
   }
 
@@ -862,9 +884,10 @@ class CloudBackupOperationNotifier
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['ntb', 'ntm'],
+        allowedExtensions: const ['ntx', 'ntb', 'ntm'],
         allowMultiple: true,
-        dialogTitle: 'Select the .ntb backup and its matching .ntm media file',
+        dialogTitle:
+            'Select a .ntx combined backup, or a .ntb file with its matching .ntm media file',
       );
 
       if (result == null || result.files.isEmpty) {
@@ -876,26 +899,41 @@ class CloudBackupOperationNotifier
         return null;
       }
 
+      final combinedFiles = result.files
+          .where((selected) => selected.name.toLowerCase().endsWith('.ntx'))
+          .toList();
       final dataFiles = result.files
           .where((selected) => selected.name.toLowerCase().endsWith('.ntb'))
           .toList();
-      if (dataFiles.length != 1) {
-        throw Exception('Select exactly one NativeTavern .ntb backup file');
+
+      late final File file;
+      File? selectedMediaFile;
+      if (combinedFiles.length == 1 && dataFiles.isEmpty) {
+        final filePath = combinedFiles.single.path;
+        if (filePath == null) {
+          throw Exception('The selected backup file is not locally accessible');
+        }
+        file = File(filePath);
+      } else if (dataFiles.length == 1 && combinedFiles.isEmpty) {
+        final dataSelection = dataFiles.single;
+        final filePath = dataSelection.path;
+        if (filePath == null) {
+          throw Exception('The selected backup file is not locally accessible');
+        }
+        file = File(filePath);
+        final expectedMediaName =
+            '${path.withoutExtension(dataSelection.name)}.ntm';
+        final mediaSelection = result.files.cast<PlatformFile?>().firstWhere(
+              (candidate) => candidate?.name == expectedMediaName,
+              orElse: () => null,
+            );
+        selectedMediaFile =
+            mediaSelection?.path == null ? null : File(mediaSelection!.path!);
+      } else {
+        throw Exception(
+          'Select exactly one NativeTavern .ntx combined backup, or one .ntb data backup',
+        );
       }
-      final dataSelection = dataFiles.single;
-      final filePath = dataSelection.path;
-      if (filePath == null) {
-        throw Exception('The selected backup file is not locally accessible');
-      }
-      final file = File(filePath);
-      final expectedMediaName =
-          '${dataSelection.name.substring(0, dataSelection.name.length - 4)}.ntm';
-      final mediaSelection = result.files.cast<PlatformFile?>().firstWhere(
-            (candidate) => candidate?.name == expectedMediaName,
-            orElse: () => null,
-          );
-      final selectedMediaFile =
-          mediaSelection?.path == null ? null : File(mediaSelection!.path!);
 
       state = state.copyWith(
         currentOperation: selectedMediaFile == null

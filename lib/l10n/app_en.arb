@@ -6886,21 +6886,29 @@
   "aiDataSharingSettingsTitle": "Remote AI data sharing",
   "aiDataSharingAllowedDescription": "Allowed for providers and endpoints you configure",
   "aiDataSharingLocalOnlyDescription": "Blocked; local AI endpoints remain available",
-  "localBackup": "Local & File Backup (.ntb)",
+  "localBackup": "Local & File Backup",
   "@localBackup": {
     "description": "Local and file backup section header"
   },
-  "localBackupDescription": "Export and import NativeTavern .ntb backup files to your device storage or files app",
+  "localBackupDescription": "Export and import NativeTavern .ntx combined backups or .ntb data backups to your device storage or files app",
   "@localBackupDescription": {
     "description": "Local backup description"
   },
-  "exportNtbBackup": "Export Backup File (.ntb)",
+  "exportNtbBackup": "Export Data Backup (.ntb)",
   "@exportNtbBackup": {
     "description": "Export NTB backup button"
   },
-  "exportNtbBackupSubtitle": "Save or share full backup to device filesystem",
+  "exportNtbBackupSubtitle": "Save JSON data only; media is stored separately as .ntm",
   "@exportNtbBackupSubtitle": {
     "description": "Export NTB backup subtitle"
+  },
+  "exportNtxBackup": "Export Combined Backup (.ntx)",
+  "@exportNtxBackup": {
+    "description": "Export NTX combined backup button"
+  },
+  "exportNtxBackupSubtitle": "Save app data and media together in one .ntx file",
+  "@exportNtxBackupSubtitle": {
+    "description": "Export NTX backup subtitle"
   },
   "importNtbBackup": "Import Backup File (.ntb)",
   "@importNtbBackup": {
@@ -6909,6 +6917,14 @@
   "importNtbBackupSubtitle": "Restore or merge data from a local .ntb file",
   "@importNtbBackupSubtitle": {
     "description": "Import NTB backup subtitle"
+  },
+  "importNtxBackup": "Import Backup (.ntx / .ntb)",
+  "@importNtxBackup": {
+    "description": "Import NTX or NTB backup button"
+  },
+  "importNtxBackupSubtitle": "Restore or merge data from a combined .ntx file or a .ntb data backup",
+  "@importNtxBackupSubtitle": {
+    "description": "Import NTX backup subtitle"
   },
   "exportToFiles": "Save to Files",
   "@exportToFiles": {
@@ -6929,6 +6945,26 @@
   "selectNtbFileDescription": "Pick the .ntb backup file and optional .ntm media file",
   "@selectNtbFileDescription": {
     "description": "Select NTB file description"
+  },
+  "selectNtxFile": "Select NativeTavern Backup",
+  "@selectNtxFile": {
+    "description": "Select NTX or NTB backup file title"
+  },
+  "selectNtxFileDescription": "Pick a .ntx combined backup, or a .ntb file with optional .ntm media",
+  "@selectNtxFileDescription": {
+    "description": "Select NTX file description"
+  },
+  "backupSavedToFilesApp": "Backup saved to Files",
+  "@backupSavedToFilesApp": {
+    "description": "Snackbar after saving a backup through the system Files app"
+  },
+  "backupSavedToAppFolder": "Could not save to Files. Backup saved to NativeTavern/Backups.",
+  "@backupSavedToAppFolder": {
+    "description": "Snackbar when a backup is stored in the app Backups folder"
+  },
+  "savedToFilesApp": "Saved to Files",
+  "@savedToFilesApp": {
+    "description": "Snackbar after saving an export through the system Files app"
   },
   "importBackupExplanation": "Restore or merge characters, chats, settings, and media from this backup file.",
   "@importBackupExplanation": {

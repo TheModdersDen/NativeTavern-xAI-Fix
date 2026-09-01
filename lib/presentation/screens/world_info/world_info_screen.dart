@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/data/models/world_info.dart';
-import 'package:native_tavern/core/utils/share_utils.dart';
+import 'package:native_tavern/presentation/widgets/export_destination_sheet.dart';
 import 'package:native_tavern/domain/services/world_info_import.dart';
 import 'package:native_tavern/presentation/providers/character_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
@@ -15,8 +15,6 @@ import 'package:native_tavern/presentation/screens/world_info/world_info_entry_e
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 /// Log a message to the console
 void _log(String message, {String? error, StackTrace? stackTrace}) {
@@ -506,22 +504,19 @@ class _WorldInfoCard extends StatelessWidget {
 
   static Future<void> _exportWorldInfo(
       BuildContext context, WorldInfo worldInfo) async {
-    final shareOrigin = sharePositionOrigin(context);
     try {
       final json = worldInfo.toJson();
       final jsonString = const JsonEncoder.withIndent('  ').convert(json);
-
-      final tempDir = await getTemporaryDirectory();
       final fileName =
           '${worldInfo.name.replaceAll(RegExp(r'[^\w\s-]'), '_')}.json';
-      final file = File('${tempDir.path}/$fileName');
-      await file.writeAsString(jsonString);
-
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile(file.path)],
+      await exportTextWithDestination(
+        context: context,
+        fileName: fileName,
+        content: jsonString,
         subject: 'NativeTavern World Info: ${worldInfo.name}',
-        sharePositionOrigin: shareOrigin,
-      ));
+        allowedExtensions: const ['json'],
+        mimeType: 'application/json',
+      );
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);

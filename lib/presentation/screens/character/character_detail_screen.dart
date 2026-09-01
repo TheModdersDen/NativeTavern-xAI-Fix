@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +15,9 @@ import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/common/character_avatar_image.dart';
 import 'package:native_tavern/presentation/widgets/common/adaptive_popup_menu.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
+import 'package:native_tavern/presentation/screens/import/import_screen.dart';
 import 'package:native_tavern/presentation/widgets/chat/chat_import_dialog.dart';
+import 'package:native_tavern/presentation/widgets/export_destination_sheet.dart';
 
 /// Character detail screen
 class CharacterDetailScreen extends ConsumerWidget {
@@ -109,7 +114,6 @@ class _CharacterDetailContentState
   }
 
   Future<void> _handleMenuAction(String action, Character character) async {
-    final l10n = AppLocalizations.of(context);
     switch (action) {
       case 'delete':
         await _confirmDelete(character);
@@ -118,17 +122,43 @@ class _CharacterDetailContentState
         await _duplicateCharacter(character);
         break;
       case 'export':
-        // TODO: Implement PNG export
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.pngExportComingSoon)),
-        );
+        await _exportCharacter(character, asCharx: false);
         break;
       case 'export_charx':
-        // TODO: Implement CharX export
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.charxExportComingSoon)),
-        );
+        await _exportCharacter(character, asCharx: true);
         break;
+    }
+  }
+
+  Future<void> _exportCharacter(Character character,
+      {required bool asCharx}) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final importService = ref.read(importServiceProvider);
+      Uint8List? avatarBytes;
+      final avatarPath = character.assets?.avatarPath;
+      if (avatarPath != null && await File(avatarPath).exists()) {
+        avatarBytes = await File(avatarPath).readAsBytes();
+      }
+      final bytes = asCharx
+          ? await importService.exportToCharX(character, avatarBytes)
+          : await importService.exportToPng(character, avatarBytes);
+      final safeName = character.name.replaceAll(RegExp(r'[^\w\s-]'), '_');
+      final fileName = asCharx ? '$safeName.charx' : '$safeName.png';
+      if (!mounted) return;
+      await exportBytesWithDestination(
+        context: context,
+        fileName: fileName,
+        bytes: bytes,
+        subject: 'NativeTavern Character: ${character.name}',
+        allowedExtensions: [asCharx ? 'charx' : 'png'],
+        mimeType: asCharx ? 'application/zip' : 'image/png',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.exportFailed(e.toString()))),
+      );
     }
   }
 
@@ -993,23 +1023,20 @@ class _CharacterChatList extends ConsumerWidget {
                       final result = await exportService.importFromFile();
                       if (result == null || !context.mounted) return;
 
-                      final createdChat =
-                          await ChatImportResolutionDialog.show(
+                      final createdChat = await ChatImportResolutionDialog.show(
                         context,
                         importResult: result,
                         initialCharacterId: characterId,
                       );
 
                       if (createdChat != null && context.mounted) {
-                        ref.invalidate(
-                            characterChatsProvider(characterId));
+                        ref.invalidate(characterChatsProvider(characterId));
                         ref.invalidate(pagedChatsProvider);
                         ref.invalidate(allChatsProvider);
                         context.push('/chat/${createdChat.id}');
                       }
                     },
-                    icon:
-                        const Icon(Icons.file_upload_outlined, size: 18),
+                    icon: const Icon(Icons.file_upload_outlined, size: 18),
                     label: Text(l10n.importChat),
                   ),
                   TextButton.icon(

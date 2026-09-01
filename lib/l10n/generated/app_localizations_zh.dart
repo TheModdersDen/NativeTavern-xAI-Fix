@@ -6313,23 +6313,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiDataSharingLocalOnlyDescription => '已阻止；本地 AI 端点仍可使用';
 
   @override
-  String get localBackup => '本地与文件备份 (.ntb)';
+  String get localBackup => '本地与文件备份';
 
   @override
   String get localBackupDescription =>
-      '将 NativeTavern .ntb 备份文件导出或导入到设备存储或文件管理器';
+      '将 NativeTavern .ntx 合并备份或 .ntb 数据备份导出或导入到设备存储或文件管理器';
 
   @override
-  String get exportNtbBackup => '导出备份文件 (.ntb)';
+  String get exportNtbBackup => '导出数据备份 (.ntb)';
 
   @override
-  String get exportNtbBackupSubtitle => '保存或分享完整备份至设备文件系统';
+  String get exportNtbBackupSubtitle => '仅保存 JSON 数据；媒体单独存储为 .ntm';
+
+  @override
+  String get exportNtxBackup => '导出合并备份 (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle => '将应用数据和媒体一起保存到一个 .ntx 文件';
 
   @override
   String get importNtbBackup => '导入备份文件 (.ntb)';
 
   @override
   String get importNtbBackupSubtitle => '从本地 .ntb 文件恢复或合并数据';
+
+  @override
+  String get importNtxBackup => '导入备份 (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle => '从合并的 .ntx 文件或 .ntb 数据备份恢复或合并数据';
 
   @override
   String get exportToFiles => '保存到文件';
@@ -6345,6 +6357,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get selectNtbFileDescription => '选择 .ntb 备份文件以及可选的 .ntm 媒体文件';
+
+  @override
+  String get selectNtxFile => '选择 NativeTavern 备份';
+
+  @override
+  String get selectNtxFileDescription => '选择 .ntx 合并备份，或带可选 .ntm 媒体的 .ntb 文件';
+
+  @override
+  String get backupSavedToFilesApp => '备份已保存到文件';
+
+  @override
+  String get backupSavedToAppFolder => '无法保存到文件应用。备份已保存到 NativeTavern/Backups。';
+
+  @override
+  String get savedToFilesApp => '已保存到文件';
 
   @override
   String get importBackupExplanation => '从此备份文件中恢复或合并角色、聊天、设置和媒体文件。';
@@ -12666,23 +12693,35 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get aiDataSharingLocalOnlyDescription => '已封鎖；本機 AI 端點仍可使用';
 
   @override
-  String get localBackup => '本地與檔案備份 (.ntb)';
+  String get localBackup => '本地與檔案備份';
 
   @override
   String get localBackupDescription =>
-      '將 NativeTavern .ntb 備份檔案匯出或匯入至裝置儲存空間或檔案管理器';
+      '將 NativeTavern .ntx 合併備份或 .ntb 資料備份匯出或匯入至裝置儲存空間或檔案管理器';
 
   @override
-  String get exportNtbBackup => '匯出備份檔案 (.ntb)';
+  String get exportNtbBackup => '匯出資料備份 (.ntb)';
 
   @override
-  String get exportNtbBackupSubtitle => '儲存或分享完整備份至裝置檔案系統';
+  String get exportNtbBackupSubtitle => '僅儲存 JSON 資料；媒體另外儲存為 .ntm';
+
+  @override
+  String get exportNtxBackup => '匯出合併備份 (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle => '將應用程式資料與媒體一併儲存到單一 .ntx 檔案';
 
   @override
   String get importNtbBackup => '匯入備份檔案 (.ntb)';
 
   @override
   String get importNtbBackupSubtitle => '從本機 .ntb 檔案還原或合併資料';
+
+  @override
+  String get importNtxBackup => '匯入備份 (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle => '從合併的 .ntx 檔案或 .ntb 資料備份還原或合併資料';
 
   @override
   String get exportToFiles => '儲存到檔案';
@@ -12698,6 +12737,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get selectNtbFileDescription => '選擇 .ntb 備份檔案及可選的 .ntm 媒體檔案';
+
+  @override
+  String get selectNtxFile => '選擇 NativeTavern 備份';
+
+  @override
+  String get selectNtxFileDescription => '選擇 .ntx 合併備份，或含可選 .ntm 媒體的 .ntb 檔案';
+
+  @override
+  String get backupSavedToFilesApp => '備份已儲存到檔案';
+
+  @override
+  String get backupSavedToAppFolder =>
+      '無法儲存到檔案 App。備份已儲存到 NativeTavern/Backups。';
+
+  @override
+  String get savedToFilesApp => '已儲存到檔案';
 
   @override
   String get importBackupExplanation => '從此備份檔案中還原或合併角色、聊天、設定及媒體檔案。';

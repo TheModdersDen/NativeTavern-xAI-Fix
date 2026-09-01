@@ -6541,23 +6541,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiDataSharingLocalOnlyDescription => 'ブロック中。ローカル AI は利用できます';
 
   @override
-  String get localBackup => 'ローカル・ファイルバックアップ (.ntb)';
+  String get localBackup => 'ローカル・ファイルバックアップ';
 
   @override
   String get localBackupDescription =>
-      'NativeTavern .ntb バックアップファイルをデバイスやファイルアプリにエクスポート/インポートします';
+      'NativeTavern の .ntx 結合バックアップまたは .ntb データバックアップをデバイスやファイルアプリにエクスポート/インポートします';
 
   @override
-  String get exportNtbBackup => 'バックアップファイルをエクスポート (.ntb)';
+  String get exportNtbBackup => 'データバックアップをエクスポート (.ntb)';
 
   @override
-  String get exportNtbBackupSubtitle => '完全バックアップをデバイスのファイルシステムに保存または共有';
+  String get exportNtbBackupSubtitle =>
+      'JSON データのみ保存します。メディアは .ntm として別に保存されます';
+
+  @override
+  String get exportNtxBackup => '結合バックアップをエクスポート (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle => 'アプリデータとメディアを 1 つの .ntx ファイルに保存します';
 
   @override
   String get importNtbBackup => 'バックアップファイルをインポート (.ntb)';
 
   @override
   String get importNtbBackupSubtitle => 'ローカルの .ntb ファイルからデータを復元または統合';
+
+  @override
+  String get importNtxBackup => 'バックアップをインポート (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle =>
+      '結合 .ntx ファイルまたは .ntb データバックアップから復元または統合します';
 
   @override
   String get exportToFiles => 'ファイルに保存';
@@ -6574,6 +6588,23 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get selectNtbFileDescription =>
       '.ntb バックアップファイルと対応する .ntm メディアファイルを選択';
+
+  @override
+  String get selectNtxFile => 'NativeTavern バックアップを選択';
+
+  @override
+  String get selectNtxFileDescription =>
+      '.ntx 結合バックアップ、または任意の .ntm メディア付き .ntb ファイルを選択';
+
+  @override
+  String get backupSavedToFilesApp => 'バックアップをファイルに保存しました';
+
+  @override
+  String get backupSavedToAppFolder =>
+      'ファイルアプリに保存できませんでした。NativeTavern/Backups に保存しました。';
+
+  @override
+  String get savedToFilesApp => 'ファイルに保存しました';
 
   @override
   String get importBackupExplanation =>

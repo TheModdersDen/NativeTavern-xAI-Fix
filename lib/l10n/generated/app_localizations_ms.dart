@@ -6556,18 +6556,25 @@ class AppLocalizationsMs extends AppLocalizations {
       'Disekat; AI setempat kekal tersedia';
 
   @override
-  String get localBackup => 'Local & File Backup (.ntb)';
+  String get localBackup => 'Local & File Backup';
 
   @override
   String get localBackupDescription =>
-      'Export and import NativeTavern .ntb backup files to your device storage or files app';
+      'Export and import NativeTavern .ntx combined backups or .ntb data backups to your device storage or files app';
 
   @override
-  String get exportNtbBackup => 'Export Backup File (.ntb)';
+  String get exportNtbBackup => 'Export Data Backup (.ntb)';
 
   @override
   String get exportNtbBackupSubtitle =>
-      'Save or share full backup to device filesystem';
+      'Save JSON data only; media is stored separately as .ntm';
+
+  @override
+  String get exportNtxBackup => 'Export Combined Backup (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle =>
+      'Save app data and media together in one .ntx file';
 
   @override
   String get importNtbBackup => 'Import Backup File (.ntb)';
@@ -6575,6 +6582,13 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get importNtbBackupSubtitle =>
       'Restore or merge data from a local .ntb file';
+
+  @override
+  String get importNtxBackup => 'Import Backup (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle =>
+      'Restore or merge data from a combined .ntx file or a .ntb data backup';
 
   @override
   String get exportToFiles => 'Save to Files';
@@ -6591,6 +6605,23 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get selectNtbFileDescription =>
       'Pick the .ntb backup file and optional .ntm media file';
+
+  @override
+  String get selectNtxFile => 'Select NativeTavern Backup';
+
+  @override
+  String get selectNtxFileDescription =>
+      'Pick a .ntx combined backup, or a .ntb file with optional .ntm media';
+
+  @override
+  String get backupSavedToFilesApp => 'Backup saved to Files';
+
+  @override
+  String get backupSavedToAppFolder =>
+      'Could not save to Files. Backup saved to NativeTavern/Backups.';
+
+  @override
+  String get savedToFilesApp => 'Saved to Files';
 
   @override
   String get importBackupExplanation =>

@@ -6558,18 +6558,25 @@ class AppLocalizationsEs extends AppLocalizations {
       'Bloqueado; la IA local sigue disponible';
 
   @override
-  String get localBackup => 'Copia de seguridad local (.ntb)';
+  String get localBackup => 'Copia de seguridad local';
 
   @override
   String get localBackupDescription =>
-      'Exportar e importar copias de seguridad .ntb de NativeTavern';
+      'Exportar e importar copias combinadas .ntx o copias de datos .ntb de NativeTavern';
 
   @override
-  String get exportNtbBackup => 'Exportar copia de seguridad (.ntb)';
+  String get exportNtbBackup => 'Exportar copia de datos (.ntb)';
 
   @override
   String get exportNtbBackupSubtitle =>
-      'Guardar o compartir copia de seguridad en el sistema de archivos';
+      'Guardar solo datos JSON; los medios se almacenan aparte como .ntm';
+
+  @override
+  String get exportNtxBackup => 'Exportar copia combinada (.ntx)';
+
+  @override
+  String get exportNtxBackupSubtitle =>
+      'Guardar datos de la app y medios juntos en un archivo .ntx';
 
   @override
   String get importNtbBackup => 'Importar copia de seguridad (.ntb)';
@@ -6577,6 +6584,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get importNtbBackupSubtitle =>
       'Restaurar o fusionar datos desde un archivo .ntb local';
+
+  @override
+  String get importNtxBackup => 'Importar copia (.ntx / .ntb)';
+
+  @override
+  String get importNtxBackupSubtitle =>
+      'Restaurar o fusionar desde un archivo .ntx combinado o una copia .ntb';
 
   @override
   String get exportToFiles => 'Guardar en Archivos';
@@ -6593,6 +6607,23 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get selectNtbFileDescription =>
       'Seleccione el archivo .ntb y el archivo .ntm opcional';
+
+  @override
+  String get selectNtxFile => 'Seleccionar copia de NativeTavern';
+
+  @override
+  String get selectNtxFileDescription =>
+      'Elija una copia combinada .ntx, o un archivo .ntb con medios .ntm opcionales';
+
+  @override
+  String get backupSavedToFilesApp => 'Copia guardada en Archivos';
+
+  @override
+  String get backupSavedToAppFolder =>
+      'No se pudo guardar en Archivos. Copia guardada en NativeTavern/Backups.';
+
+  @override
+  String get savedToFilesApp => 'Guardado en Archivos';
 
   @override
   String get importBackupExplanation =>

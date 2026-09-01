@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:path_provider/path_provider.dart';
 import 'package:native_tavern/data/models/chat.dart';
@@ -150,13 +151,16 @@ class ChatExportService {
     final result = await FilePicker.platform.saveFile(
       dialogTitle: 'Save Chat Export',
       fileName: fileName,
+      bytes: Uint8List.fromList(utf8.encode(content)),
       type: FileType.custom,
       allowedExtensions: [extension],
     );
 
     if (result != null) {
       final file = File(result);
-      await file.writeAsString(content);
+      if (!await file.exists() || await file.length() == 0) {
+        await file.writeAsString(content);
+      }
       return result;
     }
 

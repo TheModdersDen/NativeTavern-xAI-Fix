@@ -14,7 +14,7 @@ import 'package:native_tavern/data/models/chat_background.dart';
 import 'package:native_tavern/data/models/live2d.dart';
 import 'package:native_tavern/data/models/rpg/rpg.dart';
 import 'package:native_tavern/core/flags/rpg_product_ui.dart';
-import 'package:native_tavern/core/utils/share_utils.dart';
+import 'package:native_tavern/presentation/widgets/export_destination_sheet.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
@@ -3003,13 +3003,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         AppLocalizations.of(context).user;
 
     try {
-      await exportService.exportAndShare(
-        chatState.chat!,
-        chatState.messages,
-        chatState.character!,
-        userName: userName,
-        useJsonl: useJsonl,
-        sharePositionOrigin: sharePositionOrigin(context),
+      final content = useJsonl
+          ? await exportService.exportToJsonl(
+              chatState.chat!,
+              chatState.messages,
+              chatState.character!,
+              userName: userName,
+            )
+          : await exportService.exportToJson(
+              chatState.chat!,
+              chatState.messages,
+              chatState.character!,
+              userName: userName,
+            );
+      final extension = useJsonl ? 'jsonl' : 'json';
+      final fileName =
+          '${chatState.character!.name}_${chatState.chat!.id}.$extension';
+      if (!mounted) return;
+      await exportTextWithDestination(
+        context: context,
+        fileName: fileName,
+        content: content,
+        subject: 'Chat with ${chatState.character!.name}',
+        allowedExtensions: [extension],
+        mimeType: 'application/json',
       );
     } catch (e) {
       final l10n = AppLocalizations.of(context);
