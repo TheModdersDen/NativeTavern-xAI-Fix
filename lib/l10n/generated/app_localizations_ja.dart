@@ -6539,4 +6539,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiDataSharingLocalOnlyDescription => 'ブロック中。ローカル AI は利用できます';
+
+  @override
+  String get localBackup => 'ローカル・ファイルバックアップ (.ntb)';
+
+  @override
+  String get localBackupDescription =>
+      'NativeTavern .ntb バックアップファイルをデバイスやファイルアプリにエクスポート/インポートします';
+
+  @override
+  String get exportNtbBackup => 'バックアップファイルをエクスポート (.ntb)';
+
+  @override
+  String get exportNtbBackupSubtitle => '完全バックアップをデバイスのファイルシステムに保存または共有';
+
+  @override
+  String get importNtbBackup => 'バックアップファイルをインポート (.ntb)';
+
+  @override
+  String get importNtbBackupSubtitle => 'ローカルの .ntb ファイルからデータを復元または統合';
+
+  @override
+  String get exportToFiles => 'ファイルに保存';
+
+  @override
+  String get shareBackup => 'バックアップを共有';
+
+  @override
+  String get exportOptions => 'エクスポート設定';
+
+  @override
+  String get selectNtbFile => 'NativeTavern バックアップ (.ntb) を選択';
+
+  @override
+  String get selectNtbFileDescription =>
+      '.ntb バックアップファイルと対応する .ntm メディアファイルを選択';
+
+  @override
+  String get importBackupExplanation =>
+      'このバックアップファイルからキャラクター、チャット、設定、メディアを復元または統合します。';
+
+  @override
+  String get restoringBackup => 'バックアップを復元中...';
+
+  @override
+  String get exportingBackup => 'バックアップをエクスポート中...';
 }

@@ -95,6 +95,27 @@ class ImportService {
     return _parseCharacterJson(data);
   }
 
+  /// Import characters from a NativeTavern .ntb backup JSON string
+  Future<List<Character>> importCharactersFromNtb(String json) async {
+    final data = jsonDecode(json) as Map<String, dynamic>;
+    if (data['app'] != 'NativeTavern') {
+      throw Exception('Invalid backup file: not a NativeTavern backup');
+    }
+    final backupData = data['data'] as Map<String, dynamic>? ?? data;
+    final charactersMap = backupData['characters'];
+    final characters = <Character>[];
+    if (charactersMap is Map) {
+      for (final entry in charactersMap.values) {
+        if (entry is Map<String, dynamic>) {
+          try {
+            characters.add(_parseCharacterJson(entry));
+          } catch (_) {}
+        }
+      }
+    }
+    return characters;
+  }
+
   /// Creates a playable character bound to an already-imported Live2D model.
   Future<Character> createCharacterFromLive2D({
     required Live2DModelDefinition definition,

@@ -11642,6 +11642,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Blocked; local AI endpoints remain available'**
   String get aiDataSharingLocalOnlyDescription;
+
+  /// Local and file backup section header
+  ///
+  /// In en, this message translates to:
+  /// **'Local & File Backup (.ntb)'**
+  String get localBackup;
+
+  /// Local backup description
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import NativeTavern .ntb backup files to your device storage or files app'**
+  String get localBackupDescription;
+
+  /// Export NTB backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Export Backup File (.ntb)'**
+  String get exportNtbBackup;
+
+  /// Export NTB backup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Save or share full backup to device filesystem'**
+  String get exportNtbBackupSubtitle;
+
+  /// Import NTB backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Import Backup File (.ntb)'**
+  String get importNtbBackup;
+
+  /// Import NTB backup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Restore or merge data from a local .ntb file'**
+  String get importNtbBackupSubtitle;
+
+  /// Save to files action button
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Files'**
+  String get exportToFiles;
+
+  /// Share backup action button
+  ///
+  /// In en, this message translates to:
+  /// **'Share Backup'**
+  String get shareBackup;
+
+  /// Export options modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Export Options'**
+  String get exportOptions;
+
+  /// Select NTB file title
+  ///
+  /// In en, this message translates to:
+  /// **'Select NativeTavern Backup (.ntb)'**
+  String get selectNtbFile;
+
+  /// Select NTB file description
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the .ntb backup file and optional .ntm media file'**
+  String get selectNtbFileDescription;
+
+  /// Explanation shown before importing a backup
+  ///
+  /// In en, this message translates to:
+  /// **'Restore or merge characters, chats, settings, and media from this backup file.'**
+  String get importBackupExplanation;
+
+  /// Status text while restoring backup
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring backup...'**
+  String get restoringBackup;
+
+  /// Status text while exporting backup
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting backup...'**
+  String get exportingBackup;
 }
 
 class _AppLocalizationsDelegate

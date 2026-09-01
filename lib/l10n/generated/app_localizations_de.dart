@@ -6556,4 +6556,51 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get aiDataSharingLocalOnlyDescription =>
       'Blockiert; lokale KI bleibt verfügbar';
+
+  @override
+  String get localBackup => 'Lokales & Datei-Backup (.ntb)';
+
+  @override
+  String get localBackupDescription =>
+      'NativeTavern .ntb Sicherungsdateien exportieren und importieren';
+
+  @override
+  String get exportNtbBackup => 'Backup-Datei exportieren (.ntb)';
+
+  @override
+  String get exportNtbBackupSubtitle =>
+      'Vollständiges Backup im Dateisystem speichern oder teilen';
+
+  @override
+  String get importNtbBackup => 'Backup-Datei importieren (.ntb)';
+
+  @override
+  String get importNtbBackupSubtitle =>
+      'Daten aus lokaler .ntb Datei wiederherstellen oder zusammenführen';
+
+  @override
+  String get exportToFiles => 'In Dateien speichern';
+
+  @override
+  String get shareBackup => 'Backup teilen';
+
+  @override
+  String get exportOptions => 'Export-Optionen';
+
+  @override
+  String get selectNtbFile => 'NativeTavern Backup (.ntb) auswählen';
+
+  @override
+  String get selectNtbFileDescription =>
+      'Wählen Sie die .ntb Datei und optionale .ntm Mediendatei';
+
+  @override
+  String get importBackupExplanation =>
+      'Stellt Charaktere, Chats, Einstellungen und Medien aus diesem Backup wieder her.';
+
+  @override
+  String get restoringBackup => 'Backup wird wiederhergestellt...';
+
+  @override
+  String get exportingBackup => 'Backup wird exportiert...';
 }

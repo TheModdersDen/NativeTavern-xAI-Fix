@@ -23,6 +23,7 @@ import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/l10n/generated/app_localizations.dart';
+import 'package:native_tavern/presentation/router/app_router.dart';
 
 /// Import service provider
 final importServiceProvider = Provider<ImportService>((ref) {
@@ -129,7 +130,17 @@ class ImportNotifier extends StateNotifier<ImportState> {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['png', 'charx', 'json', 'zip', 'skel', 'atlas'],
+        allowedExtensions: [
+          'png',
+          'charx',
+          'json',
+          'jsonl',
+          'zip',
+          'skel',
+          'atlas',
+          'ntb',
+          'ntm',
+        ],
         allowMultiple: true, // Enable batch import
       );
 
@@ -245,6 +256,24 @@ class ImportNotifier extends StateNotifier<ImportState> {
             character = await _importLive2DAsCharacter(
               () => _live2dImportService.importSpineFiles([File(path)]),
             );
+            break;
+          case 'ntb':
+            final file = File(path);
+            final json = await file.readAsString();
+            final ntbChars =
+                await _importService.importCharactersFromNtb(json);
+            if (ntbChars.isNotEmpty) {
+              character = ntbChars.first;
+              final baseName = p.basename(path);
+              for (int cIdx = 1; cIdx < ntbChars.length; cIdx++) {
+                results.add(ImportResult(
+                  fileName: '${ntbChars[cIdx].name} ($baseName)',
+                  filePath: path,
+                  character: ntbChars[cIdx],
+                  isProcessing: false,
+                ));
+              }
+            }
             break;
           default:
             throw Exception('Unsupported file format: $extension');
@@ -708,6 +737,14 @@ class _FilePickerViewState extends State<_FilePickerView> {
                           label:
                               Text(AppLocalizations.of(context)!.browseFiles),
                         ),
+                      const SizedBox(height: 12),
+                      TextButton.icon(
+                        onPressed: () =>
+                            context.push(AppRoutes.cloudBackupSettings),
+                        icon: const Icon(Icons.backup_outlined, size: 18),
+                        label: Text(
+                            AppLocalizations.of(context)!.importNtbBackup),
+                      ),
                     ],
                   ],
                 ),

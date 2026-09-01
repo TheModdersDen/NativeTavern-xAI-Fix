@@ -1,7 +1,8 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:native_tavern/domain/services/cloud_backup_service.dart';
@@ -571,37 +572,81 @@ class CloudBackupOperationNotifier
     }
   }
 
-  /// Export backup to file (for Google Drive)
-  Future<File?> exportToFile(Map<String, dynamic> data) async {
+  /// Export backup to local file (.ntb and optional .ntm)
+  Future<File?> exportBackupToFile({
+    required Map<String, dynamic> data,
+    CloudBackupOptions? options,
+  }) async {
     state = state.copyWith(
       isLoading: true,
-      currentOperation: 'Creating backup file...',
+      currentOperation: 'Creating backup files...',
       status: CloudBackupStatus.uploading,
       error: null,
     );
 
     try {
-      final file = await _service.exportForGoogleDrive(data: data);
+      final opts =
+          options ?? _ref.read(cloudBackupSettingsProvider).backupOptions;
+      final artifacts = await _service.exportLocalBackupArtifacts(
+        data: data,
+        options: opts,
+        onProgress: (progress) {
+          final progressValue = switch (progress.stage) {
+            CloudBackupArtifactStage.scanningMedia => 0.15,
+            CloudBackupArtifactStage.compressingMedia =>
+              progress.totalFiles != null && progress.totalFiles! > 0
+                  ? 0.2 +
+                      (0.5 *
+                          (progress.processedFiles / progress.totalFiles!))
+                  : 0.45,
+            CloudBackupArtifactStage.writingData => 0.85,
+          };
+          state = state.copyWith(
+            currentOperation: switch (progress.stage) {
+              CloudBackupArtifactStage.scanningMedia =>
+                'Scanning media files...',
+              CloudBackupArtifactStage.compressingMedia =>
+                'Compressing media (${progress.processedFiles}/${progress.totalFiles ?? '?'})...',
+              CloudBackupArtifactStage.writingData => 'Writing backup file...',
+            },
+            progress: progressValue,
+          );
+        },
+      );
 
-      // Let user pick destination
+      // Save data file (.ntb)
+      final ntbName = artifacts.dataFile.uri.pathSegments.last;
       final result = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save backup to Google Drive or other location',
-        fileName: file.uri.pathSegments.last,
-        type: FileType.any,
+        dialogTitle: 'Save NativeTavern Backup (.ntb)',
+        fileName: ntbName,
+        type: FileType.custom,
+        allowedExtensions: const ['ntb'],
       );
 
       if (result != null) {
-        final destFile = await file.copy(result);
+        final destFile = await artifacts.dataFile.copy(result);
+
+        // If media sidecar was also generated, save it next to the .ntb if possible
+        if (artifacts.mediaFile != null &&
+            await artifacts.mediaFile!.exists()) {
+          final destDir = destFile.parent;
+          final ntmName = artifacts.mediaFile!.uri.pathSegments.last;
+          try {
+            final destMedia = File('${destDir.path}/$ntmName');
+            await artifacts.mediaFile!.copy(destMedia.path);
+          } catch (mediaCopyErr) {
+            debugPrint(
+                '[CloudBackup] Could not auto-save .ntm sidecar: $mediaCopyErr');
+          }
+        }
 
         state = state.copyWith(
           isLoading: false,
           currentOperation: null,
+          progress: null,
           status: CloudBackupStatus.success,
+          warning: _service.lastMediaWarning,
         );
-
-        _ref
-            .read(cloudBackupSettingsProvider.notifier)
-            .updateLastGoogleDriveSync();
 
         return destFile;
       }
@@ -609,16 +654,18 @@ class CloudBackupOperationNotifier
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
+        progress: null,
         status: CloudBackupStatus.idle,
       );
 
       return null;
     } catch (e, stackTrace) {
-      debugPrint('[CloudBackup] exportToFile error: $e');
+      debugPrint('[CloudBackup] exportBackupToFile error: $e');
       debugPrint('[CloudBackup] Stack trace: $stackTrace');
       state = state.copyWith(
         isLoading: false,
         currentOperation: null,
+        progress: null,
         error: e.toString(),
         status: CloudBackupStatus.error,
       );
@@ -626,7 +673,179 @@ class CloudBackupOperationNotifier
     }
   }
 
-  /// Import backup from file (for Google Drive)
+  /// Share backup (.ntb and optional .ntm) via native share sheet
+  Future<bool> shareBackup({
+    required Map<String, dynamic> data,
+    CloudBackupOptions? options,
+    Rect? sharePositionOrigin,
+  }) async {
+    state = state.copyWith(
+      isLoading: true,
+      currentOperation: 'Preparing backup to share...',
+      status: CloudBackupStatus.uploading,
+      error: null,
+    );
+
+    try {
+      final opts =
+          options ?? _ref.read(cloudBackupSettingsProvider).backupOptions;
+      final artifacts = await _service.exportLocalBackupArtifacts(
+        data: data,
+        options: opts,
+        onProgress: (progress) {
+          state = state.copyWith(
+            currentOperation: switch (progress.stage) {
+              CloudBackupArtifactStage.scanningMedia =>
+                'Scanning media files...',
+              CloudBackupArtifactStage.compressingMedia =>
+                'Compressing media (${progress.processedFiles}/${progress.totalFiles ?? '?'})...',
+              CloudBackupArtifactStage.writingData => 'Writing backup file...',
+            },
+          );
+        },
+      );
+
+      final filesToShare = <XFile>[
+        XFile(
+          artifacts.dataFile.path,
+          mimeType: 'application/octet-stream',
+          name: artifacts.dataFile.uri.pathSegments.last,
+        ),
+      ];
+
+      if (artifacts.mediaFile != null &&
+          await artifacts.mediaFile!.exists()) {
+        filesToShare.add(
+          XFile(
+            artifacts.mediaFile!.path,
+            mimeType: 'application/zip',
+            name: artifacts.mediaFile!.uri.pathSegments.last,
+          ),
+        );
+      }
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: filesToShare,
+          subject: 'NativeTavern Backup',
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+
+      state = state.copyWith(
+        isLoading: false,
+        currentOperation: null,
+        progress: null,
+        status: CloudBackupStatus.success,
+        warning: _service.lastMediaWarning,
+      );
+
+      return true;
+    } catch (e, stackTrace) {
+      debugPrint('[CloudBackup] shareBackup error: $e');
+      debugPrint('[CloudBackup] Stack trace: $stackTrace');
+      state = state.copyWith(
+        isLoading: false,
+        currentOperation: null,
+        progress: null,
+        error: e.toString(),
+        status: CloudBackupStatus.error,
+      );
+      return false;
+    }
+  }
+
+  /// Import backup directly from specific local file path(s)
+  Future<MergeResult?> importFromPath({
+    required String filePath,
+    String? mediaPath,
+    required RestoreMode mode,
+    required Map<String, dynamic> localData,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
+  }) async {
+    state = state.copyWith(
+      isLoading: true,
+      currentOperation: 'Reading backup file...',
+      status: CloudBackupStatus.downloading,
+      error: null,
+    );
+
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        throw Exception('Backup file does not exist: $filePath');
+      }
+
+      File? mediaFile = mediaPath != null ? File(mediaPath) : null;
+      if (mediaFile == null || !await mediaFile.exists()) {
+        // Look for matching .ntm in the same directory
+        final ntmCandidate =
+            '${filePath.substring(0, filePath.length - 4)}.ntm';
+        final candidateFile = File(ntmCandidate);
+        if (await candidateFile.exists()) {
+          mediaFile = candidateFile;
+        }
+      }
+
+      state = state.copyWith(
+        currentOperation: mediaFile != null
+            ? 'Reading data and restoring media...'
+            : 'Reading data backup...',
+        progress: 0.3,
+      );
+
+      final backupData = await _service.importFromFile(
+        file,
+        mediaFile: mediaFile,
+      );
+
+      state = state.copyWith(
+        currentOperation: 'Restoring data...',
+        progress: 0.6,
+      );
+
+      final mergeResult = await _service.mergeData(
+        backupData: backupData,
+        localData: localData,
+        mode: mode,
+      );
+
+      await restoreCallback(backupData, mode);
+
+      state = state.copyWith(
+        isLoading: false,
+        currentOperation: null,
+        progress: null,
+        status: CloudBackupStatus.success,
+        warning: (backupData['_mediaRestoreWarning'] ??
+            backupData['_textRestoreWarning']) as String?,
+        mediaIncluded: backupData['media'] is Map,
+        mediaRestoredFiles: backupData['_mediaRestoredFiles'] as int?,
+        mediaCategories: _mediaCategoriesFromBackup(backupData),
+      );
+
+      return mergeResult;
+    } catch (e, stackTrace) {
+      debugPrint('[CloudBackup] importFromPath error: $e');
+      debugPrint('[CloudBackup] Stack trace: $stackTrace');
+      state = state.copyWith(
+        isLoading: false,
+        currentOperation: null,
+        progress: null,
+        error: e.toString(),
+        status: CloudBackupStatus.error,
+      );
+      return null;
+    }
+  }
+
+  /// Export backup to file (for Google Drive)
+  Future<File?> exportToFile(Map<String, dynamic> data) async {
+    return exportBackupToFile(data: data);
+  }
+
+  /// Import backup from file (for Google Drive or local storage)
   Future<MergeResult?> importFromFile({
     required RestoreMode mode,
     required Map<String, dynamic> localData,

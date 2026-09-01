@@ -6311,6 +6311,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiDataSharingLocalOnlyDescription => '已阻止；本地 AI 端点仍可使用';
+
+  @override
+  String get localBackup => '本地与文件备份 (.ntb)';
+
+  @override
+  String get localBackupDescription =>
+      '将 NativeTavern .ntb 备份文件导出或导入到设备存储或文件管理器';
+
+  @override
+  String get exportNtbBackup => '导出备份文件 (.ntb)';
+
+  @override
+  String get exportNtbBackupSubtitle => '保存或分享完整备份至设备文件系统';
+
+  @override
+  String get importNtbBackup => '导入备份文件 (.ntb)';
+
+  @override
+  String get importNtbBackupSubtitle => '从本地 .ntb 文件恢复或合并数据';
+
+  @override
+  String get exportToFiles => '保存到文件';
+
+  @override
+  String get shareBackup => '分享备份';
+
+  @override
+  String get exportOptions => '导出选项';
+
+  @override
+  String get selectNtbFile => '选择 NativeTavern 备份 (.ntb)';
+
+  @override
+  String get selectNtbFileDescription => '选择 .ntb 备份文件以及可选的 .ntm 媒体文件';
+
+  @override
+  String get importBackupExplanation => '从此备份文件中恢复或合并角色、聊天、设置和媒体文件。';
+
+  @override
+  String get restoringBackup => '正在恢复备份...';
+
+  @override
+  String get exportingBackup => '正在导出备份...';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -12621,4 +12664,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get aiDataSharingLocalOnlyDescription => '已封鎖；本機 AI 端點仍可使用';
+
+  @override
+  String get localBackup => '本地與檔案備份 (.ntb)';
+
+  @override
+  String get localBackupDescription =>
+      '將 NativeTavern .ntb 備份檔案匯出或匯入至裝置儲存空間或檔案管理器';
+
+  @override
+  String get exportNtbBackup => '匯出備份檔案 (.ntb)';
+
+  @override
+  String get exportNtbBackupSubtitle => '儲存或分享完整備份至裝置檔案系統';
+
+  @override
+  String get importNtbBackup => '匯入備份檔案 (.ntb)';
+
+  @override
+  String get importNtbBackupSubtitle => '從本機 .ntb 檔案還原或合併資料';
+
+  @override
+  String get exportToFiles => '儲存到檔案';
+
+  @override
+  String get shareBackup => '分享備份';
+
+  @override
+  String get exportOptions => '匯出選項';
+
+  @override
+  String get selectNtbFile => '選擇 NativeTavern 備份 (.ntb)';
+
+  @override
+  String get selectNtbFileDescription => '選擇 .ntb 備份檔案及可選的 .ntm 媒體檔案';
+
+  @override
+  String get importBackupExplanation => '從此備份檔案中還原或合併角色、聊天、設定及媒體檔案。';
+
+  @override
+  String get restoringBackup => '正在還原備份...';
+
+  @override
+  String get exportingBackup => '正在匯出備份...';
 }

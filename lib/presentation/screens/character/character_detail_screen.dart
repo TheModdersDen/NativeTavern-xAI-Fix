@@ -966,18 +966,26 @@ class _CharacterChatList extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-              child: Row(
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
                 children: [
-                  const Icon(Icons.forum_outlined,
-                      size: 20, color: AppTheme.primaryColor),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.chats,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppTheme.primaryColor,
-                          ),
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.forum_outlined,
+                          size: 20, color: AppTheme.primaryColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.chats,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
+                      ),
+                    ],
                   ),
                   TextButton.icon(
                     onPressed: () async {
@@ -985,20 +993,23 @@ class _CharacterChatList extends ConsumerWidget {
                       final result = await exportService.importFromFile();
                       if (result == null || !context.mounted) return;
 
-                      final createdChat = await ChatImportResolutionDialog.show(
+                      final createdChat =
+                          await ChatImportResolutionDialog.show(
                         context,
                         importResult: result,
                         initialCharacterId: characterId,
                       );
 
                       if (createdChat != null && context.mounted) {
-                        ref.invalidate(characterChatsProvider(characterId));
+                        ref.invalidate(
+                            characterChatsProvider(characterId));
                         ref.invalidate(pagedChatsProvider);
                         ref.invalidate(allChatsProvider);
                         context.push('/chat/${createdChat.id}');
                       }
                     },
-                    icon: const Icon(Icons.file_upload_outlined, size: 18),
+                    icon:
+                        const Icon(Icons.file_upload_outlined, size: 18),
                     label: Text(l10n.importChat),
                   ),
                   TextButton.icon(

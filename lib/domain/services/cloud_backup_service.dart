@@ -1069,6 +1069,20 @@ class CloudBackupService {
     return artifacts.dataFile;
   }
 
+  /// Create local backup artifacts (.ntb and optional .ntm) for saving or sharing
+  Future<CloudBackupArtifacts> exportLocalBackupArtifacts({
+    required Map<String, dynamic> data,
+    CloudBackupOptions options = const CloudBackupOptions(),
+    void Function(CloudBackupArtifactProgress progress)? onProgress,
+  }) async {
+    return createCloudBackupArtifacts(
+      data: data,
+      provider: CloudProvider.googleDrive,
+      options: options,
+      onProgress: onProgress,
+    );
+  }
+
   /// Import backup from file (for Google Drive)
   Future<Map<String, dynamic>> importFromFile(
     File file, {

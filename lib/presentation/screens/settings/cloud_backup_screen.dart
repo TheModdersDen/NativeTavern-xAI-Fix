@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/core/services/initialization_service.dart';
+import 'package:native_tavern/core/utils/share_utils.dart';
 import 'package:native_tavern/domain/services/cloud_backup_service.dart';
 import 'package:native_tavern/domain/services/database_backup_service.dart';
 import 'package:native_tavern/domain/services/google_drive_service.dart';
@@ -145,6 +146,48 @@ class CloudBackupScreen extends ConsumerWidget {
                       leading: const Icon(Icons.link_outlined),
                       title: Text(l10n.independentMediaBackup),
                       subtitle: Text(l10n.independentMediaBackupDescription),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Local & File Backup section (.ntb)
+                _buildSection(
+                  context: context,
+                  title: l10n.localBackup,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.folder_zip_outlined,
+                          color: AppTheme.accentColor),
+                      title: Text(l10n.exportNtbBackup),
+                      subtitle: Text(l10n.exportNtbBackupSubtitle),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.save_alt),
+                            tooltip: l10n.exportToFiles,
+                            onPressed: () => _exportBackupToFile(context, ref),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.share),
+                            tooltip: l10n.shareBackup,
+                            onPressed: () => _shareBackup(context, ref),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.file_open_outlined,
+                          color: Colors.teal),
+                      title: Text(l10n.importNtbBackup),
+                      subtitle: Text(l10n.importNtbBackupSubtitle),
+                      trailing: ElevatedButton.icon(
+                        icon: const Icon(Icons.file_open, size: 18),
+                        label: Text(l10n.import_action),
+                        onPressed: () => _importFromFile(context, ref),
+                      ),
                     ),
                   ],
                 ),
@@ -772,6 +815,98 @@ class CloudBackupScreen extends ConsumerWidget {
             child: Text(l10n.delete),
           ),
         ],
+      ),
+    );
+  }
+
+  void _exportBackupToFile(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final db = ref.read(databaseProvider);
+    final dbBackupService = DatabaseBackupService(db);
+    final localData = await dbBackupService.exportAllData();
+
+    final result = await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .exportBackupToFile(data: localData);
+
+    if (result != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupExported)),
+      );
+    }
+  }
+
+  void _shareBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final origin = sharePositionOrigin(context);
+    final db = ref.read(databaseProvider);
+    final dbBackupService = DatabaseBackupService(db);
+    final localData = await dbBackupService.exportAllData();
+
+    final success = await ref
+        .read(cloudBackupOperationProvider.notifier)
+        .shareBackup(data: localData, sharePositionOrigin: origin);
+
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupExported)),
+      );
+    }
+  }
+
+  void _importFromFile(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.read(cloudBackupSettingsProvider);
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => _RestoreDialog(
+        backup: CloudBackupInfo(
+          id: 'local_file',
+          name: l10n.importNtbBackup,
+          size: 0,
+          createdAt: DateTime.now(),
+          provider: CloudProvider.googleDrive,
+        ),
+        defaultMode: settings.defaultRestoreMode,
+        onRestore: (mode) async {
+          Navigator.pop(context);
+
+          final db = ref.read(databaseProvider);
+          final dbBackupService = DatabaseBackupService(db);
+          final localData = await dbBackupService.exportAllData();
+
+          final result = await ref
+              .read(cloudBackupOperationProvider.notifier)
+              .importFromFile(
+                mode: mode,
+                localData: localData,
+                restoreCallback: (data, restoreMode) async {
+                  final importMode = _convertToImportMode(restoreMode);
+                  final actualData =
+                      data['data'] as Map<String, dynamic>? ?? data;
+                  await dbBackupService.importData(
+                    data: actualData,
+                    mode: importMode,
+                  );
+                },
+              );
+
+          if (result != null && context.mounted) {
+            final operation = ref.read(cloudBackupOperationProvider);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(_restoreResultMessage(
+                  l10n: l10n,
+                  added: result.totalAdded,
+                  updated: result.totalUpdated,
+                  skipped: result.totalSkipped,
+                  operation: operation,
+                )),
+              ),
+            );
+          }
+        },
       ),
     );
   }

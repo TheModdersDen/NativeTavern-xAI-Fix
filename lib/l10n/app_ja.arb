@@ -342,5 +342,19 @@
   "useLocalAiOnly": "ローカル AI のみ使用",
   "aiDataSharingSettingsTitle": "リモート AI へのデータ共有",
   "aiDataSharingAllowedDescription": "設定したプロバイダーとエンドポイントへの送信を許可",
-  "aiDataSharingLocalOnlyDescription": "ブロック中。ローカル AI は利用できます"
+  "aiDataSharingLocalOnlyDescription": "ブロック中。ローカル AI は利用できます",
+  "localBackup": "ローカル・ファイルバックアップ (.ntb)",
+  "localBackupDescription": "NativeTavern .ntb バックアップファイルをデバイスやファイルアプリにエクスポート/インポートします",
+  "exportNtbBackup": "バックアップファイルをエクスポート (.ntb)",
+  "exportNtbBackupSubtitle": "完全バックアップをデバイスのファイルシステムに保存または共有",
+  "importNtbBackup": "バックアップファイルをインポート (.ntb)",
+  "importNtbBackupSubtitle": "ローカルの .ntb ファイルからデータを復元または統合",
+  "exportToFiles": "ファイルに保存",
+  "shareBackup": "バックアップを共有",
+  "exportOptions": "エクスポート設定",
+  "selectNtbFile": "NativeTavern バックアップ (.ntb) を選択",
+  "selectNtbFileDescription": ".ntb バックアップファイルと対応する .ntm メディアファイルを選択",
+  "importBackupExplanation": "このバックアップファイルからキャラクター、チャット、設定、メディアを復元または統合します。",
+  "restoringBackup": "バックアップを復元中...",
+  "exportingBackup": "バックアップをエクスポート中..."
 }

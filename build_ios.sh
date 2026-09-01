@@ -193,6 +193,9 @@ printf 'Team: %s\n' "$TEAM_ID"
 flutter clean
 flutter pub get
 
+echo "=== Generating Launcher Icons ==="
+dart run flutter_launcher_icons
+
 pushd ios >/dev/null
 if [[ "$POD_REPO_UPDATE" == 'true' ]]; then
   pod install --repo-update

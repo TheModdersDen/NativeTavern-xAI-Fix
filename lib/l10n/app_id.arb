@@ -1,6 +1,5 @@
 {
   "@@locale": "id",
-  
   "appTitle": "NativeTavern",
   "home": "Beranda",
   "characters": "Karakter",
@@ -295,5 +294,19 @@
   "useLocalAiOnly": "Gunakan AI lokal saja",
   "aiDataSharingSettingsTitle": "Berbagi data dengan AI jarak jauh",
   "aiDataSharingAllowedDescription": "Diizinkan untuk penyedia dan endpoint yang dikonfigurasi",
-  "aiDataSharingLocalOnlyDescription": "Diblokir; AI lokal tetap tersedia"
+  "aiDataSharingLocalOnlyDescription": "Diblokir; AI lokal tetap tersedia",
+  "localBackup": "Local & File Backup (.ntb)",
+  "localBackupDescription": "Export and import NativeTavern .ntb backup files to your device storage or files app",
+  "exportNtbBackup": "Export Backup File (.ntb)",
+  "exportNtbBackupSubtitle": "Save or share full backup to device filesystem",
+  "importNtbBackup": "Import Backup File (.ntb)",
+  "importNtbBackupSubtitle": "Restore or merge data from a local .ntb file",
+  "exportToFiles": "Save to Files",
+  "shareBackup": "Share Backup",
+  "exportOptions": "Export Options",
+  "selectNtbFile": "Select NativeTavern Backup (.ntb)",
+  "selectNtbFileDescription": "Pick the .ntb backup file and optional .ntm media file",
+  "importBackupExplanation": "Restore or merge characters, chats, settings, and media from this backup file.",
+  "restoringBackup": "Restoring backup...",
+  "exportingBackup": "Exporting backup..."
 }

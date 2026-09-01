@@ -255,10 +255,10 @@ if [ -f "$ANDROID_MANIFEST" ]; then
         echo "Added portrait orientation restriction"
     fi
 
-    # Add intent-filter for .jsonl and chat files if not present
+    # Add intent-filter for .jsonl, .ntb, .ntm and chat files if not present
     if ! grep -q "android:pathPattern=\".*\\.jsonl\"" "$ANDROID_MANIFEST"; then
-        perl -i -pe 's|(</activity>)|            <intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="file" />\n                <data android:scheme="content" />\n                <data android:mimeType="*/*" />\n                <data android:pathPattern=".*\\\\.jsonl" />\n                <data android:host="*" />\n            </intent-filter>\n            <intent-filter>\n                <action android:name="android.intent.action.SEND" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <data android:mimeType="*/*" />\n            </intent-filter>\n$1|' "$ANDROID_MANIFEST"
-        echo "Added JSONL intent filters to AndroidManifest.xml"
+        perl -i -pe 's|(</activity>)|            <intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="file" />\n                <data android:scheme="content" />\n                <data android:mimeType="*/*" />\n                <data android:pathPattern=".*\\\\.jsonl" />\n                <data android:pathPattern=".*\\\\.ntb" />\n                <data android:pathPattern=".*\\\\.ntm" />\n                <data android:host="*" />\n            </intent-filter>\n            <intent-filter>\n                <action android:name="android.intent.action.SEND" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <data android:mimeType="*/*" />\n            </intent-filter>\n$1|' "$ANDROID_MANIFEST"
+        echo "Added JSONL and NTB intent filters to AndroidManifest.xml"
     fi
 else
     echo "Warning: AndroidManifest.xml not found at $ANDROID_MANIFEST"
@@ -301,6 +301,7 @@ package com.miaomiaoxworld.nativetavern
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.telephony.TelephonyManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -377,7 +378,26 @@ class MainActivity : FlutterActivity() {
     private fun copyUriToCache(uri: Uri): String? {
         return try {
             val contentResolver = applicationContext.contentResolver
-            val fileName = "imported_${System.currentTimeMillis()}.jsonl"
+            var extension = ".jsonl"
+            val uriStr = uri.toString().lowercase(Locale.ROOT)
+            if (uriStr.endsWith(".ntb")) {
+                extension = ".ntb"
+            } else if (uriStr.endsWith(".ntm")) {
+                extension = ".ntm"
+            } else {
+                val cursor = contentResolver.query(uri, null, null, null, null)
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex >= 0) {
+                            val displayName = it.getString(nameIndex)?.lowercase(Locale.ROOT)
+                            if (displayName?.endsWith(".ntb") == true) extension = ".ntb"
+                            else if (displayName?.endsWith(".ntm") == true) extension = ".ntm"
+                        }
+                    }
+                }
+            }
+            val fileName = "imported_${System.currentTimeMillis()}$extension"
             val tempFile = File(cacheDir, fileName)
             contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(tempFile).use { output ->

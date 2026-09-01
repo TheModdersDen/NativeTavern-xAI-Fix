@@ -1,6 +1,5 @@
 {
   "@@locale": "th",
-  
   "appTitle": "NativeTavern",
   "home": "หน้าแรก",
   "characters": "ตัวละคร",
@@ -295,5 +294,19 @@
   "useLocalAiOnly": "ใช้เฉพาะ AI ในเครื่อง",
   "aiDataSharingSettingsTitle": "การแชร์ข้อมูลกับ AI ระยะไกล",
   "aiDataSharingAllowedDescription": "อนุญาตสำหรับผู้ให้บริการและ endpoint ที่ตั้งค่าไว้",
-  "aiDataSharingLocalOnlyDescription": "ถูกบล็อก; AI ในเครื่องยังใช้ได้"
+  "aiDataSharingLocalOnlyDescription": "ถูกบล็อก; AI ในเครื่องยังใช้ได้",
+  "localBackup": "Local & File Backup (.ntb)",
+  "localBackupDescription": "Export and import NativeTavern .ntb backup files to your device storage or files app",
+  "exportNtbBackup": "Export Backup File (.ntb)",
+  "exportNtbBackupSubtitle": "Save or share full backup to device filesystem",
+  "importNtbBackup": "Import Backup File (.ntb)",
+  "importNtbBackupSubtitle": "Restore or merge data from a local .ntb file",
+  "exportToFiles": "Save to Files",
+  "shareBackup": "Share Backup",
+  "exportOptions": "Export Options",
+  "selectNtbFile": "Select NativeTavern Backup (.ntb)",
+  "selectNtbFileDescription": "Pick the .ntb backup file and optional .ntm media file",
+  "importBackupExplanation": "Restore or merge characters, chats, settings, and media from this backup file.",
+  "restoringBackup": "Restoring backup...",
+  "exportingBackup": "Exporting backup..."
 }

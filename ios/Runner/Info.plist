@@ -26,6 +26,20 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
+			<string>NativeTavern Backup File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.nativetavern.ntb</string>
+				<string>com.nativetavern.ntm</string>
+				<string>public.data</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
 			<string>JSON Lines Chat File</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
@@ -42,6 +56,50 @@
 	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.nativetavern.ntb</string>
+			<key>UTTypeDescription</key>
+			<string>NativeTavern Backup</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ntb</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-nativetavern-backup</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.nativetavern.ntm</string>
+			<key>UTTypeDescription</key>
+			<string>NativeTavern Media Archive</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.archive</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ntm</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-nativetavern-media</string>
+				</array>
+			</dict>
+		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.json-lines</string>

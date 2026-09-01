@@ -1902,7 +1902,13 @@
   "mcpStreamableHttp": "可流式传输 HTTP",
   "mcpLegacyHttpSse": "旧版 HTTP + SSE",
   "chatWithName": "与{name}聊天",
-  "@chatWithName": {"placeholders": {"name": {"type": "String"}}},
+  "@chatWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "noValidCharactersInGroup": "群组中没有有效角色",
   "aiDataSharingTitle": "选择远程 AI 如何处理你的数据",
   "aiDataSharingIntroduction": "NativeTavern 采用本地优先设计。使用远程 AI 功能时，本设备会将必要数据直接发送给你配置的服务商；NativeTavern 不会中转或存储这些请求。",
@@ -1918,5 +1924,19 @@
   "aiDataSharingAllowedDescription": "已允许向你配置的服务商和端点发送数据",
   "aiDataSharingLocalOnlyDescription": "已阻止；本地 AI 端点仍可使用",
   "imagine": "生图",
-  "fillImagePromptWithAi": "AI 填写提示词"
+  "fillImagePromptWithAi": "AI 填写提示词",
+  "localBackup": "本地与文件备份 (.ntb)",
+  "localBackupDescription": "将 NativeTavern .ntb 备份文件导出或导入到设备存储或文件管理器",
+  "exportNtbBackup": "导出备份文件 (.ntb)",
+  "exportNtbBackupSubtitle": "保存或分享完整备份至设备文件系统",
+  "importNtbBackup": "导入备份文件 (.ntb)",
+  "importNtbBackupSubtitle": "从本地 .ntb 文件恢复或合并数据",
+  "exportToFiles": "保存到文件",
+  "shareBackup": "分享备份",
+  "exportOptions": "导出选项",
+  "selectNtbFile": "选择 NativeTavern 备份 (.ntb)",
+  "selectNtbFileDescription": "选择 .ntb 备份文件以及可选的 .ntm 媒体文件",
+  "importBackupExplanation": "从此备份文件中恢复或合并角色、聊天、设置和媒体文件。",
+  "restoringBackup": "正在恢复备份...",
+  "exportingBackup": "正在导出备份..."
 }

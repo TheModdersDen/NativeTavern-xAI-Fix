@@ -1,6 +1,5 @@
 {
   "@@locale": "pl",
-  
   "appTitle": "NativeTavern",
   "home": "Strona główna",
   "characters": "Postacie",
@@ -295,5 +294,19 @@
   "useLocalAiOnly": "Używaj tylko lokalnej AI",
   "aiDataSharingSettingsTitle": "Udostępnianie danych zdalnej AI",
   "aiDataSharingAllowedDescription": "Dozwolone dla skonfigurowanych dostawców i endpointów",
-  "aiDataSharingLocalOnlyDescription": "Zablokowane; lokalna AI pozostaje dostępna"
+  "aiDataSharingLocalOnlyDescription": "Zablokowane; lokalna AI pozostaje dostępna",
+  "localBackup": "Local & File Backup (.ntb)",
+  "localBackupDescription": "Export and import NativeTavern .ntb backup files to your device storage or files app",
+  "exportNtbBackup": "Export Backup File (.ntb)",
+  "exportNtbBackupSubtitle": "Save or share full backup to device filesystem",
+  "importNtbBackup": "Import Backup File (.ntb)",
+  "importNtbBackupSubtitle": "Restore or merge data from a local .ntb file",
+  "exportToFiles": "Save to Files",
+  "shareBackup": "Share Backup",
+  "exportOptions": "Export Options",
+  "selectNtbFile": "Select NativeTavern Backup (.ntb)",
+  "selectNtbFileDescription": "Pick the .ntb backup file and optional .ntm media file",
+  "importBackupExplanation": "Restore or merge characters, chats, settings, and media from this backup file.",
+  "restoringBackup": "Restoring backup...",
+  "exportingBackup": "Exporting backup..."
 }

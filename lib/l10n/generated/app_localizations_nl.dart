@@ -6555,4 +6555,51 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get aiDataSharingLocalOnlyDescription =>
       'Geblokkeerd; lokale AI blijft beschikbaar';
+
+  @override
+  String get localBackup => 'Local & File Backup (.ntb)';
+
+  @override
+  String get localBackupDescription =>
+      'Export and import NativeTavern .ntb backup files to your device storage or files app';
+
+  @override
+  String get exportNtbBackup => 'Export Backup File (.ntb)';
+
+  @override
+  String get exportNtbBackupSubtitle =>
+      'Save or share full backup to device filesystem';
+
+  @override
+  String get importNtbBackup => 'Import Backup File (.ntb)';
+
+  @override
+  String get importNtbBackupSubtitle =>
+      'Restore or merge data from a local .ntb file';
+
+  @override
+  String get exportToFiles => 'Save to Files';
+
+  @override
+  String get shareBackup => 'Share Backup';
+
+  @override
+  String get exportOptions => 'Export Options';
+
+  @override
+  String get selectNtbFile => 'Select NativeTavern Backup (.ntb)';
+
+  @override
+  String get selectNtbFileDescription =>
+      'Pick the .ntb backup file and optional .ntm media file';
+
+  @override
+  String get importBackupExplanation =>
+      'Restore or merge characters, chats, settings, and media from this backup file.';
+
+  @override
+  String get restoringBackup => 'Restoring backup...';
+
+  @override
+  String get exportingBackup => 'Exporting backup...';
 }

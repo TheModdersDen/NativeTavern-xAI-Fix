@@ -8,6 +8,7 @@ analyzer:
     - "lib/generated/**"
     - build/**
     - ios/**
+    - android/**
   errors:
     invalid_annotation_target: ignore
   language:

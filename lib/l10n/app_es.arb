@@ -1,6 +1,5 @@
 {
   "@@locale": "es",
-  
   "appTitle": "NativeTavern",
   "home": "Inicio",
   "characters": "Personajes",
@@ -295,5 +294,19 @@
   "useLocalAiOnly": "Usar solo IA local",
   "aiDataSharingSettingsTitle": "Compartir datos con IA remota",
   "aiDataSharingAllowedDescription": "Permitido para los proveedores y endpoints configurados",
-  "aiDataSharingLocalOnlyDescription": "Bloqueado; la IA local sigue disponible"
+  "aiDataSharingLocalOnlyDescription": "Bloqueado; la IA local sigue disponible",
+  "localBackup": "Copia de seguridad local (.ntb)",
+  "localBackupDescription": "Exportar e importar copias de seguridad .ntb de NativeTavern",
+  "exportNtbBackup": "Exportar copia de seguridad (.ntb)",
+  "exportNtbBackupSubtitle": "Guardar o compartir copia de seguridad en el sistema de archivos",
+  "importNtbBackup": "Importar copia de seguridad (.ntb)",
+  "importNtbBackupSubtitle": "Restaurar o fusionar datos desde un archivo .ntb local",
+  "exportToFiles": "Guardar en Archivos",
+  "shareBackup": "Compartir copia",
+  "exportOptions": "Opciones de exportación",
+  "selectNtbFile": "Seleccionar copia de NativeTavern (.ntb)",
+  "selectNtbFileDescription": "Seleccione el archivo .ntb y el archivo .ntm opcional",
+  "importBackupExplanation": "Restaure o combine personajes, chats, ajustes y multimedia.",
+  "restoringBackup": "Restaurando copia de seguridad...",
+  "exportingBackup": "Exportando copia de seguridad..."
 }

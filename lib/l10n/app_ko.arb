@@ -342,5 +342,19 @@
   "useLocalAiOnly": "로컬 AI만 사용",
   "aiDataSharingSettingsTitle": "원격 AI 데이터 공유",
   "aiDataSharingAllowedDescription": "설정한 제공업체와 엔드포인트로 전송 허용",
-  "aiDataSharingLocalOnlyDescription": "차단됨. 로컬 AI는 계속 사용할 수 있습니다"
+  "aiDataSharingLocalOnlyDescription": "차단됨. 로컬 AI는 계속 사용할 수 있습니다",
+  "localBackup": "Local & File Backup (.ntb)",
+  "localBackupDescription": "Export and import NativeTavern .ntb backup files to your device storage or files app",
+  "exportNtbBackup": "Export Backup File (.ntb)",
+  "exportNtbBackupSubtitle": "Save or share full backup to device filesystem",
+  "importNtbBackup": "Import Backup File (.ntb)",
+  "importNtbBackupSubtitle": "Restore or merge data from a local .ntb file",
+  "exportToFiles": "Save to Files",
+  "shareBackup": "Share Backup",
+  "exportOptions": "Export Options",
+  "selectNtbFile": "Select NativeTavern Backup (.ntb)",
+  "selectNtbFileDescription": "Pick the .ntb backup file and optional .ntm media file",
+  "importBackupExplanation": "Restore or merge characters, chats, settings, and media from this backup file.",
+  "restoringBackup": "Restoring backup...",
+  "exportingBackup": "Exporting backup..."
 }
