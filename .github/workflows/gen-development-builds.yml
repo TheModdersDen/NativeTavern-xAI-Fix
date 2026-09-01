@@ -1,0 +1,414 @@
+# NativeTavern development artifacts
+#
+# Produces sideloadable development binaries for testers:
+#   - Android debug APK  (ubuntu-latest)
+#   - iOS debug IPA      (macos-latest)
+#
+# Why this file does not call the release packaging scripts:
+#   ./build_android.sh and ./build_ios.sh are store-release only (signed AAB/IPA,
+#   TestFlight / Play). Development artifacts use ./build_android_local.sh and
+#   tool/ci_build_ios_debug.sh so GitHub-hosted runners can succeed without a
+#   Homebrew Android SDK or a full Apple signing setup.
+#
+# Resource policy:
+#   - Manual dispatch only (no push/PR builds) so macOS minutes are not spent
+#     on every commit. Disable a platform with the boolean inputs.
+#   - Shallow checkout, Flutter SDK + pub cache, Gradle cache, Android SDK
+#     component cache, and CocoaPods cache. APK/IPA are already compressed, so
+#     artifact upload uses compression-level 0.
+#   - flutter clean is skipped; CI workspaces are fresh.
+#   - Gradle heap is capped in CI (see build_android_local.sh) so a standard
+#     7 GB Linux runner does not OOM on the Flutter template's -Xmx8G default.
+#
+# Artifact retention:
+#   GitHub Actions stores artifacts in whole days (minimum 1). Public repos cap
+#   at 90 days, private repos at 400, and neither can exceed the org/repo
+#   retention setting. 48 hours is therefore 2 days. Resolution order:
+#     1. Per-artifact workflow input (apk_retention_days / ipa_retention_days)
+#     2. Per-artifact repository variable
+#        (DEV_BUILD_APK_RETENTION_DAYS / DEV_BUILD_IPA_RETENTION_DAYS)
+#     3. Shared workflow input artifact_retention_days
+#     4. Shared repository variable DEV_BUILD_ARTIFACT_RETENTION_DAYS
+#     5. 2 days
+#
+# Optional secrets (all unused paths are skipped):
+#   Android release-style signing (debug APKs work without these):
+#     ANDROID_UPLOAD_KEYSTORE_BASE64  base64 of config/upload-keystore.jks
+#     ANDROID_KEY_PROPERTIES          full key.properties file contents
+#   iOS development signing (unsigned debug IPA is produced without these):
+#     IOS_CERTIFICATE_BASE64          base64 of a .p12 signing certificate
+#     IOS_CERTIFICATE_PASSWORD        password for that .p12
+#     IOS_PROVISION_PROFILE_BASE64    base64 of a .mobileprovision
+#     APPLE_DEVELOP_ID or IOS_TEAM_ID Apple team ID
+#
+# Flutter is pinned to 3.44.9 to match pubspec.yaml's environment.flutter
+# minimum. Bump both together.
+
+name: Generate Development Build Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: Build the Android APK
+        type: boolean
+        default: true
+      build_ios:
+        description: Build the iOS debug IPA
+        type: boolean
+        default: true
+      android_build_mode:
+        description: Android build mode
+        type: choice
+        options:
+          - debug
+          - release
+        default: debug
+      artifact_retention_days:
+        description: Default artifact retention in days (48 hours = 2). GitHub minimum is 1; public repos cap at 90, private at 400.
+        type: string
+        default: '2'
+      apk_retention_days:
+        description: Override retention for the Android APK only. Leave empty to use the default.
+        type: string
+        default: ''
+      ipa_retention_days:
+        description: Override retention for the iOS debug IPA only. Leave empty to use the default.
+        type: string
+        default: ''
+      generate_launcher_icons:
+        description: Regenerate launcher icons before packaging
+        type: boolean
+        default: true
+
+# Least privilege: checkout the repo and upload artifacts. No contents:write.
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: dev-builds-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PUB_ENVIRONMENT: bot.github
+  # Skip analytics/telemetry noise on hosted runners.
+  FLUTTER_SUPPRESS_ANALYTICS: true
+  # GitHub Actions artifact TTL is whole days. 2 days ~= 48 hours.
+  ARTIFACT_RETENTION_DAYS: ${{ inputs.artifact_retention_days || vars.DEV_BUILD_ARTIFACT_RETENTION_DAYS || '2' }}
+  # Pin must stay in sync with pubspec.yaml environment.flutter (>= 3.44.9).
+  FLUTTER_VERSION: '3.44.9'
+
+jobs:
+  resolve-retention:
+    name: Resolve artifact retention
+    if: ${{ inputs.build_android || inputs.build_ios }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      apk_days: ${{ steps.retention.outputs.apk_days }}
+      ipa_days: ${{ steps.retention.outputs.ipa_days }}
+    steps:
+      - name: Compute per-artifact retention
+        id: retention
+        env:
+          APK_OVERRIDE: ${{ inputs.apk_retention_days || vars.DEV_BUILD_APK_RETENTION_DAYS }}
+          IPA_OVERRIDE: ${{ inputs.ipa_retention_days || vars.DEV_BUILD_IPA_RETENTION_DAYS }}
+          DEFAULT_DAYS: ${{ env.ARTIFACT_RETENTION_DAYS }}
+        run: |
+          set -euo pipefail
+          is_valid_days() {
+            [[ "$1" =~ ^[0-9]+$ ]] && (( 10#$1 >= 1 && 10#$1 <= 400 ))
+          }
+          default_days="$DEFAULT_DAYS"
+          is_valid_days "$default_days" || {
+            echo "Invalid default artifact retention '$default_days'. Use an integer 1-400 (GitHub public repos cap at 90)."
+            exit 1
+          }
+          apk_days="${APK_OVERRIDE:-$default_days}"
+          ipa_days="${IPA_OVERRIDE:-$default_days}"
+          is_valid_days "$apk_days" || {
+            echo "Invalid APK retention '$apk_days'. Use an integer 1-400, or leave the override empty."
+            exit 1
+          }
+          is_valid_days "$ipa_days" || {
+            echo "Invalid IPA retention '$ipa_days'. Use an integer 1-400, or leave the override empty."
+            exit 1
+          }
+          echo "apk_days=$apk_days" >> "$GITHUB_OUTPUT"
+          echo "ipa_days=$ipa_days" >> "$GITHUB_OUTPUT"
+          echo "APK retention: ${apk_days} day(s)"
+          echo "IPA retention: ${ipa_days} day(s)"
+          {
+            echo "## Artifact retention"
+            echo
+            echo "| Artifact | Days | ~Hours |"
+            echo "| --- | --- | --- |"
+            echo "| Android APK | ${apk_days} | $((apk_days * 24)) |"
+            echo "| iOS debug IPA | ${ipa_days} | $((ipa_days * 24)) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-android:
+    name: Android APK
+    needs: resolve-retention
+    if: ${{ inputs.build_android }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SKIP_FLUTTER_CLEAN: 'true'
+      SKIP_LAUNCHER_ICONS: ${{ inputs.generate_launcher_icons == false }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Read app version
+        run: |
+          set -euo pipefail
+          version="$(awk '/^version:/ { print $2; exit }' pubspec.yaml)"
+          echo "APP_VERSION=${version}" >> "$GITHUB_ENV"
+          echo "APP_VERSION_SAFE=${version//+/-}" >> "$GITHUB_ENV"
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Cache Gradle
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-jdk17-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-jdk17-
+            gradle-${{ runner.os }}-
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Cache Android SDK components
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk
+            ${{ env.ANDROID_HOME }}/ndk-bundle
+            ${{ env.ANDROID_HOME }}/cmake
+            ${{ env.ANDROID_HOME }}/platforms
+            ${{ env.ANDROID_HOME }}/build-tools
+          key: android-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            android-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-
+            android-sdk-${{ runner.os }}-
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+
+      - name: Flutter environment
+        run: |
+          set -euo pipefail
+          flutter config --no-analytics || true
+          dart --disable-analytics || true
+          flutter precache --android
+          flutter --version
+          echo "JAVA_HOME=${JAVA_HOME:-}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-}"
+
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses >/dev/null || true
+
+      - name: Install optional Android signing files
+        if: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_PROPERTIES != '' }}
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          set -euo pipefail
+          mkdir -p config
+          printf '%s' "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > config/upload-keystore.jks
+          printf '%s\n' "$ANDROID_KEY_PROPERTIES" > config/key.properties
+          echo "Installed config/upload-keystore.jks and config/key.properties"
+          unset ANDROID_UPLOAD_KEYSTORE_BASE64 ANDROID_KEY_PROPERTIES
+
+      - name: Build Android APK
+        run: |
+          set -euo pipefail
+          test -x ./build_android_local.sh || chmod +x ./build_android_local.sh
+          mode_flag="--debug"
+          if [[ "${{ inputs.android_build_mode }}" == "release" ]]; then
+            mode_flag="--release"
+          fi
+          ./build_android_local.sh "$mode_flag" --apk
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: nativetavern-${{ env.APP_VERSION_SAFE }}-android-${{ inputs.android_build_mode }}-apk
+          path: |
+            build/local_release/*.apk
+            build/local_release/*.apk.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: ${{ needs.resolve-retention.outputs.apk_days }}
+          overwrite: true
+
+      - name: Summarize Android APK
+        if: ${{ success() }}
+        run: |
+          set -euo pipefail
+          apk="$(ls -1 build/local_release/*.apk | head -n 1)"
+          {
+            echo "## Android APK"
+            echo
+            echo "- File: \`$(basename "$apk")\`"
+            echo "- Mode: \`${{ inputs.android_build_mode }}\`"
+            echo "- Size: $(du -h "$apk" | awk '{print $1}')"
+            echo "- SHA-256: \`$(awk '{print $1}' "${apk}.sha256")\`"
+            echo "- Retention: ${{ needs.resolve-retention.outputs.apk_days }} day(s)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-ios:
+    name: iOS debug IPA
+    needs: resolve-retention
+    if: ${{ inputs.build_ios }}
+    runs-on: macos-latest
+    timeout-minutes: 90
+    env:
+      SKIP_LAUNCHER_ICONS: ${{ inputs.generate_launcher_icons == false }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Read app version
+        run: |
+          set -euo pipefail
+          version="$(awk '/^version:/ { print $2; exit }' pubspec.yaml)"
+          echo "APP_VERSION=${version}" >> "$GITHUB_ENV"
+          echo "APP_VERSION_SAFE=${version//+/-}" >> "$GITHUB_ENV"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v5
+        with:
+          path: ~/Library/Caches/CocoaPods
+          key: cocoapods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'pubspec.lock') }}
+          restore-keys: |
+            cocoapods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}-
+            cocoapods-${{ runner.os }}-
+
+      - name: Flutter environment
+        run: |
+          set -euo pipefail
+          flutter config --no-analytics || true
+          dart --disable-analytics || true
+          flutter precache --ios
+          flutter --version
+
+      - name: Import optional iOS signing material
+        if: ${{ secrets.IOS_CERTIFICATE_BASE64 != '' && secrets.IOS_CERTIFICATE_PASSWORD != '' && secrets.IOS_PROVISION_PROFILE_BASE64 != '' }}
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD || github.run_id }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/nativetavern-dev.p12"
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          KEYCHAIN_PATH="$RUNNER_TEMP/nativetavern-dev.keychain-db"
+          mkdir -p "$PROFILE_DIR"
+          python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' \
+            <<<"$IOS_CERTIFICATE_BASE64" > "$CERT_PATH"
+          python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' \
+            <<<"$IOS_PROVISION_PROFILE_BASE64" > "$PROFILE_DIR/nativetavern-dev.mobileprovision"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" \
+            -P "$IOS_CERTIFICATE_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain
+          echo "IOS_SIGNING_ENABLED=true" >> "$GITHUB_ENV"
+          echo "Imported iOS certificate and provisioning profile"
+          rm -f "$CERT_PATH"
+          unset IOS_CERTIFICATE_BASE64 IOS_CERTIFICATE_PASSWORD IOS_PROVISION_PROFILE_BASE64 KEYCHAIN_PASSWORD
+
+      - name: Configure Apple team id
+        if: ${{ env.IOS_SIGNING_ENABLED == 'true' }}
+        env:
+          APPLE_DEVELOP_ID: ${{ secrets.APPLE_DEVELOP_ID || secrets.IOS_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${APPLE_DEVELOP_ID:-}" ]]; then
+            echo "IOS signing material is present but APPLE_DEVELOP_ID / IOS_TEAM_ID is empty."
+            exit 1
+          fi
+          {
+            echo "TEAM_ID=${APPLE_DEVELOP_ID}"
+            echo "APPLE_DEVELOP_ID=${APPLE_DEVELOP_ID}"
+          } >> "$GITHUB_ENV"
+
+      - name: Build iOS debug IPA
+        run: |
+          set -euo pipefail
+          chmod +x tool/ci_build_ios_debug.sh
+          tool/ci_build_ios_debug.sh
+
+      - name: Upload iOS debug IPA
+        uses: actions/upload-artifact@v7
+        with:
+          name: nativetavern-${{ env.APP_VERSION_SAFE }}-ios-debug-ipa
+          path: |
+            build/local_release/*.ipa
+            build/local_release/*.ipa.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: ${{ needs.resolve-retention.outputs.ipa_days }}
+          overwrite: true
+
+      - name: Summarize iOS debug IPA
+        if: ${{ success() }}
+        run: |
+          set -euo pipefail
+          ipa="$(ls -1 build/local_release/*.ipa | head -n 1)"
+          signed="${IOS_SIGNING_ENABLED:-false}"
+          {
+            echo "## iOS debug IPA"
+            echo
+            echo "- File: \`$(basename "$ipa")\`"
+            echo "- Signed: \`${signed}\`"
+            echo "- Size: $(du -h "$ipa" | awk '{print $1}')"
+            echo "- SHA-256: \`$(awk '{print $1}' "${ipa}.sha256")\`"
+            echo "- Retention: ${{ needs.resolve-retention.outputs.ipa_days }} day(s)"
+            if [[ "$signed" != "true" ]]; then
+              echo
+              echo "Unsigned debug IPA. Re-sign before installing on a physical device."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
