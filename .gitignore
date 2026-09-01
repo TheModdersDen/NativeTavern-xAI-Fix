@@ -79,3 +79,8 @@ config/*
 assets_for_discord
 scripts
 .wrangler/cache/wrangler-account.json
+
+# Backup files
+*.bak
+*.orig
+*-bak/

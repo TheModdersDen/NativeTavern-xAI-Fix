@@ -107,7 +107,6 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -125,10 +124,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -163,6 +158,21 @@ GRADLE_KTS_CONTENT
     else
         echo "Signing configuration already exists in build.gradle.kts"
     fi
+fi
+
+# Configure settings.gradle.kts with compatible AGP 8.9.1
+SETTINGS_GRADLE_KTS="android/settings.gradle.kts"
+if [ -f "$SETTINGS_GRADLE_KTS" ]; then
+    perl -i -pe 's/id\("com\.android\.application"\) version "[^"]*"/id("com.android.application") version "8.9.1"/' "$SETTINGS_GRADLE_KTS"
+    perl -i -pe 's/id\("org\.jetbrains\.kotlin\.android"\) version "[^"]*"/id("org.jetbrains.kotlin.android") version "2.1.0"/' "$SETTINGS_GRADLE_KTS"
+fi
+
+# Configure Gradle wrapper (AGP 8.9.1 uses Gradle 8.11.1)
+GRADLE_WRAPPER_PROPERTIES="android/gradle/wrapper/gradle-wrapper.properties"
+if [ -f "$GRADLE_WRAPPER_PROPERTIES" ]; then
+    sed -i '' 's/gradle-[0-9.]*-[a-z]*.zip/gradle-8.11.1-all.zip/' "$GRADLE_WRAPPER_PROPERTIES" 2>/dev/null || \
+    sed -i 's/gradle-[0-9.]*-[a-z]*.zip/gradle-8.11.1-all.zip/' "$GRADLE_WRAPPER_PROPERTIES" 2>/dev/null || true
+fi
 elif [ -f "$BUILD_GRADLE" ]; then
     echo "Configuring signing for build.gradle (Groovy DSL)..."
     # Legacy Groovy DSL support
@@ -450,7 +460,7 @@ echo "Building Android APK (for direct distribution)..."
 dart run tool/build_android_release.dart \
     .flutter-plugins-dependencies \
     android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-flutter build apk --release --no-pub
+flutter build apk --release --no-pub --android-skip-build-dependency-validation
 
 # Rename/Move APK
 echo "Copying APK to release directory..."
@@ -462,7 +472,7 @@ echo "Building Android App Bundle (AAB) for Google Play..."
 dart run tool/build_android_release.dart \
     .flutter-plugins-dependencies \
     android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-flutter build appbundle --release --no-pub
+flutter build appbundle --release --no-pub --android-skip-build-dependency-validation
 
 # Rename/Move AAB
 echo "Copying AAB to release directory..."
