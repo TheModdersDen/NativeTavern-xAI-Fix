@@ -138,9 +138,10 @@ import StoreKit
   }
 
   private func hideItem(at url: URL, hidden: Bool) {
+    var itemURL = url
     var values = URLResourceValues()
     values.isHidden = hidden
-    try? url.setResourceValues(values)
+    try? itemURL.setResourceValues(values)
   }
 
   private func synchronizeLive2DContentScale(requestedScale: CGFloat?) -> Int {

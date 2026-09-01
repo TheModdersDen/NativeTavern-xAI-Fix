@@ -274,11 +274,14 @@ EXPORTED_IPA="$(find "$EXPORT_PATH" -maxdepth 1 -type f -name '*.ipa' -print -qu
 validate_ipa "$EXPORTED_IPA"
 #assert_critical_ios_files_unchanged
 
-[[ ! -e "$FINAL_IPA" ]] \
-  || fail "Release artifact already exists: $FINAL_IPA"
-cp "$EXPORTED_IPA" "$FINAL_IPA"
+mkdir -p "$REPO_ROOT/release" "$REPO_ROOT/build/local_release"
+LOCAL_RELEASE_IPA="$REPO_ROOT/build/local_release/NativeTavern_v${VERSION}.ipa"
+cp -f "$EXPORTED_IPA" "$FINAL_IPA"
+cp -f "$EXPORTED_IPA" "$LOCAL_RELEASE_IPA"
+shasum -a 256 "$LOCAL_RELEASE_IPA" > "${LOCAL_RELEASE_IPA}.sha256"
 
-printf '%s\n' '=== iOS release build complete ==='
+printf '%s\n' '=== iOS build complete ==='
 printf 'IPA: %s\n' "$FINAL_IPA"
+printf 'Local Release IPA: %s\n' "$LOCAL_RELEASE_IPA"
 printf 'SHA-256: '
 shasum -a 256 "$FINAL_IPA" | awk '{ print $1 }'
