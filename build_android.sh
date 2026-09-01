@@ -72,8 +72,8 @@ restore_flutter_state
 echo "Restoring committed Flutter dependencies..."
 flutter pub get --offline
 
-echo "Generating App Icons..."
-flutter pub run flutter_launcher_icons
+echo "=== Generating Launcher Icons ==="
+dart run flutter_launcher_icons
 
 echo "=== Configuring Release Signing ==="
 CONFIG_KEYSTORE="config/upload-keystore.jks"

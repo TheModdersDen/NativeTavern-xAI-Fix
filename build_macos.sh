@@ -39,6 +39,9 @@ fi
 flutter clean
 flutter pub get
 
+printf '=== Generating Launcher Icons ===\n'
+dart run flutter_launcher_icons
+
 # Build macOS release application
 flutter build macos --release \
   --build-name="$BUILD_NAME" \
