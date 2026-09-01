@@ -35,7 +35,7 @@ import StoreKit
         return
       }
       let arguments = call.arguments as? [String: Any]
-      let requestedScale = (arguments?["devicePixelRatio"] as? NSNumber)
+      let requestedScale = (arguments?["devicePixelRatio"] as? NSNumber).map { CGFloat(truncating: $0) }
       result(self?.synchronizeLive2DContentScale(requestedScale: requestedScale) ?? 0)
     }
 

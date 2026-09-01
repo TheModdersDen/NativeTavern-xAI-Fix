@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import 'package:native_tavern/data/models/bookmark.dart';
 import 'package:native_tavern/data/models/chat.dart';
 import 'package:native_tavern/data/models/operation_log.dart';
@@ -2879,9 +2880,10 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       settings['personaId'] = personaId;
     }
 
+    final uuid = const Uuid();
     final newChat = await _chatRepository.createChat(
       Chat(
-        id: const Uuid().v4(),
+        id: uuid.v4(),
         characterId: characterId,
         title: title,
         authorNote: importResult.authorNote ?? '',
@@ -2895,7 +2897,6 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
       ),
     );
 
-    const uuid = Uuid();
     final sortedMessages = [...importResult.messages]
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 

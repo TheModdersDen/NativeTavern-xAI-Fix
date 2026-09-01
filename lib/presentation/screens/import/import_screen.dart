@@ -220,20 +220,20 @@ class ImportNotifier extends StateNotifier<ImportState> {
                     ? chatImport.messages.first.content
                     : '',
                 scenario: '',
-                mesExamples: '',
+                exampleMessages: '',
                 creatorNotes: 'Imported from ${path.split('/').last}',
                 systemPrompt: '',
                 postHistoryInstructions: '',
                 tags: const ['chat-history'],
                 creator: chatImport.userName,
-                characterVersion: '1.0',
+                version: '1.0',
                 alternateGreetings: const [],
                 extensions: {
                   'chatImport': true,
                   'chatImportPath': path,
                 },
                 createdAt: chatImport.createDate,
-                updatedAt: DateTime.now(),
+                modifiedAt: DateTime.now(),
               );
             }
             break;
