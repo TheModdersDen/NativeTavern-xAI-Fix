@@ -60,7 +60,9 @@ ditto -c -k --sequesterRsrc --keepParent "$BUILD_APP_PATH" "$FINAL_ZIP"
 
 [[ -f "$FINAL_ZIP" ]] || fail "Failed to produce release zip: $FINAL_ZIP"
 
+SHA="$(shasum -a 256 "$FINAL_ZIP" | awk '{ print $1 }')"
+printf '%s  %s\n' "$SHA" "$(basename "$FINAL_ZIP")" > "${FINAL_ZIP}.sha256"
+
 printf '=== macOS release build complete ===\n'
 printf 'Archive: %s\n' "$FINAL_ZIP"
-printf 'SHA-256: '
-shasum -a 256 "$FINAL_ZIP" | awk '{ print $1 }'
+printf 'SHA-256: %s\n' "$SHA"

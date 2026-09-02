@@ -9,6 +9,7 @@ analyzer:
     - build/**
     - ios/**
     - android/**
+    - macos/**
   errors:
     invalid_annotation_target: ignore
   language:

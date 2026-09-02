@@ -83,6 +83,7 @@ build_*
 # Development packaging scripts used by GitHub Actions and local testers.
 !build_android_local.sh
 !build_ios_local.sh
+!build_macos_local.sh
 !tool/build_android_release.dart
 !tool/build_ios_adhoc.sh
 resize_app_store_images.py

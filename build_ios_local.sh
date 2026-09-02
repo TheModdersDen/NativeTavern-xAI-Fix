@@ -27,6 +27,47 @@ else
   ENABLE_ICLOUD="${ENABLE_ICLOUD:-false}"
 fi
 
+# Parse CLI arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check-only)
+      CHECK_ONLY="true"
+      shift
+      ;;
+    --skip-clean)
+      SKIP_CLEAN="true"
+      shift
+      ;;
+    --export-method)
+      EXPORT_METHOD="$2"
+      shift 2
+      ;;
+    --bundle-id)
+      BUNDLE_ID="$2"
+      shift 2
+      ;;
+    --device)
+      BUILD_FOR_DEVICE="true"
+      DEVICE_ID="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: ./build_ios_local.sh [options]"
+      echo "Options:"
+      echo "  --check-only          Validate configuration without building"
+      echo "  --skip-clean          Skip flutter clean for faster rebuilds"
+      echo "  --export-method <m>   development or ad-hoc (default: development)"
+      echo "  --bundle-id <id>      Override iOS bundle identifier"
+      echo "  --device <id>         Target a connected physical iOS device"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
 
 APP_DELEGATE="ios/Runner/AppDelegate.swift"
 INFO_PLIST="ios/Runner/Info.plist"
