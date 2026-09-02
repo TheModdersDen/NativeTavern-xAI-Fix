@@ -5,9 +5,24 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
 
+# Load environment variables from .env if present
+if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+fi
+
 BUILD_MODE="${BUILD_MODE:-release}"
 BUILD_TARGET="${BUILD_TARGET:-apk}" # apk, aab, all
 CHECK_ONLY="${CHECK_ONLY:-false}"
+INSTALL_TO_DEVICE="${INSTALL_TO_DEVICE:-false}"
+DEVICE_ID="${DEVICE_ID:-}"
+SKIP_CLEAN="${SKIP_CLEAN:-${SKIP_FLUTTER_CLEAN:-false}}"
+SKIP_LAUNCHER_ICONS="${SKIP_LAUNCHER_ICONS:-false}"
+
+# Google Play / Android configuration
+PACKAGE_NAME="${PACKAGE_NAME:-${GOOGLE_PLAY_PACKAGE_NAME:-com.miaomiaoxworld.nativetavern}}"
+TRACK_NAME="${GOOGLE_PLAY_TRACK:-${TRACK:-}}"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -36,15 +51,41 @@ while [[ $# -gt 0 ]]; do
             BUILD_TARGET="all"
             shift
             ;;
+        --package)
+            PACKAGE_NAME="$2"
+            shift 2
+            ;;
+        --track)
+            TRACK_NAME="$2"
+            shift 2
+            ;;
+        --skip-clean)
+            SKIP_CLEAN="true"
+            shift
+            ;;
+        -i|--install)
+            INSTALL_TO_DEVICE="true"
+            shift
+            ;;
+        -d|--device)
+            DEVICE_ID="$2"
+            INSTALL_TO_DEVICE="true"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: ./build_android_local.sh [options]"
             echo "Options:"
-            echo "  --check-only  Validate configuration without building"
-            echo "  --debug       Build in debug mode"
-            echo "  --release     Build in release mode (default)"
-            echo "  --apk         Build APK only (default)"
-            echo "  --aab         Build AAB only"
-            echo "  --all         Build both APK and AAB"
+            echo "  --check-only    Validate configuration without building"
+            echo "  --debug         Build in debug mode"
+            echo "  --release       Build in release mode (default)"
+            echo "  --apk           Build APK only (default)"
+            echo "  --aab           Build AAB only"
+            echo "  --all           Build both APK and AAB"
+            echo "  --package <id>  Override application package ID (default: from GOOGLE_PLAY_PACKAGE_NAME)"
+            echo "  --track <name>  Override track name (default: from GOOGLE_PLAY_TRACK)"
+            echo "  --skip-clean    Skip flutter clean for faster rebuilds"
+            echo "  -i, --install   Automatically sideload APK to connected device via adb"
+            echo "  -d, --device ID Sideload APK to specific adb device ID"
             exit 0
             ;;
         *)
@@ -57,6 +98,13 @@ done
 echo "=== NativeTavern Local Android Build ==="
 echo "Build Mode: $BUILD_MODE"
 echo "Build Target: $BUILD_TARGET"
+echo "Package Name: $PACKAGE_NAME"
+if [ -n "$TRACK_NAME" ]; then
+    echo "Google Play Track: $TRACK_NAME"
+fi
+if [ -n "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+    echo "Google Play Service Account: configured"
+fi
 echo "Check Only: $CHECK_ONLY"
 
 # Auto-detect JAVA_HOME if not set or invalid
@@ -127,15 +175,18 @@ file_sha256() {
     fi
 }
 
-if [ "${SKIP_FLUTTER_CLEAN:-false}" = "true" ]; then
-    echo "Skipping flutter clean (SKIP_FLUTTER_CLEAN=true)."
+if [ "$SKIP_CLEAN" = "true" ]; then
+    echo "Skipping flutter clean (SKIP_CLEAN=true)."
 else
     echo "Cleaning previous Flutter build output..."
     flutter clean
 fi
 
-echo "Generating Android platform files..."
-flutter create --platforms=android --org com.miaomiaoxworld .
+ORG_NAME="$(echo "$PACKAGE_NAME" | sed 's/\.[^.]*$//')"
+[ -n "$ORG_NAME" ] || ORG_NAME="com.miaomiaoxworld"
+
+echo "Generating Android platform files (org: $ORG_NAME)..."
+flutter create --platforms=android --org "$ORG_NAME" .
 restore_flutter_state
 
 echo "Restoring Flutter dependencies..."
@@ -161,8 +212,19 @@ if [ -f "$CONFIG_KEYSTORE" ] && [ -f "$CONFIG_KEY_PROPERTIES" ]; then
     cp "$CONFIG_KEYSTORE" "$KEYSTORE_PATH"
     cp "$CONFIG_KEY_PROPERTIES" "$KEY_PROPERTIES"
     USE_CUSTOM_SIGNING="true"
+elif [ -n "${ANDROID_KEYSTORE_PATH:-${KEYSTORE_PATH:-}}" ] && [ -f "${ANDROID_KEYSTORE_PATH:-${KEYSTORE_PATH:-}}" ]; then
+    echo "Found signing keystore from environment, configuring..."
+    mkdir -p android/app
+    cp "${ANDROID_KEYSTORE_PATH:-$KEYSTORE_PATH}" "$KEYSTORE_PATH"
+    cat > "$KEY_PROPERTIES" << EOF
+storePassword=${ANDROID_STORE_PASSWORD:-${STORE_PASSWORD:-android}}
+keyPassword=${ANDROID_KEY_PASSWORD:-${KEY_PASSWORD:-android}}
+keyAlias=${ANDROID_KEY_ALIAS:-${KEY_ALIAS:-upload}}
+storeFile=upload-keystore.jks
+EOF
+    USE_CUSTOM_SIGNING="true"
 else
-    echo "No custom release keystore found in config/. Using local debug/fallback signing configuration."
+    echo "No custom release keystore found in config/ or .env. Using local debug/fallback signing configuration for sideloading."
 fi
 
 # Configure build.gradle.kts
@@ -201,7 +263,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.miaomiaoxworld.nativetavern"
+        applicationId = "__APPLICATION_ID__"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -251,7 +313,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.miaomiaoxworld.nativetavern"
+        applicationId = "__APPLICATION_ID__"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -260,7 +322,7 @@ android {
 
     buildTypes {
         release {
-            // Sign with debug keys for local testing
+            // Sign with debug keys for local sideloading
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -271,6 +333,8 @@ flutter {
 }
 GRADLE_KTS_CONTENT
 fi
+
+perl -i -pe "s/__APPLICATION_ID__/$PACKAGE_NAME/g" "$BUILD_GRADLE_KTS"
 
 # Configure settings.gradle.kts with compatible AGP 8.9.1
 SETTINGS_GRADLE_KTS="android/settings.gradle.kts"
@@ -506,10 +570,32 @@ if [ "$BUILD_TARGET" == "apk" ] || [ "$BUILD_TARGET" == "all" ]; then
     [ -f "$APK_OUTPUT" ] || { echo "ERROR: APK was not produced at $APK_OUTPUT"; exit 1; }
     LOCAL_APK="build/local_release/NativeTavern_v${VERSION}_${BUILD_MODE}.apk"
     cp "$APK_OUTPUT" "$LOCAL_APK"
-    echo "Local APK ready at: $LOCAL_APK"
+    echo "Local APK ready for sideloading at: $LOCAL_APK"
     APK_SHA="$(file_sha256 "$LOCAL_APK")"
     echo "APK SHA-256: $APK_SHA"
     printf '%s  %s\n' "$APK_SHA" "$(basename "$LOCAL_APK")" > "${LOCAL_APK}.sha256"
+
+    if [ -n "$TRACK_NAME" ]; then
+        TRACK_APK="build/local_release/NativeTavern_v${VERSION}_${TRACK_NAME}_${BUILD_MODE}.apk"
+        cp "$LOCAL_APK" "$TRACK_APK"
+        printf '%s  %s\n' "$APK_SHA" "$(basename "$TRACK_APK")" > "${TRACK_APK}.sha256"
+        echo "Track APK ($TRACK_NAME): $TRACK_APK"
+    fi
+
+    if [ "$INSTALL_TO_DEVICE" == "true" ]; then
+        echo "=== Sideloading APK to Device ==="
+        if command -v adb >/dev/null 2>&1; then
+            ADB_ARGS=()
+            if [ -n "$DEVICE_ID" ]; then
+                ADB_ARGS+=(-s "$DEVICE_ID")
+            fi
+            echo "Installing $LOCAL_APK to device..."
+            adb "${ADB_ARGS[@]}" install -r "$LOCAL_APK"
+            echo "APK successfully sideloaded!"
+        else
+            echo "WARNING: adb command not found; install Android platform-tools or add adb to PATH to enable automatic device installation."
+        fi
+    fi
 fi
 
 if [ "$BUILD_TARGET" == "aab" ] || [ "$BUILD_TARGET" == "all" ]; then
@@ -523,6 +609,13 @@ if [ "$BUILD_TARGET" == "aab" ] || [ "$BUILD_TARGET" == "all" ]; then
     AAB_SHA="$(file_sha256 "$LOCAL_AAB")"
     echo "AAB SHA-256: $AAB_SHA"
     printf '%s  %s\n' "$AAB_SHA" "$(basename "$LOCAL_AAB")" > "${LOCAL_AAB}.sha256"
+
+    if [ -n "$TRACK_NAME" ]; then
+        TRACK_AAB="build/local_release/NativeTavern_v${VERSION}_${TRACK_NAME}_${BUILD_MODE}.aab"
+        cp "$LOCAL_AAB" "$TRACK_AAB"
+        printf '%s  %s\n' "$AAB_SHA" "$(basename "$TRACK_AAB")" > "${TRACK_AAB}.sha256"
+        echo "Track AAB ($TRACK_NAME): $TRACK_AAB"
+    fi
 fi
 
 echo "=== Local Android Build Finished Successfully ==="
