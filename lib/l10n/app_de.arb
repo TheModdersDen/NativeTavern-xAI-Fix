@@ -152,6 +152,7 @@
   "openRouter": "OpenRouter",
   "gemini": "Gemini",
   "ollama": "Ollama",
+  "lmStudio": "LM Studio",
   "koboldCpp": "KoboldCpp",
   "xai": "xAI (Grok)",
   "local": "Lokal",
@@ -317,5 +318,13 @@
   "selectNtxFileDescription": "Wählen Sie ein .ntx-Kombibackup oder eine .ntb-Datei mit optionaler .ntm-Mediendatei",
   "backupSavedToFilesApp": "Backup in Dateien gespeichert",
   "backupSavedToAppFolder": "Speichern in Dateien nicht möglich. Backup wurde in NativeTavern/Backups gespeichert.",
-  "savedToFilesApp": "In Dateien gespeichert"
+  "savedToFilesApp": "In Dateien gespeichert",
+  "xaiApiKeyHint": "xai-...",
+  "enableCrossDeviceSync": "Automatic cross-device sync",
+  "enableCrossDeviceSyncDescription": "Keep this device updated with iCloud on Apple devices and Google Drive on Android and other signed-in devices. Changes upload when the app is backgrounded and download on the next launch or resume.",
+  "syncNow": "Sync now",
+  "crossDeviceSyncComplete": "Devices are in sync",
+  "openingBackupFile": "Opening backup…",
+  "enableGoogleDriveBackup": "Enable Google Drive Backup",
+  "enableGoogleDriveBackupDescription": "Save backups to Google Drive so they appear on your other Android and signed-in devices"
 }

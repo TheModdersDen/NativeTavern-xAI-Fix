@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:native_tavern/domain/models/tool_calling.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
+import 'package:native_tavern/domain/services/region_service.dart';
 import 'package:native_tavern/domain/services/tool_calling/openai_tool_calling_adapter.dart';
 
 void main() {
@@ -191,11 +192,13 @@ void main() {
       expect(requestData.containsKey('top_k'), isFalse);
     });
 
-    test('OpenAI and xAI are both filtered out when China restriction is active', () {
+    test(
+        'OpenAI and xAI are both filtered out when China restriction is active',
+        () {
       List<LLMProvider> filterProviders({required bool hideRestricted}) {
         return LLMProvider.values.where((provider) {
           if (hideRestricted &&
-              (provider == LLMProvider.openai || provider == LLMProvider.xai)) {
+              RegionService.isRestrictedCloudProvider(provider)) {
             return false;
           }
           return true;
@@ -207,10 +210,42 @@ void main() {
       expect(restrictedProviders.contains(LLMProvider.xai), isFalse);
       expect(restrictedProviders.contains(LLMProvider.claude), isTrue);
       expect(restrictedProviders.contains(LLMProvider.deepSeek), isTrue);
+      expect(restrictedProviders.contains(LLMProvider.lmStudio), isTrue);
+      expect(restrictedProviders.contains(LLMProvider.ollama), isTrue);
+      expect(
+        RegionService.isRestrictedCloudProvider(LLMProvider.lmStudio),
+        isFalse,
+      );
 
       final unrestrictedProviders = filterProviders(hideRestricted: false);
       expect(unrestrictedProviders.contains(LLMProvider.openai), isTrue);
       expect(unrestrictedProviders.contains(LLMProvider.xai), isTrue);
+      expect(unrestrictedProviders.contains(LLMProvider.lmStudio), isTrue);
+    });
+
+    test('Chinese language and China region hide xAI from user-facing lists',
+        () {
+      expect(
+        RegionService.hidesRestrictedAiProviders(
+          isChinaRegion: true,
+          languageCode: 'en',
+        ),
+        isTrue,
+      );
+      expect(
+        RegionService.hidesRestrictedAiProviders(
+          isChinaRegion: false,
+          languageCode: 'zh',
+        ),
+        isTrue,
+      );
+      expect(
+        RegionService.hidesRestrictedAiProviders(
+          isChinaRegion: false,
+          languageCode: 'en',
+        ),
+        isFalse,
+      );
     });
   });
 }

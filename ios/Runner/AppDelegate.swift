@@ -55,13 +55,25 @@ import StoreKit
       }
     }
 
-    if let url = launchOptions?[.url] as? URL {
+    let iCloudChannel = FlutterMethodChannel(
+      name: "com.nativetavern/icloud",
+      binaryMessenger: controller.binaryMessenger
+    )
+    iCloudChannel.setMethodCallHandler { [weak self] call, result in
+      self?.handleICloudCall(call, result: result)
+    }
+
+    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
       initialFilePath = copyIncomingFile(url)
     }
 
     _ = prepareBackupVisibility()
 
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    var filteredOptions = launchOptions
+    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
+      filteredOptions?.removeValue(forKey: .url)
+    }
+    return super.application(application, didFinishLaunchingWithOptions: filteredOptions)
   }
 
   private var fileOpenChannel: FlutterMethodChannel?
@@ -72,13 +84,41 @@ import StoreKit
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
+    if isNativeTavernDocument(url) {
+      deliverOpenedFile(url)
+      return true
+    }
+    return super.application(app, open: url, options: options)
+  }
+
+  override func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    if let url = userActivity.webpageURL, isNativeTavernDocument(url) {
+      deliverOpenedFile(url)
+      return true
+    }
+    return super.application(
+      application,
+      continue: userActivity,
+      restorationHandler: restorationHandler
+    )
+  }
+
+  private func deliverOpenedFile(_ url: URL) {
     let filePath = copyIncomingFile(url) ?? url.path
     if let channel = fileOpenChannel {
       channel.invokeMethod("onFileOpened", arguments: filePath)
     } else {
       initialFilePath = filePath
     }
-    return super.application(app, open: url, options: options)
+  }
+
+  private func isNativeTavernDocument(_ url: URL) -> Bool {
+    let ext = url.pathExtension.lowercased()
+    return ["ntx", "ntb", "ntm", "jsonl"].contains(ext)
   }
 
   /// Copies a security-scoped Files URL into a readable temp path.
@@ -253,5 +293,88 @@ import StoreKit
     // Return true if any China indicator is found
     let isChina = !reasons.isEmpty
     result(["isChina": isChina, "reasons": reasons])
+  }
+
+  private static var iCloudContainerId: String {
+    if let containers = Bundle.main.object(forInfoDictionaryKey: "NSUbiquitousContainers") as? [String: Any],
+       let containerId = containers.keys.first {
+      return containerId
+    }
+    return "iCloud.com.miaomiaoxworld.nativetavern"
+  }
+
+  private func handleICloudCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "getContainerPath":
+      result(iCloudDocumentsPath())
+    case "ensureDownloaded":
+      let args = call.arguments as? [String: Any]
+      let path = args?["path"] as? String
+      result(ensureICloudFileDownloaded(path))
+    case "copyFile":
+      let args = call.arguments as? [String: Any]
+      let sourcePath = args?["sourcePath"] as? String
+      let fileName = args?["fileName"] as? String
+      result(copyToICloud(sourcePath: sourcePath, fileName: fileName))
+    default:
+      result(FlutterMethodNotImplemented)
+    }
+  }
+
+  private func iCloudDocumentsURL() -> URL? {
+    guard let container = FileManager.default.url(
+      forUbiquityContainerIdentifier: Self.iCloudContainerId
+    ) else {
+      return FileManager.default.url(forUbiquityContainerIdentifier: nil)
+        .map { $0.appendingPathComponent("Documents") }
+    }
+    let documents = container.appendingPathComponent("Documents")
+    try? FileManager.default.createDirectory(
+      at: documents,
+      withIntermediateDirectories: true
+    )
+    return documents
+  }
+
+  private func iCloudDocumentsPath() -> String? {
+    iCloudDocumentsURL()?.path
+  }
+
+  private func ensureICloudFileDownloaded(_ path: String?) -> Bool {
+    guard let path, !path.isEmpty else { return false }
+    let url = URL(fileURLWithPath: path)
+    do {
+      try FileManager.default.startDownloadingUbiquitousItem(at: url)
+      return FileManager.default.fileExists(atPath: path)
+    } catch {
+      return FileManager.default.fileExists(atPath: path)
+    }
+  }
+
+  private func copyToICloud(sourcePath: String?, fileName: String?) -> Bool {
+    guard let sourcePath, let fileName, let destinationDir = iCloudDocumentsURL() else {
+      return false
+    }
+    let source = URL(fileURLWithPath: sourcePath)
+    let destination = destinationDir.appendingPathComponent(fileName)
+    let coordinator = NSFileCoordinator()
+    var coordinationError: NSError?
+    var copied = false
+    coordinator.coordinate(
+      writingItemAt: destination,
+      options: .forReplacing,
+      error: &coordinationError
+    ) { writerURL in
+      do {
+        if FileManager.default.fileExists(atPath: writerURL.path) {
+          try FileManager.default.removeItem(at: writerURL)
+        }
+        try FileManager.default.copyItem(at: source, to: writerURL)
+        copied = true
+      } catch {
+        copied = false
+      }
+    }
+    return copied && coordinationError == nil
   }
 }

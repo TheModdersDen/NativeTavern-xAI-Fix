@@ -1075,6 +1075,12 @@ abstract class AppLocalizations {
   /// **'Ollama'**
   String get ollama;
 
+  /// LM Studio local provider name
+  ///
+  /// In en, this message translates to:
+  /// **'LM Studio'**
+  String get lmStudio;
+
   /// KoboldCpp provider name
   ///
   /// In en, this message translates to:
@@ -5971,11 +5977,17 @@ abstract class AppLocalizations {
   /// **'https://api.example.com/v1'**
   String get apiEndpointHint;
 
-  /// API key hint
+  /// API key hint for OpenAI-compatible providers
   ///
   /// In en, this message translates to:
   /// **'sk-...'**
   String get apiKeyHint;
+
+  /// API key hint for the xAI/Grok provider
+  ///
+  /// In en, this message translates to:
+  /// **'xai-...'**
+  String get xaiApiKeyHint;
 
   /// Temperature value display
   ///
@@ -6718,8 +6730,50 @@ abstract class AppLocalizations {
   /// Enable iCloud backup description
   ///
   /// In en, this message translates to:
-  /// **'Automatically sync backups to iCloud'**
+  /// **'Save backups to iCloud Drive so they appear on your other Apple devices'**
   String get enableICloudBackupDescription;
+
+  /// Toggle for automatic iCloud/Google Drive sync
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic cross-device sync'**
+  String get enableCrossDeviceSync;
+
+  /// Description of automatic cross-device backup sync
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this device updated with iCloud on Apple devices and Google Drive on Android and other signed-in devices. Changes upload when the app is backgrounded and download on the next launch or resume.'**
+  String get enableCrossDeviceSyncDescription;
+
+  /// Enable Google Drive backup toggle, the Android counterpart to iCloud backup
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Google Drive Backup'**
+  String get enableGoogleDriveBackup;
+
+  /// Enable Google Drive backup description
+  ///
+  /// In en, this message translates to:
+  /// **'Save backups to Google Drive so they appear on your other Android and signed-in devices'**
+  String get enableGoogleDriveBackupDescription;
+
+  /// Button that runs an immediate cloud sync
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// Shown after a successful automatic cloud sync
+  ///
+  /// In en, this message translates to:
+  /// **'Devices are in sync'**
+  String get crossDeviceSyncComplete;
+
+  /// Shown while a backup file opened from the Files app is being prepared
+  ///
+  /// In en, this message translates to:
+  /// **'Opening backup…'**
+  String get openingBackupFile;
 
   /// iCloud not available message
   ///
@@ -6856,7 +6910,7 @@ abstract class AppLocalizations {
   /// About restore modes description
   ///
   /// In en, this message translates to:
-  /// **'Replace: Overwrites all local data with backup data.\\nMerge: Keeps both, newer data wins for conflicts.\\nAdd New Only: Only adds new items, keeps all existing data.'**
+  /// **'Replace: Overwrites all local data with backup data.\nMerge: Keeps both, newer data wins for conflicts.\nAdd New Only: Only adds new items, keeps all existing data.'**
   String get aboutRestoreModesDescription;
 
   /// Sign in to Google Drive title

@@ -522,6 +522,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ollama => 'Ollama';
 
   @override
+  String get lmStudio => 'LM Studio';
+
+  @override
   String get koboldCpp => 'KoboldCpp';
 
   @override
@@ -3232,6 +3235,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get apiKeyHint => 'sk-...';
 
   @override
+  String get xaiApiKeyHint => 'xai-...';
+
+  @override
   String temperatureValue(String value) {
     return '$value';
   }
@@ -3664,7 +3670,30 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get enableICloudBackupDescription =>
-      'Automatically sync backups to iCloud';
+      'Save backups to iCloud Drive so they appear on your other Apple devices';
+
+  @override
+  String get enableCrossDeviceSync => 'Automatic cross-device sync';
+
+  @override
+  String get enableCrossDeviceSyncDescription =>
+      'Keep this device updated with iCloud on Apple devices and Google Drive on Android and other signed-in devices. Changes upload when the app is backgrounded and download on the next launch or resume.';
+
+  @override
+  String get enableGoogleDriveBackup => 'Enable Google Drive Backup';
+
+  @override
+  String get enableGoogleDriveBackupDescription =>
+      'Save backups to Google Drive so they appear on your other Android and signed-in devices';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get crossDeviceSyncComplete => 'Devices are in sync';
+
+  @override
+  String get openingBackupFile => 'Opening backup…';
 
   @override
   String get iCloudNotAvailable => 'iCloud Not Available';
@@ -3742,7 +3771,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get aboutRestoreModesDescription =>
-      'Replace: Overwrites all local data with backup data.\\nMerge: Keeps both, newer data wins for conflicts.\\nAdd New Only: Only adds new items, keeps all existing data.';
+      'Replace: Overwrites all local data with backup data.\nMerge: Keeps both, newer data wins for conflicts.\nAdd New Only: Only adds new items, keeps all existing data.';
 
   @override
   String get signInToGoogleDrive => 'Sign in to Google Drive';

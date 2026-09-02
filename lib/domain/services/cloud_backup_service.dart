@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:native_tavern/domain/services/icloud_container_service.dart';
 
 /// Cloud provider type
 enum CloudProvider { googleDrive, iCloud }
@@ -196,20 +197,30 @@ class CloudBackupService {
   /// Singleton instance
   static final CloudBackupService instance = CloudBackupService._();
 
+  /// Stable filename used for automatic cross-device sync.
+  static const syncBackupFileName = 'NativeTavern_sync.ntx';
+  static const syncMetadataFileName = 'NativeTavern_sync.meta.json';
+
   CloudBackupService._({
     Future<Directory> Function()? documentsDirectoryProvider,
-  }) : _documentsDirectoryProvider =
-            documentsDirectoryProvider ?? getApplicationDocumentsDirectory;
+    ICloudContainerService? iCloudContainerService,
+  })  : _documentsDirectoryProvider =
+            documentsDirectoryProvider ?? getApplicationDocumentsDirectory,
+        _iCloudContainer =
+            iCloudContainerService ?? const ICloudContainerService();
 
   factory CloudBackupService.forTesting({
     required Directory documentsDirectory,
+    ICloudContainerService? iCloudContainerService,
   }) {
     return CloudBackupService._(
       documentsDirectoryProvider: () async => documentsDirectory,
+      iCloudContainerService: iCloudContainerService,
     );
   }
 
   final Future<Directory> Function() _documentsDirectoryProvider;
+  final ICloudContainerService _iCloudContainer;
   String? lastMediaWarning;
 
   /// Get the cloud backups cache directory
@@ -231,6 +242,15 @@ class CloudBackupService {
     }
 
     try {
+      final nativePath = await _iCloudContainer.getContainerDocumentsPath();
+      if (nativePath != null && nativePath.isNotEmpty) {
+        final nativeDir = Directory(nativePath);
+        if (!await nativeDir.exists()) {
+          await nativeDir.create(recursive: true);
+        }
+        return nativeDir;
+      }
+
       // On iOS/macOS, iCloud container is accessible via file system
       // The ubiquity container path pattern for our app
 
@@ -1009,8 +1029,17 @@ class CloudBackupService {
       final fileName = path.basename(backupFile.path);
       final targetPath = path.join(iCloudDir.path, fileName);
 
-      // Copy file to iCloud directory
-      final targetFile = await backupFile.copy(targetPath);
+      final copiedNatively = await _iCloudContainer.copyIntoContainer(
+        sourcePath: backupFile.path,
+        fileName: fileName,
+      );
+      final targetFile = File(targetPath);
+      if (!copiedNatively) {
+        if (await targetFile.exists()) {
+          await targetFile.delete();
+        }
+        await backupFile.copy(targetPath);
+      }
 
       if (mediaFile != null) {
         try {
@@ -1103,6 +1132,7 @@ class CloudBackupService {
     onProgress?.call(0.0);
 
     final file = File(backup.remotePath!);
+    await _iCloudContainer.ensureDownloaded(file.path);
     if (!await file.exists()) {
       throw Exception('Backup file not found');
     }
@@ -1115,6 +1145,44 @@ class CloudBackupService {
     );
     onProgress?.call(1.0);
     return data;
+  }
+
+  Future<CloudBackupInfo?> getICloudSyncBackup() async {
+    final iCloudDir = await getICloudDirectory();
+    if (iCloudDir == null) return null;
+    final file = File(path.join(iCloudDir.path, syncBackupFileName));
+    await _iCloudContainer.ensureDownloaded(file.path);
+    if (!await file.exists()) return null;
+    final stat = await file.stat();
+    return CloudBackupInfo(
+      id: syncBackupFileName.hashCode.toString(),
+      name: syncBackupFileName,
+      size: stat.size,
+      createdAt: stat.modified,
+      provider: CloudProvider.iCloud,
+      remotePath: file.path,
+    );
+  }
+
+  Future<Map<String, dynamic>?> readICloudSyncMetadata() async {
+    final iCloudDir = await getICloudDirectory();
+    if (iCloudDir == null) return null;
+    final file = File(path.join(iCloudDir.path, syncMetadataFileName));
+    await _iCloudContainer.ensureDownloaded(file.path);
+    if (!await file.exists()) return null;
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return decoded.cast<String, dynamic>();
+    } catch (_) {}
+    return null;
+  }
+
+  Future<void> writeICloudSyncMetadata(Map<String, dynamic> metadata) async {
+    final iCloudDir = await getICloudDirectory();
+    if (iCloudDir == null) return;
+    final file = File(path.join(iCloudDir.path, syncMetadataFileName));
+    await file.writeAsString(jsonEncode(metadata), flush: true);
   }
 
   /// Delete backup from iCloud

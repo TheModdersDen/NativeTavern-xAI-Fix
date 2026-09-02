@@ -1011,6 +1011,9 @@ class CloudBackupOperationNotifier
 
       if (success) {
         _ref.read(googleDriveSignedInProvider.notifier).state = true;
+        _ref
+            .read(cloudBackupSettingsProvider.notifier)
+            .setGoogleDriveEnabled(true);
         _ref.invalidate(googleDriveUserProvider);
         _ref.invalidate(googleDriveBackupsProvider);
       }
@@ -1039,6 +1042,9 @@ class CloudBackupOperationNotifier
   Future<void> signOutFromGoogleDrive() async {
     await _googleDriveService.signOut();
     _ref.read(googleDriveSignedInProvider.notifier).state = false;
+    _ref
+        .read(cloudBackupSettingsProvider.notifier)
+        .setGoogleDriveEnabled(false);
     _ref.invalidate(googleDriveUserProvider);
     _ref.invalidate(googleDriveBackupsProvider);
   }
@@ -1171,13 +1177,35 @@ class CloudBackupOperationNotifier
     );
 
     try {
-      // Download backup
-      var backupData = await _googleDriveService.downloadBackup(
-        fileId: fileId,
-        onProgress: (progress) {
-          state = state.copyWith(progress: progress * 0.5);
-        },
-      );
+      Map<String, dynamic>? backupData;
+      final listed = _ref.read(googleDriveBackupsProvider).valueOrNull;
+      GoogleDriveBackupInfo? named;
+      if (listed != null) {
+        for (final item in listed) {
+          if (item.id == fileId) {
+            named = item;
+            break;
+          }
+        }
+      }
+      if (named != null && named.name.toLowerCase().endsWith('.ntx')) {
+        final cacheDir = await _service.getCloudCacheDirectory();
+        final downloaded = await _googleDriveService.downloadToFile(
+          fileId: fileId,
+          destination: File(path.join(cacheDir.path, named.name)),
+        );
+        if (downloaded == null) {
+          throw Exception('Failed to download backup');
+        }
+        backupData = await _service.importFromFile(downloaded);
+      } else {
+        backupData = await _googleDriveService.downloadBackup(
+          fileId: fileId,
+          onProgress: (progress) {
+            state = state.copyWith(progress: progress * 0.5);
+          },
+        );
+      }
 
       if (backupData == null) {
         throw Exception('Failed to download backup');
@@ -1309,6 +1337,250 @@ class CloudBackupOperationNotifier
         status: CloudBackupStatus.error,
       );
       return false;
+    }
+  }
+
+  static const _deviceIdKey = 'cloud_sync_device_id';
+  bool _autoSyncInFlight = false;
+
+  Future<String> _deviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString(_deviceIdKey);
+    if (id == null || id.isEmpty) {
+      id = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
+      await prefs.setString(_deviceIdKey, id);
+    }
+    return id;
+  }
+
+  Future<File> _namedSyncSnapshot(CloudBackupArtifacts artifacts) async {
+    final combined = await _combinedBackupFile(artifacts);
+    final dest = File(
+      path.join(combined.parent.path, CloudBackupService.syncBackupFileName),
+    );
+    if (dest.path != combined.path) {
+      if (await dest.exists()) {
+        await dest.delete();
+      }
+      await combined.copy(dest.path);
+    }
+    return dest;
+  }
+
+  Map<String, dynamic> _syncMetadata(String deviceId) => {
+        'deviceId': deviceId,
+        'updatedAt': DateTime.now().toUtc().toIso8601String(),
+        'fileName': CloudBackupService.syncBackupFileName,
+      };
+
+  bool _remoteIsNewer({
+    required DateTime? remoteUpdatedAt,
+    required DateTime? lastLocalSync,
+    required String? remoteDeviceId,
+    required String localDeviceId,
+  }) {
+    if (remoteUpdatedAt == null) return false;
+    if (remoteDeviceId != null && remoteDeviceId == localDeviceId) {
+      return false;
+    }
+    if (lastLocalSync == null) return true;
+    return remoteUpdatedAt.isAfter(
+      lastLocalSync.add(const Duration(seconds: 15)),
+    );
+  }
+
+  /// Pull remote changes then push the merged local snapshot.
+  Future<void> runAutoSync({
+    required Future<Map<String, dynamic>> Function() loadData,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
+    bool uploadAfterPull = true,
+  }) async {
+    final settings = _ref.read(cloudBackupSettingsProvider);
+    if (!settings.autoSyncEnabled || _autoSyncInFlight || state.isLoading) {
+      return;
+    }
+    _autoSyncInFlight = true;
+    try {
+      if (settings.iCloudEnabled) {
+        await _autoSyncICloud(
+          loadData: loadData,
+          restoreCallback: restoreCallback,
+          uploadAfterPull: uploadAfterPull,
+        );
+      }
+      if (settings.googleDriveEnabled &&
+          _ref.read(googleDriveSignedInProvider)) {
+        await _autoSyncGoogleDrive(
+          loadData: loadData,
+          restoreCallback: restoreCallback,
+          uploadAfterPull: uploadAfterPull,
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('[CloudBackup] runAutoSync error: $e');
+      debugPrint('[CloudBackup] Stack trace: $stackTrace');
+    } finally {
+      _autoSyncInFlight = false;
+    }
+  }
+
+  /// Upload the current snapshot without downloading.
+  Future<void> pushAutoSync({
+    required Future<Map<String, dynamic>> Function() loadData,
+  }) async {
+    final settings = _ref.read(cloudBackupSettingsProvider);
+    if (!settings.autoSyncEnabled || _autoSyncInFlight || state.isLoading) {
+      return;
+    }
+    _autoSyncInFlight = true;
+    try {
+      final data = await loadData();
+      final artifacts = await _service.createCloudBackupArtifacts(
+        data: data,
+        provider: settings.iCloudEnabled
+            ? CloudProvider.iCloud
+            : CloudProvider.googleDrive,
+        options: settings.backupOptions,
+      );
+      final snapshot = await _namedSyncSnapshot(artifacts);
+      final deviceId = await _deviceId();
+      if (settings.iCloudEnabled) {
+        await _service.uploadToICloud(backupFile: snapshot);
+        await _service.writeICloudSyncMetadata(_syncMetadata(deviceId));
+        _ref.read(cloudBackupSettingsProvider.notifier).updateLastICloudSync();
+        _ref.invalidate(iCloudBackupsProvider);
+      }
+      if (settings.googleDriveEnabled &&
+          _ref.read(googleDriveSignedInProvider)) {
+        await _googleDriveService.upsertNamedFile(
+          fileName: CloudBackupService.syncBackupFileName,
+          source: snapshot,
+        );
+        await _googleDriveService.upsertNamedJson(
+          CloudBackupService.syncMetadataFileName,
+          _syncMetadata(deviceId),
+        );
+        _ref
+            .read(cloudBackupSettingsProvider.notifier)
+            .updateLastGoogleDriveSync();
+        _ref.invalidate(googleDriveBackupsProvider);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('[CloudBackup] pushAutoSync error: $e');
+      debugPrint('[CloudBackup] Stack trace: $stackTrace');
+    } finally {
+      _autoSyncInFlight = false;
+    }
+  }
+
+  Future<void> _autoSyncICloud({
+    required Future<Map<String, dynamic>> Function() loadData,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
+    required bool uploadAfterPull,
+  }) async {
+    if (await _service.getICloudDirectory() == null) {
+      return;
+    }
+    final settings = _ref.read(cloudBackupSettingsProvider);
+    final deviceId = await _deviceId();
+    final metadata = await _service.readICloudSyncMetadata();
+    final remote = await _service.getICloudSyncBackup();
+    final remoteUpdatedAt = metadata?['updatedAt'] != null
+        ? DateTime.tryParse(metadata!['updatedAt'] as String)?.toUtc()
+        : remote?.createdAt.toUtc();
+    final shouldPull = _remoteIsNewer(
+      remoteUpdatedAt: remoteUpdatedAt,
+      lastLocalSync: settings.lastICloudSync?.toUtc(),
+      remoteDeviceId: metadata?['deviceId'] as String?,
+      localDeviceId: deviceId,
+    );
+    if (shouldPull && remote != null) {
+      final localData = await loadData();
+      await downloadFromICloud(
+        backup: remote,
+        mode: RestoreMode.merge,
+        localData: localData,
+        restoreCallback: restoreCallback,
+      );
+    }
+    if (uploadAfterPull) {
+      final data = await loadData();
+      final artifacts = await _service.createCloudBackupArtifacts(
+        data: data,
+        provider: CloudProvider.iCloud,
+        options: settings.backupOptions,
+      );
+      final snapshot = await _namedSyncSnapshot(artifacts);
+      await _service.uploadToICloud(backupFile: snapshot);
+      await _service.writeICloudSyncMetadata(_syncMetadata(deviceId));
+      _ref.read(cloudBackupSettingsProvider.notifier).updateLastICloudSync();
+      _ref.invalidate(iCloudBackupsProvider);
+    }
+  }
+
+  Future<void> _autoSyncGoogleDrive({
+    required Future<Map<String, dynamic>> Function() loadData,
+    required Future<void> Function(Map<String, dynamic> data, RestoreMode mode)
+        restoreCallback,
+    required bool uploadAfterPull,
+  }) async {
+    final settings = _ref.read(cloudBackupSettingsProvider);
+    final deviceId = await _deviceId();
+    final metadata = await _googleDriveService.readNamedJson(
+      CloudBackupService.syncMetadataFileName,
+    );
+    final remote = await _googleDriveService.findNamedFile(
+      CloudBackupService.syncBackupFileName,
+    );
+    final remoteUpdatedAt = metadata?['updatedAt'] != null
+        ? DateTime.tryParse(metadata!['updatedAt'] as String)?.toUtc()
+        : remote?.modifiedAt?.toUtc() ?? remote?.createdAt.toUtc();
+    final shouldPull = _remoteIsNewer(
+      remoteUpdatedAt: remoteUpdatedAt,
+      lastLocalSync: settings.lastGoogleDriveSync?.toUtc(),
+      remoteDeviceId: metadata?['deviceId'] as String?,
+      localDeviceId: deviceId,
+    );
+    if (shouldPull && remote != null) {
+      final cacheDir = await _service.getCloudCacheDirectory();
+      final downloaded = await _googleDriveService.downloadToFile(
+        fileId: remote.id,
+        destination: File(
+          path.join(cacheDir.path, CloudBackupService.syncBackupFileName),
+        ),
+      );
+      if (downloaded != null) {
+        final localData = await loadData();
+        await importFromPath(
+          filePath: downloaded.path,
+          mode: RestoreMode.merge,
+          localData: localData,
+          restoreCallback: restoreCallback,
+        );
+      }
+    }
+    if (uploadAfterPull) {
+      final data = await loadData();
+      final artifacts = await _service.createCloudBackupArtifacts(
+        data: data,
+        provider: CloudProvider.googleDrive,
+        options: settings.backupOptions,
+      );
+      final snapshot = await _namedSyncSnapshot(artifacts);
+      await _googleDriveService.upsertNamedFile(
+        fileName: CloudBackupService.syncBackupFileName,
+        source: snapshot,
+      );
+      await _googleDriveService.upsertNamedJson(
+        CloudBackupService.syncMetadataFileName,
+        _syncMetadata(deviceId),
+      );
+      _ref
+          .read(cloudBackupSettingsProvider.notifier)
+          .updateLastGoogleDriveSync();
+      _ref.invalidate(googleDriveBackupsProvider);
     }
   }
 }

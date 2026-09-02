@@ -92,6 +92,37 @@ class CloudBackupScreen extends ConsumerWidget {
                       title: Text(l10n.cloudBackupDescription),
                       subtitle: Text(l10n.cloudBackupSubtitle),
                     ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.sync),
+                      title: Text(l10n.enableCrossDeviceSync),
+                      subtitle: Text(l10n.enableCrossDeviceSyncDescription),
+                      value: settings.autoSyncEnabled,
+                      onChanged: (value) async {
+                        if (value && !Platform.isIOS && !Platform.isMacOS) {
+                          final ready = await _ensureGoogleDriveSyncReady(
+                            context,
+                            ref,
+                          );
+                          if (!ready) return;
+                        }
+                        ref
+                            .read(cloudBackupSettingsProvider.notifier)
+                            .setAutoSyncEnabled(value);
+                        if (value) {
+                          await _runManualAutoSync(context, ref);
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.sync_alt,
+                          color: AppTheme.accentColor),
+                      title: Text(l10n.syncNow),
+                      trailing: ElevatedButton.icon(
+                        icon: const Icon(Icons.sync, size: 18),
+                        label: Text(l10n.syncNow),
+                        onPressed: () => _runManualAutoSync(context, ref),
+                      ),
+                    ),
                   ],
                 ),
 
@@ -372,6 +403,18 @@ class CloudBackupScreen extends ConsumerWidget {
                   context: context,
                   title: 'Google Drive',
                   children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.cloud, color: Colors.green),
+                      title: Text(l10n.enableGoogleDriveBackup),
+                      subtitle: Text(l10n.enableGoogleDriveBackupDescription),
+                      value:
+                          settings.googleDriveEnabled && isGoogleDriveSignedIn,
+                      onChanged: (value) => _setGoogleDriveBackupEnabled(
+                        context,
+                        ref,
+                        value,
+                      ),
+                    ),
                     // Sign in/out section
                     if (!isGoogleDriveSignedIn) ...[
                       ListTile(
@@ -627,6 +670,28 @@ class CloudBackupScreen extends ConsumerWidget {
     return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
   }
 
+  Future<void> _runManualAutoSync(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final db = ref.read(databaseProvider);
+    final dbBackupService = DatabaseBackupService(db);
+    await ref.read(cloudBackupOperationProvider.notifier).runAutoSync(
+          loadData: dbBackupService.exportAllData,
+          restoreCallback: (data, restoreMode) async {
+            final importMode = _convertToImportMode(restoreMode);
+            final actualData = data['data'] as Map<String, dynamic>? ?? data;
+            await dbBackupService.importData(
+              data: actualData,
+              mode: importMode,
+            );
+          },
+        );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.crossDeviceSyncComplete)),
+      );
+    }
+  }
+
   void _backupToICloud(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
 
@@ -741,17 +806,52 @@ class CloudBackupScreen extends ConsumerWidget {
 
   // ============ Google Drive Methods ============
 
-  void _signInToGoogleDrive(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final success = await ref
+  Future<bool> _ensureGoogleDriveSyncReady(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    if (ref.read(googleDriveSignedInProvider)) {
+      ref
+          .read(cloudBackupSettingsProvider.notifier)
+          .setGoogleDriveEnabled(true);
+      return true;
+    }
+    final signedIn = await ref
         .read(cloudBackupOperationProvider.notifier)
         .signInToGoogleDrive();
-
-    if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.signedInSuccessfully)),
-      );
+    if (signedIn) {
+      ref
+          .read(cloudBackupSettingsProvider.notifier)
+          .setGoogleDriveEnabled(true);
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.signedInSuccessfully)),
+        );
+      }
     }
+    return signedIn;
+  }
+
+  Future<void> _setGoogleDriveBackupEnabled(
+    BuildContext context,
+    WidgetRef ref,
+    bool enabled,
+  ) async {
+    if (!enabled) {
+      ref
+          .read(cloudBackupSettingsProvider.notifier)
+          .setGoogleDriveEnabled(false);
+      return;
+    }
+    final ready = await _ensureGoogleDriveSyncReady(context, ref);
+    if (ready && ref.read(cloudBackupSettingsProvider).autoSyncEnabled) {
+      await _runManualAutoSync(context, ref);
+    }
+  }
+
+  void _signInToGoogleDrive(BuildContext context, WidgetRef ref) async {
+    await _ensureGoogleDriveSyncReady(context, ref);
   }
 
   void _signOutFromGoogleDrive(WidgetRef ref) async {

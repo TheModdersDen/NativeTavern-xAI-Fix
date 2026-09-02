@@ -4,14 +4,29 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
+if [[ -f .env ]]; then
+  set -a
+  source .env
+  set +a
+fi
 
 EXPECTED_BUNDLE_ID="com.miaomiaoxworld.nativetavern"
+BUNDLE_ID="${BUNDLE_ID:-${APPLE_BUNDLE_ID:-${IOS_BUNDLE_ID:-$EXPECTED_BUNDLE_ID}}}"
 EXPECTED_IOS_TARGET="15.0"
-EXPORT_METHOD="${EXPORT_METHOD:-app-store-connect}"
+EXPORT_METHOD="${EXPORT_METHOD:-${IOS_EXPORT_METHOD:-development}}"
 BUILD_FOR_DEVICE="${BUILD_FOR_DEVICE:-false}"
 DEVICE_ID="${DEVICE_ID:-}"
 POD_REPO_UPDATE="${POD_REPO_UPDATE:-false}"
 CHECK_ONLY="${CHECK_ONLY:-false}"
+SKIP_CLEAN="${SKIP_CLEAN:-false}"
+
+ICLOUD_CONTAINER_ID="${ICLOUD_CONTAINER_ID:-${APPLE_ICLOUD_CONTAINER_ID:-${ICLOUD_CONTAINER:-}}}"
+if [[ -n "$ICLOUD_CONTAINER_ID" ]]; then
+  ENABLE_ICLOUD="${ENABLE_ICLOUD:-true}"
+else
+  ENABLE_ICLOUD="${ENABLE_ICLOUD:-false}"
+fi
+
 
 APP_DELEGATE="ios/Runner/AppDelegate.swift"
 INFO_PLIST="ios/Runner/Info.plist"
@@ -104,8 +119,8 @@ validate_app_bundle() {
   build="$(read_plist_value "$app_path/Info.plist" CFBundleVersion)"
   minimum_os="$(read_plist_value "$app_path/Info.plist" MinimumOSVersion)"
 
-  [[ "$bundle_id" == "$EXPECTED_BUNDLE_ID" ]] \
-    || fail "Built bundle identifier is $bundle_id, expected $EXPECTED_BUNDLE_ID"
+  [[ "$bundle_id" == "$BUNDLE_ID" ]] \
+    || fail "Built bundle identifier is $bundle_id, expected $BUNDLE_ID"
   [[ "$version" == "$BUILD_NAME" ]] \
     || fail "Built version is $version, expected $BUILD_NAME"
   [[ "$build" == "$BUILD_NUMBER" ]] \
@@ -165,21 +180,32 @@ if [[ "$CHECK_ONLY" == 'true' ]]; then
   exit 0
 fi
 
-if [[ -f .env ]]; then
-  set -a
-  source .env
-  set +a
-fi
-
 PROJECT_TEAM_ID="$(read_project_team_id)"
 TEAM_ID="${TEAM_ID:-${APPLE_DEVELOP_ID:-$PROJECT_TEAM_ID}}"
 [[ -n "$TEAM_ID" ]] || fail "Set TEAM_ID, APPLE_DEVELOP_ID in .env, or configure DEVELOPMENT_TEAM in Xcode"
 
 TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/nativetavern-ios-release.XXXXXX")"
+ENTITLEMENTS_FILE="ios/Runner/Runner.entitlements"
+ENTITLEMENTS_BACKUP="$TEMP_DIR/Runner.entitlements.bak"
+INFO_PLIST_BACKUP="$TEMP_DIR/Info.plist.bak"
+
+if [[ -f "$ENTITLEMENTS_FILE" ]]; then
+  cp "$ENTITLEMENTS_FILE" "$ENTITLEMENTS_BACKUP"
+fi
+if [[ -f "$INFO_PLIST" ]]; then
+  cp "$INFO_PLIST" "$INFO_PLIST_BACKUP"
+fi
+
 cleanup() {
+  if [[ -f "$ENTITLEMENTS_BACKUP" ]]; then
+    cp -f "$ENTITLEMENTS_BACKUP" "$ENTITLEMENTS_FILE"
+  fi
+  if [[ -f "$INFO_PLIST_BACKUP" ]]; then
+    cp -f "$INFO_PLIST_BACKUP" "$INFO_PLIST"
+  fi
   rm -rf -- "$TEMP_DIR"
 }
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
 BUILD_ROOT="$REPO_ROOT/build/ios-release/$VERSION"
 ARCHIVE_PATH="$BUILD_ROOT/Runner.xcarchive"
@@ -187,11 +213,21 @@ EXPORT_PATH="$BUILD_ROOT/export"
 FINAL_IPA="$REPO_ROOT/release/NativeTavern_v${VERSION}.ipa"
 EXPORT_OPTIONS="$TEMP_DIR/ExportOptions.plist"
 
+TARGET_CONTAINER_ID="${ICLOUD_CONTAINER_ID:-iCloud.com.miaomiaoxworld.nativetavern}"
+
 printf '=== Building NativeTavern %s ===\n' "$VERSION"
 printf 'Team: %s\n' "$TEAM_ID"
+printf 'Bundle ID: %s\n' "$BUNDLE_ID"
+printf 'iCloud Enabled: %s\n' "$ENABLE_ICLOUD"
+if [[ "$ENABLE_ICLOUD" == 'true' ]]; then
+  printf 'iCloud Container: %s\n' "$TARGET_CONTAINER_ID"
+fi
+printf 'Export Method: %s\n' "$EXPORT_METHOD"
 
-flutter clean
-flutter pub get
+if [[ "$SKIP_CLEAN" != 'true' ]]; then
+  flutter clean
+  flutter pub get
+fi
 
 echo "=== Generating Launcher Icons ==="
 dart run flutter_launcher_icons
@@ -216,6 +252,45 @@ COMMON_XCODE_ARGS=(
   "FLUTTER_BUILD_NAME=$BUILD_NAME"
   "FLUTTER_BUILD_NUMBER=$BUILD_NUMBER"
 )
+
+if [[ "$BUNDLE_ID" != "$EXPECTED_BUNDLE_ID" ]]; then
+  COMMON_XCODE_ARGS+=("PRODUCT_BUNDLE_IDENTIFIER=$BUNDLE_ID")
+fi
+
+if [[ "$ENABLE_ICLOUD" == 'true' ]]; then
+  cat <<EOF > "$ENTITLEMENTS_FILE"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>$TARGET_CONTAINER_ID</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+	</array>
+	<key>com.apple.developer.ubiquity-container-identifiers</key>
+	<array>
+		<string>$TARGET_CONTAINER_ID</string>
+	</array>
+</dict>
+</plist>
+EOF
+  if [[ "$TARGET_CONTAINER_ID" != "iCloud.com.miaomiaoxworld.nativetavern" ]]; then
+    sed -i '' "s/iCloud\.com\.miaomiaoxworld\.nativetavern/$TARGET_CONTAINER_ID/g" "$INFO_PLIST"
+  fi
+else
+  cat <<EOF > "$ENTITLEMENTS_FILE"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+</dict>
+</plist>
+EOF
+fi
 
 if [[ "$BUILD_FOR_DEVICE" == 'true' ]]; then
   [[ -n "$DEVICE_ID" ]] || fail "Set DEVICE_ID when BUILD_FOR_DEVICE=true"

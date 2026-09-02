@@ -256,7 +256,8 @@ final class ToolGenerationLoop {
       LLMProvider.moonshot ||
       LLMProvider.zai ||
       LLMProvider.miniMax ||
-      LLMProvider.xai =>
+      LLMProvider.xai ||
+      LLMProvider.lmStudio =>
         const OpenAiToolCallingAdapter(),
       LLMProvider.ollama || LLMProvider.koboldCpp => null,
     };

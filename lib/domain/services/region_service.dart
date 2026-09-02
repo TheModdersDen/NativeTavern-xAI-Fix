@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:native_tavern/domain/services/llm_service.dart';
 
 /// Service to detect the user's region for provider filtering
 class RegionService {
@@ -8,6 +9,22 @@ class RegionService {
 
   static bool? _cachedIsChinaRegion;
   static List<String>? _cachedReasons;
+
+  /// OpenAI and xAI must stay out of China-store and Chinese-language UI.
+  ///
+  /// Local servers (Ollama, LM Studio, KoboldCpp) stay visible: they run on
+  /// the user's machine/LAN and are treated like the existing local options,
+  /// not unlicensed cloud generative-AI services.
+  static bool hidesRestrictedAiProviders({
+    required bool isChinaRegion,
+    required String languageCode,
+  }) {
+    return isChinaRegion || languageCode.toLowerCase() == 'zh';
+  }
+
+  static bool isRestrictedCloudProvider(LLMProvider provider) {
+    return provider == LLMProvider.openai || provider == LLMProvider.xai;
+  }
 
   /// Check if the app is running in China region
   /// On iOS: Uses comprehensive detection (SKStorefront, locale, timezone, preferred languages)

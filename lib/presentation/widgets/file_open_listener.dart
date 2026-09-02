@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:native_tavern/domain/services/file_export_service.dart';
 import 'package:native_tavern/domain/services/file_open_service.dart';
+import 'package:native_tavern/domain/services/opened_document.dart';
 import 'package:native_tavern/presentation/providers/cloud_backup_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
-import 'package:path/path.dart' as path;
 
 /// Routes files opened from the system Files app / share sheet into the
 /// matching in-app import flow.
@@ -21,8 +21,6 @@ class FileOpenListener extends ConsumerStatefulWidget {
 
 class _FileOpenListenerState extends ConsumerState<FileOpenListener> {
   StreamSubscription<String>? _subscription;
-
-  static const _backupExtensions = {'.ntx', '.ntb', '.ntm'};
 
   @override
   void initState() {
@@ -43,9 +41,8 @@ class _FileOpenListenerState extends ConsumerState<FileOpenListener> {
 
   void _handleOpenedFile(String filePath) {
     if (!mounted || filePath.isEmpty) return;
-    final extension = path.extension(filePath).toLowerCase();
     final router = ref.read(appRouterProvider);
-    if (_backupExtensions.contains(extension)) {
+    if (OpenedDocument.isBackupPath(filePath)) {
       ref.read(pendingBackupImportPathProvider.notifier).state = filePath;
       if (router.routeInformationProvider.value.uri.path !=
           AppRoutes.cloudBackupSettings) {

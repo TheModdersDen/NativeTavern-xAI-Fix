@@ -31,6 +31,10 @@
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ntx</string>
+			</array>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.nativetavern.ntx</string>
@@ -43,12 +47,17 @@
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ntb</string>
+				<string>ntm</string>
+				<string>ntx</string>
+			</array>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.nativetavern.ntb</string>
 				<string>com.nativetavern.ntm</string>
 				<string>com.nativetavern.ntx</string>
-				<string>public.data</string>
 			</array>
 		</dict>
 		<dict>
@@ -169,6 +178,20 @@
 	<true/>
 	<key>UISupportsDocumentBrowser</key>
 	<false/>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.com.miaomiaoxworld.nativetavern</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>NativeTavern</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>

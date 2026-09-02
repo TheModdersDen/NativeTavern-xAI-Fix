@@ -510,10 +510,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ollama => 'Ollama';
 
   @override
+  String get lmStudio => 'LM Studio';
+
+  @override
   String get koboldCpp => 'KoboldCpp';
 
   @override
-  String get xai => 'xAI (Grok)';
+  String get xai => '';
 
   @override
   String get local => '本地';
@@ -3154,6 +3157,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get apiKeyHint => 'sk-...';
 
   @override
+  String get xaiApiKeyHint => 'sk-...';
+
+  @override
   String temperatureValue(String value) {
     return '$value';
   }
@@ -3568,7 +3574,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enableICloudBackup => '启用 iCloud 备份';
 
   @override
-  String get enableICloudBackupDescription => '自动同步备份到 iCloud';
+  String get enableICloudBackupDescription =>
+      '将备份保存到 iCloud 云盘，以便在其他 Apple 设备上使用';
+
+  @override
+  String get enableCrossDeviceSync => '自动跨设备同步';
+
+  @override
+  String get enableCrossDeviceSyncDescription =>
+      '在 Apple 设备上通过 iCloud、在 Android 及其他已登录设备上通过 Google Drive 自动保持数据最新。应用进入后台时上传，下次启动或回到前台时下载。';
+
+  @override
+  String get enableGoogleDriveBackup => '启用 Google Drive 备份';
+
+  @override
+  String get enableGoogleDriveBackupDescription =>
+      '将备份保存到 Google Drive，以便在其他 Android 和已登录设备上使用';
+
+  @override
+  String get syncNow => '立即同步';
+
+  @override
+  String get crossDeviceSyncComplete => '设备已同步';
+
+  @override
+  String get openingBackupFile => '正在打开备份…';
 
   @override
   String get iCloudNotAvailable => 'iCloud 不可用';
@@ -3642,7 +3672,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aboutRestoreModesDescription =>
-      '替换：用备份数据覆盖所有本地数据。\\n合并：保留两者，冲突时新数据优先。\\n仅添加新项：仅从备份添加新项，保留所有现有数据。';
+      '替换：用备份数据覆盖所有本地数据。\n合并：保留两者，冲突时新数据优先。\n仅添加新项：仅从备份添加新项，保留所有现有数据。';
 
   @override
   String get signInToGoogleDrive => '登录 Google Drive';
@@ -6889,10 +6919,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ollama => 'Ollama';
 
   @override
+  String get lmStudio => 'LM Studio';
+
+  @override
   String get koboldCpp => 'KoboldCpp';
 
   @override
-  String get xai => 'xAI (Grok)';
+  String get xai => '';
 
   @override
   String get local => '本機';
@@ -9533,6 +9566,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get apiKeyHint => 'sk-...';
 
   @override
+  String get xaiApiKeyHint => 'sk-...';
+
+  @override
   String temperatureValue(String value) {
     return '$value';
   }
@@ -9947,7 +9983,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get enableICloudBackup => '啟用 iCloud 備份';
 
   @override
-  String get enableICloudBackupDescription => '自動將備份同步至 iCloud';
+  String get enableICloudBackupDescription =>
+      '將備份儲存到 iCloud 雲碟，以便在其他 Apple 裝置上使用';
+
+  @override
+  String get enableCrossDeviceSync => '自動跨裝置同步';
+
+  @override
+  String get enableCrossDeviceSyncDescription =>
+      '在 Apple 裝置上透過 iCloud、在 Android 及其他已登入裝置上透過 Google 雲端硬碟自動保持資料最新。應用程式進入背景時上傳，下次啟動或回到前景時下載。';
+
+  @override
+  String get enableGoogleDriveBackup => '啟用 Google 雲端硬碟備份';
+
+  @override
+  String get enableGoogleDriveBackupDescription =>
+      '將備份儲存到 Google 雲端硬碟，以便在其他 Android 和已登入裝置上使用';
+
+  @override
+  String get syncNow => '立即同步';
+
+  @override
+  String get crossDeviceSyncComplete => '裝置已同步';
+
+  @override
+  String get openingBackupFile => '正在開啟備份…';
 
   @override
   String get iCloudNotAvailable => 'iCloud 無法使用';

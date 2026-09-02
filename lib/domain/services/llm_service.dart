@@ -19,12 +19,42 @@ enum LLMProvider {
   qwen,
   openRouter,
   ollama,
+  lmStudio,
   koboldCpp,
   siliconFlow,
   moonshot,
   zai,
   miniMax,
   xai,
+}
+
+extension LLMProviderCapabilities on LLMProvider {
+  /// Local OpenAI-compatible or native local servers that do not require a key.
+  bool get isLocalServer =>
+      this == LLMProvider.ollama ||
+      this == LLMProvider.koboldCpp ||
+      this == LLMProvider.lmStudio;
+
+  /// LM Studio and custom OpenAI-compatible endpoints speak the Chat Completions API.
+  bool get usesOpenAiChatCompletions => switch (this) {
+        LLMProvider.openAICompatible ||
+        LLMProvider.openai ||
+        LLMProvider.deepSeek ||
+        LLMProvider.qwen ||
+        LLMProvider.openRouter ||
+        LLMProvider.siliconFlow ||
+        LLMProvider.moonshot ||
+        LLMProvider.zai ||
+        LLMProvider.miniMax ||
+        LLMProvider.xai ||
+        LLMProvider.lmStudio =>
+          true,
+        LLMProvider.claude ||
+        LLMProvider.gemini ||
+        LLMProvider.ollama ||
+        LLMProvider.koboldCpp =>
+          false,
+      };
 }
 
 /// Provider preset for OpenAI and OpenAI-compatible endpoints.
@@ -616,7 +646,8 @@ class LLMService {
       LLMProvider.moonshot ||
       LLMProvider.zai ||
       LLMProvider.miniMax ||
-      LLMProvider.xai =>
+      LLMProvider.xai ||
+      LLMProvider.lmStudio =>
         _generateOpenAiToolTurn(
           fittedBase,
           continuationMessages,
@@ -650,10 +681,7 @@ class LLMService {
     final data = await _postToolJson(
       endpoint: endpoint,
       data: adapter.decorateRequest(baseRequest, toolConfiguration),
-      headers: {
-        'Authorization': 'Bearer ${config.apiKey}',
-        'Content-Type': 'application/json',
-      },
+      headers: _openAiHeaders(config),
       cancellationToken: cancellationToken,
     );
     final choices = toolObjectList(data['choices']);
@@ -1368,6 +1396,7 @@ class LLMService {
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
       case LLMProvider.xai:
+      case LLMProvider.lmStudio:
         return _generateOpenAIWithReasoning(messages, config);
       case LLMProvider.claude:
         return _generateClaudeWithReasoning(messages, config);
@@ -1462,6 +1491,7 @@ class LLMService {
       case LLMProvider.openAICompatible:
       case LLMProvider.openai:
       case LLMProvider.xai:
+      case LLMProvider.lmStudio:
         return _streamOpenAIWithReasoning(messages, config);
       case LLMProvider.claude:
         return _streamClaudeWithReasoning(messages, config);
@@ -1492,6 +1522,32 @@ class LLMService {
         case LLMProvider.moonshot:
         case LLMProvider.zai:
         case LLMProvider.miniMax:
+        case LLMProvider.lmStudio:
+          final url = '${config.apiUrl}/models';
+          _log('Sending GET request to $url');
+          final headers = <String, String>{};
+          if (config.apiKey.isNotEmpty) {
+            headers['Authorization'] = 'Bearer ${config.apiKey}';
+          }
+          final response = await _dio.get(
+            url,
+            options: Options(
+              headers: headers,
+              validateStatus: (status) => true,
+            ),
+          );
+          _log('Response status: ${response.statusCode}');
+          _log('Response data: ${response.data}');
+          if (response.statusCode == 200) {
+            final data = response.data as Map<String, dynamic>?;
+            final modelCount = (data?['data'] as List?)?.length ?? 0;
+            final result = 'Connected! Found $modelCount LM Studio models';
+            _log('Success: $result');
+            return result;
+          }
+          _log('Error: Cannot connect to LM Studio');
+          throw Exception('Cannot connect to LM Studio at ${config.apiUrl}');
+
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
         case LLMProvider.xai:
@@ -1779,12 +1835,15 @@ class LLMService {
         case LLMProvider.openAICompatible:
         case LLMProvider.openai:
         case LLMProvider.xai:
+        case LLMProvider.lmStudio:
           _log('Fetching models from ${config.apiUrl}/models');
+          final headers = <String, String>{};
+          if (config.apiKey.isNotEmpty) {
+            headers['Authorization'] = 'Bearer ${config.apiKey}';
+          }
           final response = await _dio.get(
             '${config.apiUrl}/models',
-            options: Options(
-              headers: {'Authorization': 'Bearer ${config.apiKey}'},
-            ),
+            options: Options(headers: headers),
           );
           _log('Models response status: ${response.statusCode}');
           final data = response.data as Map<String, dynamic>;
@@ -1952,6 +2011,16 @@ class LLMService {
     }
   }
 
+  Map<String, String> _openAiHeaders(LLMConfig config) {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+    if (config.apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${config.apiKey}';
+    }
+    return headers;
+  }
+
   Map<String, dynamic> _buildOpenAIRequestBody({
     required List<Map<String, dynamic>> messages,
     required LLMConfig config,
@@ -2044,10 +2113,7 @@ class LLMService {
     final response = await _dio.post(
       endpoint,
       options: Options(
-        headers: {
-          'Authorization': 'Bearer ${config.apiKey}',
-          'Content-Type': 'application/json',
-        },
+        headers: _openAiHeaders(config),
         validateStatus: (status) => true, // Accept all status codes
       ),
       data: requestData,
@@ -2114,10 +2180,7 @@ class LLMService {
     final response = await _dio.post<ResponseBody>(
       endpoint,
       options: Options(
-        headers: {
-          'Authorization': 'Bearer ${config.apiKey}',
-          'Content-Type': 'application/json',
-        },
+        headers: _openAiHeaders(config),
         responseType: ResponseType.stream,
       ),
       data: requestData,
@@ -2687,10 +2750,7 @@ class LLMService {
       final response = await _dio.post<ResponseBody>(
         endpoint,
         options: Options(
-          headers: {
-            'Authorization': 'Bearer ${config.apiKey}',
-            'Content-Type': 'application/json',
-          },
+          headers: _openAiHeaders(config),
           responseType: ResponseType.stream,
           validateStatus: (status) => true, // Accept all status codes
         ),

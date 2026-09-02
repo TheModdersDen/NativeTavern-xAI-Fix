@@ -17,6 +17,7 @@ import 'package:native_tavern/core/flags/rpg_product_ui.dart';
 import 'package:native_tavern/presentation/widgets/export_destination_sheet.dart';
 import 'package:native_tavern/domain/services/chat_export_service.dart';
 import 'package:native_tavern/domain/services/llm_service.dart';
+import 'package:native_tavern/domain/services/region_service.dart';
 import 'package:native_tavern/domain/services/markdown_hotkey_service.dart';
 import 'package:native_tavern/domain/services/rpg_scenario_package_service.dart';
 import 'package:native_tavern/domain/services/slash_command_service.dart';
@@ -36,6 +37,7 @@ import 'package:native_tavern/presentation/providers/story_providers.dart';
 import 'package:native_tavern/presentation/providers/tts_providers.dart';
 import 'package:native_tavern/presentation/providers/world_info_providers.dart';
 import 'package:native_tavern/presentation/router/app_router.dart';
+import 'package:native_tavern/presentation/screens/ai_config/ai_config_screen.dart';
 import 'package:native_tavern/presentation/theme/app_theme.dart';
 import 'package:native_tavern/presentation/widgets/chat/author_note_dialog.dart';
 import 'package:native_tavern/presentation/widgets/chat/bookmark_dialog.dart';
@@ -256,9 +258,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   /// Check if API is properly configured
   bool _isApiConfigured(LLMConfig config) {
-    // Local providers (Ollama, KoboldCpp) don't need API key
-    if (config.provider == LLMProvider.ollama ||
-        config.provider == LLMProvider.koboldCpp) {
+    // Local providers (Ollama, LM Studio, KoboldCpp) don't need API key
+    if (config.provider.isLocalServer) {
       return config.apiUrl.isNotEmpty;
     }
     // Cloud providers need API key
@@ -269,6 +270,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _showApiConfigurationDialog() {
     final parentContext = context;
     final l10n = AppLocalizations.of(context);
+    final hideRestricted = RegionService.hidesRestrictedAiProviders(
+      isChinaRegion: ref.read(isChinaRegionProvider).valueOrNull ?? false,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -293,8 +298,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Text('• ${l10n.claude} (Anthropic)'),
             Text('• ${l10n.openRouter}'),
             Text('• ${l10n.gemini} (Google)'),
-            Text('• ${l10n.xai}'),
+            if (!hideRestricted) Text('• ${l10n.xai}'),
             Text('• ${l10n.ollama} (${l10n.local})'),
+            Text('• ${l10n.lmStudio} (${l10n.local})'),
             Text('• ${l10n.koboldCpp} (${l10n.local})'),
           ],
         ),

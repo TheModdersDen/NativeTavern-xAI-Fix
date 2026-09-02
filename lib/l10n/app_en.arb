@@ -718,6 +718,10 @@
   "@ollama": {
     "description": "Ollama provider name"
   },
+  "lmStudio": "LM Studio",
+  "@lmStudio": {
+    "description": "LM Studio local provider name"
+  },
   "koboldCpp": "KoboldCpp",
   "@koboldCpp": {
     "description": "KoboldCpp provider name"
@@ -4514,7 +4518,11 @@
   },
   "apiKeyHint": "sk-...",
   "@apiKeyHint": {
-    "description": "API key hint"
+    "description": "API key hint for OpenAI-compatible providers"
+  },
+  "xaiApiKeyHint": "xai-...",
+  "@xaiApiKeyHint": {
+    "description": "API key hint for the xAI/Grok provider"
   },
   "temperatureValue": "{value}",
   "@temperatureValue": {
@@ -5033,9 +5041,37 @@
   "@enableICloudBackup": {
     "description": "Enable iCloud backup toggle"
   },
-  "enableICloudBackupDescription": "Automatically sync backups to iCloud",
+  "enableICloudBackupDescription": "Save backups to iCloud Drive so they appear on your other Apple devices",
   "@enableICloudBackupDescription": {
     "description": "Enable iCloud backup description"
+  },
+  "enableCrossDeviceSync": "Automatic cross-device sync",
+  "@enableCrossDeviceSync": {
+    "description": "Toggle for automatic iCloud/Google Drive sync"
+  },
+  "enableCrossDeviceSyncDescription": "Keep this device updated with iCloud on Apple devices and Google Drive on Android and other signed-in devices. Changes upload when the app is backgrounded and download on the next launch or resume.",
+  "@enableCrossDeviceSyncDescription": {
+    "description": "Description of automatic cross-device backup sync"
+  },
+  "enableGoogleDriveBackup": "Enable Google Drive Backup",
+  "@enableGoogleDriveBackup": {
+    "description": "Enable Google Drive backup toggle, the Android counterpart to iCloud backup"
+  },
+  "enableGoogleDriveBackupDescription": "Save backups to Google Drive so they appear on your other Android and signed-in devices",
+  "@enableGoogleDriveBackupDescription": {
+    "description": "Enable Google Drive backup description"
+  },
+  "syncNow": "Sync now",
+  "@syncNow": {
+    "description": "Button that runs an immediate cloud sync"
+  },
+  "crossDeviceSyncComplete": "Devices are in sync",
+  "@crossDeviceSyncComplete": {
+    "description": "Shown after a successful automatic cloud sync"
+  },
+  "openingBackupFile": "Opening backup…",
+  "@openingBackupFile": {
+    "description": "Shown while a backup file opened from the Files app is being prepared"
   },
   "iCloudNotAvailable": "iCloud Not Available",
   "@iCloudNotAvailable": {
@@ -5145,7 +5181,7 @@
   "@aboutRestoreModes": {
     "description": "About restore modes label"
   },
-  "aboutRestoreModesDescription": "Replace: Overwrites all local data with backup data.\\nMerge: Keeps both, newer data wins for conflicts.\\nAdd New Only: Only adds new items, keeps all existing data.",
+  "aboutRestoreModesDescription": "Replace: Overwrites all local data with backup data.\nMerge: Keeps both, newer data wins for conflicts.\nAdd New Only: Only adds new items, keeps all existing data.",
   "@aboutRestoreModesDescription": {
     "description": "About restore modes description"
   },

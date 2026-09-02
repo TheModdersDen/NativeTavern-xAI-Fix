@@ -464,6 +464,14 @@ void main() {
       CloudBackupService.cloudBackupFileName(extension: 'ntx').endsWith('.ntx'),
       isTrue,
     );
+    expect(
+      CloudBackupService.syncBackupFileName,
+      'NativeTavern_sync.ntx',
+    );
+    expect(
+      CloudBackupService.syncMetadataFileName,
+      'NativeTavern_sync.meta.json',
+    );
   });
 }
 
