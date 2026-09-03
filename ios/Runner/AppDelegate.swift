@@ -3,20 +3,35 @@ import UIKit
 import StoreKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
+    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
+      initialFilePath = copyIncomingFile(url)
+    }
 
-    // Register region detection channel
-    let controller = window?.rootViewController as! FlutterViewController
-    let regionChannel = FlutterMethodChannel(name: "com.nativetavern/region",
-                                              binaryMessenger: controller.binaryMessenger)
+    _ = prepareBackupVisibility()
+
+    var filteredOptions = launchOptions
+    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
+      filteredOptions?.removeValue(forKey: .url)
+    }
+    return super.application(application, didFinishLaunchingWithOptions: filteredOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    let messenger = engineBridge.applicationRegistrar.messenger()
+    let regionChannel = FlutterMethodChannel(
+      name: "com.nativetavern/region",
+      binaryMessenger: messenger
+    )
     let live2DRenderScaleChannel = FlutterMethodChannel(
       name: "com.nativetavern/live2d_render_scale",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: messenger
     )
 
     regionChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
@@ -41,7 +56,7 @@ import StoreKit
 
     let fileOpenChannel = FlutterMethodChannel(
       name: "com.nativetavern/file_open",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: messenger
     )
     self.fileOpenChannel = fileOpenChannel
     fileOpenChannel.setMethodCallHandler { [weak self] call, result in
@@ -57,23 +72,11 @@ import StoreKit
 
     let iCloudChannel = FlutterMethodChannel(
       name: "com.nativetavern/icloud",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: messenger
     )
     iCloudChannel.setMethodCallHandler { [weak self] call, result in
       self?.handleICloudCall(call, result: result)
     }
-
-    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
-      initialFilePath = copyIncomingFile(url)
-    }
-
-    _ = prepareBackupVisibility()
-
-    var filteredOptions = launchOptions
-    if let url = launchOptions?[.url] as? URL, isNativeTavernDocument(url) {
-      filteredOptions?.removeValue(forKey: .url)
-    }
-    return super.application(application, didFinishLaunchingWithOptions: filteredOptions)
   }
 
   private var fileOpenChannel: FlutterMethodChannel?
@@ -105,6 +108,13 @@ import StoreKit
       continue: userActivity,
       restorationHandler: restorationHandler
     )
+  }
+
+  @discardableResult
+  func handleIncomingURL(_ url: URL) -> Bool {
+    guard isNativeTavernDocument(url) else { return false }
+    deliverOpenedFile(url)
+    return true
   }
 
   private func deliverOpenedFile(_ url: URL) {
